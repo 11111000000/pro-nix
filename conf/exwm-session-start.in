@@ -1,0 +1,51 @@
+# Запуск вспомогательных приложений и переменных среды для EXWM.
+LOG_DIR="${EMACS_STARTUP_LOG_DIR:-$HOME/.cache/emacs-startup}"
+LOG_FILE="${EMACS_STARTUP_LOG_FILE:-$LOG_DIR/gdm-exwm.log}"
+mkdir -p "$LOG_DIR"
+exec >>"$LOG_FILE" 2>&1
+
+printf '%s\n' "[exwm-session-start $(date '+%F %T%z')] begin log_file=$LOG_FILE"
+printf '%s\n' "[exwm-session-start $(date '+%F %T%z')] pwd=$(pwd) user=$USER display=${DISPLAY:-unset} desktop_session=${DESKTOP_SESSION:-unset} xdg_session=${XDG_SESSION_TYPE:-unset}"
+printf '%s\n' "[exwm-session-start $(date '+%F %T%z')] env EMACS_STARTUP_LOG_DIR=${EMACS_STARTUP_LOG_DIR:-unset} EMACS_STARTUP_LOG_FILE=${EMACS_STARTUP_LOG_FILE:-unset}"
+
+eval $(ssh-agent -s)
+export SSH_AUTH_SOCK
+export NIX_LD_PRELOAD=""
+xset -b
+xhost +SI:localuser:$USER
+xhost +SI:localuser:root
+# wmname LG3D
+# export _JAVA_AWT_WM_NONREPARENTING=1
+
+# Переменные для тем и раскладок ввода.
+export QT_QPA_PLATFORMTHEME=qt5ct
+export XMODIFIERS=@im=exwm-xim
+export GTK_IM_MODULE=xim
+export QT_IM_MODULE=xim
+export CLUTTER_IM_MODULE=xim
+export GTK_KEY_THEME=Emacs
+
+export LSP_USE_PLISTS=true
+
+# Курсор и редактор по умолчанию
+xsetroot -cursor_name left_ptr
+export VISUAL=emacsclient
+export EDITOR="$VISUAL"
+
+# Загрузка Xresources для применения настроек (включая fullscreen для Emacs)
+xrdb -merge ~/.Xresources
+
+# Запуск композитного менеджера, затем Emacs для EXWM.
+#@PICOM@ --experimental-backends --config /dev/null &
+#или
+#@PICOM@ --backend xrender --config /dev/null &
+export XDG_CURRENT_DESKTOP=EXWM
+printf '%s\n' "[exwm-session-start $(date '+%F %T%z')] importing env and launching emacs"
+systemctl --user import-environment DISPLAY XAUTHORITY PATH DBUS_SESSION_BUS_ADDRESS XDG_RUNTIME_DIR XDG_CURRENT_DESKTOP
+printf '%s\n' "[exwm-session-start $(date '+%F %T%z')] exec systemd-run emacs"
+exec /run/current-system/sw/bin/systemd-run --user --scope -p MemoryMax=2G -p MemoryHigh=1800M -p CPUQuota=200% -- @EMACS@
+
+# Finally, start EXWM via pro3
+#export PRO_WITH_EXWM=1
+#export PRO_PROFILE=wm
+#exec @EMACS@ --init-directory "$HOME/pro3/.emacs.d"

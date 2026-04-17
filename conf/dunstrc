@@ -1,0 +1,28 @@
+[global]
+    font = Aporetic Sans, 14
+    width = 300
+    notification_limit = 5
+    offset = (30, 50)
+    origin = bottom-right
+    transparency = 10
+    frame_width = 0                # no border
+    separator_color = frame
+    icon_position = right
+    mouse_left_click = close_current
+    mouse_middle_click = do_action
+    mouse_right_click = close_all
+
+[urgency_low]
+    background = "#bbbbbb"
+    foreground = "#333333"
+    timeout = 5
+
+[urgency_normal]
+    background = "#cccccc"
+    foreground = "#333333"
+    timeout = 10
+
+[urgency_critical]
+    background = "#888888"
+    foreground = "#333333"
+    timeout = 0

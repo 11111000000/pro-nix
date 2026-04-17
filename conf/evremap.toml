@@ -1,0 +1,179 @@
+device_name = "AT Translated Set 2 keyboard"
+[[Application]]
+executable = "firefox"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_B"
+dst = "KEY_LEFT"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_F"
+dst = "KEY_RIGHT"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_P"
+dst = "KEY_UP"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_N"
+dst = "KEY_DOWN"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_A"
+dst = "KEY_HOME"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_E"
+dst = "KEY_END"
+
+[[Application.Mapping]]
+src = "KEY_LEFTALT+KEY_B"
+dst = "KEY_LEFTCTRL+KEY_LEFT"
+
+[[Application.Mapping]]
+src = "KEY_LEFTALT+KEY_F"
+dst = "KEY_LEFTCTRL+KEY_RIGHT"
+
+
+[[Application]]
+executable = "google-chrome-stable"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_B"
+dst = "KEY_LEFT"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_F"
+dst = "KEY_RIGHT"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_P"
+dst = "KEY_UP"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_N"
+dst = "KEY_DOWN"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_A"
+dst = "KEY_HOME"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_E"
+dst = "KEY_END"
+
+[[Application.Mapping]]
+src = "KEY_LEFTALT+KEY_B"
+dst = "KEY_LEFTCTRL+KEY_LEFT"
+
+[[Application.Mapping]]
+src = "KEY_LEFTALT+KEY_F"
+dst = "KEY_LEFTCTRL+KEY_RIGHT"
+
+
+[[Application]]
+executable = "chromium"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_B"
+dst = "KEY_LEFT"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_F"
+dst = "KEY_RIGHT"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_P"
+dst = "KEY_UP"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_N"
+dst = "KEY_DOWN"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_A"
+dst = "KEY_HOME"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_E"
+dst = "KEY_END"
+
+[[Application.Mapping]]
+src = "KEY_LEFTALT+KEY_B"
+dst = "KEY_LEFTCTRL+KEY_LEFT"
+
+[[Application.Mapping]]
+src = "KEY_LEFTALT+KEY_F"
+dst = "KEY_LEFTCTRL+KEY_RIGHT"
+
+
+[[Application]]
+executable = "firefox-bin"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_B"
+dst = "KEY_LEFT"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_F"
+dst = "KEY_RIGHT"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_P"
+dst = "KEY_UP"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_N"
+dst = "KEY_DOWN"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_A"
+dst = "KEY_HOME"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_E"
+dst = "KEY_END"
+
+[[Application.Mapping]]
+src = "KEY_LEFTALT+KEY_B"
+dst = "KEY_LEFTCTRL+KEY_LEFT"
+
+[[Application.Mapping]]
+src = "KEY_LEFTALT+KEY_F"
+dst = "KEY_LEFTCTRL+KEY_RIGHT"
+
+
+[[Application]]
+executable = "chrome"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_B"
+dst = "KEY_LEFT"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_F"
+dst = "KEY_RIGHT"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_P"
+dst = "KEY_UP"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_N"
+dst = "KEY_DOWN"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_A"
+dst = "KEY_HOME"
+
+[[Application.Mapping]]
+src = "KEY_LEFTCTRL+KEY_E"
+dst = "KEY_END"
+
+[[Application.Mapping]]
+src = "KEY_LEFTALT+KEY_B"
+dst = "KEY_LEFTCTRL+KEY_LEFT"
+
+[[Application.Mapping]]
+src = "KEY_LEFTALT+KEY_F"
+dst = "KEY_LEFTCTRL+KEY_RIGHT"

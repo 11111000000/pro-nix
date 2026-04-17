@@ -1,0 +1,5 @@
+/.agent-shell/
+...*
+.context
+local.nix
+bootstrap/local.nix

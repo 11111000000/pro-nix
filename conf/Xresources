@@ -1,0 +1,49 @@
+Emacs.font: Aporetic Sans Mono 12
+Emacs.fullscreen: maximized
+Emacs.menuBar: 0
+Emacs.toolBar: 0
+Emacs.verticalScrollBars: off
+Emacs.FontBackend: xft
+Emacs.background:   #262626
+Emacs.foreground:   #e5e5e5
+Emacs.cursorColor:  #007700
+
+*international: true
+Xft.antialias: true
+Xft.autohint: 0
+Xft.hintstyle: hintfull
+Xft.hinting: true
+Xft.lcdfilter: lcddefault
+Xft.rgba: rgb
+
+! Терминал/служебное
+XTerm*faceName: Terminus:size=12
+XTerm*font: xft:Terminus:size=12
+URxvt*font: xft:Terminus:size=12
+URxvt.perl-ext-common: default,clipboard
+URxvt.keysym.C-y: perl:clipboard:paste
+URxvt.keysym.C-plus: perl:font-size:increase
+URxvt.keysym.C-minus: perl:font-size:decrease
+URxvt.keysym.C-0: perl:font-size:reset
+URxvt.keysym.C-underscore: perl:font-size:increase
+URxvt*background: #000000
+URxvt*foreground: #e5e5e5
+URxvt*cursorColor: #007700
+URxvt*scrollBar: false
+URxvt*saveLines: 2000
+URxvt.scrollBar: false
+URxvt.saveLines: 2000
+
+! Xpdf и прочие для чтения
+Xpdf*font: xft:Aporetic Sans:size=12
+
+! Xmessage для служебных окон
+Xmessage*font: xft:Aporetic Sans Mono:size=12
+Xmessage*background: #3c3c3c
+Xmessage*foreground: #c2c2c2
+Xmessage*form.*.shapeStyle: rectangle
+Xmessage*Scrollbar.width: 1
+Xmessage*Scrollbar.borderWidth: 0
+Xmessage*Buttons: Quit
+Xmessage*defaultButton: Quit
+Xmessage*international: true

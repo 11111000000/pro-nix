@@ -1,0 +1,48 @@
+#!/bin/sh
+# X session for EXWM (manual start via: startx)
+
+# Make X resources available
+xrdb -merge ~/.Xresources
+
+# Beep off, sane cursor
+xset -b
+xsetroot -cursor_name left_ptr
+
+# Let xbindkeys live outside Emacs so a hotkey can interrupt a stuck session.
+pgrep -x xbindkeys >/dev/null 2>&1 || /run/current-system/sw/bin/xbindkeys >/dev/null 2>&1 &
+
+# Trust local user for X clients
+xhost +SI:localuser:$USER
+xhost +SI:localuser:root
+
+# Java/WM hints
+# wmname LG3D
+# export _JAVA_AWT_WM_NONREPARENTING=1
+
+# Input methods and theme
+export XMODIFIERS=@im=exwm-xim
+export GTK_IM_MODULE=xim
+export QT_IM_MODULE=xim
+export CLUTTER_IM_MODULE=xim
+export GTK_KEY_THEME=Emacs
+
+# Tooling environment
+export QT_QPA_PLATFORMTHEME=qt5ct
+export LSP_USE_PLISTS=true
+export VISUAL=emacsclient
+export EDITOR="$VISUAL"
+
+# Start GNOME Keyring (Secret Service) so nm-applet can store and retrieve passwords
+eval "$(@GNOME_KEYRING_DAEMON@ --start --components=secrets,ssh 2>/dev/null)"
+export SSH_AUTH_SOCK
+
+# Export env for systemd --user and mark session as graphical
+export XDG_CURRENT_DESKTOP=EXWM
+systemctl --user import-environment DISPLAY XAUTHORITY PATH DBUS_SESSION_BUS_ADDRESS XDG_RUNTIME_DIR XDG_CURRENT_DESKTOP
+
+# Finally, start Emacs
+exec /run/current-system/sw/bin/systemd-run --user --scope -p MemoryMax=2G -p Nice=5 -- @EMACS@
+## Finally, start EXWM via pro3
+#export PRO_WITH_EXWM=1o
+#export PRO_PROFILE=wm
+#exec @EMACS@ --init-directory "$HOME/pro3/.emacs.d"
