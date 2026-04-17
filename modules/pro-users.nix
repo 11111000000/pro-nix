@@ -131,9 +131,18 @@
         home.file.".emacs.d/init.el".source = ../emacs/base/init.el;
         home.file.".emacs.d/site-init.el".source = ../emacs/base/site-init.el;
         home.file.".emacs.d/modules.el.example".text = ''
-          ;; Copy to ~/.emacs.d/modules.el and edit the list.
-          ;; User modules win; the system base is a fallback.
-          (setq pro-emacs-modules '(core ui git nix js ai exwm))
+          ;; Скопируйте в ~/.emacs.d/modules.el и отредактируйте список.
+          ;; Пользовательские модули имеют приоритет, системная база — запасной вариант.
+          (setq pro-emacs-modules '(core ui text nav keys org lisp nix python c java haskell project git ai feeds chat agent exwm))
+        '';
+        home.file.".emacs.d/keys.org.example".text = ''
+          #+title: Клавиши PRO
+
+          | Секция | Клавиша | Команда | Примечание |
+          |--------+---------+---------+------------|
+          | Git    | C-x g   | magit-status | Статус репозитория |
+          | AI     | C-c a   | pro-ai-open-entry | Вход в AI |
+          | Org    | C-c o   | org-agenda | Повестка |
         '';
         home.activation.tridactyl-reminder = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
           echo "[Tridactyl] Проверьте, что расширение Tridactyl установлено в Firefox (https://tridactyl.xyz)."

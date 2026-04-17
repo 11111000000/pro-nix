@@ -1,0 +1,226 @@
+#+TITLE: Анализ: минимальный Emacs/EXWM стек в NixOS
+
+* Короткий вывод
+
+Минимальный и удобный вариант здесь такой:
+1. NixOS собирает только бинарную часть: Emacs, EXWM, X11 helper'ы, desktop entries и session launcher.
+2. Lisp-конфиг живёт отдельно от Nix store, в `~/.config/emacs` или в отдельном git checkout.
+3. Лиспы обновляются без `nixos-rebuild`, а NixOS пересобирается только когда меняется системная часть или набор бинарных зависимостей.
+
+Это лучше всего совпадает с твоим требованием: аккуратный EXWM desktop из NixOS, но без обязательной пересборки системы ради правок `init.el`.
+
+* Что уже есть в этом репо
+
+В текущем `~/.config/nixos` уже почти всё готово:
+- `services.xserver.enable = true`
+- GDM и X11 session commands
+- `conf/xinitrc.in` и `conf/exwm-session-start.in`
+- `systemd.user.targets."exwm-session"`
+- `systemd-user-services.nix` с tray/service слоем
+- desktop launchers для браузеров
+- `system-packages.nix` с `emacsPkg`, `git`, `nodejs_20`, `dbus`, `xhost`, `xset`, `wmname`, `xbindkeys`
+
+Проблема не в отсутствии базы, а в том, что system layer и Emacs layer сейчас смешаны.
+
+* Что говорят источники
+
+Из NixOS wiki и `emacs-overlay`:
+- `services.emacs` полезен для daemon/server mode, но не решает EXWM session как desktop.
+- `programs.emacs` удобен в Home Manager, если Emacs нужен как user app.
+- `nix-community/emacs-overlay` даёт свежий Emacs и свежие пакеты EXWM/зависимости.
+- `emacsWithPackagesFromUsePackage` удобен, но он запекает Lisp-пакеты в derivation, значит изменения пакетов требуют rebuild.
+
+Практический вывод:
+- EXWM лучше поднимать как session launcher.
+- Emacs binary и системные зависимости лучше дать NixOS.
+- Lisp-конфиг лучше вынести из Nix store, если нужна правка без rebuild.
+
+* Минимальная архитектура
+
+1. NixOS ставит `emacs`/`emacs-gtk`, `exwm`-deps, X11 tools, `git`, `nix`, `nodejs`, language servers и formatter'ы.
+2. NixOS создаёт один launcher: `exwm.desktop` или Xsession script.
+3. Launcher выставляет нужные env vars и делает `exec emacs --init-directory $HOME/.config/emacs`.
+4. `~/.config/emacs` содержит только Lisp и свои package management rules.
+
+* Рекомендуемый состав
+
+** Системная часть
+
+Минимум:
+- `emacs` или `emacs-gtk`
+- `git`
+- `nix` tools
+- `nodejs_20`
+- `typescript-language-server`
+- `prettier`
+- `ripgrep`, `fd`
+- `xhost`, `xset`, `xsetroot`, `wmname`, `dbus`
+- `gnome-keyring`, если нужен Secret Service
+
+** Lisp часть
+
+Минимум по задачам:
+- AI: `gptel`
+- Git: `magit`, `transient`, `with-editor`
+- Nix: `nix-mode`, `nix-ts-mode` если доступен, `nixpkgs-fmt` как formatter
+- JavaScript: built-in `js-ts-mode`/`typescript-ts-mode`, `eglot`, `json-ts-mode`
+
+Для минимальности я бы предпочёл `eglot` вместо тяжёлого `lsp-mode`.
+
+* Как сделать без rebuild для Lisp
+
+Лучший путь:
+1. Системный launcher указывает на writable init dir, например `~/.config/emacs`.
+2. Этот каталог не кладётся в Nix store, а живёт как обычный git checkout.
+3. Emacs сам грузит `early-init.el` и `init.el` оттуда.
+4. Обновления Lisp идут обычным `git pull` или через package manager внутри Emacs.
+
+Подходящие менеджеры:
+- `elpaca`
+- `straight.el`
+- `package.el` с `package-vc`
+
+Если важнее воспроизводимость, чем zero-rebuild, можно вместо этого использовать `emacsWithPackagesFromUsePackage`. Но это уже привязывает пакеты к пересборке NixOS.
+
+* Как распространять
+
+Самый практичный вариант - два слоя:
+1. Репозиторий `nixos-config` - system packages, desktop entry, session launcher.
+2. Репозиторий `emacs-config` - Lisp, package pins, UI, keybinds, AI/Git/Nix/JS настройки.
+
+Или один репозиторий, но Emacs dir должен быть out-of-store symlink'ом на живой checkout. Иначе любые изменения Lisp снова упрются в rebuild.
+
+* Что я бы выбрал здесь
+
+1. Оставить NixOS как сборщик desktop/session слоя.
+2. Вынести Emacs-конфиг в `~/.config/emacs` как отдельный git checkout.
+3. Launcher EXWM пусть всегда стартует именно этот каталог через `--init-directory`.
+4. В NixOS держать только бинарные зависимости и desktop integration.
+
+Это даёт минимальный, аккуратный и достаточно эффективный стек: EXWM остаётся декларативным, а Lisp можно править и обновлять без пересборки всей системы.
+
+* Конкретная схема
+
+Нужно разделить конфиг на три уровня:
+
+1. System loader, который генерируется NixOS и обновляется через `nixos-rebuild`.
+2. User manifest со списком модулей, который живёт в `~/.config/emacs/modules.el` и правится вручную.
+3. Module files, лежащие рядом в `~/.config/emacs/modules/`.
+
+Пример дерева:
+
+#+begin_src text
+~/.config/emacs/
+  early-init.el
+  init.el
+  modules.el
+  modules/
+    core.el
+    ui.el
+    git.el
+    nix.el
+    js.el
+    ai.el
+    exwm.el
+#+end_src
+
+`modules.el` должен быть единственным файлом, где пользователь выбирает набор модулей.
+
+* Как это грузить
+
+Системный `init.el` может быть очень коротким:
+
+#+begin_src elisp
+(setq user-emacs-directory (expand-file-name "~/.config/emacs/"))
+(load (expand-file-name "site-init.el" user-emacs-directory) nil t)
+(load (expand-file-name "modules.el" user-emacs-directory) t t)
+
+(dolist (module my-emacs-modules)
+  (load (expand-file-name (format "modules/%s.el" module) user-emacs-directory) nil t))
+#+end_src
+
+`modules.el` задаёт список:
+
+#+begin_src elisp
+(setq my-emacs-modules '(core ui git nix js ai exwm))
+#+end_src
+
+Так пользователь может добавить или убрать `ai`, `git`, `nix`, `js`, `exwm` без rebuild.
+
+* Как NixOS обновляет системную часть
+
+NixOS должен генерировать только:
+- Emacs binary
+- EXWM/session launcher
+- `site-init.el`
+- набор системных бинарников, нужных модулям
+
+То есть `nixos-rebuild` меняет:
+- версии пакетов
+- launcher
+- базовые настройки Emacs
+- доступные внешние инструменты
+
+Но не меняет пользовательский `modules.el`.
+
+* Важное ограничение
+
+Если модуль зависит от внешнего package, этот package тоже должен быть доступен системе заранее.
+Иначе пользователь сможет включить модуль в `modules.el`, но Emacs упадёт на `require`.
+
+Поэтому для минимального рабочего набора я бы делал системный superset из:
+- `gptel`
+- `magit`
+- `nix-mode`
+- `eglot`
+- JS tooling
+- `exwm`
+
+Тогда user может только включать и выключать модули, а не собирать зависимости вручную.
+
+* Практический вывод
+
+Лучший баланс такой:
+1. `nixos-rebuild` обновляет `site-init.el` и бинарную базу.
+2. Пользователь редактирует только `modules.el`.
+3. Модули лежат в обычном файловом дереве, поэтому меняются без rebuild.
+4. Лиспы остаются модульными, но система сохраняет один официальный путь запуска.
+
+* Практический шаблон
+
+#+begin_src nix
+home.file.".local/share/applications/exwm.desktop".text = ''
+  [Desktop Entry]
+  Type=Application
+  Name=EXWM
+  Exec=/run/current-system/sw/bin/exwm-session
+  TryExec=/run/current-system/sw/bin/exwm-session
+  DesktopNames=EXWM
+'';
+
+environment.systemPackages = with pkgs; [
+  emacs-gtk
+  git
+  nix
+  nodejs_20
+  xorg.xhost xorg.xset xorg.xsetroot dbus gnome-keyring
+];
+#+end_src
+
+Сама реализация launcher'а должна быть тонкой: env, Xresources, xhost/xset, then `exec emacs --init-directory "$HOME/.config/emacs"`.
+
+* Риски
+
+- Если Lisp тоже упаковать в Nix store, перестанет работать обновление без rebuild.
+- Если сделать два разных пути запуска EXWM, быстро появятся расхождения по env vars.
+- Если положить в Nix всё подряд, конфиг станет слишком тяжёлым и неудобным для быстрой правки.
+
+* Источники
+
+- Текущий `~/.config/nixos/configuration.nix`
+- Текущий `~/.config/nixos/conf/xinitrc.in`
+- Текущий `~/.config/nixos/conf/exwm-session-start.in`
+- Текущий `~/.config/nixos/systemd-user-services.nix`
+- NixOS wiki: Emacs
+- NixOS wiki: Home Manager
+- `nix-community/emacs-overlay`

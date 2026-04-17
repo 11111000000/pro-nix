@@ -1,6 +1,33 @@
-;;; ai.el --- AI helpers -*- lexical-binding: t; -*-
+;;; ai.el --- AI policy and entrypoint -*- lexical-binding: t; -*-
+
+;; Этот модуль задаёт минимальную политику AI: один вход, понятный выбор backend-а.
+
+(defcustom pro-ai-backend 'openrouter
+  "Предпочтительный AI-backend."
+  :type '(choice (const openrouter) (const aitunnel))
+  :group 'pro)
+
+(defcustom pro-ai-openrouter-model nil
+  "Модель по умолчанию для OpenRouter."
+  :type '(choice (const nil) string)
+  :group 'pro)
+
+(defcustom pro-ai-aitunnel-model nil
+  "Модель по умолчанию для AITunnel."
+  :type '(choice (const nil) string)
+  :group 'pro)
+
+(defun pro-ai-open-entry ()
+  "Открыть AI-буфер с учётом выбранного backend-а."
+  (interactive)
+  (when (require 'gptel nil t)
+    (when (and (eq pro-ai-backend 'openrouter) pro-ai-openrouter-model)
+      (setq gptel-model pro-ai-openrouter-model))
+    (when (and (eq pro-ai-backend 'aitunnel) pro-ai-aitunnel-model)
+      (setq gptel-model pro-ai-aitunnel-model))
+    (gptel)))
 
 (when (require 'gptel nil t)
-  (global-set-key (kbd "C-c a") #'gptel))
+  (global-set-key (kbd "C-c a") #'pro-ai-open-entry))
 
 (provide 'ai)
