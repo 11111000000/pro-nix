@@ -3,7 +3,7 @@
 ## Goal
 Turn the current machine-specific NixOS setup into a portable `pro` configuration that:
 - installs from a downloaded repository plus a bootstrap script
-- supports multiple hardware profiles
+- supports machine-specific overrides when needed
 - treats `az`, `zoya`, `lada`, and `boris` as equal users
 - keeps system settings shared and editable only through config files
 - keeps Emacs Lisp in normal `.el` files, never inline in Nix
@@ -25,7 +25,7 @@ The same repo is too coupled to one machine and one person:
 ### Synthesis
 The configuration should become a portable platform:
 - shared common modules for all machines
-- host profiles only for hardware-specific differences
+- machine-specific overlays only for hardware-specific differences
 - user accounts described symmetrically
 - Emacs as a base layer plus overrideable modules
 - a bootstrap path that selects the right host profile at install time
@@ -83,8 +83,8 @@ The user layer provides:
 - personal Emacs overrides
 - optional per-user tweaks
 
-### Host layer
-Each host profile provides only:
+### Machine layer
+Each machine-specific layer provides only:
 - hardware-specific kernel and device settings
 - machine-specific drivers
 - boot and storage details
@@ -130,15 +130,11 @@ All Lisp should live in normal `.el` files:
 - no inline Lisp in Nix strings for actual behavior
 - Nix may copy or install `.el` files, but not author them inline
 
-## Hardware profiles
+## Machine overlays
 
-Create empty profile stubs first:
-- `hosts/laptop` for the current notebook
-- `hosts/cf19` for Panasonic CF-19
-- `hosts/desktop` for the stationary machine
-- `hosts/custom` for future hardware
+Create empty stubs only when a machine actually needs them.
 
-Only the hardware profile should change when the machine changes.
+Only the machine-specific layer should change when the machine changes.
 Common user and system behavior should remain shared.
 
 ## Installation flow
@@ -146,9 +142,9 @@ Common user and system behavior should remain shared.
 1. User downloads the repo.
 2. User runs a bootstrap script.
 3. Script asks which hardware profile to install.
-4. Script writes or selects the chosen host profile.
-5. Script runs `nixos-rebuild` for that profile.
-6. Future rebuilds continue using the chosen hardware profile.
+4. Script writes or selects the needed machine overrides.
+5. Script runs `nixos-rebuild` for that setup.
+6. Future rebuilds continue using the same shared core.
 
 This makes installation feel like a guided setup while keeping the result declarative.
 
@@ -167,13 +163,13 @@ This makes installation feel like a guided setup while keeping the result declar
 
 ### What should never drift
 - user equality
-- one host profile per chosen machine
+- one machine-specific override set per chosen machine, if needed
 - Emacs Lisp location and override rules
 
 ## Refactor phases
 
-### Phase 1: Split common and host logic
-Extract shared settings from the monolithic config into common modules and host stubs.
+### Phase 1: Split common and machine logic
+Extract shared settings from the monolithic config into common modules and machine stubs.
 
 ### Phase 2: Normalize users
 Define `az`, `zoya`, `lada`, and `boris` as equivalent accounts using one shared user template.
@@ -182,7 +178,7 @@ Define `az`, `zoya`, `lada`, and `boris` as equivalent accounts using one shared
 Move Emacs behavior into ordinary `.el` files and keep Nix responsible only for installation and launching.
 
 ### Phase 4: Add bootstrap selection
-Create a script that selects hardware profile and runs the matching rebuild.
+Create a script that selects machine-specific overrides and runs the matching rebuild.
 
 ### Phase 5: Add override precedence
 Implement user-first module lookup for Emacs modules.
@@ -201,8 +197,8 @@ Document file locations, precedence rules, and profile selection in `docs/analys
 ## Success criteria
 
 - The repo can be installed from a fresh download.
-- The installer can select laptop, CF-19, desktop, or custom.
-- Rebuilds are tied to one chosen host profile.
+- The installer can apply machine-specific overrides when needed.
+- Rebuilds stay on one shared core.
 - `az`, `zoya`, `lada`, and `boris` behave the same from the system perspective.
 - Emacs Lisp lives in normal `.el` files only.
 - The base Emacs works by default and is easy to override or disable.

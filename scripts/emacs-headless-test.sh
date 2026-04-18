@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+MODE="${1:-both}"
+LOG_BASE="${EMACS_HEADLESS_LOG_DIR:-$PWD/logs/emacs-headless}"
+STAMP="$(date +%Y%m%d-%H%M%S)"
+RUN_DIR="$LOG_BASE/$STAMP"
+MASTER_LOG="$RUN_DIR/run.log"
+TTY_LOG="$RUN_DIR/tty.log"
+XORG_LOG="$RUN_DIR/xorg.log"
+EMACS_BIN="${EMACS_BIN:-emacs}"
+INIT_FILE="${EMACS_INIT_FILE:-$HOME/.emacs.d/init.el}"
+MODULES_FILE="${EMACS_MODULES_FILE:-$HOME/.emacs.d/modules.el}"
+
+escape_path() {
+  printf '%s' "$1" | sed 's/[\\&]/\\&/g'
+}
+
+mkdir -p "$RUN_DIR"
+: > "$MASTER_LOG"
+: > "$TTY_LOG"
+: > "$XORG_LOG"
+
+exec > >(tee -a "$MASTER_LOG") 2>&1
+
+hr() { printf '\n%s\n' '────────────────────────────────────────────────────────'; }
+section() { hr; printf '%s\n' "$1"; hr; }
+step() {
+  local title="$1"; shift
+  local logfile="$1"; shift
+  section "$title"
+  printf 'CMD: %s\n' "$*"
+  { "$@"; } 2>&1 | tee -a "$logfile"
+}
+
+find_free_display() {
+  local n
+  for n in $(seq 99 120); do
+    if [[ ! -e "/tmp/.X11-unix/X$n" ]]; then
+      printf ':%s\n' "$n"
+      return 0
+    fi
+  done
+  return 1
+}
+
+run_tty() {
+  section "TTY headless Emacs"
+  if ! command -v script >/dev/null 2>&1; then
+    printf 'script command is missing\n' | tee -a "$TTY_LOG"
+    return 1
+  fi
+
+  local init_esc modules_esc cmd
+  init_esc="$(escape_path "$INIT_FILE")"
+  modules_esc="$(escape_path "$MODULES_FILE")"
+  cmd="$EMACS_BIN -nw --quick --eval \"(setq user-emacs-directory \\\"$HOME/.emacs.d/\\\")\" --eval \"(load \\\"$init_esc\\\" nil t)\" --eval \"(when (file-readable-p \\\"$modules_esc\\\") (load-file \\\"$modules_esc\\\"))\" --eval \"(progn (message \\\"[pro-emacs] tty-ready\\\") (kill-emacs 0))\""
+  step "TTY bootstrap" "$TTY_LOG" script -qec "$cmd" /dev/null
+}
+
+run_xorg() {
+  section "Xorg headless Emacs"
+  if ! command -v Xvfb >/dev/null 2>&1; then
+    printf 'Xvfb command is missing; add xorg.xorgserver to the system packages.\n' | tee -a "$XORG_LOG"
+    return 1
+  fi
+
+  local display
+  display="$(find_free_display)"
+  printf 'Using DISPLAY=%s\n' "$display" | tee -a "$XORG_LOG"
+
+  Xvfb "$display" -screen 0 1280x720x24 -nolisten tcp >>"$XORG_LOG" 2>&1 &
+  local xpid=$!
+  trap 'kill "$xpid" >/dev/null 2>&1 || true' RETURN INT TERM
+  sleep 1
+
+  local init_esc modules_esc
+  init_esc="$(escape_path "$INIT_FILE")"
+  modules_esc="$(escape_path "$MODULES_FILE")"
+  DISPLAY="$display" "$EMACS_BIN" --quick \
+    --eval "(setq user-emacs-directory \"$HOME/.emacs.d/\")" \
+    --eval "(load \"$init_esc\" nil t)" \
+    --eval "(when (file-readable-p \"$modules_esc\") (load-file \"$modules_esc\"))" \
+    --eval "(progn (message \"[pro-emacs] xorg-ready\") (when (display-graphic-p) (make-frame)) (kill-emacs 0))" \
+    >>"$XORG_LOG" 2>&1
+  kill "$xpid" >/dev/null 2>&1 || true
+}
+
+section "Context"
+printf 'PWD: %s\n' "$PWD"
+printf 'Log dir: %s\n' "$RUN_DIR"
+printf 'Init file: %s\n' "$INIT_FILE"
+printf 'Emacs: %s\n' "$EMACS_BIN"
+
+case "$MODE" in
+  tty)
+    run_tty
+    ;;
+  xorg)
+    run_xorg
+    ;;
+  both)
+    run_tty
+    run_xorg
+    ;;
+  *)
+    printf 'Usage: %s [tty|xorg|both]\n' "$0" >&2
+    exit 2
+    ;;
+esac
+
+section "Done"
+printf 'TTY log:  %s\n' "$TTY_LOG"
+printf 'Xorg log: %s\n' "$XORG_LOG"
+printf 'Master:   %s\n' "$MASTER_LOG"

@@ -32,8 +32,8 @@ If the base is too weak:
 
 The earlier plan did not make this balance explicit enough.
 
-### 3. Host selection and user behavior were not clearly separated
-Hardware choice should happen once at installation time.
+### 3. Machine choice and user behavior were not clearly separated
+Machine-specific choice should happen only where it is actually needed.
 User behavior should remain shared across all machines.
 
 If host selection and user policy are mixed, the config becomes brittle:
@@ -52,13 +52,13 @@ It should do one thing only:
 Anything more complicated risks becoming its own framework.
 
 ### 5. The plan still carried a bit of single-user thinking
-The system must not revolve around `/home/zoya`.
+The system must not revolve around one user's home directory.
 It should revolve around the `pro` profile and shared policy.
 
 That means the plan should speak in terms of:
 - shared modules
 - equal users
-- host profiles
+- machine-specific overrides
 - portable bootstrap
 - ordinary `.el` files for Lisp
 
@@ -99,14 +99,11 @@ This core owns:
 - common services
 - Emacs base deployment
 
-### 2. Host overlays
-Each host profile adds only hardware-specific data.
+Storage-related shared services live in a separate storage module.
+Privacy-related shared services live in a separate privacy module.
 
-Planned host profiles:
-- `laptop`
-- `cf19`
-- `desktop`
-- `custom`
+### 2. Machine overlays
+Each machine-specific layer adds only hardware-specific data.
 
 ### 3. Equal users
 The system defines four equal accounts:
@@ -125,9 +122,9 @@ Emacs is split into:
 User files win over system files when the names match.
 
 ### 5. Bootstrap
-A bootstrap script downloads or activates the repo, asks for the hardware profile, and runs the matching rebuild.
+A bootstrap script downloads or activates the repo and applies the chosen machine-specific overrides.
 
-After that, rebuilds remain bound to the selected host profile.
+After that, rebuilds stay on the same shared core.
 
 ## File layout
 
@@ -196,7 +193,7 @@ Nix may install or copy these files, but not author their behavior inline.
 - one center, many surfaces
 - system defaults without user captivity
 - portable install path
-- clear host separation
+- clear machine separation where needed
 - plain-file Emacs modules
 - user override without rebuild
 
@@ -210,8 +207,8 @@ Nix may install or copy these files, but not author their behavior inline.
 ### Phase 1: Create the core
 Move shared policy into common modules.
 
-### Phase 2: Add host profiles
-Create empty stubs for laptop, CF-19, desktop, and custom.
+### Phase 2: Add machine overlays
+Create empty stubs only if a machine actually needs them.
 
 ### Phase 3: Normalize users
 Define equal user templates for all four accounts.
@@ -231,7 +228,7 @@ Document precedence, paths, and host rules in `docs/plans` and `docs/analyse`.
 ## Success criteria
 
 - Fresh install works from a downloaded repo.
-- The installer can choose a host profile.
+- The installer can apply machine-specific overrides only when needed.
 - `az`, `zoya`, `lada`, and `boris` remain equal.
 - Emacs Lisp stays in `.el` files.
 - EXWM is available by default but not imposed.

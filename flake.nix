@@ -1,28 +1,46 @@
 {
-  description = "NixOS (latest stable) + Home Manager (latest stable)";
+  description = "Portable Pro NixOS Config";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
-
-    home-manager = {
-      url = "github:nix-community/home-manager/release-25.11";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nixpkgs.url = "nixpkgs/nixos-24.05";
+    utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs:
-    let
-      system = "x86_64-linux";
-    in
-    {
-      nixosConfigurations.pro = nixpkgs.lib.nixosSystem {
-        inherit system;
+  outputs = inputs@{ nixpkgs, utils, ... }:
+    utils.lib.eachSystem [ "x86_64-linux" ] (system:
+      let
+        pkgs = import nixpkgs { inherit system; };
+      in {
+        # Для каждой машины — отдельный профиль
+        nixosConfigurations.thinkpad = inputs.nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            ./configuration.nix
+            ./hosts/thinkpad/configuration.nix
+          ];
+        };
 
-        specialArgs = { inherit inputs; };
+        nixosConfigurations.desktop = inputs.nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            ./configuration.nix
+            ./hosts/desktop/configuration.nix
+          ];
+        };
 
-        modules = [
-          ./configuration.nix
-        ];
-      };
-    };
+        nixosConfigurations.cf19 = inputs.nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            ./configuration.nix
+            ./hosts/cf19/configuration.nix
+          ];
+        };
+
+        # Краткие алиасы
+        nixosConfigurations.default = inputs.nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [ ./configuration.nix ];
+        };
+      }
+    );
 }

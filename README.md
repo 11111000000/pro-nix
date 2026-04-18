@@ -8,11 +8,13 @@
 - `hardware-configuration.nix` - параметры, сгенерированные для железа
 - `system-packages.nix` - список системных пакетов
 - `local.nix` - локальные переопределения конкретного хоста, не хранится в git
+- `AGENTS.md` - рабочий порядок, HDS и политики репозитория
+- `ENVIRONMENT.md` - как собирать и тестировать этот репозиторий
 - `modules/pro-users.nix` - общие пользователи и Home Manager база
 - `modules/pro-desktop.nix` - X11/desktop defaults and fonts
 - `modules/nix-cuda-compat.nix` - обходные совместимости Nix/CUDA
 
-Профиль `pro` уже встроен в основной конфиг: все пользователи машины получают общую базу Emacs, EXWM как опцию и Samba-шару по имени хоста.
+Профиль `pro` уже встроен в основной конфиг: все пользователи машины получают общую базу Emacs, EXWM как опцию, а сетевые, storage- и privacy-политики вынесены в отдельные модули.
 
 ## Как это работает
 
@@ -55,6 +57,16 @@ sudo nixos-rebuild test --flake .#pro
 ```bash
 sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
 ```
+
+Проверка конфигурации и Emacs-слоя для агентов:
+
+```bash
+just flake-check
+just headless
+just headless-report
+```
+
+Логи headless-запуска сохраняются в `logs/emacs-headless/<timestamp>/`.
 
 Откатиться на предыдущее поколение можно из меню загрузчика или через `nixos-rebuild switch --rollback`.
 

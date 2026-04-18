@@ -27,7 +27,10 @@
       (setq gptel-model pro-ai-aitunnel-model))
     (gptel)))
 
-(when (require 'gptel nil t)
-  (global-set-key (kbd "C-c a") #'pro-ai-open-entry))
+(defun pro-ai-toggle-backend ()
+  "Переключить AI-backend между OpenRouter и AITunnel."
+  (interactive)
+  (setq pro-ai-backend (if (eq pro-ai-backend 'openrouter) 'aitunnel 'openrouter))
+  (message "[pro-ai] backend: %S" pro-ai-backend))
 
 (provide 'ai)

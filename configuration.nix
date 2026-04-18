@@ -1,27 +1,15 @@
-# configuration.nix: Конфигурация системы NixOS
+# configuration.nix: Ядро системы NixOS
 # 
-# Данный файл задаёт полное описание системы NixOS, оформленное в стиле "литературного программирования" 
-# Каждая секция предваряется пояснением, раскрывающим её смысл, назначение и взаимосвязи с другими частями системы.
+# Этот файл задаёт каркас системы NixOS как рабочего мира, где каждая секция объясняет не только параметр, но и роль слоя в общей архитектуре.
 #
-# Структура конфигурации выстроена иерархически:
-# — Базовые импорты и модули.
-# — Ключевые системные параметры (загрузчик, ядро, сеть).
-# — Аппаратная поддержка и базовые сервисы (ввод, Bluetooth, энергосбережение).
-# — Локализация и языковые стандарты.
-# — Графическая среда и оконные менеджеры (X11, KDE, EXWM).
-# — Обслуживающие службы (печать, звук, виртуализация, прокси).
-# — Пользовательские настройки и Home Manager.
-# — Системные пакеты и среда.
-# — Особые приёмы (переназначение клавиш, монтирование, пользовательские сервисы).
+# Структура собрана как последовательность слоёв: импорты, ядро, аппаратная опора, локализация, графика, сервисы, пользовательская оболочка и пакетный контур.
+# Такой порядок нужен не ради красоты, а чтобы система оставалась читаемой при долгой жизни и частых переносах.
 #
-# Каждый блок начинается с подробного пояснения, далее приводится соответствующий Nix-код с подробными комментариями.
-# Это обеспечивает связность структуры и способствует долгосрочному сопровождению системы.
-#
-# Пример ориентирован на ноутбук с процессором Intel, NVMe-диском и модулем Bluetooth — при необходимости скорректируйте под своё оборудование.
+# Пример ориентирован на ноутбук с Intel, NVMe и Bluetooth; при другом железе меняется только то, что действительно зависит от машины.
 
 { config, pkgs, lib, ... }:
 
-let
+  let
   local = if builtins.pathExists ./local.nix then import ./local.nix else { };
   hostName = local.hostName or "nixos";
   emacsPkg = pkgs.emacs30 or pkgs.emacs;
@@ -29,32 +17,35 @@ let
     url = "https://github.com/nix-community/home-manager/archive/refs/heads/release-25.11.tar.gz";
     sha256 = "16mcnqpcgl3s2frq9if6vb8rpnfkmfxkz5kkkjwlf769wsqqg3i9";
   };
-in
+  in
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 1: Импортируемые модули и включение дополнительной логики
 #
-# На начальном этапе загружаются необходимые модули: результаты автоматического 
-# сканирования железа, Home Manager для персональных настроек, а также при необходимости 
-# нестабильные или пользовательские модули (например, для более гибкой работы с клавишами).
+# Сначала собирается контур слоёв: железо, пользовательская база и локальные исключения. Здесь решается, какие различия допускаются, а какие должны жить отдельно.
 
-{
+  {
+  environment.etc."pro/emacs-keys.org".source = ./emacs-keys.org;
+
   imports = [
-    # Импортируется конфиг, сгенерированный скриптом аппаратного сканирования NixOS.
+    # Сгенерированный контур железа фиксирует то, что определено физической машиной, а не волей автора.
     ./hardware-configuration.nix
 
-    # Общие смысловые модули.
+    # Общие смысловые модули формируют shared policy и не должны знать о личных привычках больше, чем требуется.
     ./modules/pro-users.nix
+    ./modules/pro-services.nix
+    ./modules/pro-storage.nix
+    ./modules/pro-privacy.nix
     ./modules/pro-desktop.nix
     ./modules/nix-cuda-compat.nix
 
-    # Локальные переопределения конкретного хоста.
+    # Локальные переопределения конкретного хоста оставлены там, где они действительно принадлежат машине, а не профилю.
   ] ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ] ++ [
 
-    # Модуль Home Manager для управления пользовательскими параметрами.
+    # Home Manager подключается как слой пользовательской формы, чтобы личная среда не растворялась в системных файлах.
     (import "${home-manager}/nixos")
 
-    # Вспомогательный модуль для переназначения клавиш (xremap) подключён по требованию.
+    # Вспомогательный модуль для переназначения клавиш подключён только как потенциальный рабочий инструмент, а не как обязательная часть ядра.
     # <nixos-unstable/nixos/modules/services/misc/xremap.nix>
   ];
 
@@ -62,83 +53,44 @@ in
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 2: Загрузчик системы и параметры ядра
 #
-# Здесь настраивается механизм загрузки для систем с EFI, ограничивается число хранемых
-# конфигураций для экономии места, а также выбирается самое современное ядро для максимальной
-# безопасности и совместимости с новым железом.
+# Здесь задаётся способ входа в систему: EFI, число поколений, поведение ядра и границы того, что можно считать надёжным стартом.
 
-  boot.loader.systemd-boot.enable = true;             # Использовать systemd-boot для EFI.
-  boot.loader.efi.canTouchEfiVariables = true;        # Разрешить запись в EFI-память.
-  boot.loader.efi.efiSysMountPoint = "/boot";         # Явно указываем точку монтирования ESP.
-  boot.loader.systemd-boot.configurationLimit = 6;    # Уменьшаем число поколений для экономии места на ESP.
-  boot.loader.timeout = 5;                            # Показывать меню загрузчика 5 секунд.
-  boot.loader.systemd-boot.editor = true;             # Разрешить редактирование параметров загрузки (например, systemd.unit=multi-user.target).
+  boot.loader.systemd-boot.enable = true;             # systemd-boot выбран как простой и предсказуемый вход в систему.
+  boot.loader.efi.canTouchEfiVariables = true;        # EFI-переменные можно менять из этой установки.
+  boot.loader.efi.efiSysMountPoint = "/boot";         # Точка ESP фиксируется явно, чтобы путь к загрузчику не расплывался.
+  boot.loader.systemd-boot.configurationLimit = 6;    # Небольшой лимит поколений удерживает ESP в рабочем размере.
+  boot.loader.timeout = 5;                            # Короткая пауза оставляет выбор, но не превращает старт в ожидание.
+  boot.loader.systemd-boot.editor = true;             # Редактор загрузки оставлен для редких вмешательств без вскрытия всего контура.
 
-  boot.plymouth.enable = true;                        # Boot splash - nicer boot experience.
-  boot.plymouth.theme = "spinner";                     # Simple spinner theme - reliable and clean.
+  boot.plymouth.enable = true;                        # Plymouth смягчает переход от firmware к рабочему миру.
+  boot.plymouth.theme = "spinner";                     # Спиннер выбран как спокойная форма ожидания без декоративного шума.
 
-  boot.kernelPackages = pkgs.linuxPackages_6_6;        # LTS ядро: стабильнее suspend/resume на Tiger Lake.
+  boot.kernelPackages = pkgs.linuxPackages_6_6;        # LTS-ядро здесь поддерживает устойчивость сна и пробуждения на этом поколении железа.
   boot.kernelParams = [ "mem_sleep_default=s2idle" "i915.enable_psr=0" "nvme_core.default_ps_max_latency_us=0" "acpi_backlight=native" ];
-  boot.kernel.sysctl."kernel.sysrq" = 1;               # Magic SysRq: вернуть управление и переключиться на TTY (Alt+SysRq+R и др.).
-  boot.resumeDevice = "/dev/nvme0n1p3";                 # Устройство swap для корректного resume из гибернации (уточните при необходимости)
+  boot.kernel.sysctl."kernel.sysrq" = 1;               # SysRq оставлен как аварийный выход, когда система перестаёт отвечать как среда, а не как инструмент.
+  boot.resumeDevice = "/dev/nvme0n1p3";                 # Устройство resume фиксирует путь к гибернации на этой машине.
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 3: Сетевая конфигурация и имя машины
 #
-# В этом разделе задаётся уникальное имя компьютера и выбирается менеджер сетевых
-# подключений для гибкой работы в различных сетевых окружениях. Wi-Fi управляется 
-# через NetworkManager (ручная настройка отключена).
+# Здесь определяется имя машины и тот сетевой менеджер, который будет держать связь с внешним миром без ручной пляски вокруг Wi-Fi.
 
-  networking.hostName = hostName;  # Имя хоста задаётся локальным, gitignored конфигом.
+  networking.hostName = hostName;  # Имя хоста берётся из локального конфигурационного слоя и не смешивается с общим репозиторием.
 
-  # Не используем "старую" систему беспроводной связи — вместо этого мы делегируем
-  # управление беспроводными сетями NetworkManager.
+  # Старую беспроводную схему не используем: сеть должна управляться одной понятной системой, а не несколькими конкурирующими.
   # networking.wireless.enable = true;
-
-  networking.networkmanager.enable = true; # Активируем NetworkManager для управления сетью.
-  services.samba.enable = true;
-  services.samba.openFirewall = true;
-  services.avahi.enable = true;
-  services.avahi.publish.enable = true;
-  services.samba.settings = {
-    global = {
-      workgroup = "WORKGROUP";
-      "server string" = "NixOS Samba Server";
-      "map to guest" = "Bad User";
-      "usershare allow guests" = "Yes";
-    };
-
-    ${hostName} = {
-      path = "/srv/samba/${hostName}";
-      browseable = "yes";
-      "read only" = "no";
-      "guest ok" = "no";
-      "force group" = "pro";
-      "create mask" = "0775";
-      "directory mask" = "2775";
-      "valid users" = "az zoya lada boris";
-    };
-  };
-
-  systemd.tmpfiles.rules = [
-    "d /srv/samba/${hostName} 2775 root pro - -"
-  ];
-
-  # Используем systemd-resolved и задаём собственные DNS-серверы (Яндекс + fallback)
-  networking.nameservers = [ "77.88.8.8" "77.88.8.1" "1.1.1.1" "8.8.8.8" ];   # Приоритет — Яндекс, после fallback.
-  networking.networkmanager.dns = "systemd-resolved"; # NM отдаёт резолвинг systemd-resolved.
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 4: Часовой пояс и языковая локализация
 #
-# Определяются базовые параметры часового пояса и языковые стандарты для корректного 
-# отображения времени, валют, адресов и других региональных настроек. Основной язык — русский.
+# Локализация здесь задаёт не просто язык, а бытовую меру времени, адресов и типографики рабочего поля.
 
-  time.timeZone = "Asia/Irkutsk";           # Географический регион для времени и даты.
+  time.timeZone = "Asia/Irkutsk";           # Часовой пояс выбран как точка совпадения с реальным ритмом работы.
 
-  # Основная локаль системы (русский Unicode).
+  # Основная локаль системы задаёт русский Unicode как естественный язык рабочего поля.
   i18n.defaultLocale = "ru_RU.UTF-8";
 
-  # Расширенные языковые параметры для согласованной работы приложений.
+  # Дополнительные LC-параметры удерживают приложения в одном культурном и числовом режиме.
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "ru_RU.UTF-8";
     LC_IDENTIFICATION = "ru_RU.UTF-8";
@@ -239,7 +191,7 @@ in
     settings.experimental-features = [ "nix-command" "flakes" ];
     settings.connect-timeout = 5;
     settings.fallback = true;
-    # Cachix first: prefer the faster community cache before falling back to the public one.
+    # Сначала используем более быстрый community-кеш, а к публичному возвращаемся только при необходимости.
     settings.substituters = lib.mkForce [
       "https://nix-community.cachix.org?priority=1"
       "https://cache.nixos.org?priority=50"
@@ -296,66 +248,6 @@ in
 
   fonts.fontconfig.defaultFonts.monospace = [ "Terminus" "Aporetic Sans Mono" ];
 
-  virtualisation.docker.enable = true;
-
-  services.openssh = {
-    enable = true;
-    settings = {
-      PermitRootLogin        = "no";
-      PasswordAuthentication = true;
-      AllowUsers             = [ "zoya" ];
-    };
-    extraConfig = ''
-      Match User zoya
-        ChrootDirectory /srv/sftp
-        ForceCommand internal-sftp
-        X11Forwarding no
-        AllowTcpForwarding no
-    '';
-  };
-
-  services.tor = {
-    enable = true;
-    client.enable = true;
-    torsocks.enable = true;
-    settings = {
-      SOCKSPort = [ 9052 ];
-      ControlPort = [ 9051 ];
-      CookieAuthentication = true;
-      UseBridges = 1;
-      ClientTransportPlugin = lib.mkForce [ "obfs4 exec ${pkgs.obfs4}/bin/lyrebird" ];
-      Bridge = [
-        "obfs4 157.131.86.3:4151 F09798E5258569811C71BFA98F43975E768CD8B8 cert=gRkZGmnzzzCwnSUT65285BkI1a8ni7R+7tXAYizYUzrlSklcX4rOtl7gU/9unBwblOQ3Ew iat-mode=0"
-      ];
-      DNSPort = [ 9053 ];
-      AutomapHostsOnResolve = true;
-      AutomapHostsSuffixes = [ ".onion" ".exit" ];
-    };
-  };
-
-  services.i2p.enable = true;
-  services.resolved.enable = true;
-
-  services.syncthing = {
-    enable            = true;
-    user              = "zoya";
-    group             = "users";
-    dataDir           = "/home/zoya/Sync";
-    configDir         = "/home/zoya/.config/syncthing";
-    guiAddress        = "127.0.0.1:8384";
-    openDefaultPorts  = false;
-  };
-
-  security.audit.enable = false;
-  security.auditd.enable = false;
-
-  services.fail2ban = {
-    enable    = true;
-    bantime   = "1h";
-    maxretry  = 6;
-  };
-
-  security.apparmor.enable = true;
   systemd.oomd = {
     enable = true;
     enableRootSlice = true;
@@ -366,13 +258,6 @@ in
     };
   };
   
-  networking.firewall = {
-    enable = true;
-    allowedTCPPorts = [ 22 22000 80 443 9050 9051 9053 7657 4444 4445 8384 139 445 ];
-    allowedUDPPorts = [ 21027 53 9564 137 138 ];
-    trustedInterfaces = [ "docker0" ];
-  };
-
   environment.variables = {
     LANG = "ru_RU.UTF-8";
     LC_CTYPE = "ru_RU.UTF-8";

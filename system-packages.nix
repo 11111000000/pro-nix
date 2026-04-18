@@ -1,11 +1,12 @@
 { pkgs, emacsPkg ? pkgs.emacs }:
 
 let
-  # Python окружение, в котором гарантированно есть requests (+ pip для установки пакетов в venv/--user при необходимости)
+  emacsPackages = pkgs.emacsPackagesFor emacsPkg;
+
+  # Python-слой здесь держит минимальную воспроизводимость: `requests` уже есть, а `pip` остаётся доступным для локальных окружений и одноразовых установок.
   myPython = pkgs.python3.withPackages (ps: [ ps.requests ps.pip ]);
 
-  # Делаем так, чтобы команды `python` и `python3` в PATH точно указывали на myPython,
-  # независимо от того, что ещё может подтянуться в окружение (Emacs/org-babel часто зовёт `python`).
+  # Так мы фиксируем один Python для всего рабочего поля: `python` и `python3` всегда ведут в один и тот же контур, даже если окружение пытается подменить путь.
   pythonCmd = pkgs.writeShellScriptBin "python" ''
     exec ${myPython}/bin/python3 "$@"
   '';
@@ -13,7 +14,7 @@ let
     exec ${myPython}/bin/python3 "$@"
   '';
 
-  # Добавляем pip в PATH (через python -m pip), чтобы можно было ставить пакеты в venv/--user.
+  # `pip` тоже идёт рядом, чтобы личные окружения можно было поднимать без расхождения с выбранным Python.
   pipCmd = pkgs.writeShellScriptBin "pip" ''
     exec ${myPython}/bin/python3 -m pip "$@"
   '';
@@ -24,12 +25,38 @@ in
 
 with pkgs; [
   kbd
-  # Базовые редакторы и вспомогательные инструменты.
+  # Редакторный контур и его спутники: здесь живут инструменты, которые держат текст, ссылки и навигацию в одном рабочем ритме.
   emacsPkg
+  emacsPackages.gptel
+  emacsPackages.consult
+  emacsPackages.vertico
+  emacsPackages.orderless
+  emacsPackages.marginalia
+  emacsPackages.magit
+  emacsPackages.elfeed
+  emacsPackages.telega
+  emacsPackages.ligature
+  emacsPackages.kind-icon
+  emacsPackages.nerd-icons
+  emacsPackages.treemacs-icons-dired
+  emacsPackages.nerd-icons-ibuffer
+  emacsPackages.eldoc-box
+  emacsPackages.which-key
+  emacsPackages.rainbow-delimiters
+  emacsPackages.corfu
+  emacsPackages.nix-mode
+  emacsPackages.haskell-mode
+  emacsPackages.python-mode
+  emacsPackages.java-ts-mode
+  emacsPackages.exwm
+  emacsPackages.consult-dir
+  emacsPackages.consult-project-extra
+  emacsPackages.consult-xref
   direnv
   acpi
+  xorg.xvfb
 
-  # Утилиты общего назначения.
+  # Общие утилиты составляют инструментальный фон: они не оформляют идею, а дают ей быстро стать действием.
   (writeShellScriptBin "nix-gui" ''
     exec ${nix}/bin/nix --experimental-features 'nix-command flakes' run github:nix-gui/nix-gui -- "$@"
   '')
@@ -78,7 +105,7 @@ ollama
   pasystray
   libnotify    
 
-  # DE-neutral applets & tray серверы, используемые в systemd user-сервисах:
+  # Апплеты и tray-серверы без привязки к конкретной среде нужны там, где интерфейс должен переживать смену оболочки.
   volumeicon
   caffeine-ng       # на Linux только caffeine-ng!
   redshift
@@ -90,8 +117,8 @@ ollama
   baobab            # GNOME Disk Usage Analyzer (круговая/treemap)
   duc               # Быстрый индексатор + консоль/GUI
 
-  # Браузеры — запускаются с ограничением памяти (3GB Chromium, 2GB Firefox)
-  # (writeShellScriptBin переопределяет стандартные команды)
+  # Браузеры обернуты в мягкий лимит памяти, чтобы графический поток не вытеснял остальной рабочий контур.
+  # Обёртки `writeShellScriptBin` намеренно переопределяют стандартные команды и прячут этот предел от повседневной рутины.
   (writeShellScriptBin "chromium" ''
     exec systemd-run --user --scope -p MemoryMax=4500M -p MemoryHigh=4G -- ${chromium}/bin/chromium "$@"
   '')
@@ -102,14 +129,14 @@ ollama
     exec systemd-run --user --scope -p MemoryMax=2500M -p MemoryHigh=2G -- ${firefox}/bin/firefox "$@"
   '')
   (writeShellScriptBin "emacs-panic" ''
-    exec /home/zoya/.local/bin/emacs-panic "$@"
+    pkill -INT -u "$USER" -x emacs >/dev/null 2>&1 || pkill -INT -u "$USER" -f 'emacs.*daemon' >/dev/null 2>&1 || true
   '')
   tor-browser
 
-  # Месенджеры
+  # Мессенджеры здесь находятся рядом с остальными каналами связи, а не отдельно от них.
   telegram-desktop
 
-  # Диагностические и сетевые средства.
+  # Диагностика и сеть сведены в один набор: он нужен тогда, когда рабочее окружение начинает вести себя как система, а не как интерфейс.
   lsof
   iftop
   iotop
@@ -120,10 +147,10 @@ ollama
   atop
   
   # ────────────────────────────────────────────────────────────────────────────
-  # АНОНИМНОСТЬ, ОБХОД ЦЕНЗУРЫ И ДЕЦЕНТРАЛИЗОВАННЫЕ СЕТИ
+  # Анонимность, обход блокировок и децентрализованные сети
   # ────────────────────────────────────────────────────────────────────────────
 
-  # --- Tor и обфускация ---
+  # Tor и обфускация образуют слой, в котором адреса перестают быть прямой формой доступа.
   tor                     # Tor клиент (системный сервис)
   torsocks                # Проксирование приложений через Tor (torify)
   tor-browser             # Браузер со встроенным Tor
@@ -132,45 +159,45 @@ ollama
   nyx                     # Мониторинг Tor в реальном времени (как htop для Tor)
   onionshare              # Анонимный файлообмен через Tor
 
-  # --- I2P — анонимная overlay-сеть ---
+  # I2P здесь хранится как вторая траектория скрытой связи: не альтернатива, а иной способ присутствовать в сети.
   i2p                     # I2P роутер и клиент
   # i2p лучше подходит для P2P внутри сети и скрытых сервисов (eepsites)
 
-  # --- DNSCrypt — шифрование DNS ---
+  # DNSCrypt нужен как тихая дисциплина имен: запрос должен идти по защищённому каналу, а не по привычке.
   dnscrypt-proxy          # DNS-over-HTTPS/TLS прокси
 
-  # --- Проксирование произвольных приложений ---
+  # Проксирование произвольных приложений позволяет не переписывать сами программы, а лишь их путь к миру.
   proxychains             # Проксирование любых приложений через Tor/SOCKS
   # Использование: proxychains <команда> (например: proxychains curl https://example.com)
 
-  # --- VPN и туннели (резервные каналы связи) ---
+  # VPN и туннели остаются резервным контуром связи на случай, когда основная сеть требует обхода или изоляции.
   mullvad-vpn             # Mullvad VPN (официальный пакет, приватный)
   wireguard-tools         # WireGuard — современный VPN-протокол
   yggdrasil               # Децентрализованная overlay-сеть (IPv6 поверх любого транспорта)
   zerotierone             # ZeroTier — альтернатива Yggdrasil
 
-  # --- Децентрализованные мессенджеры ---
-  # Session временно убран: текущая версия не собирается локально и не берётся из кэша
-  element-desktop         # Matrix клиент (уже был, децентрализованный)
-  jami                    # Jami (уже был, P2P без серверов)
-  weechat                 # IRC клиент (уже был, можно использовать с Tor)
+  # Децентрализованные мессенджеры нужны как каналы, где связь не сводится к одному серверу.
+  # Session временно убран: текущая версия не собирается локально и не берётся из кэша.
+  element-desktop         # Matrix-клиент, который держит федеративную переписку в рабочем поле.
+  jami                    # Jami, где P2P сохраняет разговор без центрального узла.
+  weechat                 # IRC-клиент, который хорошо сочетается с Tor и консольной дисциплиной.
 
-  # --- Утилиты для тестирования анонимности ---
-  curl                    # Проверка Tor: curl --socks5-hostname 127.0.0.1:9050 https://check.torproject.org
-  wget                    # Резервный загрузчик
+  # Утилиты для проверки анонимности нужны не как украшение, а как быстрый способ проверить, что скрытый путь действительно жив.
+  curl                    # Проверка Tor: `curl --socks5-hostname 127.0.0.1:9050 https://check.torproject.org`
+  wget                    # Резервный загрузчик для тех моментов, когда нужен простой и предсказуемый транспорт.
 
   # ────────────────────────────────────────────────────────────────────────────
-  # Сетевая устойчивость: туннели и overlay (原有保留)
+  # Сетевая устойчивость: туннели и overlay
   # ────────────────────────────────────────────────────────────────────────────
-  obfs4                 # Pluggable transports для Tor bridges
-  torsocks              # Проксирование приложений через Tor
-  tor-browser           # Браузер с встроенным Tor
+  obfs4                 # Pluggable transports для мостов Tor.
+  torsocks              # Проксирование приложений через Tor.
+  tor-browser           # Браузер со встроенным Tor.
   
-  # Федеративные/децентрализованные мессенджеры
-  element-desktop       # Matrix клиент
-  weechat               # IRC клиент (консольный)
+  # Федеративные и децентрализованные мессенджеры продолжают ту же линию, но уже без привязки к браузеру.
+  element-desktop       # Matrix-клиент.
+  weechat               # IRC-клиент в консольной форме.
   
-  # Инструменты компиляции и сборки ПО.
+  # Инструменты компиляции и сборки образуют техническое ядро, без которого рабочее поле быстро теряет самостоятельность.
   cmake
   gcc
   binutils
@@ -181,7 +208,7 @@ ollama
   automake
   autoconf
   
-  # Вспомогательные средства для EXWM/Emacs.
+  # Вспомогательные средства для EXWM и Emacs держат оконную и текстовую среду в одном жесте управления.
   #evremap
   xorg.xset
   xorg.xhost
@@ -197,33 +224,33 @@ ollama
   silver-searcher
   platinum-searcher
 
-  # Темы курсора X11 (whiteglass и др.)
+  # Темы курсора X11 нужны как визуальная интонация, а не как отдельный дизайн-проект.
   xorg.xcursorthemes
   adwaita-icon-theme
   
-  # Аудио/видео
+  # Аудио и видео работают как бытовая акустика рабочего места.
   ffmpeg-full
   vlc
   mpv
   jami
 
-  # Торрент-клиенты
+  # Торрент-клиенты оставлены как отдельный транспортный контур.
   #transmission
   #transmission-gtk
   qbittorrent
   deluge
 
-  # Для мониторинга безопасности
+  # Здесь мог бы стоять мониторинг безопасности; сейчас этот слот оставлен как напоминание о границе между инструментом и наблюдением.
 
-  # Диаграммы и визуализация
-  graphviz           # Для рендеринга графов (используется PlantUML для некоторых диаграмм).
-  plantuml           # Генератор UML-диаграмм; командa `plantuml` и JAR.
+  # Диаграммы и визуализация нужны, когда мысль должна выйти из текста и стать схемой.
+  graphviz           # Рендеринг графов; иногда служит почвой для PlantUML.
+  plantuml           # Генератор UML-диаграмм и одноимённая команда.
   nodePackages.mermaid-cli  # Утилита `mmdc` для рендеринга Mermaid.
 
   pandoc                # Универсальный конвертер документов.
 
-  # Офисные приложения
-  libreoffice-fresh  # LibreOffice Impress (аналог PowerPoint), Writer, Calc и др.
+  # Офисные приложения держат документальный слой рядом с кодом, а не отдельно от него.
+  libreoffice-fresh  # LibreOffice Impress, Writer, Calc и другие инструменты пакета.
 
   #clamav
   # haskell
@@ -236,8 +263,7 @@ ollama
   
   blender
 
-  # Делает `python` и `python3` в PATH гарантированно указывать на myPython (с requests),
-  # чтобы `import requests` работал в org-babel и в любых вызовах из PATH.
+  # Финальные Python-обёртки закрывают цикл: любой вызов из PATH попадает в один и тот же исполняемый контур.
   pythonCmd
   python3Cmd
   pipCmd

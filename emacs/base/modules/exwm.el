@@ -1,13 +1,10 @@
 ;;; exwm.el --- EXWM session -*- lexical-binding: t; -*-
 
+;; Этот модуль поднимает EXWM и берёт глобальные клавиши из общего слоя ключей.
+
 (when (require 'exwm nil t)
   (setq exwm-workspace-number 4
-        exwm-input-global-keys
-        `(([?] . exwm-reset)
-          ([?] . exwm-input-release-keyboard)
-          (,(kbd "s-r") . exwm-reset)
-          (,(kbd "s-w") . exwm-workspace-switch)
-          (,(kbd "s-&") . async-shell-command)))
+        exwm-input-global-keys pro-keys-exwm-global-keys)
   (when (require 'exwm-systemtray nil t)
     (exwm-systemtray-enable))
   (exwm-enable))
