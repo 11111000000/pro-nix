@@ -38,6 +38,8 @@ Files:
 - `tty.log` - TTY run output
 - `xorg.log` - Xorg/Xvfb run output
 
+The runner creates a disposable HOME inside the log directory, so the test does not depend on the user's live `~/.emacs.d`.
+
 ## What the agent should inspect
 
 - whether `~/.emacs.d/init.el` loads cleanly

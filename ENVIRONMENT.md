@@ -34,3 +34,5 @@ When you edit Emacs or Nix, prefer this order:
 If the change touches Emacs UI, test both `tty` and `xorg`.
 
 Avoid committing generated logs or `result/`; they are runtime artifacts.
+
+The headless runner uses a disposable HOME under `logs/emacs-headless/<timestamp>/home` so it does not depend on the user's live Emacs state.
