@@ -12,7 +12,13 @@
 - `ENVIRONMENT.md` - как собирать и тестировать этот репозиторий
 - `modules/pro-users.nix` - общие пользователи и Home Manager база
 - `modules/pro-desktop.nix` - X11/desktop defaults and fonts
+- `modules/pro-services.nix` - общие сетевые и сервисные политики
+- `modules/pro-storage.nix` - Samba, Syncthing и storage-related policy
+- `modules/pro-privacy.nix` - Tor, I2P и privacy-related firewall policy
 - `modules/nix-cuda-compat.nix` - обходные совместимости Nix/CUDA
+- `scripts/` - установочные и диагностические сценарии
+- `justfile` - команды для сборки и тестов
+- `ENVIRONMENT.md` - как собирать и тестировать репозиторий
 
 Профиль `pro` уже встроен в основной конфиг: все пользователи машины получают общую базу Emacs, EXWM как опцию, а сетевые, storage- и privacy-политики вынесены в отдельные модули.
 
@@ -76,3 +82,4 @@ just headless-report
 - `local.nix` игнорируется git и может содержать hostname, Samba, hardware overrides и прочие локальные настройки.
 - Если меняется железо, обновите `hardware-configuration.nix` через `nixos-generate-config`.
 - После правок в пакетах или сервисах всегда делайте пересборку, иначе изменения не применятся.
+- Временные артефакты, лог-файлы и `result/` не должны попадать в git.

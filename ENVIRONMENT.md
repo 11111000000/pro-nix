@@ -8,6 +8,8 @@
 - `rg`
 - `fd`
 - `nixos-rebuild`
+- `Xvfb`
+- `script`
 
 ## Common commands
 
@@ -30,3 +32,5 @@ When you edit Emacs or Nix, prefer this order:
 5. read the latest logs
 
 If the change touches Emacs UI, test both `tty` and `xorg`.
+
+Avoid committing generated logs or `result/`; they are runtime artifacts.

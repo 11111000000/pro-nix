@@ -51,8 +51,12 @@ The Xorg test needs `Xvfb` available in the system environment.
 
 If the command is missing, add the Xorg server package to the Nix layer and rerun the test.
 
+The TTY test needs `script` from util-linux/coreutils tooling.
+
 ## Philosophy
 
 This is not a benchmark. It is a witness.
 
 The runner should leave behind enough evidence for an agent to explain what changed, what failed, and what should be fixed next.
+
+Generated logs belong under `logs/` and must stay out of git.

@@ -34,7 +34,11 @@ Read the latest logs:
 - `fd` for file discovery
 - `git diff --stat` for change scope
 - `nixos-rebuild test` for system-level validation
+- `just` as the default workflow wrapper
+- `Xvfb` and `script` for Emacs headless verification
 
 ## Agent rule
 
 If you change Emacs modules, run the headless test runner and inspect the logs before claiming success.
+
+Do not rely on generated logs as source files; they are evidence, not configuration.

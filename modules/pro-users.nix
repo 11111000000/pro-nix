@@ -144,6 +144,7 @@
         home.file.".config/pro/emacs-headless-report.sh".source = ../scripts/pro-emacs-headless-report.sh;
         home.file.".config/pro/justfile".source = ../justfile;
         home.file.".config/pro/ENVIRONMENT.md".source = ../ENVIRONMENT.md;
+        home.file.".config/pro/README.agent.md".source = ../docs/plans/repo-agent-guide.md;
         home.file.".emacs.d/modules.el.example".text = ''
           ;; Этот файл показывает форму пользовательского расширения Emacs: базовая система уже есть, но её можно переосмыслить через личный слой.
           ;; Пользовательские модули имеют приоритет, системная база остаётся запасным вариантом.

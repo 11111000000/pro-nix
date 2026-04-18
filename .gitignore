@@ -1,5 +1,7 @@
 /.agent-shell/
 ...*
 .context
+logs/
+result
 local.nix
 bootstrap/local.nix
