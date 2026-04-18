@@ -34,4 +34,9 @@
   (when (require 'consult nil t)
     (consult-buffer)))
 
+(defun pro-project-open-dired ()
+  "Открыть dired в корне проекта."
+  (interactive)
+  (dired (or (pro-project-root) default-directory)))
+
 (provide 'project)

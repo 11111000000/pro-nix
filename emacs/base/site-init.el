@@ -1,10 +1,10 @@
 ;;; site-init.el --- pro Emacs base -*- lexical-binding: t; -*-
 
-(defconst pro-emacs-base-default-modules '(core ui text nav keys org lisp nix python c java haskell project git ai feeds chat agent exwm))
-(defconst pro-emacs-base-system-modules-dir "/etc/pro/emacs/modules")
-(defconst pro-emacs-base-user-modules-dir (expand-file-name "~/.emacs.d/modules"))
-(defconst pro-emacs-base-user-manifest (expand-file-name "~/.emacs.d/modules.el"))
-(defconst pro-emacs-base-disable-marker (expand-file-name "~/.emacs.d/.disable-nixos-base"))
+(defvar pro-emacs-base-default-modules '(core ui text nav keys org lisp nix python c java haskell project git ai feeds chat agent exwm))
+(defvar pro-emacs-base-system-modules-dir "/etc/pro/emacs/modules")
+(defvar pro-emacs-base-user-modules-dir (expand-file-name "~/.emacs.d/modules"))
+(defvar pro-emacs-base-user-manifest (expand-file-name "~/.emacs.d/modules.el"))
+(defvar pro-emacs-base-disable-marker (expand-file-name "~/.emacs.d/.disable-nixos-base"))
 
 (defun pro-emacs-base--module-file (dir name)
   (expand-file-name (format "%s.el" name) dir))

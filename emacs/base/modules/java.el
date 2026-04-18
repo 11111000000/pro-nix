@@ -9,6 +9,11 @@
   (setq-local indent-tabs-mode nil)
   (setq-local tab-width 4))
 
+(defun pro-java-open-project ()
+  "Переход к проектной работе в Java-буфере."
+  (interactive)
+  (message "[pro-java] project entrypoint is intentionally minimal"))
+
 (when (require 'eglot nil t)
   (add-hook 'java-ts-mode-hook #'eglot-ensure))
 

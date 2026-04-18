@@ -90,9 +90,12 @@
   "Подключить полезные подсказки для завершения."
   (when (display-graphic-p)
     (when (pro-ui--try-require 'corfu)
-      (global-corfu-mode 1))
-    (when (pro-ui--try-require 'kind-icon)
-      (setq kind-icon-default-face 'corfu-default))))
+      (global-corfu-mode 1)
+      (setq corfu-auto t
+            corfu-cycle t))
+    (when (and (pro-ui--try-require 'kind-icon)
+               (boundp 'corfu-margin-formatters))
+      (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))))
 
 (defun pro-ui-apply-buffers ()
   "Подключить дополнительные визуальные удобства для списков и завершения."
@@ -103,7 +106,7 @@
     (when (pro-ui--try-require 'eldoc-box)
       (setq eldoc-box-clear-with-C-g t))
     (when (pro-ui--try-require 'treemacs-icons-dired)
-      (setq treemacs-icons-dired-mode t))))
+      (add-hook 'dired-mode-hook #'treemacs-icons-dired-enable-once))))
 
 (defun pro-ui-apply ()
   "Применить все визуальные политики PRO."
@@ -141,9 +144,5 @@
 
 (when (display-graphic-p)
   (pro-ui-apply))
-
-(when (require 'corfu nil t)
-  (setq corfu-auto t
-        corfu-cycle t))
 
 (provide 'ui)

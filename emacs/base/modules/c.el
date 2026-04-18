@@ -10,6 +10,11 @@
   (setq-local indent-tabs-mode nil)
   (setq-local c-basic-offset 4))
 
+(defun pro-c-format-buffer ()
+  "Показать точку для будущего форматирования C-буфера."
+  (interactive)
+  (message "[pro-c] formatting hook is intentionally minimal"))
+
 (add-hook 'c-ts-mode-hook #'pro-c-setup)
 
 (provide 'c)

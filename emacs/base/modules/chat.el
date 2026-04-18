@@ -1,11 +1,11 @@
 ;;; chat.el --- Telegram и чаты -*- lexical-binding: t; -*-
 
-;; Этот модуль подключает чаты только как полезную рабочую поверхность.
+;; Этот модуль подключает чаты как полезный, но не навязчивый канал коммуникации.
 
-(when (require 'telega nil t)
-  (defun pro-chat-open ()
-    "Открыть Telegram."
-    (interactive)
+(defun pro-chat-open ()
+  "Открыть Telegram, если пакет доступен."
+  (interactive)
+  (when (require 'telega nil t)
     (telega)))
 
 (provide 'chat)

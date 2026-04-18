@@ -5,12 +5,13 @@ MODE="${1:-both}"
 LOG_BASE="${EMACS_HEADLESS_LOG_DIR:-$PWD/logs/emacs-headless}"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 RUN_DIR="$LOG_BASE/$STAMP"
+RUN_HOME="$RUN_DIR/home"
 MASTER_LOG="$RUN_DIR/run.log"
 TTY_LOG="$RUN_DIR/tty.log"
 XORG_LOG="$RUN_DIR/xorg.log"
 EMACS_BIN="${EMACS_BIN:-emacs}"
-INIT_FILE="${EMACS_INIT_FILE:-$HOME/.emacs.d/init.el}"
-MODULES_FILE="${EMACS_MODULES_FILE:-$HOME/.emacs.d/modules.el}"
+REPO_SITE_INIT="${EMACS_SITE_INIT:-$PWD/emacs/base/site-init.el}"
+REPO_MODULES_DIR="${EMACS_MODULES_DIR:-$PWD/emacs/base/modules}"
 
 escape_path() {
   printf '%s' "$1" | sed 's/[\\&]/\\&/g'
@@ -20,6 +21,8 @@ mkdir -p "$RUN_DIR"
 : > "$MASTER_LOG"
 : > "$TTY_LOG"
 : > "$XORG_LOG"
+mkdir -p "$RUN_HOME/.emacs.d"
+mkdir -p "$RUN_HOME/.cache"
 
 exec > >(tee -a "$MASTER_LOG") 2>&1
 
@@ -51,10 +54,11 @@ run_tty() {
     return 1
   fi
 
-  local init_esc modules_esc cmd
-  init_esc="$(escape_path "$INIT_FILE")"
-  modules_esc="$(escape_path "$MODULES_FILE")"
-  cmd="$EMACS_BIN -nw --quick --eval \"(setq user-emacs-directory \\\"$HOME/.emacs.d/\\\")\" --eval \"(load \\\"$init_esc\\\" nil t)\" --eval \"(when (file-readable-p \\\"$modules_esc\\\") (load-file \\\"$modules_esc\\\"))\" --eval \"(progn (message \\\"[pro-emacs] tty-ready\\\") (kill-emacs 0))\""
+  local repo_site_esc repo_modules_esc run_home_esc cmd
+  repo_site_esc="$(escape_path "$REPO_SITE_INIT")"
+  repo_modules_esc="$(escape_path "$REPO_MODULES_DIR")"
+  run_home_esc="$(escape_path "$RUN_HOME")"
+  cmd="HOME=\"$RUN_HOME\" $EMACS_BIN -nw --quick --eval \"(setq user-emacs-directory \\\"$run_home_esc/.emacs.d/\\\" pro-emacs-base-system-modules-dir \\\"$repo_modules_esc\\\" pro-emacs-base-user-modules-dir \\\"$run_home_esc/.emacs.d/modules\\\" pro-emacs-base-user-manifest \\\"$run_home_esc/.emacs.d/modules.el\\\" pro-emacs-base-default-modules '(core ui text nav keys org lisp nix python c java haskell project git ai feeds chat agent exwm))\" --load \"$repo_site_esc\" --eval \"(pro-emacs-base-start)\" --eval \"(progn (message \\\"[pro-emacs] tty-ready\\\") (kill-emacs 0))\""
   step "TTY bootstrap" "$TTY_LOG" script -qec "$cmd" /dev/null
 }
 
@@ -74,13 +78,14 @@ run_xorg() {
   trap 'kill "$xpid" >/dev/null 2>&1 || true' RETURN INT TERM
   sleep 1
 
-  local init_esc modules_esc
-  init_esc="$(escape_path "$INIT_FILE")"
-  modules_esc="$(escape_path "$MODULES_FILE")"
-  DISPLAY="$display" "$EMACS_BIN" --quick \
-    --eval "(setq user-emacs-directory \"$HOME/.emacs.d/\")" \
-    --eval "(load \"$init_esc\" nil t)" \
-    --eval "(when (file-readable-p \"$modules_esc\") (load-file \"$modules_esc\"))" \
+  local repo_site_esc repo_modules_esc run_home_esc
+  repo_site_esc="$(escape_path "$REPO_SITE_INIT")"
+  repo_modules_esc="$(escape_path "$REPO_MODULES_DIR")"
+  run_home_esc="$(escape_path "$RUN_HOME")"
+  DISPLAY="$display" HOME="$RUN_HOME" "$EMACS_BIN" --quick \
+    --eval "(setq user-emacs-directory \"$run_home_esc/.emacs.d/\" pro-emacs-base-system-modules-dir \"$repo_modules_esc\" pro-emacs-base-user-modules-dir \"$run_home_esc/.emacs.d/modules\" pro-emacs-base-user-manifest \"$run_home_esc/.emacs.d/modules.el\" pro-emacs-base-default-modules '(core ui text nav keys org lisp nix python c java haskell project git ai feeds chat agent exwm))" \
+    --load "$repo_site_esc" \
+    --eval "(pro-emacs-base-start)" \
     --eval "(progn (message \"[pro-emacs] xorg-ready\") (when (display-graphic-p) (make-frame)) (kill-emacs 0))" \
     >>"$XORG_LOG" 2>&1
   kill "$xpid" >/dev/null 2>&1 || true
@@ -89,7 +94,9 @@ run_xorg() {
 section "Context"
 printf 'PWD: %s\n' "$PWD"
 printf 'Log dir: %s\n' "$RUN_DIR"
-printf 'Init file: %s\n' "$INIT_FILE"
+printf 'Site init: %s\n' "$REPO_SITE_INIT"
+printf 'Modules dir: %s\n' "$REPO_MODULES_DIR"
+printf 'Disposable HOME: %s\n' "$RUN_HOME"
 printf 'Emacs: %s\n' "$EMACS_BIN"
 
 case "$MODE" in

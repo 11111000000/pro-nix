@@ -11,4 +11,9 @@
   (interactive)
   (compile "sudo nixos-rebuild switch --flake .#pro"))
 
+(defun pro-nix-format-buffer ()
+  "Показать явную точку для будущего форматирования Nix-буфера."
+  (interactive)
+  (message "[pro-nix] formatting hook is intentionally minimal"))
+
 (provide 'nix)

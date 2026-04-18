@@ -9,6 +9,12 @@
   (setq-local indent-tabs-mode nil)
   (setq-local python-indent-offset 4))
 
+(defun pro-python-run-buffer ()
+  "Запустить текущий Python-буфер как сценарий."
+  (interactive)
+  (when buffer-file-name
+    (compile (format "python %s" (shell-quote-argument buffer-file-name)))))
+
 (when (require 'eglot nil t)
   (add-hook 'python-ts-mode-hook #'eglot-ensure))
 

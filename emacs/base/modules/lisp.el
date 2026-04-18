@@ -10,6 +10,12 @@
   (setq-local indent-tabs-mode nil)
   (setq-local fill-column 88))
 
+(defun pro-lisp-eval-buffer ()
+  "Оценить буфер как рабочий Lisp-артефакт."
+  (interactive)
+  (when (derived-mode-p 'emacs-lisp-mode 'lisp-interaction-mode)
+    (eval-buffer)))
+
 (when (require 'rainbow-delimiters nil t)
   (add-hook 'emacs-lisp-mode-hook #'rainbow-delimiters-mode)
   (add-hook 'lisp-interaction-mode-hook #'rainbow-delimiters-mode))

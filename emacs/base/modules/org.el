@@ -13,7 +13,8 @@
         org-M-RET-may-split-line nil
         org-table-auto-blank-field t
         org-return-follows-link t
-        org-image-actual-width nil))
+        org-image-actual-width nil
+        org-table-formula-use-constants nil))
 
 (when (require 'org-tempo nil t)
   (setq org-structure-template-alist
@@ -33,10 +34,17 @@
   (interactive)
   (find-file (expand-file-name "modules.el" user-emacs-directory)))
 
+(defun pro-org-setup ()
+  "Собрать полезные локальные привычки для Org-блоков и таблиц."
+  (setq-local truncate-lines nil)
+  (setq-local word-wrap t))
+
 (with-eval-after-load 'org
   (define-key org-mode-map (kbd "C-c |") #'org-table-create-or-convert-from-region)
   (define-key org-mode-map (kbd "C-c t") #'org-table-transpose-table-at-point)
   (define-key org-mode-map (kbd "C-c K") #'pro-org-open-keys-file)
   (define-key org-mode-map (kbd "C-c M") #'pro-org-open-module-list))
+
+(add-hook 'org-mode-hook #'pro-org-setup)
 
 (provide 'org)

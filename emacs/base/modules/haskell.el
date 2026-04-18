@@ -9,6 +9,11 @@
   (setq-local indent-tabs-mode nil)
   (setq-local tab-width 2))
 
+(defun pro-haskell-open-repl ()
+  "Показать точку для REPL-потока Haskell."
+  (interactive)
+  (message "[pro-haskell] repl entrypoint is intentionally minimal"))
+
 (add-hook 'haskell-mode-hook #'pro-haskell-setup)
 
 (provide 'haskell)

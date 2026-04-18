@@ -1,11 +1,11 @@
 ;;; agent.el --- агентный буфер -*- lexical-binding: t; -*-
 
-;; Этот модуль держит агентский интерфейс коротким и доступным.
+;; Этот модуль оставляет агентский интерфейс коротким и повторяемым.
 
-(when (require 'agent-shell nil t)
-  (defun pro-agent-open ()
-    "Открыть агентский буфер."
-    (interactive)
+(defun pro-agent-open ()
+  "Открыть агентский буфер, если пакет доступен."
+  (interactive)
+  (when (require 'agent-shell nil t)
     (agent-shell)))
 
 (provide 'agent)

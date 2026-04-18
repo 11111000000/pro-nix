@@ -1,16 +1,12 @@
-;;; core.el --- base editing defaults -*- lexical-binding: t; -*-
+;;; core.el --- ядро Emacs -*- lexical-binding: t; -*-
 
-(setq inhibit-startup-screen t
-      inhibit-startup-message t
-      initial-scratch-message ""
-      ring-bell-function #'ignore
-      use-dialog-box nil
-      create-lockfiles nil
-      make-backup-files nil)
+;; Этот модуль держит самые общие и тихие правила среды.
 
-(setq backup-directory-alist
-      `(("." . ,(expand-file-name "backups/" user-emacs-directory))))
-(setq auto-save-file-name-transforms
-      `((".*" ,(expand-file-name "auto-save/" user-emacs-directory) t)))
+(setq-default indent-tabs-mode nil)
+(setq-default fill-column 88)
+(setq ring-bell-function 'ignore)
+
+(when (fboundp 'global-auto-revert-mode)
+  (global-auto-revert-mode 1))
 
 (provide 'core)

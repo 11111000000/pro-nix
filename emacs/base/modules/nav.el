@@ -18,6 +18,14 @@
     (setq xref-show-definitions-function #'consult-xref
           xref-show-xrefs-function #'consult-xref)))
 
+(defun pro-nav-search-project ()
+  "Искать в текущем проекте, если доступен project root."
+  (interactive)
+  (when (require 'consult nil t)
+    (if (fboundp 'pro-project-root)
+        (consult-ripgrep (or (pro-project-root) default-directory))
+      (consult-ripgrep default-directory))))
+
 (defun pro-nav-open-line ()
   "Открыть строковый поиск."
   (interactive)

@@ -33,4 +33,11 @@
   (setq pro-ai-backend (if (eq pro-ai-backend 'openrouter) 'aitunnel 'openrouter))
   (message "[pro-ai] backend: %S" pro-ai-backend))
 
+(defun pro-ai-reset-models ()
+  "Сбросить локальные предпочтения моделей."
+  (interactive)
+  (setq pro-ai-openrouter-model nil
+        pro-ai-aitunnel-model nil)
+  (message "[pro-ai] models reset"))
+
 (provide 'ai)
