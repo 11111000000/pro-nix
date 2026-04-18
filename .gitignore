@@ -5,3 +5,4 @@ logs/
 result
 local.nix
 bootstrap/local.nix
+.org
