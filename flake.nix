@@ -3,46 +3,45 @@
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-24.05";
-    utils.url = "github:numtide/flake-utils";
+    home-manager.url = "github:nix-community/home-manager/release-24.05";
   };
 
-  outputs = inputs@{ nixpkgs, utils, ... }:
-    utils.lib.eachSystem [ "x86_64-linux" ] (system:
-      let
-        pkgs = import nixpkgs { inherit system; };
-      in {
-        nixosConfigurations = {
-          # Для каждой машины — отдельный профиль
-          thinkpad = inputs.nixpkgs.lib.nixosSystem {
-            system = "x86_64-linux";
-            modules = [
-              ./configuration.nix
-              ./hosts/thinkpad/configuration.nix
-            ];
-          };
+  outputs = inputs@{ nixpkgs, ... }:
+    let
+      system = "x86_64-linux";
+      lib = nixpkgs.lib;
+      pkgs = import nixpkgs { inherit system; };
 
-          desktop = inputs.nixpkgs.lib.nixosSystem {
-            system = "x86_64-linux";
-            modules = [
-              ./configuration.nix
-              ./hosts/desktop/configuration.nix
-            ];
-          };
+      mkHost = extraModules: lib.nixosSystem {
+        inherit system;
+        modules = [
+          inputs.home-manager.nixosModules.home-manager
+          ./configuration.nix
+        ] ++ extraModules;
+      };
 
-          cf19 = inputs.nixpkgs.lib.nixosSystem {
-            system = "x86_64-linux";
-            modules = [
-              ./configuration.nix
-              ./hosts/cf19/configuration.nix
-            ];
-          };
+      hosts = {
+        thinkpad = mkHost [ ./hosts/thinkpad/configuration.nix ];
+        desktop = mkHost [ ./hosts/desktop/configuration.nix ];
+        cf19 = mkHost [ ./hosts/cf19/configuration.nix ];
+      };
+    in {
+      nixosConfigurations = {
+        default = hosts.thinkpad;
+      };
 
-          # Краткий алиас
-          default = inputs.nixpkgs.lib.nixosSystem {
-            system = "x86_64-linux";
-            modules = [ ./configuration.nix ];
-          };
-        };
-      }
-    );
+      checks.${system}.default = hosts.thinkpad.config.system.build.toplevel;
+
+      proConfigurations = hosts;
+
+      apps.${system}.check-all = {
+        type = "app";
+        program = toString (pkgs.writeShellScript "check-all-hosts" ''
+          set -eu
+          nix build .#proConfigurations.default.config.system.build.toplevel
+          nix build .#proConfigurations.desktop.config.system.build.toplevel
+          nix build .#proConfigurations.cf19.config.system.build.toplevel
+        '');
+      };
+    };
 }

@@ -13,10 +13,6 @@
   local = if builtins.pathExists ./local.nix then import ./local.nix else { };
   hostName = local.hostName or "nixos";
   emacsPkg = pkgs.emacs30 or pkgs.emacs;
-  home-manager = builtins.fetchTarball {
-    url = "https://github.com/nix-community/home-manager/archive/refs/heads/release-25.11.tar.gz";
-    sha256 = "16mcnqpcgl3s2frq9if6vb8rpnfkmfxkz5kkkjwlf769wsqqg3i9";
-  };
   in
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -27,9 +23,10 @@
   {
   environment.etc."pro/emacs-keys.org".source = ./emacs-keys.org;
 
-  imports = [
-    # Сгенерированный контур железа фиксирует то, что определено физической машиной, а не волей автора.
-    ./hardware-configuration.nix
+   imports = [
+     # Аппаратные параметры задаются на уровне профиля хоста: hardware-configuration.nix больше не используется
+     # ./hardware-configuration.nix
+
 
     # Общие смысловые модули формируют shared policy и не должны знать о личных привычках больше, чем требуется.
     ./modules/pro-users.nix
@@ -43,8 +40,6 @@
   ] ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ] ++ [
 
     # Home Manager подключается как слой пользовательской формы, чтобы личная среда не растворялась в системных файлах.
-    (import "${home-manager}/nixos")
-
     # Вспомогательный модуль для переназначения клавиш подключён только как потенциальный рабочий инструмент, а не как обязательная часть ядра.
     # <nixos-unstable/nixos/modules/services/misc/xremap.nix>
   ];
@@ -55,12 +50,12 @@
 #
 # Здесь задаётся способ входа в систему: EFI, число поколений, поведение ядра и границы того, что можно считать надёжным стартом.
 
-  boot.loader.systemd-boot.enable = true;             # systemd-boot выбран как простой и предсказуемый вход в систему.
+  boot.loader.grub.enable = true;                     # GRUB остаётся безопасной общей точкой входа для разных машин.
+  boot.loader.grub.device = "nodev";                  # Для EFI-сценария загрузчик живёт без привязки к конкретному диску.
   boot.loader.efi.canTouchEfiVariables = true;        # EFI-переменные можно менять из этой установки.
   boot.loader.efi.efiSysMountPoint = "/boot";         # Точка ESP фиксируется явно, чтобы путь к загрузчику не расплывался.
-  boot.loader.systemd-boot.configurationLimit = 6;    # Небольшой лимит поколений удерживает ESP в рабочем размере.
   boot.loader.timeout = 5;                            # Короткая пауза оставляет выбор, но не превращает старт в ожидание.
-  boot.loader.systemd-boot.editor = true;             # Редактор загрузки оставлен для редких вмешательств без вскрытия всего контура.
+  boot.loader.grub.useOSProber = false;               # Явная загрузка без автоматического поиска чужих систем.
 
   boot.plymouth.enable = true;                        # Plymouth смягчает переход от firmware к рабочему миру.
   boot.plymouth.theme = "spinner";                     # Спиннер выбран как спокойная форма ожидания без декоративного шума.
@@ -75,7 +70,7 @@
 #
 # Здесь определяется имя машины и тот сетевой менеджер, который будет держать связь с внешним миром без ручной пляски вокруг Wi-Fi.
 
-  networking.hostName = hostName;  # Имя хоста берётся из локального конфигурационного слоя и не смешивается с общим репозиторием.
+  networking.hostName = lib.mkDefault hostName;  # Базовое имя задаётся только как запасной вариант, а машина может переопределить его на своём уровне.
 
   # Старую беспроводную схему не используем: сеть должна управляться одной понятной системой, а не несколькими конкурирующими.
   # networking.wireless.enable = true;
@@ -141,15 +136,14 @@
   '';
   
   # Параметры сна/гибернации.
-  services.logind = {
-    settings.Login = {
-      LidSwitchIgnoreInhibited = "no";
-      HandlePowerKey = "suspend-then-hibernate";
-      HandleLidSwitch = "suspend-then-hibernate";
-      HandleLidSwitchExternalPower = "suspend";
-      HandleLidSwitchDocked = "suspend";
-    };
-  };
+  services.logind.extraConfig = ''
+    [Login]
+    LidSwitchIgnoreInhibited=no
+    HandlePowerKey=suspend-then-hibernate
+    HandleLidSwitch=suspend-then-hibernate
+    HandleLidSwitchExternalPower=suspend
+    HandleLidSwitchDocked=suspend
+  '';
 
   services.upower = {
     enable = true;
@@ -253,9 +247,6 @@
     enableRootSlice = true;
     enableSystemSlice = true;
     enableUserSlices = true;
-    settings.OOM = {
-      DefaultMemoryPressureDurationSec = "10s";
-    };
   };
   
   environment.variables = {
@@ -269,11 +260,11 @@
 
   system.stateVersion = "25.05";
 
-  powerManagement.powerUpCommands = ''
-    for n in XHCI RP05; do
-      if awk -v d="$n" '$1==d && $3 ~ /\*enabled/' /proc/acpi/wakeup >/dev/null 2>&1; then
-        echo "$n" > /proc/acpi/wakeup || true
-      fi
-    done
-  '';
+   powerManagement.powerUpCommands = ''
+     for n in XHCI RP05; do
+       if awk -v d="$n" '$1==d && $3 ~ /\*enabled/' /proc/acpi/wakeup >/dev/null 2>&1; then
+         echo "$n" > /proc/acpi/wakeup || true
+       fi
+     done
+   '';
 }

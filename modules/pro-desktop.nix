@@ -13,7 +13,7 @@
     printf '%s\n' "[sessionCommands $(date '+%F %T%z')] path=$PATH log_file=$EMACS_STARTUP_LOG_FILE"
     [ -f "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources" || true
   '';
-  services.xserver.displayManager.autoLogin.enable = false;
+  services.displayManager.autoLogin.enable = false;
 
   # Консоль берёт ту же раскладку, что и графика: пользователь не должен учить две разные клавиатуры.
   console.useXkbConfig = true;
@@ -37,7 +37,7 @@
   };
 
   # PipeWire здесь заменяет старый аудиослой и собирает звук в один современный контур.
-  services.pulseaudio.enable = false;
+  hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;

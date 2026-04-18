@@ -41,7 +41,7 @@
           ripgrep
           xclip
           rxvt-unicode
-          poppler-utils
+          poppler_utils
           home-manager
           obexd
           fnm
