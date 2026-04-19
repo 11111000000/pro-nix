@@ -22,7 +22,7 @@
 
   services.xserver.xkb = {
     layout = "us,ru";
-    options = "grp:toggle,caps:ctrl_modifier,grp_led:caps";
+    options = "grp:ralt_toggle,caps:ctrl_modifier,grp_led:caps";
   };
 
   # `kbdrate` удерживает TTY в человеческом темпе, чтобы консоль не становилась источником раздражения.

@@ -35,16 +35,21 @@ This repository provides a portable NixOS configuration plus a portable Emacs la
 - `modules/pro-storage.nix` contains Samba, Syncthing, Avahi discovery, and storage-related firewall policy.
 - `modules/pro-privacy.nix` contains Tor, I2P, and privacy-related firewall policy.
 - `emacs/base/modules/*.el` contains the modular Emacs base by concern.
+- `emacs/base/modules/ai.el` loads AI provider policy and model defaults from `emacs/base/modules/ai-models.json` with user override via `~/.config/emacs/ai-models.json`.
 - `emacs/base/init.el` and `emacs/base/site-init.el` form the portable Emacs loader.
 - `modules/pro-users-wsl.nix` and `modules/pro-users-termux.nix` describe non-NixOS Emacs adapters.
-- `scripts/emacs-headless-test.sh` runs TTY/Xorg Emacs verification and collects logs.
+- `scripts/emacs-headless-test.sh` runs TTY/Xorg Emacs verification, executes headless ERT tests, and collects logs.
+- `scripts/test-emacs-headless.sh` runs the disposable-home headless test suite.
+- `scripts/parse-emacs-logs.sh` summarizes the latest headless run logs.
 - `scripts/pro-emacs-headless-report.sh` summarizes the latest headless run logs.
 - `justfile` exposes simple and harmonious commands for install, check, and Emacs verification.
 - `ENVIRONMENT.md` describes the recommended repository workflow for agents.
 - `docs/plans/emacs-headless-tests.md` documents the headless verification contract.
+- `docs/plans/emacs-headless-changelog.md` records the headless Emacs test and log workflow changes.
 - `docs/plans/repo-agent-guide.md` documents the agent-facing build/test entrypoint.
 - `docs/plans/install-matrix.md` documents the complete installation guide for all environments.
 - `bootstrap/install.sh`, `bootstrap/install-pro.sh`, and `bootstrap/choose-host.sh` implement the interactive NixOS installer flow.
 - `scripts/emacs-sync.sh` syncs the portable Emacs tree into a plain `~/.emacs.d`.
 - `scripts/emacs-verify.sh` wraps the headless Emacs verification entrypoint.
+- `.gitignore` excludes generated `*.elc`/`*.eln` and other transient files.
 - `emacs-keys.org` is the shared global keybinding surface; `~/.emacs.d/keys.org` is the user override surface.

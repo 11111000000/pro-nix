@@ -25,9 +25,20 @@ in
     "directory mask" = "2775";
     "valid users" = "az zo la bo";
   };
+  services.samba.shares.public = {
+    path = "/srv/samba/public";
+    browseable = "yes";
+    "read only" = "no";
+    "guest ok" = "yes";
+    "guest only" = "yes";
+    "force user" = "az";
+    "create mask" = "0775";
+    "directory mask" = "2775";
+  };
 
   systemd.tmpfiles.rules = [
     "d /srv/samba/${hostName} 2775 root pro - -"
+    "d /srv/samba/public 2775 az pro - -"
   ];
 
   services.syncthing = {

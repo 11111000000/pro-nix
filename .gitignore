@@ -11,6 +11,14 @@ bootstrap/local.nix
 *.swo
 *.tmp
 *~
+*.elc
+*.eln
+*#
+.#*
+*.bak
+*.orig
+*.rej
+auto-save-list/
 .direnv/
 tmp/
 temp/
