@@ -13,7 +13,9 @@
   "Путь к пользовательскому файлу клавиш.")
 
 (defconst pro-keys-system-file
-  (expand-file-name "../pro/emacs-keys.org" user-emacs-directory)
+  (or (let ((etc-file "/etc/pro/emacs-keys.org"))
+        (and (file-readable-p etc-file) etc-file))
+      (expand-file-name "../pro/emacs-keys.org" user-emacs-directory))
   "Путь к системному файлу клавиш PRO.")
 
 (defvar pro-keys-exwm-global-keys nil
@@ -26,9 +28,9 @@
 (defun pro-keys-apply-binding (key command)
   "Привязать KEY к COMMAND, если KEY не пустой."
   (when (and key command (not (string-empty-p key)))
-    (let ((fn (if (and (symbolp command) (fboundp command)) command nil)))
-      (when fn
-        (global-set-key (kbd key) fn)))))
+    (if (symbolp command)
+        (global-set-key (kbd key) command)
+      (message "[pro-keys] command %s not found for key %s" command key))))
 
 (defun pro-keys-apply-exwm-binding (key command)
   "Добавить EXWM-ключ KEY -> COMMAND в отдельный список."
@@ -43,9 +45,10 @@
 (defun pro-keys--parse-command (text)
   "Преобразовать TEXT в символ команды."
   (let ((name (pro-keys--normalize-command-name text)))
-    (unless (or (string-empty-p name)
-                (string-prefix-p "-" name)
-                (not (string-match-p "\`[A-Za-z][A-Za-z0-9-]*\'" name)))
+    (when (and name
+               (not (string-empty-p name))
+               (not (string-prefix-p "-" name))
+               (string-match-p "^[A-Za-z][A-Za-z0-9_-]*$" name))
       (intern name))))
 
 (defun pro-keys--meaningful-cell-p (text)

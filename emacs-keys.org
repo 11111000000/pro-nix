@@ -1,25 +1,26 @@
 #+title: Клавиши PRO
 
-| Секция | Клавиша | Команда | Примечание |
-|--------+---------+---------+------------|
-| Навигация | C-s | consult-line | Поиск по текущему буферу |
-| Навигация | C-x b | consult-buffer | Смена буфера |
-| Навигация | C-x C-b | consult-buffer | Смена буфера |
-| Навигация | M-g i | consult-imenu | Символы файла |
-| Навигация | M-g g | consult-goto-line | Переход к строке |
-| Поиск | C-c s | consult-ripgrep | Поиск по проекту |
-| Поиск | C-c f | consult-find | Поиск файла |
-| Поиск | C-c p s | pro-project-ripgrep | Поиск в проекте |
-| Поиск | C-c p f | pro-project-find-file | Файл проекта |
-| UI | C-= | pro-ui-zoom-in | Увеличить шрифт |
-| UI | C-- | pro-ui-zoom-out | Уменьшить шрифт |
-| UI | C-0 | pro-ui-zoom-reset | Сбросить масштаб |
-| UI | M-/ | eldoc-box-help-at-point | Подсказка под курсором |
-| EXWM | s-r | exwm-reset | Сброс окна EXWM |
-| EXWM | s-w | exwm-workspace-switch | Переключить рабочее пространство |
-| EXWM | s-& | async-shell-command | Запуск команды |
-| ORG | C-c K | pro-org-open-keys-file | Открыть файл клавиш |
-| AI     | C-c a   | pro-ai-open-entry | Вход в AI |
-| Git    | C-x g   | pro-git-status | Статус репозитория |
-| Org    | C-c o   | org-agenda | Повестка |
-| Ключи  | C-c k   | pro-keys-reload | Перезагрузить клавиши |
+| Секция    | Клавиша | Команда                 | Примечание                       |
+|-----------+---------+-------------------------+----------------------------------|
+| Навигация | C-s     | consult-line            | Поиск по текущему буферу         |
+| Навигация | C-x b   | consult-buffer          | Смена буфера                     |
+| Навигация | C-x C-b | consult-buffer          | Смена буфера                     |
+| Навигация | M-g i   | consult-imenu           | Символы файла                    |
+| Навигация | M-g g   | consult-goto-line       | Переход к строке                 |
+| Поиск     | C-c s   | consult-ripgrep         | Поиск по проекту                 |
+| Поиск     | C-c f   | consult-find            | Поиск файла                      |
+| Поиск     | C-c p s | pro-project-ripgrep     | Поиск в проекте                  |
+| Поиск     | C-c p f | pro-project-find-file   | Файл проекта                     |
+| UI        | C-=     | pro-ui-zoom-in          | Увеличить шрифт                  |
+| UI        | C--     | pro-ui-zoom-out         | Уменьшить шрифт                  |
+| UI        | C-0     | pro-ui-zoom-reset       | Сбросить масштаб                 |
+| UI        | M-/     | eldoc-box-help-at-point | Подсказка под курсором           |
+| EXWM      | s-r     | exwm-reset              | Сброс окна EXWM                  |
+| EXWM      | s-w     | exwm-workspace-switch   | Переключить рабочее пространство |
+| EXWM      | s-&     | async-shell-command     | Запуск команды                   |
+| ORG       | C-c K   | pro-org-open-keys-file  | Открыть файл клавиш              |
+| AI        | C-c a   | pro-ai-open-entry       | Вход в AI                        |
+| Git       | C-x g   | pro-git-status          | Статус репозитория               |
+| Git       | C-c g   | pro-git-dispatch        | Magit dispatch                   |
+| Org       | C-c o   | org-agenda              | Повестка                         |
+| Ключи     | C-c k   | pro-keys-reload         | Перезагрузить клавиши            |

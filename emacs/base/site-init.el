@@ -1,6 +1,6 @@
 ;;; site-init.el --- pro Emacs base -*- lexical-binding: t; -*-
 
-(defvar pro-emacs-base-default-modules '(core ui keys pro-project git nix js ai exwm))
+(defvar pro-emacs-base-default-modules '(core ui pro-project git nix js ai agent-shell exwm keys))
 (defvar pro-emacs-base-system-modules-dir nil)
 (defvar pro-emacs-base-user-modules-dir (expand-file-name "~/.config/emacs/modules"))
 (defvar pro-emacs-base-user-manifest (expand-file-name "~/.config/emacs/modules.el"))
