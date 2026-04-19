@@ -51,9 +51,9 @@
 # Здесь задаётся способ входа в систему: EFI, число поколений, поведение ядра и границы того, что можно считать надёжным стартом.
 
   boot.loader.grub.enable = true;                     # GRUB остаётся безопасной общей точкой входа для разных машин.
-  boot.loader.grub.device = "nodev";                  # Для EFI-сценария загрузчик живёт без привязки к конкретному диску.
-  boot.loader.efi.canTouchEfiVariables = true;        # EFI-переменные можно менять из этой установки.
-  boot.loader.efi.efiSysMountPoint = "/boot";         # Точка ESP фиксируется явно, чтобы путь к загрузчику не расплывался.
+  boot.loader.grub.device = lib.mkDefault "nodev";   # Для EFI-сценария загрузчик живёт без привязки к конкретному диску.
+  boot.loader.efi.canTouchEfiVariables = lib.mkDefault true;        # EFI-переменные можно менять из этой установки.
+  boot.loader.efi.efiSysMountPoint = lib.mkDefault "/boot";         # Точка ESP фиксируется явно, чтобы путь к загрузчику не расплывался.
   boot.loader.timeout = 5;                            # Короткая пауза оставляет выбор, но не превращает старт в ожидание.
   boot.loader.grub.useOSProber = false;               # Явная загрузка без автоматического поиска чужих систем.
 
@@ -170,9 +170,10 @@
     settings.experimental-features = [ "nix-command" "flakes" ];
     settings.connect-timeout = 5;
     settings.fallback = true;
-    # Сначала используем более быстрый community-кеш, а к публичному возвращаемся только при необходимости.
-    settings.substituters = [
+    # Сначала используем публичный кэш и его Fastly-зеркало, чтобы сборка быстрее уходила в готовые бинарники.
+    settings.substituters = lib.mkForce [
       "https://cache.nixos.org"
+      "https://nix-mirror.freetls.fastly.net"
     ];
     settings.trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
