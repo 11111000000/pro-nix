@@ -30,16 +30,17 @@
            (not (file-exists-p pro-emacs-base-disable-marker))
            (file-readable-p system-file)) system-file)
      (t
-      (message "[pro-emacs] module lookup failed: %s user=%s system=%s" name user-file system-file)
-      nil))))
+       (message "[pro-emacs] module lookup failed: %s user=%s system=%s" name user-file system-file)
+       nil))))
 
 (defun pro-emacs-base-start ()
   (let ((modules (pro-emacs-base--manifest-modules)))
     (dolist (module modules)
-      (let ((file (pro-emacs-base--resolve-module (if (symbolp module) (symbol-name module) module))))
+      (let* ((module-name (if (symbolp module) (symbol-name module) module))
+             (file (pro-emacs-base--resolve-module module-name)))
         (if file
             (load file nil t)
-          (message "[pro-emacs] missing module: %s" module))))
+          (message "[pro-emacs] missing module: %s" module-name))))
     (message "[pro-emacs] loaded modules: %S" modules)))
 
 (provide 'pro-site-init)

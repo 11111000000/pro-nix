@@ -2,6 +2,25 @@
 
 let
   emacsPackages = pkgs.emacsPackagesFor emacsPkg;
+  emacsRuntime = emacsPackages.emacsWithPackages (epkgs: with epkgs; [
+    consult
+    vertico
+    orderless
+    marginalia
+    magit
+    ligature
+    kind-icon
+    nerd-icons
+    treemacs-icons-dired
+    nerd-icons-ibuffer
+    eldoc-box
+    which-key
+    rainbow-delimiters
+    corfu
+    nix-mode
+    exwm
+    gptel
+  ]);
   xvfbRun = pkgs."xvfb-run";
 
   # Python-слой здесь держит минимальную воспроизводимость: `requests` уже есть, а `pip` остаётся доступным для локальных окружений и одноразовых установок.
@@ -27,24 +46,7 @@ in
 with pkgs; [
   kbd
   # Редакторный контур и его спутники: здесь живут инструменты, которые держат текст, ссылки и навигацию в одном рабочем ритме.
-  emacsPkg
-  emacsPackages.gptel
-  emacsPackages.consult
-  emacsPackages.vertico
-  emacsPackages.orderless
-  emacsPackages.marginalia
-  emacsPackages.magit
-  emacsPackages.ligature
-  emacsPackages.kind-icon
-  emacsPackages.nerd-icons
-  emacsPackages.treemacs-icons-dired
-  emacsPackages.nerd-icons-ibuffer
-  emacsPackages.eldoc-box
-  emacsPackages.which-key
-  emacsPackages.rainbow-delimiters
-  emacsPackages.corfu
-  emacsPackages.nix-mode
-  emacsPackages.exwm
+  emacsRuntime
   direnv
   acpi
   xvfbRun
@@ -166,7 +168,7 @@ ollama
   mullvad-vpn             # Mullvad VPN (официальный пакет, приватный)
   wireguard-tools         # WireGuard — современный VPN-протокол
   yggdrasil               # Децентрализованная overlay-сеть (IPv6 поверх любого транспорта)
-  zerotierone             # ZeroTier — альтернатива Yggdrasil
+  # zerotierone           # ZeroTier — альтернатива Yggdrasil (build hangs, use nix-shell if needed)
 
   # Децентрализованные мессенджеры нужны как каналы, где связь не сводится к одному серверу.
   # Session временно убран: текущая версия не собирается локально и не берётся из кэша.

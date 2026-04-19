@@ -1,0 +1,59 @@
+{
+  "providers": {
+    "openrouter": {
+      "host": "openrouter.ai",
+      "endpoint": "/api/v1/chat/completions",
+      "auth_host": "openrouter.ai",
+      "auth_user": "token",
+      "preferred_model": "qwen/qwen3-next-80b-a3b-instruct:free",
+      "models": [
+        "qwen/qwen3-next-80b-a3b-instruct:free",
+        "qwen/qwen3-coder:free",
+        "minimax/minimax-m2.5:free",
+        "openai/gpt-oss-120b:free",
+        "nvidia/nemotron-3-super-120b-a12b:free",
+        "z-ai/glm-4.5-air:free",
+        "google/gemma-4-31b-it:free",
+        "google/gemma-4-26b-a4b-it:free",
+        "meta-llama/llama-3.3-70b-instruct:free",
+        "openai/gpt-oss-20b:free"
+      ]
+    },
+    "siliconflow": {
+      "host": "api.siliconflow.com",
+      "endpoint": "/v1/chat/completions",
+      "auth_host": "api.siliconflow.com",
+      "auth_user": "token",
+      "preferred_model": "Qwen/Qwen3-235B-A22B-2507",
+      "models": [
+        "Qwen/Qwen3-235B-A22B-2507",
+        "Qwen/Qwen3-Coder",
+        "Qwen/Qwen3-30B-A3B",
+        "DeepSeek-ai/DeepSeek-V3",
+        "DeepSeek-ai/DeepSeek-R1",
+        "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+        "GLM-4.7-Flash",
+        "glm-4-9b-chat",
+        "Qwen/Qwen3-8B"
+      ]
+    },
+    "aitunnel": {
+      "host": "api.aitunnel.ru",
+      "endpoint": "/v1/chat/completions",
+      "auth_host": "api.aitunnel.ru",
+      "auth_user": "token",
+      "preferred_model": "gpt-4.1-mini",
+      "models": [
+        "gpt-5.4-mini",
+        "gpt-5.4",
+        "qwen3-235b-a22b-2507",
+        "qwen3-coder",
+        "minimax-m2.7",
+        "claude-sonnet-4-6",
+        "deepseek-v3.2",
+        "gpt-4.1-mini",
+        "gemini-2.5-flash"
+      ]
+    }
+  }
+}

@@ -42,6 +42,12 @@ headless-xorg:
 headless:
 	./scripts/emacs-verify.sh both
 
+headless-tests:
+	./scripts/test-emacs-headless.sh both
+
+headless-parse:
+	./scripts/parse-emacs-logs.sh
+
 headless-report:
 	./scripts/emacs-headless-report.sh
 

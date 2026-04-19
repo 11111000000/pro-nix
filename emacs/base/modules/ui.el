@@ -97,49 +97,4 @@
                (boundp 'corfu-margin-formatters))
       (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))))
 
-(defun pro-ui-apply-buffers ()
-  "Подключить дополнительные визуальные удобства для списков и завершения."
-  (when (display-graphic-p)
-    (when (pro-ui--try-require 'which-key)
-      (setq which-key-idle-delay 0.7)
-      (which-key-mode 1))
-    (when (pro-ui--try-require 'eldoc-box)
-      (setq eldoc-box-clear-with-C-g t))
-    (when (pro-ui--try-require 'treemacs-icons-dired)
-      (add-hook 'dired-mode-hook #'treemacs-icons-dired-enable-once))))
-
-(defun pro-ui-apply ()
-  "Применить все визуальные политики PRO."
-  (pro-ui-apply-fonts)
-  (pro-ui-apply-ligatures)
-  (pro-ui-apply-icons)
-  (pro-ui-apply-tabs)
-  (pro-ui-apply-completion)
-  (pro-ui-apply-buffers))
-
-(defun pro-ui-zoom-in ()
-  "Увеличить шрифт."
-  (interactive)
-  (text-scale-increase 1))
-
-(defun pro-ui-zoom-out ()
-  "Уменьшить шрифт."
-  (interactive)
-  (text-scale-decrease 1))
-
-(defun pro-ui-zoom-reset ()
-  "Сбросить масштаб шрифта."
-  (interactive)
-  (text-scale-set 0))
-
-(when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
-(when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
-(when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
-(blink-cursor-mode 0)
-(column-number-mode 1)
-(global-hl-line-mode 1)
-
-(when (display-graphic-p)
-  (pro-ui-apply))
-
 (provide 'ui)

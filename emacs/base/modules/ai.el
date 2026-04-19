@@ -1,10 +1,12 @@
 ;;; ai.el --- AI policy and entrypoint -*- lexical-binding: t; -*-
 
-;; Этот модуль задаёт минимальную политику AI: один вход, понятный выбор backend-а.
+(require 'json)
+(require 'seq)
+(require 'subr-x)
 
-(defcustom pro-ai-backend 'openrouter
+(defcustom pro-ai-backend 'aitunnel
   "Предпочтительный AI-backend."
-  :type '(choice (const openrouter) (const aitunnel))
+  :type '(choice (const openrouter) (const siliconflow) (const aitunnel))
   :group 'pro-ui)
 
 (defcustom pro-ai-enable-gptel-history t
@@ -12,49 +14,171 @@
   :type 'boolean
   :group 'pro-ui)
 
-(defcustom pro-ai-openrouter-model nil
-  "Модель по умолчанию для OpenRouter."
-  :type '(choice (const nil) string)
+(defvar pro-ai--config-cache nil)
+(defvar pro-ai--registered-backends nil)
+
+(defun pro-ai--module-directory ()
+  "Вернуть каталог системного модуля."
+  (file-name-directory (or load-file-name buffer-file-name)))
+
+(defcustom pro-ai-models-file
+  (expand-file-name "ai-models.json" (pro-ai--module-directory))
+  "Путь к базовому JSON-каталогу моделей."
+  :type 'file
   :group 'pro-ui)
 
-(defcustom pro-ai-aitunnel-model nil
-  "Модель по умолчанию для AITunnel."
-  :type '(choice (const nil) string)
+(defcustom pro-ai-user-models-file
+  (expand-file-name "ai-models.json" user-emacs-directory)
+  "Пользовательский JSON-каталог моделей."
+  :type 'file
   :group 'pro-ui)
 
-(defun pro-ai--resolve-model ()
-  "Выбрать модель по текущему backend-у."
-  (pcase pro-ai-backend
-    ('openrouter pro-ai-openrouter-model)
-    ('aitunnel pro-ai-aitunnel-model)
+(defun pro-ai--read-json-file (path)
+  "Прочитать JSON из PATH как alist."
+  (when (file-readable-p path)
+    (with-temp-buffer
+      (insert-file-contents path)
+      (let ((json-object-type 'alist)
+            (json-array-type 'list)
+            (json-key-type 'symbol)
+            (json-false nil))
+        (json-read)))))
+
+(defun pro-ai--merge-plists (base override)
+  "Поверхностно слить BASE и OVERRIDE."
+  (let ((result (copy-sequence base)))
+    (while override
+      (setq result (plist-put result (pop override) (pop override))))
+    result))
+
+(defun pro-ai--normalize-model-id (id)
+  "Нормализовать ID модели к строке для gptel."
+  (format "%s" id))
+
+(defun pro-ai--merge-provider-configs (base override)
+  "Слить конфиги провайдеров BASE и OVERRIDE по имени."
+  (let* ((base-providers (alist-get 'providers base))
+         (override-providers (alist-get 'providers override))
+         (merged-providers
+          (append override-providers
+                  (seq-remove (lambda (entry)
+                                (assoc (car entry) override-providers))
+                              base-providers))))
+    `((providers . ,merged-providers))))
+
+(defun pro-ai--config ()
+  "Вернуть объединённый JSON-конфиг провайдеров."
+  (or pro-ai--config-cache
+      (setq pro-ai--config-cache
+            (let ((base (pro-ai--read-json-file pro-ai-models-file))
+                  (user (pro-ai--read-json-file pro-ai-user-models-file)))
+              (cond
+               ((and base user) (pro-ai--merge-provider-configs base user))
+               (user user)
+               (base base)
+               (t nil))))))
+
+(defun pro-ai--provider-config (name)
+  "Вернуть конфиг провайдера NAME."
+  (alist-get name (alist-get 'providers (pro-ai--config))))
+
+(defun pro-ai--provider-field (provider field)
+  "Вернуть FIELD провайдера PROVIDER."
+  (alist-get field provider))
+
+(defun pro-ai--provider-models (provider)
+  "Вернуть список моделей для PROVIDER."
+  (mapcar #'pro-ai--normalize-model-id (alist-get 'models provider)))
+
+(defun pro-ai--load-key-from-authinfo (host user)
+  "Загрузить секрет для HOST и USER из authinfo."
+  (when (and (or (file-exists-p (expand-file-name "~/.authinfo"))
+                 (file-exists-p (expand-file-name "~/.authinfo.gpg")))
+             (require 'auth-source nil t))
+    (condition-case nil
+        (let ((auth (auth-source-search :max 1 :host host :user user)))
+          (when auth
+            (let ((secret (plist-get (car auth) :secret)))
+              (cond
+               ((functionp secret)
+                (let ((value (ignore-errors (funcall secret))))
+                  (and (stringp value) (not (string-empty-p value)) value)))
+               ((stringp secret)
+                (and (not (string-empty-p secret)) secret))))))
+      (error nil))))
+
+(defun pro-ai--backend-name (provider)
+  "Имя gptel-backend для PROVIDER."
+  (capitalize (symbol-name provider)))
+
+(defun pro-ai--host-from-provider (provider)
+  "Вернуть host для PROVIDER по его имени."
+  (pcase provider
+    ('openrouter "openrouter.ai")
+    ('siliconflow "api.siliconflow.com")
+    ('aitunnel "api.aitunnel.ru")
     (_ nil)))
+
+(defun pro-ai--register-backend (provider)
+  "Зарегистрировать backend для PROVIDER."
+  (let* ((config (pro-ai--provider-config provider))
+         (backend-name (pro-ai--backend-name provider))
+         (host (or (pro-ai--provider-field config 'host)
+                   (pro-ai--host-from-provider provider)))
+         (endpoint (pro-ai--provider-field config 'endpoint))
+         (auth-host (or (pro-ai--provider-field config 'auth_host) host))
+         (auth-user (or (pro-ai--provider-field config 'auth_user) "token"))
+         (key (pro-ai--load-key-from-authinfo auth-host auth-user))
+         (models (pro-ai--provider-models config)))
+    (when (and key host endpoint models (fboundp 'gptel-make-openai))
+      (setq gptel--known-backends
+            (assq-delete-all backend-name gptel--known-backends))
+      (gptel-make-openai backend-name
+        :host host
+        :endpoint endpoint
+        :key key
+        :models models)
+      (push backend-name pro-ai--registered-backends)
+      backend-name)))
+
+(defun pro-ai--ensure-backends ()
+  "Зарегистрировать все поддерживаемые backend-и."
+  (setq pro-ai--registered-backends nil)
+  (dolist (provider '(openrouter siliconflow aitunnel))
+    (pro-ai--register-backend provider)))
+
+(defun pro-ai--backend-choice ()
+  "Вернуть текущий backend с fallback."
+  (or pro-ai-backend 'openrouter))
+
+(defun pro-ai--select-model (provider)
+  "Вернуть модель для PROVIDER из конфига."
+  (let* ((config (pro-ai--provider-config provider))
+         (preferred (alist-get 'preferred_model config))
+         (models (pro-ai--provider-models config)))
+    (or preferred (car models))))
+
+(defun pro-ai--activate-backend (provider)
+  "Сделать PROVIDER активным в gptel."
+  (let ((backend-name (pro-ai--backend-name provider)))
+    (when (and (fboundp 'gptel-get-backend)
+               (gptel-get-backend backend-name))
+      (setq gptel-backend (gptel-get-backend backend-name)
+            gptel-model (pro-ai--select-model provider))
+      t)))
 
 (defun pro-ai-open-entry ()
   "Открыть AI-буфер с учётом выбранного backend-а."
   (interactive)
   (when (require 'gptel nil t)
-    ;; Load API keys from ~/.authinfo if present (minimal helper below).
     (when (fboundp 'pro-ai-load-keys)
       (ignore-errors (pro-ai-load-keys)))
 
-    (let ((model (pro-ai--resolve-model)))
-      (when model
-        (setq gptel-model model))
-      (setq gptel-use-curl t
-            gptel-track-response pro-ai-enable-gptel-history)
-      (gptel))))
-
-
-(defun pro-ai--load-key-from-authinfo (host user)
-  "Load secret for HOST and USER from ~/.authinfo via auth-source.
-Return the secret string or nil if missing. Lightweight helper used
-to keep API keys out of the repository and loaded from the user's
-authinfo file."
-  (when (require 'auth-source nil t)
-    (let ((auth (auth-source-search :max 1 :host host :user user)))
-      (when auth
-        (let ((secret (plist-get (car auth) :secret)))
-          (if (functionp secret) (funcall secret) secret))))))
+    (pro-ai--ensure-backends)
+    (pro-ai--activate-backend (pro-ai--backend-choice))
+    (setq gptel-use-curl t
+          gptel-track-response pro-ai-enable-gptel-history)
+    (call-interactively #'gptel)))
 
 (defun pro-ai-load-keys ()
   "Load common AI provider keys from ~/.authinfo and export to env.
@@ -74,24 +198,26 @@ by providers and prints a short status message."
              (if openai "LOADED" "MISSING"))))
 
 (defun pro-ai-toggle-backend ()
-  "Переключить AI-backend между OpenRouter и AITunnel."
+  "Переключить AI-backend между тремя провайдерами."
   (interactive)
-  (setq pro-ai-backend (if (eq pro-ai-backend 'openrouter) 'aitunnel 'openrouter))
+  (setq pro-ai-backend
+        (pcase pro-ai-backend
+          ('aitunnel 'openrouter)
+          ('openrouter 'siliconflow)
+          (_ 'aitunnel)))
   (message "[pro-ai] backend: %S" pro-ai-backend))
 
 (defun pro-ai-reset-models ()
-  "Сбросить локальные предпочтения моделей."
+  "Сбросить кэш моделей и перечитать JSON."
   (interactive)
-  (setq pro-ai-openrouter-model nil
-        pro-ai-aitunnel-model nil)
-  (message "[pro-ai] models reset"))
+  (setq pro-ai--config-cache nil)
+  (message "[pro-ai] models reloaded"))
 
 (defun pro-ai-provider-name ()
   "Вернуть имя текущего AI-провайдера."
-  (pcase pro-ai-backend
-    ('openrouter "openrouter")
-    ('aitunnel "aitunnel")
-    (_ "unknown")))
+  (symbol-name (pro-ai--backend-choice)))
+
+(pro-ai--ensure-backends)
 
 ;; Agent-shell integration
 (with-eval-after-load 'agent-shell
