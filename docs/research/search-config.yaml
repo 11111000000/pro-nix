@@ -1,0 +1,36 @@
+package: modern-elisp-patterns
+version: 1.0
+description: Search for modern Emacs Lisp patterns in codebase
+
+searches:
+  - name: lexical-binding-check
+    pattern: "lexical-binding.*t"
+    description: Check files with lexical binding enabled
+    
+  - name: use-package-alternatives
+    pattern: "(use-package|use-module|require|load)"
+    description: Find package loading patterns
+    
+  - name: defgroup-defcustom-analysis
+    pattern: "(defgroup|defcustom)"
+    description: Analyze customization patterns
+    
+  - name: modern-macro-usage
+    pattern: "(cl-defun|cl-macrolet|cl-labels)"
+    description: Find modern macro usage
+    
+  - name: delayed-loading
+    pattern: "(with-eval-after-load|delayed-load|define-minor-mode)"
+    description: Find lazy loading patterns
+    
+  - name: setq-patterns
+    pattern: "(setq|setq-default)"
+    description: Analyze variable assignment patterns
+    
+  - name: function-references
+    pattern: "#['\"]"
+    description: Find proper function references
+    
+  - name: module-structure
+    pattern: "(provide|require)"
+    description: Analyze module structure

@@ -23,7 +23,7 @@ in
     "force group" = "pro";
     "create mask" = "0775";
     "directory mask" = "2775";
-    "valid users" = "az zoya lada boris";
+    "valid users" = "az zo la bo";
   };
 
   systemd.tmpfiles.rules = [

@@ -1,85 +1,98 @@
-# NixOS конфигурация
+# Pro NixOS + Emacs
 
-Этот репозиторий содержит portable-конфигурацию NixOS для `pro`.
+Этот репозиторий содержит две связанные части:
 
-Что здесь есть:
-- `flake.nix` - точка входа для сборки системы
-- `configuration.nix` - основная конфигурация NixOS
-- `hardware-configuration.nix` - параметры, сгенерированные для железа
-- `system-packages.nix` - список системных пакетов
-- `local.nix` - локальные переопределения конкретного хоста, не хранится в git
-- `AGENTS.md` - рабочий порядок, HDS и политики репозитория
-- `ENVIRONMENT.md` - как собирать и тестировать этот репозиторий
-- `modules/pro-users.nix` - общие пользователи и Home Manager база
-- `modules/pro-desktop.nix` - X11/desktop defaults and fonts
-- `modules/pro-services.nix` - общие сетевые и сервисные политики
-- `modules/pro-storage.nix` - Samba, Syncthing и storage-related policy
-- `modules/pro-privacy.nix` - Tor, I2P и privacy-related firewall policy
-- `modules/nix-cuda-compat.nix` - обходные совместимости Nix/CUDA
-- `scripts/` - установочные и диагностические сценарии
-- `justfile` - команды для сборки и тестов
-- `ENVIRONMENT.md` - как собирать и тестировать репозиторий
+1. NixOS-конфигурацию `pro` для машинных профилей.
+2. Портативный Emacs-слой, который можно подключать отдельно на любой машине с Nix и Home Manager.
 
-Профиль `pro` уже встроен в основной конфиг: все пользователи машины получают общую базу Emacs, EXWM как опцию, а сетевые, storage- и privacy-политики вынесены в отдельные модули.
+## Быстрый старт
 
-## Как это работает
+### NixOS
 
-Конфигурация описывает систему декларативно: вы меняете `.nix`-файлы, а затем пересобираете систему. После пересборки NixOS применяет новые настройки, пакеты и сервисы.
-
-Основная сборка идёт через flake:
+Новая машина:
 
 ```bash
-sudo nixos-rebuild switch --flake .#pro
+sudo nixos-generate-config
+sudo nixos-rebuild switch --flake .#default
 ```
 
-Если нужно просто собрать систему без немедленного применения:
+Готовый хост:
 
 ```bash
-sudo nixos-rebuild build --flake .#pro
+sudo nixos-rebuild switch --flake .#thinkpad
+sudo nixos-rebuild switch --flake .#desktop
+sudo nixos-rebuild switch --flake .#cf19
+sudo nixos-rebuild switch --flake .#huawei
 ```
 
-Если хотите пересобрать и сразу загрузиться в новое поколение после перезагрузки:
+Интерактивная установка:
 
 ```bash
-sudo nixos-rebuild boot --flake .#pro
+./bootstrap/install.sh
 ```
 
-## Как вносить изменения
+### Portable Emacs
 
-1. Измените нужный `.nix`-файл.
-2. Проверьте синтаксис и сборку.
-3. Примените конфигурацию командой `nixos-rebuild switch`.
+С Home Manager:
 
-Полезная проверка перед применением:
-
-```bash
-sudo nixos-rebuild test --flake .#pro
+```nix
+{
+  imports = [ /path/to/repo/emacs/home-manager.nix ];
+  pro.emacs.enable = true;
+  pro.emacs.gui.enable = false;
+}
 ```
 
-## Полезные команды
-
-Показать доступные поколения:
+Без Nix, в текущий `~/.emacs.d`:
 
 ```bash
-sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
+./scripts/emacs-sync.sh ~/.emacs.d
 ```
 
-Проверка конфигурации и Emacs-слоя для агентов:
+Перед синхронизацией старый `~/.emacs.d` автоматически переименуется в backup с timestamp.
+
+Если использовать новый путь по умолчанию, скрипт ставит `~/.config/emacs` и создаёт `~/.emacs.d` как симлинк на него. Для NixOS Home Manager тоже использует этот путь напрямую.
+
+Логи headless-проверки:
 
 ```bash
-just flake-check
+./scripts/emacs-headless-report.sh
+```
+
+## Проверки
+
+```bash
+nix flake check
+nix run .#check-all
 just headless
 just headless-report
 ```
 
-Логи headless-запуска сохраняются в `logs/emacs-headless/<timestamp>/`.
+Если `nix flake check` каждый раз заново тянет зависимости, проверьте, что `flake.lock` закоммичен и что входы не переопределяются через нечёткие URL. В этом репозитории `home-manager` и `nixpkgs` должны быть зафиксированы в лока.
 
-Откатиться на предыдущее поколение можно из меню загрузчика или через `nixos-rebuild switch --rollback`.
+## Команды
+
+- `just install` - интерактивная установка NixOS-хоста
+- `just install-emacs` - синхронизация портативного Emacs в текущий `~/.emacs.d`
+- `just install-plain` - то же самое для plain `.emacs.d`
+- `just flake-check` - проверка только `huawei` перед коммитом или по запросу
+- `just check-huawei` - быстрая сборка профиля `huawei`
+- `just check-all` - явная проверка всех машин
+
+## Что здесь есть
+
+- `flake.nix` - точка входа для NixOS-профилей и явной проверки всех машин
+- `configuration.nix` - общая системная база NixOS
+- `hosts/` - машинные профили
+- `emacs/home-manager.nix` - отдельный Emacs-профиль для NixOS, WSL, Termux и обычного Linux
+- `emacs/base/` - общая Emacs-база
+- `modules/pro-users.nix` - общая пользовательская политика для NixOS
+- `modules/pro-users-*.nix` - платформенные адаптеры Emacs-слоя
+- `scripts/` - установочные и диагностические сценарии
+- `justfile` - команды для сборки и тестов
+- `ENVIRONMENT.md` - рабочий порядок и проверки
 
 ## Примечания
 
-- Имя хоста задаётся в `local.nix`.
-- `local.nix` игнорируется git и может содержать hostname, Samba, hardware overrides и прочие локальные настройки.
-- Если меняется железо, обновите `hardware-configuration.nix` через `nixos-generate-config`.
-- После правок в пакетах или сервисах всегда делайте пересборку, иначе изменения не применятся.
-- Временные артефакты, лог-файлы и `result/` не должны попадать в git.
+- `flake.nix` больше не обязан проверять все хосты по умолчанию.
+- Платформенная Emacs-обвязка отделена от общей базы, чтобы тот же конфиг можно было использовать в WSL и Termux.

@@ -10,8 +10,8 @@ MASTER_LOG="$RUN_DIR/run.log"
 TTY_LOG="$RUN_DIR/tty.log"
 XORG_LOG="$RUN_DIR/xorg.log"
 EMACS_BIN="${EMACS_BIN:-emacs}"
-REPO_SITE_INIT="${EMACS_SITE_INIT:-$PWD/emacs/base/site-init.el}"
 REPO_MODULES_DIR="${EMACS_MODULES_DIR:-$PWD/emacs/base/modules}"
+REPO_BASE_DIR="${EMACS_BASE_DIR:-$PWD/emacs/base}"
 
 escape_path() {
   printf '%s' "$1" | sed 's/[\\&]/\\&/g'
@@ -54,11 +54,11 @@ run_tty() {
     return 1
   fi
 
-  local repo_site_esc repo_modules_esc run_home_esc cmd
-  repo_site_esc="$(escape_path "$REPO_SITE_INIT")"
+  local repo_modules_esc run_home_esc cmd
   repo_modules_esc="$(escape_path "$REPO_MODULES_DIR")"
   run_home_esc="$(escape_path "$RUN_HOME")"
-  cmd="HOME=\"$RUN_HOME\" $EMACS_BIN -nw --quick --eval \"(setq user-emacs-directory \\\"$run_home_esc/.emacs.d/\\\" pro-emacs-base-system-modules-dir \\\"$repo_modules_esc\\\" pro-emacs-base-user-modules-dir \\\"$run_home_esc/.emacs.d/modules\\\" pro-emacs-base-user-manifest \\\"$run_home_esc/.emacs.d/modules.el\\\" pro-emacs-base-default-modules '(core ui text nav keys org lisp nix python c java haskell project git ai feeds chat agent exwm))\" --load \"$repo_site_esc\" --eval \"(pro-emacs-base-start)\" --eval \"(progn (message \\\"[pro-emacs] tty-ready\\\") (kill-emacs 0))\""
+  base_esc="$(escape_path "$REPO_BASE_DIR")"
+  cmd="HOME=\"$RUN_HOME\" $EMACS_BIN -nw --quick --eval \"(setq user-emacs-directory \\\"$run_home_esc/.emacs.d/\\\" pro-emacs-base-system-modules-dir nil pro-emacs-base-user-modules-dir \\\"$run_home_esc/.emacs.d/modules\\\" pro-emacs-base-user-manifest \\\"$run_home_esc/.emacs.d/modules.el\\\")\" --load \"$base_esc/init.el\" --eval \"(setq pro-emacs-base-default-modules '(core ui text nav keys org lisp nix python c java haskell project git ai feeds chat agent exwm))\" --eval \"(message \\\"[pro-emacs] tty-ready\\\")\" --eval \"(kill-emacs 0)\""
   step "TTY bootstrap" "$TTY_LOG" script -qec "$cmd" /dev/null
 }
 
@@ -78,13 +78,14 @@ run_xorg() {
   trap 'kill "$xpid" >/dev/null 2>&1 || true' RETURN INT TERM
   sleep 1
 
-  local repo_site_esc repo_modules_esc run_home_esc
-  repo_site_esc="$(escape_path "$REPO_SITE_INIT")"
+  local base_esc repo_modules_esc run_home_esc
+  base_esc="$(escape_path "$REPO_BASE_DIR")"
   repo_modules_esc="$(escape_path "$REPO_MODULES_DIR")"
   run_home_esc="$(escape_path "$RUN_HOME")"
   DISPLAY="$display" HOME="$RUN_HOME" "$EMACS_BIN" --quick \
-    --eval "(setq user-emacs-directory \"$run_home_esc/.emacs.d/\" pro-emacs-base-system-modules-dir \"$repo_modules_esc\" pro-emacs-base-user-modules-dir \"$run_home_esc/.emacs.d/modules\" pro-emacs-base-user-manifest \"$run_home_esc/.emacs.d/modules.el\" pro-emacs-base-default-modules '(core ui text nav keys org lisp nix python c java haskell project git ai feeds chat agent exwm))" \
-    --load "$repo_site_esc" \
+    --eval "(setq user-emacs-directory \"$run_home_esc/.emacs.d/\" pro-emacs-base-system-modules-dir \"$repo_modules_esc\" pro-emacs-base-user-modules-dir \"$run_home_esc/.emacs.d/modules\" pro-emacs-base-user-manifest \"$run_home_esc/.emacs.d/modules.el\")" \
+    --load "$base_esc/init.el" \
+    --eval "(setq pro-emacs-base-default-modules '(core ui text nav keys org lisp nix python c java haskell project git ai feeds chat agent exwm))" \
     --eval "(pro-emacs-base-start)" \
     --eval "(progn (message \"[pro-emacs] xorg-ready\") (when (display-graphic-p) (make-frame)) (kill-emacs 0))" \
     >>"$XORG_LOG" 2>&1
@@ -94,7 +95,6 @@ run_xorg() {
 section "Context"
 printf 'PWD: %s\n' "$PWD"
 printf 'Log dir: %s\n' "$RUN_DIR"
-printf 'Site init: %s\n' "$REPO_SITE_INIT"
 printf 'Modules dir: %s\n' "$REPO_MODULES_DIR"
 printf 'Disposable HOME: %s\n' "$RUN_HOME"
 printf 'Emacs: %s\n' "$EMACS_BIN"

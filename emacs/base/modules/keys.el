@@ -13,7 +13,7 @@
   "Путь к пользовательскому файлу клавиш.")
 
 (defconst pro-keys-system-file
-  "/etc/pro/emacs-keys.org"
+  (expand-file-name "../pro/emacs-keys.org" user-emacs-directory)
   "Путь к системному файлу клавиш PRO.")
 
 (defvar pro-keys-exwm-global-keys nil

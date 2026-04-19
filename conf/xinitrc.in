@@ -41,7 +41,7 @@ export XDG_CURRENT_DESKTOP=EXWM
 systemctl --user import-environment DISPLAY XAUTHORITY PATH DBUS_SESSION_BUS_ADDRESS XDG_RUNTIME_DIR XDG_CURRENT_DESKTOP
 
 # Finally, start Emacs
-exec /run/current-system/sw/bin/systemd-run --user --scope -p MemoryMax=2G -p Nice=5 -- @EMACS@
+exec /run/current-system/sw/bin/systemd-run --user --scope -p MemoryMax=2G -p Nice=5 -- @EMACS@ --init-directory "$HOME/.config/emacs"
 ## Finally, start EXWM via pro3
 #export PRO_WITH_EXWM=1o
 #export PRO_PROFILE=wm

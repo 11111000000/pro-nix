@@ -1,9 +1,7 @@
-# Plan: Harmonic `pro` NixOS architecture
+# Plan: Harmonic `pro` architecture
 
 ## Purpose
 Turn the current configuration into a portable `pro` system that is easy to install, easy to understand, easy to override, and hard to accidentally break.
-
-This plan keeps the same goals as before, but removes tension between portability, user freedom, and system reproducibility.
 
 ## Critique of the current plan
 
@@ -30,16 +28,9 @@ If the base is too weak:
 - the default system does not boot into a useful desktop
 - EXWM becomes optional in theory only
 
-The earlier plan did not make this balance explicit enough.
-
 ### 3. Machine choice and user behavior were not clearly separated
 Machine-specific choice should happen only where it is actually needed.
 User behavior should remain shared across all machines.
-
-If host selection and user policy are mixed, the config becomes brittle:
-- the same user starts behaving differently per machine
-- rebuilds become ambiguous
-- portability is lost
 
 ### 4. The Emacs loader needed one clear rule
 The loader must not be clever.
@@ -49,18 +40,9 @@ It should do one thing only:
 2. if not found, load the system base module
 3. if disabled, skip the base
 
-Anything more complicated risks becoming its own framework.
-
 ### 5. The plan still carried a bit of single-user thinking
 The system must not revolve around one user's home directory.
 It should revolve around the `pro` profile and shared policy.
-
-That means the plan should speak in terms of:
-- shared modules
-- equal users
-- machine-specific overrides
-- portable bootstrap
-- ordinary `.el` files for Lisp
 
 ## What harmony means here
 
@@ -72,6 +54,7 @@ Things that should stay the same everywhere:
 - user equality
 - loader precedence
 - Emacs Lisp file format
+- canonical Emacs init directory is `~/.config/emacs`
 - shared system policy
 
 ### Variable
@@ -83,7 +66,7 @@ Things that may change by machine:
 
 ### Personal
 Things that belong to the user:
-- `~/.emacs.d/modules/*.el`
+- `~/.config/emacs/modules/*.el`
 - personal keybinds
 - personal package choices
 - optional user-specific overrides
@@ -99,54 +82,48 @@ This core owns:
 - common services
 - Emacs base deployment
 
-Storage-related shared services live in a separate storage module.
-Privacy-related shared services live in a separate privacy module.
-
 ### 2. Machine overlays
 Each machine-specific layer adds only hardware-specific data.
 
 ### 3. Equal users
 The system defines four equal accounts:
 - `az`
-- `zoya`
-- `lada`
-- `boris`
-
-They share the same groups, the same rights, and the same baseline shell/session policy.
+- `zo`
+- `la`
+- `bo`
 
 ### 4. Emacs base and override
 Emacs is split into:
-- base modules shipped by NixOS
-- user modules in `~/.emacs.d/modules/`
+- portable base modules in `emacs/base/modules/`
+- user modules in `~/.config/emacs/modules/`
 
 User files win over system files when the names match.
+The canonical session entry uses `--init-directory ~/.config/emacs`.
 
 ### 5. Bootstrap
 A bootstrap script downloads or activates the repo and applies the chosen machine-specific overrides.
-
-After that, rebuilds stay on the same shared core.
 
 ## File layout
 
 ```text
 pro/
   flake.nix
-  bootstrap/
-    install-pro.sh
-    select-host.sh
-  modules/
-    common/
-    users/
-    emacs/
-    desktop/
-    services/
   hosts/
-    laptop/
-    cf19/
+    thinkpad/
     desktop/
-    custom/
+    cf19/
+  modules/
+    pro-services.nix
+    pro-storage.nix
+    pro-privacy.nix
+    pro-users.nix
+    pro-users-nixos.nix
+    pro-users-wsl.nix
+    pro-users-termux.nix
   emacs/
     base/
+      early-init.el
+      init.el
       site-init.el
       modules/
         core.el
@@ -156,6 +133,7 @@ pro/
         js.el
         ai.el
         exwm.el
+    home-manager.nix
   docs/
     plans/
     analyse/
@@ -166,7 +144,7 @@ pro/
 ### Load order
 For module `M`:
 1. `~/.emacs.d/modules/M.el`
-2. `/etc/pro/emacs/modules/M.el`
+2. portable base `emacs/base/modules/M.el`
 
 If the user file exists, it wins.
 If not, the system base file loads.
@@ -185,7 +163,6 @@ Nix may install or copy these files, but not author their behavior inline.
 3. The script asks for the device profile.
 4. The script selects or writes the host profile.
 5. The script runs `nixos-rebuild` for that profile.
-6. The repo now rebuilds only for that host.
 
 ## Why this is harmonious
 
@@ -229,7 +206,7 @@ Document precedence, paths, and host rules in `docs/plans` and `docs/analyse`.
 
 - Fresh install works from a downloaded repo.
 - The installer can apply machine-specific overrides only when needed.
-- `az`, `zoya`, `lada`, and `boris` remain equal.
+- `az`, `zo`, `la`, and `bo` remain equal.
 - Emacs Lisp stays in `.el` files.
 - EXWM is available by default but not imposed.
 - User module overrides are natural and simple.

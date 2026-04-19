@@ -1,0 +1,187 @@
+# -*- fill-column: 88 -*-
+#Local Variables:
+#coding: utf-8
+#End:
+
+* Современные техники организации Emacs Lisp
+  для минималистичного конфига на Emacs 30.2+
+
+** Введение
+
+Этот документ содержит результаты анализа конфига pro-nix с точки зрения
+современных практик организации Emacs Lisp кода.
+
+Анализ выполнялся с помощью набора скриптов в папке docs/research/scripts/
+
+** Текущее состояние
+
+** 1. Лексическая связанность: 100%
+
+Все 23 файла используют lexical-binding:
+
+- early-init.el
+- init.el
+- modules/core.el
+- modules/ui.el
+- modules/keys.el
+- modules/pro-project.el
+- modules/nav.el
+- modules/org.el
+- modules/git.el
+- modules/nix.el
+- modules/python.el
+- modules/js.el
+- modules/haskell.el
+- modules/c.el
+- modules/java.el
+- modules/feeds.el
+- modules/ai.el
+- modules/agent.el
+- modules/chat.el
+- modules/exwm.el
+- modules/lisp.el
+- modules/text.el
+- modules/keys.el
+
+** 2. Структура модулей: Хорошо
+
+Каждый модуль в отдельном файле с явным provide/require.
+
+** 3. Загрузка пакетов: Хорошо
+
+Используется безопасная условная загрузка:
+
+```elisp
+(when (require 'consult nil t)
+  (consult-ripgrep ...))
+```
+
+Найдено 20+ пакетов с такой загрузкой.
+
+** 4. Отложенная загрузка: △ Средне
+
+Найдено 5 use with-eval-after-load:
+- pro-project.el
+- keys.el
+- exwm.el
+- org.el
+
+Замечание: Можно добавить delay-load для тяжелых пакетов.
+
+** 5. Настройки: △ Средне
+
+- 10+ defcustom с :group
+- 64 setq/setq-default
+- Нет :group для всех defcustom
+
+** 6. Функции и макросы: △ Средне
+
+- 64 defun
+- 5 pcase
+- Нет cl-lib
+- Нет cl-defun/cl-labels
+
+** 7. Современные пакеты: ✓ Отлично
+
+Используемые пакеты:
+- vertico - completion UI
+- orderless - pattern matching
+- marginalia - annotations
+- consult - interactive commands
+- corfu - in-buffer completion
+- eldoc-box - documentation
+- consult-xref - xref integration
+- kind-icon - icons in completion
+- which-key - key hints
+- ligature - ligatures
+- pro-tabs - tab bar
+- all-the-icons - icons
+- nerd-icons-ibuffer - buffer icons
+- treemacs-icons-dired - dired icons
+
+** Рекомендации
+
+** Приоритет 1: Добавить cl-lib
+
+Добавить в core.el или отдельный модуль:
+
+```elisp
+(require 'cl-lib)
+```
+
+Для использования:
+- cl-labels вместо labels
+- cl-macrolet для локальных макросов
+- cl-defun для keyword args
+- cl-loop вместо while/let*
+
+** Приоритет 2: Современные практики
+
+1. Добавить в early-init.el:
+```elisp
+(setq comp-deferred-compilation t)
+(setq comp-async-report-warnings-errors nil)
+```
+
+2. Использовать delay-load для тяжелых пакетов
+
+3. Использовать (:after feature) для with-eval-after-load
+
+** Приоритет 3: Улучшения
+
+1. Добавить (:group 'module) ко всем defcustom
+2. Использовать cl-defun для функций с keyword args
+3. Использовать cl-labels для локальных рекурсивных функций
+
+** Скрипты для анализа
+
+Все скрипты находятся в: docs/research/scripts/
+
+Запуск:
+```bash
+bash docs/research/scripts/run-all-analyses.sh
+```
+
+Скрипты:
+1. check-lexical-binding.sh - проверка lexical-binding
+2. analyze-packages.sh - анализ загрузки пакетов
+3. analyze-settings.sh - анализ настроек
+4. analyze-functions.sh - анализ функций
+5. analyze-modules.sh - анализ модулей
+6. analyze-delayed-load.sh - анализ отложенной загрузки
+7. search-modern-features.sh - поиск современных функций
+8. find-cl-lib-usage.sh - поиск cl-lib usage
+
+** Выводы
+
+Конфиг pro-nix уже следует современным практикам для Emacs 30.2+.
+
+Основные сильные стороны:
+- 100% lexical-binding
+- Использование современных пакетов (vertico/consult/corfu)
+- Безопасная загрузка пакетов
+- Хорошая структура модулей
+
+Возможные улучшения:
+- Добавить (require 'cl-lib)
+- Добавить (setq comp-deferred-compilation t)
+- Использовать cl-defun/cl-labels где применимо
+- Добавить delay-load для тяжелых пакетов
+
+Эти изменения позволят сделать конфиг быстрее и современнее,
+сохранив при этом минималистичный подход.
+
+** Файлы конфига для изучения
+
+- docs/research/scripts/ - скрипты анализа
+- docs/research/output/ - результаты анализа
+- emacs/base/modules/ - модули конфига
+
+** Дата анализа
+
+18 апреля 2026
+
+** Версия Emacs
+
+Требуется: 30.2+
+Проверка: через nix flake

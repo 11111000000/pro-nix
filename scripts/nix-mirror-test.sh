@@ -5,7 +5,7 @@ set -euo pipefail
 
 MIRRORS=(
     "https://cache.nixos.org"
-    "https://nix-community.cachix.org"
+    # "https://nix-community.cachix.org"  # unreachable
     "https://nix-mirror.freetls.fastly.net"
 )
 

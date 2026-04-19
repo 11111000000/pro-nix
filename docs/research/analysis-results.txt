@@ -1,0 +1,365 @@
+==========================================
+Анализ современных паттернов Emacs Lisp
+==========================================
+
+=== Версия Emacs ===
+emacs: /run/current-system/sw/share/nix-ld/lib/libmount.so.1: version `MOUNT_2_40' not found (required by /nix/store/5qdsnc26nv61j5rrw492f19xav2rz45v-glib-2.86.1/lib/libgio-2.0.so.0)
+
+----------------------------------------
+Запуск: check-lexical-binding.sh
+----------------------------------------
+=== Проверка lexical-binding в файлах ===
+
+✓ /home/zoya/pro-nix/emacs/base/early-init.el:;;; early-init.el --- pro Emacs bootstrap -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/init.el:;;; init.el --- pro Emacs loader -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/pro-project.el:;;; project.el --- проекты -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/js.el:;;; js.el --- JavaScript/TypeScript -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/ai.el:;;; ai.el --- AI policy and entrypoint -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/keys.el:;;; keys.el --- пользовательские клавиши -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/python.el:;;; python.el --- Python -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/haskell.el:;;; haskell.el --- Haskell -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/ui.el:;;; ui.el --- визуальная среда -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/exwm.el:;;; exwm.el --- EXWM session -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/org.el:;;; org.el --- орг-работа и таблицы -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/chat.el:;;; chat.el --- Telegram и чаты -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/agent.el:;;; agent.el --- агентный буфер -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/nav.el:;;; nav.el --- поиск и навигация -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/nix.el:;;; nix.el --- Nix editing -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/lisp.el:;;; lisp.el --- Lisp и структурное редактирование -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/git.el:;;; git.el --- Git workflow -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/feeds.el:;;; feeds.el --- ленты новостей -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/text.el:;;; text.el --- чтение и редактирование текста -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/core.el:;;; core.el --- ядро Emacs -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/java.el:;;; java.el --- Java -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/modules/c.el:;;; c.el --- C -*- lexical-binding
+✓ /home/zoya/pro-nix/emacs/base/site-init.el:;;; site-init.el --- pro Emacs base -*- lexical-binding
+
+=== Файлы БЕЗ lexical-binding ===
+
+
+
+----------------------------------------
+Запуск: analyze-packages.sh
+----------------------------------------
+=== Способы загрузки пакетов ===
+
+--- use-package usage ---
+
+--- require usage ---
+/home/zoya/pro-nix/emacs/base/modules/pro-project.el:(require 'subr-x)
+/home/zoya/pro-nix/emacs/base/modules/pro-project.el:  (when (require 'consult nil t)
+/home/zoya/pro-nix/emacs/base/modules/pro-project.el:  (when (require 'consult nil t)
+/home/zoya/pro-nix/emacs/base/modules/pro-project.el:  (when (require 'consult nil t)
+/home/zoya/pro-nix/emacs/base/modules/js.el:  (when (require 'eglot nil t)
+/home/zoya/pro-nix/emacs/base/modules/ai.el:  (when (require 'gptel nil t)
+/home/zoya/pro-nix/emacs/base/modules/keys.el:(require 'subr-x)
+/home/zoya/pro-nix/emacs/base/modules/python.el:(when (require 'eglot nil t)
+/home/zoya/pro-nix/emacs/base/modules/ui.el:(require 'subr-x)
+/home/zoya/pro-nix/emacs/base/modules/ui.el:  (when (and pro-ui-enable-ligatures (require 'ligature nil t))
+/home/zoya/pro-nix/emacs/base/modules/ui.el:(defun pro-ui--try-require (feature)
+/home/zoya/pro-nix/emacs/base/modules/ui.el:  (require feature nil t))
+/home/zoya/pro-nix/emacs/base/modules/ui.el:    (when (pro-ui--try-require 'all-the-icons)
+/home/zoya/pro-nix/emacs/base/modules/ui.el:    (when (pro-ui--try-require 'kind-icon)
+/home/zoya/pro-nix/emacs/base/modules/ui.el:    (when (pro-ui--try-require 'nerd-icons-ibuffer)
+/home/zoya/pro-nix/emacs/base/modules/ui.el:    (when (pro-ui--try-require 'treemacs-icons-dired)
+/home/zoya/pro-nix/emacs/base/modules/ui.el:    (when (pro-ui--try-require 'pro-tabs)
+/home/zoya/pro-nix/emacs/base/modules/ui.el:    (when (pro-ui--try-require 'corfu)
+/home/zoya/pro-nix/emacs/base/modules/ui.el:    (when (and (pro-ui--try-require 'kind-icon)
+/home/zoya/pro-nix/emacs/base/modules/ui.el:    (when (pro-ui--try-require 'which-key)
+
+--- load usage ---
+/home/zoya/pro-nix/emacs/base/init.el:  (load (expand-file-name "site-init.el" base-dir) nil t)
+/home/zoya/pro-nix/emacs/base/modules/pro-project.el:    (load project-library nil t)))
+/home/zoya/pro-nix/emacs/base/site-init.el:        (load-file pro-emacs-base-user-manifest)
+/home/zoya/pro-nix/emacs/base/site-init.el:            (load file nil t)
+
+--- provide usage ---
+/home/zoya/pro-nix/emacs/base/early-init.el:(provide 'pro-early-init)
+/home/zoya/pro-nix/emacs/base/init.el:(provide 'pro-init)
+/home/zoya/pro-nix/emacs/base/modules/pro-project.el:(provide 'pro-project)
+/home/zoya/pro-nix/emacs/base/modules/js.el:(provide 'js)
+/home/zoya/pro-nix/emacs/base/modules/ai.el:(defun pro-ai-provider-name ()
+/home/zoya/pro-nix/emacs/base/modules/ai.el:(provide 'ai)
+/home/zoya/pro-nix/emacs/base/modules/keys.el:(provide 'keys)
+/home/zoya/pro-nix/emacs/base/modules/python.el:(provide 'python)
+/home/zoya/pro-nix/emacs/base/modules/haskell.el:(provide 'haskell)
+/home/zoya/pro-nix/emacs/base/modules/ui.el:(provide 'ui)
+/home/zoya/pro-nix/emacs/base/modules/exwm.el:(provide 'pro-exwm)
+/home/zoya/pro-nix/emacs/base/modules/org.el:(provide 'org)
+/home/zoya/pro-nix/emacs/base/modules/chat.el:(provide 'chat)
+/home/zoya/pro-nix/emacs/base/modules/agent.el:(provide 'agent)
+/home/zoya/pro-nix/emacs/base/modules/nav.el:(provide 'nav)
+/home/zoya/pro-nix/emacs/base/modules/nix.el:(provide 'nix)
+/home/zoya/pro-nix/emacs/base/modules/lisp.el:(provide 'lisp)
+/home/zoya/pro-nix/emacs/base/modules/git.el:(provide 'git)
+/home/zoya/pro-nix/emacs/base/modules/feeds.el:(provide 'feeds)
+/home/zoya/pro-nix/emacs/base/modules/text.el:(provide 'text)
+/home/zoya/pro-nix/emacs/base/modules/core.el:(provide 'core)
+/home/zoya/pro-nix/emacs/base/modules/java.el:(provide 'java)
+/home/zoya/pro-nix/emacs/base/modules/c.el:(provide 'c)
+/home/zoya/pro-nix/emacs/base/site-init.el:(provide 'pro-site-init)
+
+
+----------------------------------------
+Запуск: analyze-settings.sh
+----------------------------------------
+=== Анализ настроек (setq patterns) ===
+
+--- setq usage ---
+64
+/home/zoya/pro-nix/emacs/base/early-init.el:(setq package-enable-at-startup nil)
+/home/zoya/pro-nix/emacs/base/early-init.el:(setq frame-inhibit-implied-resize t)
+/home/zoya/pro-nix/emacs/base/early-init.el:(setq inhibit-splash-screen t)
+/home/zoya/pro-nix/emacs/base/init.el:  (setq user-emacs-directory (file-name-as-directory (expand-file-name "~/.config/emacs/")))
+/home/zoya/pro-nix/emacs/base/init.el:  (setq pro-emacs-base-system-modules-dir (expand-file-name "modules" base-dir))
+/home/zoya/pro-nix/emacs/base/modules/pro-project.el:  (setq project-switch-commands pro-project-switch-commands))
+/home/zoya/pro-nix/emacs/base/modules/js.el:  (setq-local indent-tabs-mode nil)
+/home/zoya/pro-nix/emacs/base/modules/js.el:  (setq-local js-indent-level 2)
+/home/zoya/pro-nix/emacs/base/modules/ai.el:        (setq gptel-model model))
+/home/zoya/pro-nix/emacs/base/modules/ai.el:      (setq gptel-use-curl t
+/home/zoya/pro-nix/emacs/base/modules/ai.el:  (setq pro-ai-backend (if (eq pro-ai-backend 'openrouter) 'aitunnel 'openrouter))
+/home/zoya/pro-nix/emacs/base/modules/ai.el:  (setq pro-ai-openrouter-model nil
+/home/zoya/pro-nix/emacs/base/modules/keys.el:  (setq pro-keys-exwm-global-keys nil)
+/home/zoya/pro-nix/emacs/base/modules/keys.el:(setq pro-keys-exwm-global-keys nil)
+/home/zoya/pro-nix/emacs/base/modules/keys.el:  (setq exwm-input-global-keys pro-keys-exwm-global-keys))
+/home/zoya/pro-nix/emacs/base/modules/python.el:  (setq-local indent-tabs-mode nil)
+/home/zoya/pro-nix/emacs/base/modules/python.el:  (setq-local python-indent-offset 4))
+/home/zoya/pro-nix/emacs/base/modules/haskell.el:  (setq-local indent-tabs-mode nil)
+/home/zoya/pro-nix/emacs/base/modules/haskell.el:  (setq-local tab-width 2))
+/home/zoya/pro-nix/emacs/base/modules/ui.el:      (setq all-the-icons-scale-factor 1.0))
+/home/zoya/pro-nix/emacs/base/modules/ui.el:      (setq pro-tabs-enable-icons t)
+/home/zoya/pro-nix/emacs/base/modules/ui.el:      (setq corfu-auto t
+/home/zoya/pro-nix/emacs/base/modules/ui.el:      (setq which-key-idle-delay 0.7)
+/home/zoya/pro-nix/emacs/base/modules/ui.el:      (setq eldoc-box-clear-with-C-g t))
+/home/zoya/pro-nix/emacs/base/modules/exwm.el:  (setq exwm-workspace-number 4)
+/home/zoya/pro-nix/emacs/base/modules/exwm.el:    (setq exwm-input-global-keys pro-keys-exwm-global-keys))
+/home/zoya/pro-nix/emacs/base/modules/org.el:  (setq org-startup-indented t
+/home/zoya/pro-nix/emacs/base/modules/org.el:  (setq org-structure-template-alist
+/home/zoya/pro-nix/emacs/base/modules/org.el:  (setq-local truncate-lines nil)
+/home/zoya/pro-nix/emacs/base/modules/org.el:  (setq-local word-wrap t))
+
+--- setq-default usage ---
+/home/zoya/pro-nix/emacs/base/modules/text.el:(setq-default sentence-end-double-space nil)
+/home/zoya/pro-nix/emacs/base/modules/text.el:(setq-default truncate-lines nil)
+/home/zoya/pro-nix/emacs/base/modules/text.el:(setq-default fill-column 88)
+/home/zoya/pro-nix/emacs/base/modules/core.el:(setq-default indent-tabs-mode nil)
+/home/zoya/pro-nix/emacs/base/modules/core.el:(setq-default fill-column 88)
+
+--- defgroup usage ---
+/home/zoya/pro-nix/emacs/base/modules/keys.el:(defgroup pro nil
+
+--- defcustom usage ---
+/home/zoya/pro-nix/emacs/base/modules/ai.el:(defcustom pro-ai-backend 'openrouter
+/home/zoya/pro-nix/emacs/base/modules/ai.el:(defcustom pro-ai-enable-gptel-history t
+/home/zoya/pro-nix/emacs/base/modules/ai.el:(defcustom pro-ai-openrouter-model nil
+/home/zoya/pro-nix/emacs/base/modules/ai.el:(defcustom pro-ai-aitunnel-model nil
+/home/zoya/pro-nix/emacs/base/modules/ui.el:(defcustom pro-ui-code-font-family "Fira Code"
+/home/zoya/pro-nix/emacs/base/modules/ui.el:(defcustom pro-ui-text-font-family "Fira Sans"
+/home/zoya/pro-nix/emacs/base/modules/ui.el:(defcustom pro-ui-font-height 130
+/home/zoya/pro-nix/emacs/base/modules/ui.el:(defcustom pro-ui-enable-ligatures t
+/home/zoya/pro-nix/emacs/base/modules/ui.el:(defcustom pro-ui-enable-icons t
+
+
+----------------------------------------
+Запуск: analyze-functions.sh
+----------------------------------------
+=== Анализ функций и макросов ===
+
+--- defun usage ---
+64
+/home/zoya/pro-nix/emacs/base/modules/pro-project.el:(defun pro-project-root ()
+/home/zoya/pro-nix/emacs/base/modules/pro-project.el:(defun pro-project-ripgrep ()
+/home/zoya/pro-nix/emacs/base/modules/pro-project.el:(defun pro-project-find-file ()
+/home/zoya/pro-nix/emacs/base/modules/pro-project.el:(defun pro-project-switch-buffer ()
+/home/zoya/pro-nix/emacs/base/modules/pro-project.el:(defun pro-project-open-dired ()
+/home/zoya/pro-nix/emacs/base/modules/js.el:(defun pro-js--setup-buffer ()
+/home/zoya/pro-nix/emacs/base/modules/js.el:(defun pro-js-open-package-json ()
+/home/zoya/pro-nix/emacs/base/modules/ai.el:(defun pro-ai--resolve-model ()
+/home/zoya/pro-nix/emacs/base/modules/ai.el:(defun pro-ai-open-entry ()
+/home/zoya/pro-nix/emacs/base/modules/ai.el:(defun pro-ai-toggle-backend ()
+/home/zoya/pro-nix/emacs/base/modules/ai.el:(defun pro-ai-reset-models ()
+/home/zoya/pro-nix/emacs/base/modules/ai.el:(defun pro-ai-provider-name ()
+/home/zoya/pro-nix/emacs/base/modules/keys.el:(defun pro-keys--normalize-command-name (text)
+/home/zoya/pro-nix/emacs/base/modules/keys.el:(defun pro-keys-apply-binding (key command)
+/home/zoya/pro-nix/emacs/base/modules/keys.el:(defun pro-keys-apply-exwm-binding (key command)
+/home/zoya/pro-nix/emacs/base/modules/keys.el:(defun pro-keys--trim (string)
+/home/zoya/pro-nix/emacs/base/modules/keys.el:(defun pro-keys--parse-command (text)
+/home/zoya/pro-nix/emacs/base/modules/keys.el:(defun pro-keys--meaningful-cell-p (text)
+/home/zoya/pro-nix/emacs/base/modules/keys.el:(defun pro-keys--parse-org-table-line (line)
+/home/zoya/pro-nix/emacs/base/modules/keys.el:(defun pro-keys--table-line-p (line)
+
+--- cl-defun usage ---
+
+--- lambda usage ---
+1
+
+--- #' function reference ---
+27
+
+--- cl-macrolet usage ---
+
+--- cl-labels usage ---
+
+
+----------------------------------------
+Запуск: analyze-modules.sh
+----------------------------------------
+=== Анализ модулей ===
+
+--- Всего модулей ---
+20
+
+--- Модули и их размеры ---
+/home/zoya/pro-nix/emacs/base/modules/agent.el 405
+/home/zoya/pro-nix/emacs/base/modules/ai.el 2,1K
+/home/zoya/pro-nix/emacs/base/modules/c.el 725
+/home/zoya/pro-nix/emacs/base/modules/chat.el 386
+/home/zoya/pro-nix/emacs/base/modules/core.el 1,3K
+/home/zoya/pro-nix/emacs/base/modules/exwm.el 453
+/home/zoya/pro-nix/emacs/base/modules/feeds.el 404
+/home/zoya/pro-nix/emacs/base/modules/git.el 820
+/home/zoya/pro-nix/emacs/base/modules/haskell.el 683
+/home/zoya/pro-nix/emacs/base/modules/java.el 766
+/home/zoya/pro-nix/emacs/base/modules/js.el 1,3K
+/home/zoya/pro-nix/emacs/base/modules/keys.el 4,9K
+/home/zoya/pro-nix/emacs/base/modules/lisp.el 998
+/home/zoya/pro-nix/emacs/base/modules/nav.el 1,2K
+/home/zoya/pro-nix/emacs/base/modules/nix.el 929
+/home/zoya/pro-nix/emacs/base/modules/org.el 1,9K
+/home/zoya/pro-nix/emacs/base/modules/pro-project.el 1,9K
+/home/zoya/pro-nix/emacs/base/modules/python.el 859
+/home/zoya/pro-nix/emacs/base/modules/text.el 710
+/home/zoya/pro-nix/emacs/base/modules/ui.el 5,5K
+
+--- Структура модулей (provide/require) ---
+--- agent.el ---
+  (when (require 'agent-shell nil t)
+(provide 'agent)
+
+--- ai.el ---
+  (when (require 'gptel nil t)
+(defun pro-ai-provider-name ()
+(provide 'ai)
+
+--- c.el ---
+(provide 'c)
+
+--- chat.el ---
+  (when (require 'telega nil t)
+(provide 'chat)
+
+--- core.el ---
+(setq require-final-newline t)
+(provide 'core)
+
+--- exwm.el ---
+(provide 'pro-exwm)
+
+--- feeds.el ---
+  (when (require 'elfeed nil t)
+(provide 'feeds)
+
+--- git.el ---
+(require 'subr-x)
+  (when (require 'magit nil t)
+  (when (require 'magit nil t)
+  (when (require 'magit nil t)
+(provide 'git)
+
+--- haskell.el ---
+(provide 'haskell)
+
+--- java.el ---
+(when (require 'eglot nil t)
+(provide 'java)
+
+--- js.el ---
+  (when (require 'eglot nil t)
+(provide 'js)
+
+--- keys.el ---
+(require 'subr-x)
+(provide 'keys)
+
+--- lisp.el ---
+(when (require 'rainbow-delimiters nil t)
+(provide 'lisp)
+
+--- nav.el ---
+(when (require 'vertico nil t)
+(when (require 'orderless nil t)
+(when (require 'marginalia nil t)
+(when (require 'consult nil t)
+  (when (require 'consult-xref nil t)
+  (when (require 'consult nil t)
+  (when (require 'consult nil t)
+(provide 'nav)
+
+--- nix.el ---
+(when (require 'nix-mode nil t)
+(provide 'nix)
+
+--- org.el ---
+(when (require 'org nil t)
+(when (require 'org-tempo nil t)
+(provide 'org)
+
+--- pro-project.el ---
+(require 'subr-x)
+  (when (require 'consult nil t)
+  (when (require 'consult nil t)
+  (when (require 'consult nil t)
+(provide 'pro-project)
+
+--- python.el ---
+(when (require 'eglot nil t)
+(provide 'python)
+
+--- text.el ---
+(when (require 'eldoc nil t)
+(provide 'text)
+
+--- ui.el ---
+(require 'subr-x)
+  (when (and pro-ui-enable-ligatures (require 'ligature nil t))
+(defun pro-ui--try-require (feature)
+  (require feature nil t))
+    (when (pro-ui--try-require 'all-the-icons)
+    (when (pro-ui--try-require 'kind-icon)
+    (when (pro-ui--try-require 'nerd-icons-ibuffer)
+    (when (pro-ui--try-require 'treemacs-icons-dired)
+    (when (pro-ui--try-require 'pro-tabs)
+    (when (pro-ui--try-require 'corfu)
+    (when (and (pro-ui--try-require 'kind-icon)
+    (when (pro-ui--try-require 'which-key)
+    (when (pro-ui--try-require 'eldoc-box)
+    (when (pro-ui--try-require 'treemacs-icons-dired)
+(provide 'ui)
+
+
+
+----------------------------------------
+Запуск: analyze-delayed-load.sh
+----------------------------------------
+=== Анализ отложенной загрузки ===
+
+--- with-eval-after-load usage ---
+5
+/home/zoya/pro-nix/emacs/base/modules/pro-project.el:(with-eval-after-load 'project
+/home/zoya/pro-nix/emacs/base/modules/keys.el:    (:org (with-eval-after-load 'org
+/home/zoya/pro-nix/emacs/base/modules/keys.el:(with-eval-after-load 'exwm
+/home/zoya/pro-nix/emacs/base/modules/exwm.el:(with-eval-after-load 'exwm
+/home/zoya/pro-nix/emacs/base/modules/org.el:(with-eval-after-load 'org
+
+--- eval-after-load usage ---
+5
+
+--- delay-load usage ---
+
+--- define-minor-mode usage ---
+0
+
+
+==========================================
+Анализ завершен
+==========================================

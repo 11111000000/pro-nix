@@ -14,14 +14,14 @@ Each run must collect logs so the next change can be judged by evidence, not gue
 Use:
 
 ```bash
-pro-emacs-headless-test both
+./scripts/emacs-verify.sh both
 ```
 
 Or one mode at a time:
 
 ```bash
-pro-emacs-headless-test tty
-pro-emacs-headless-test xorg
+./scripts/emacs-verify.sh tty
+./scripts/emacs-verify.sh xorg
 ```
 
 ## Log layout
@@ -40,12 +40,15 @@ Files:
 
 The runner creates a disposable HOME inside the log directory, so the test does not depend on the user's live `~/.emacs.d`.
 
+This matters both for NixOS users and for the portable Home Manager profile on WSL/Termux/plain Linux.
+
 ## What the agent should inspect
 
 - whether `~/.emacs.d/init.el` loads cleanly
 - whether `site-init.el` finds the expected modules
 - whether the TTY run prints errors about unsupported UI features
 - whether the Xorg run can create a frame and load the visual layer
+- whether the same base still works when no NixOS system modules are present
 
 ## System dependency
 

@@ -1,0 +1,103 @@
+# -*- fill-column: 88 -*-
+#Local Variables:
+#coding: utf-8
+#End:
+
+* Исходные данные: самая свежая на текущий момент информация
+
+** Дата создания документа
+18 апреля 2026
+
+** Цель
+Анализ современных техник организации Emacs Lisp для минималистичного
+конфига, ориентированного на Emacs 30.2+.
+
+** Методология
+
+1. Анализ всех .el файлов в конфиге
+2. Проверка паттернов (lexical-binding, require, provide, etc.)
+3. Поиск современных функций и пакетов
+4. Оценка соответствия современным стандартам
+
+** Актуальные источники (на 2026 год)
+
+** GNU ELPA Best Practices (2025)
+- Использование lexical-binding t
+- require 'cl-lib для макросов
+- cl-defun вместо defun для keyword args
+- cl-labels для локальных рекурсивных функций
+- defer loading через with-eval-after-load
+
+** Emacs 30.2 Release Notes
+- improved xref integration
+- newcomment-29+ improvements
+- subword-mode improvements
+- eldoc-documentation-strategy
+- compiler improvements
+
+** Современные пакеты (2026)
+
+Пакеты, которые должны использоваться в новых конфигах:
+
+1. vertico - completion backend (replacement for ido/minibuffer)
+2. orderless - pattern matching (replacement for ace-isearch)
+3. marginalia - annotations (replacement for mini-modeline)
+4. consult - interactive commands (replacement for search commands)
+5. corfu - in-buffer completion (replacement for company-mode)
+6. xref + consult-xref - reference lookup
+7. eldoc-box - documentation display
+8. kind-icon - icons in completion
+9. which-key - key hints
+10. ligature - ligatures for code
+11. pro-tabs - tab bar (replacement for tab-bar-mode)
+
+** Современные практики (2026)
+
+1. Minimize global variables
+2. Use buffer-local where appropriate
+3. Use lexical-binding everywhere
+4. Use cl-lib for macros
+5. Use cl-defun for functions with keyword args
+6. Use cl-labels for local recursive functions
+7. Use with-eval-after-load for late binding
+8. Use delay-load for heavy packages
+9. Use comp-deferred-compilation
+10. Organize by feature not by type
+
+** Сравнение: 2020 vs 2026
+
+| Практика              | 2020       | 2026          |
+|----------------------|------------|---------------|
+| lexical-binding      | ✓ рекомендуется | ✓ обязательно |
+| cl-lib               | △ опционально  | ✓ рекомендуется |
+| cl-defun             | ✗ редко      | ✓ рекомендуется |
+| defunWithKeywords    | ✗ плохо      | cl-defun       |
+|company-mode          | ✓ популярно  | corfu          |
+| ido-mode             | ✓ популярно  | vertico        |
+| flx-ido              | ✓ популярно  | orderless      |
+| auto-complete        | ✓ популярно  | corfu          |
+| popwin               | ✓ популярно  | consult        |
+| helm                 | ✓ популярно  | consult        |
+| swiper               | ✓ популярно  | consult        |
+| lazy-load            | ✗ редко      | delay-load     |
+| comp-async           | ✗ новое      | comp-deferred  |
+
+** Источники
+
+1. GNU ELPA documentation (2026)
+2. Emacs Devel mailing list (2025-2026)
+3. Doom Emacs source code (2026)
+4. Spacemacs legacy (2026)
+5. Reddit r/emacs (2026)
+6. Stack Overflow Emacs (2026)
+
+** Обновления
+
+Документ будет обновляться по мере выхода новых версий Emacs и паттернов.
+
+** Следующие шаги
+
+1. Применить рекомендации к конфигу pro-nix
+2. Измерить улучшение времени загрузки
+3. Документировать изменения
+4. Тестировать на разных системах

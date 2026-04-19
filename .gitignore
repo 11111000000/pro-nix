@@ -4,5 +4,13 @@
 logs/
 result
 local.nix
+local-nix
 bootstrap/local.nix
 .org
+*.swp
+*.swo
+*.tmp
+*~
+.direnv/
+tmp/
+temp/

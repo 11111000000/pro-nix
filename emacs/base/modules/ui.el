@@ -7,27 +7,27 @@
 (defcustom pro-ui-code-font-family "Fira Code"
   "Шрифт для кода."
   :type 'string
-  :group 'pro)
+  :group 'pro-ui)
 
 (defcustom pro-ui-text-font-family "Fira Sans"
   "Шрифт для текста интерфейса."
   :type 'string
-  :group 'pro)
+  :group 'pro-ui)
 
 (defcustom pro-ui-font-height 130
   "Высота шрифта в десятых долях пункта."
   :type 'integer
-  :group 'pro)
+  :group 'pro-ui)
 
 (defcustom pro-ui-enable-ligatures t
   "Включать ли лигатуры в коде."
   :type 'boolean
-  :group 'pro)
+  :group 'pro-ui)
 
 (defcustom pro-ui-enable-icons t
   "Включать ли иконки в UI-слое."
   :type 'boolean
-  :group 'pro)
+  :group 'pro-ui)
 
 (defun pro-ui--font-available-p (family)
   "Проверить, доступен ли шрифт FAMILY."
@@ -138,9 +138,6 @@
 (blink-cursor-mode 0)
 (column-number-mode 1)
 (global-hl-line-mode 1)
-
-(setq-default cursor-type '(bar . 3)
-              x-stretch-cursor t)
 
 (when (display-graphic-p)
   (pro-ui-apply))

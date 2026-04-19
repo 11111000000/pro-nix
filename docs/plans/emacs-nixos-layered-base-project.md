@@ -1,8 +1,9 @@
-# Project: Layered Emacs base in NixOS
+# Project: Layered Emacs base with portable adapters
 
 ## Purpose
 Create an Emacs base that is:
 - present by default after `nixos-rebuild`
+- usable without NixOS via Home Manager
 - minimal and usable out of the box
 - easy to extend with user modules
 - easy to replace module-by-module
@@ -13,7 +14,8 @@ The base should add EXWM as one possible window manager/session mode and provide
 ## Core idea
 Use a two-layer load order:
 1. User layer first, if it exists: `~/.config/emacs/modules/<name>.el`
-2. NixOS base layer second: `~/.config/nixos/...` generated module files
+2. Portable base layer second: `emacs/base/modules/<name>.el`
+3. The EXWM session starts from `--init-directory ~/.config/emacs` and never from the Nix store.
 
 That gives the user the natural ability to override the base by simply creating a file with the same module name in their own Emacs tree.
 
@@ -52,9 +54,7 @@ If the marker exists:
 ## What the base provides
 
 ### Always available
-- Emacs binary and session launcher
-- EXWM session glue
-- X11 helpers and env setup
+- Emacs binary and session loader
 - basic Git/Nix/JS/AI runtime dependencies
 
 ### Minimal EXWM base
@@ -85,8 +85,8 @@ Create `.disable-nixos-base` and use only personal modules or a different framew
 
 The base should be built into `~/.config/nixos` in a way that is easy to maintain:
 - `configuration.nix` owns system packages and session entry generation
-- `system-packages.nix` owns binary runtime dependencies
-- `systemd-user-services.nix` owns tray/session helpers
+- `emacs/home-manager.nix` owns the portable Home Manager profile
+- `modules/pro-users-*.nix` own platform adapters
 - `conf/*.in` owns shell/session templates
 - `docs/plans` and `docs/analyse` document the contract
 

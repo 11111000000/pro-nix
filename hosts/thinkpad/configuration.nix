@@ -6,6 +6,7 @@
   # Аппаратные модули ThinkPad
   boot.initrd.kernelModules = [ "xhci_pci" "thunderbolt" "vmd" ];
   hardware.cpu.intel.updateMicrocode = lib.mkDefault true;
+  hardware.uinput.enable = lib.mkDefault true;
 
   networking.hostName = "thinkpad-pro";
   system.stateVersion = "25.05";

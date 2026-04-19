@@ -2,11 +2,11 @@
 
 ;; Этот модуль поднимает EXWM и берёт глобальные клавиши из общего слоя ключей.
 
-(when (require 'exwm nil t)
-  (setq exwm-workspace-number 4
-        exwm-input-global-keys pro-keys-exwm-global-keys)
-  (when (require 'exwm-systemtray nil t)
-    (exwm-systemtray-enable))
-  (exwm-enable))
+(with-eval-after-load 'exwm
+  (setq exwm-workspace-number 4)
+  (when (boundp 'pro-keys-exwm-global-keys)
+    (setq exwm-input-global-keys pro-keys-exwm-global-keys))
+  (when (featurep 'exwm-systemtray)
+    (exwm-systemtray-enable)))
 
-(provide 'exwm)
+(provide 'pro-exwm)

@@ -1,0 +1,89 @@
+# -*- fill-column: 88 -*-
+#Local Variables:
+# coding: utf-8
+# End:
+
+* Современные техники организации Emacs Lisp для Emacs 30.2+
+
+** Вступление
+
+Этот документ исследует наиболее современные техники организации
+Emacs Lisp кода, применимые в минималистичном конфиге для Emacs 30.2
+и выше.
+
+Основные принципы:
+- Лексическая связанность (lexical-binding: t)
+- Минимализм и ясность
+- Использование встроенных возможностей Emacs 30
+- Эффективная компиляция и загрузка
+
+** План поиска
+
+1. Изучение современных паттернов пакетов (use-package alternatives)
+2. Анализ newcomment.el и newcomment-29
+3. Исследование defgroup/defcustom улучшений в 30
+4. Изучение lexical-binding的最佳 практик
+5. Анализ пакетного менеджмента в 30.2
+
+** Ключевые техники
+
+** 1. Lexical Binding Best Practices
+
+- Всегда использовать (require 'cl-lib) для макросов
+- Использовать #' для функциональных аргументов
+- Minimize closures в глобальном scope
+- Использовать cl-markunbound для очистки
+
+** 2. Структура модулей
+
+Минималистичный подход:
+- Один модуль = один файл
+- Explicit :load-path через load-path
+- Use define-minor-mode для модов
+- use-setq для настроек
+
+** 3. Настройки (Settings)
+
+- defgroup → defcustom с :group
+- Использовать setq-default для buffer-local
+- Minimize setq в runtime
+- Использовать customize-set-value для программных установок
+
+** 4. Функции и макросы
+
+- Использовать cl-defun для keyword arguments
+- cl-macrolet для временных макросов
+- Использовать px.el паттерны для интерфейсов
+
+** 5. Экономия времени загрузки
+
+- Ленивая загрузка через delay-load
+- Использование comp-deferred-compilation
+- Minimizeeval-after-load
+- Использование with-eval-after-load для late binding
+
+** 6. Modern Emacs 30 Features
+
+- newcomment-29+ улучшения
+- subword-mode улучшения
+- xref improvements
+- eldoc-documentation-strategy
+- compiler notes
+
+** Скрипты для поиска
+
+See separate scripts in docs/research/scripts/
+
+** Ссылки
+
+- Emacs 30.1 Release Notes
+- Emacs Devel Mailing List
+- GNU ELPA best practices
+- Modern Emacs book (draft)
+
+** Следующие шаги
+
+- Запуск скриптов из docs/research/scripts/
+- Анализ результатов
+- Составление рекомендаций
+- Практическое применение в pro-nix

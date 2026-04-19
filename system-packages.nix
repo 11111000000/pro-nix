@@ -2,6 +2,7 @@
 
 let
   emacsPackages = pkgs.emacsPackagesFor emacsPkg;
+  xvfbRun = pkgs."xvfb-run";
 
   # Python-слой здесь держит минимальную воспроизводимость: `requests` уже есть, а `pip` остаётся доступным для локальных окружений и одноразовых установок.
   myPython = pkgs.python3.withPackages (ps: [ ps.requests ps.pip ]);
@@ -20,7 +21,7 @@ let
   '';
   pip3Cmd = pkgs.writeShellScriptBin "pip3" ''
     exec ${myPython}/bin/python3 -m pip "$@"
-  '';
+'';
 in
 
 with pkgs; [
@@ -33,8 +34,6 @@ with pkgs; [
   emacsPackages.orderless
   emacsPackages.marginalia
   emacsPackages.magit
-  emacsPackages.elfeed
-  emacsPackages.telega
   emacsPackages.ligature
   emacsPackages.kind-icon
   emacsPackages.nerd-icons
@@ -45,16 +44,10 @@ with pkgs; [
   emacsPackages.rainbow-delimiters
   emacsPackages.corfu
   emacsPackages.nix-mode
-  emacsPackages.haskell-mode
-  emacsPackages.python-mode
-  emacsPackages.java-ts-mode
   emacsPackages.exwm
-  emacsPackages.consult-dir
-  emacsPackages.consult-project-extra
-  emacsPackages.consult-xref
   direnv
   acpi
-  xorg.xvfb
+  xvfbRun
 
   # Общие утилиты составляют инструментальный фон: они не оформляют идею, а дают ей быстро стать действием.
   (writeShellScriptBin "nix-gui" ''
@@ -63,6 +56,8 @@ with pkgs; [
   wget
   diffutils
   curl
+  jq
+  just
 git
 github-cli
 ollama
@@ -121,9 +116,6 @@ ollama
   # Обёртки `writeShellScriptBin` намеренно переопределяют стандартные команды и прячут этот предел от повседневной рутины.
   (writeShellScriptBin "chromium" ''
     exec systemd-run --user --scope -p MemoryMax=4500M -p MemoryHigh=4G -- ${chromium}/bin/chromium "$@"
-  '')
-  (writeShellScriptBin "google-chrome" ''
-    exec systemd-run --user --scope -p MemoryMax=4500M -p MemoryHigh=4G -- ${google-chrome}/bin/google-chrome "$@"
   '')
   (writeShellScriptBin "firefox" ''
     exec systemd-run --user --scope -p MemoryMax=2500M -p MemoryHigh=2G -- ${firefox}/bin/firefox "$@"
@@ -226,7 +218,7 @@ ollama
 
   # Темы курсора X11 нужны как визуальная интонация, а не как отдельный дизайн-проект.
   xorg.xcursorthemes
-  adwaita-icon-theme
+  gnome.adwaita-icon-theme
   
   # Аудио и видео работают как бытовая акустика рабочего места.
   ffmpeg-full
@@ -237,7 +229,6 @@ ollama
   # Торрент-клиенты оставлены как отдельный транспортный контур.
   #transmission
   #transmission-gtk
-  qbittorrent
   deluge
 
   # Здесь мог бы стоять мониторинг безопасности; сейчас этот слот оставлен как напоминание о границе между инструментом и наблюдением.

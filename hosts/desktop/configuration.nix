@@ -5,6 +5,8 @@
 
   # Desktop: мощный GPU, NVMe, нет Thunderbolt
   boot.initrd.kernelModules = [ "xhci_pci" "ahci" "nvme" ];
+  hardware.cpu.intel.updateMicrocode = lib.mkDefault true;
+  hardware.uinput.enable = lib.mkDefault true;
 
   networking.hostName = "desktop-pro";
   system.stateVersion = "25.05";

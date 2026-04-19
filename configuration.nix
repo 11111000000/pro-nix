@@ -7,7 +7,7 @@
 #
 # Пример ориентирован на ноутбук с Intel, NVMe и Bluetooth; при другом железе меняется только то, что действительно зависит от машины.
 
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, emacsPkg ? pkgs.emacs, ... }:
 
   let
   local = if builtins.pathExists ./local.nix then import ./local.nix else { };
@@ -155,22 +155,7 @@
   };
   services.power-profiles-daemon.enable = true;    # Современный демон профилей питания.
 
-  hardware.enableAllFirmware = true;        # Всегда иметь под рукой последние прошивки для Wi-Fi, Bluetooth и проч.
-
-  # Добавляем прошивку Intel SOF для Tiger Lake (исправляет "SOF firmware ... not found" и отсутствие /dev/snd/pcm*):
-  hardware.firmware = [ pkgs.sof-firmware ];
-
-  hardware.cpu.intel.updateMicrocode = true; # Микрокод Intel — критично для безопасности.
-  hardware.uinput.enable = true;            # Для evremап: предоставляет /dev/uinput и группу uinput.
-  boot.extraModprobeConfig = ''
-    options snd-intel-dspcfg dsp_driver=1
-  '';
-
   services.xserver.videoDrivers = [ "modesetting" ];   # Драйвер видео: для большинства Intel Xe рекомендуется modesetting.
-  # Используем swap-файл на диске для поддержки гибридного сна и гибернации.
-  swapDevices = [
-    { device = "/dev/nvme0n1p3"; }
-  ];
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 6: Особенности Nix и расширенные возможности
@@ -186,17 +171,11 @@
     settings.connect-timeout = 5;
     settings.fallback = true;
     # Сначала используем более быстрый community-кеш, а к публичному возвращаемся только при необходимости.
-    settings.substituters = lib.mkForce [
-      "https://nix-community.cachix.org?priority=1"
-      "https://cache.nixos.org?priority=50"
+    settings.substituters = [
+      "https://cache.nixos.org"
     ];
     settings.trusted-public-keys = [
-      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-    ];
-    settings.trusted-substituters = [
-      "https://nix-community.cachix.org"
-      "https://nix-mirror.freetls.fastly.net"
     ];
     gc = {
       automatic = true;
@@ -221,6 +200,8 @@
     enable = true;
     extraPortals = lib.mkForce [ pkgs.xdg-desktop-portal-gtk ];
   };
+
+  environment.systemPackages = with pkgs; [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; });
 
   fonts.packages = with pkgs; [
     terminus_font

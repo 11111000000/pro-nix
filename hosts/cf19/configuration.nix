@@ -5,8 +5,9 @@
 
   # CF-19: легаси, вращающиеся диски, старый AHCI
   boot.initrd.kernelModules = [ "ahci" ];
+  hardware.uinput.enable = lib.mkDefault true;
 
-  networking.hostName = "cf19-pro";
+  networking.hostName = "huawei-pro";
   system.stateVersion = "25.05";
 
   boot.loader.systemd-boot.enable = lib.mkForce false;

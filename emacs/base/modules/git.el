@@ -8,6 +8,19 @@
   "Открыть статус репозитория."
   (interactive)
   (when (require 'magit nil t)
-    (magit-status (or (and (fboundp 'pro-project-root) (pro-project-root)) default-directory))))
+    (let ((root (or (and (fboundp 'pro-project-root) (pro-project-root)) default-directory)))
+      (magit-status root))))
+
+(defun pro-git-log-current ()
+  "Показать лог текущего репозитория."
+  (interactive)
+  (when (require 'magit nil t)
+    (magit-log-current)))
+
+(defun pro-git-dispatch ()
+  "Открыть магитовский диспетчер."
+  (interactive)
+  (when (require 'magit nil t)
+    (magit-dispatch)))
 
 (provide 'git)
