@@ -35,7 +35,7 @@ This repository provides a portable NixOS configuration plus a portable Emacs la
 - `modules/pro-storage.nix` contains Samba, Syncthing, Avahi discovery, and storage-related firewall policy.
 - `modules/pro-privacy.nix` contains Tor, I2P, and privacy-related firewall policy.
 - `emacs/base/modules/*.el` contains the modular Emacs base by concern.
-- `emacs/base/modules/ai.el` loads AI provider policy and model defaults from `emacs/base/modules/ai-models.json` with user override via `~/.config/emacs/ai-models.json`.
+- `emacs/base/modules/ai.el` loads AI provider policy and model defaults from `emacs/base/modules/ai-models.json` with user override via `~/.config/emacs/ai-models.json`; default provider is `aitunnel` and default model is `gpt-4.1-mini` when `auth-source` can read `~/.authinfo`.
 - `emacs/base/init.el` and `emacs/base/site-init.el` form the portable Emacs loader.
 - `modules/pro-users-wsl.nix` and `modules/pro-users-termux.nix` describe non-NixOS Emacs adapters.
 - `scripts/emacs-headless-test.sh` runs TTY/Xorg Emacs verification, executes headless ERT tests, and collects logs.

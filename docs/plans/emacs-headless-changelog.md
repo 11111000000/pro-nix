@@ -4,6 +4,7 @@
 
 ### Что нового
 
+- AITunnel стал дефолтным backend'ом Emacs AI, а модель по умолчанию теперь `gpt-4.1-mini`.
 - Добавлен headless-тестер с временным HOME: `scripts/test-emacs-headless.sh`.
 - Добавлен парсер логов: `scripts/parse-emacs-logs.sh`.
 - Добавлены ERT-тесты для базовой загрузки Emacs и модулей: `emacs/base/modules/tests.el`.
@@ -13,6 +14,8 @@
 
 ### Что изменилось
 
+- `emacs/base/modules/ai.el`: дефолтный backend переключен на `aitunnel`, fallback-автоподмена убрана.
+- `emacs/base/modules/ai-models.json`: для `aitunnel` задан `gpt-4.1-mini` как preferred model.
 - `scripts/test-emacs-headless.sh`: batch-ERT в TTY и Xorg (Xvfb).
 - `scripts/parse-emacs-logs.sh`: парсинг последнего или указанного прогона.
 - `scripts/emacs-headless-report.sh`: добавлена сводка по логам.

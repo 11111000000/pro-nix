@@ -4,7 +4,7 @@
 (require 'seq)
 (require 'subr-x)
 
-(defcustom pro-ai-backend 'openrouter
+(defcustom pro-ai-backend 'aitunnel
   "Предпочтительный AI-backend."
   :type '(choice (const openrouter) (const siliconflow) (const aitunnel))
   :group 'pro-ui)
@@ -53,7 +53,7 @@
 
 (defun pro-ai--normalize-model-id (id)
   "Нормализовать ID модели к строке для gptel."
-  (replace-regexp-in-string "^\|$" "" (format "%s" id)))
+  (format "%s" id))
 
 (defun pro-ai--merge-provider-configs (base override)
   "Слить конфиги провайдеров BASE и OVERRIDE по имени."
@@ -172,12 +172,10 @@
   (interactive)
   (when (require 'gptel nil t)
     (pro-ai--ensure-backends)
-    (unless (pro-ai--activate-backend (pro-ai--backend-choice))
-      (catch 'pro-ai-found
-        (dolist (provider '(openrouter siliconflow aitunnel))
-          (when (pro-ai--activate-backend provider)
-            (setq pro-ai-backend provider)
-            (throw 'pro-ai-found t)))))
+    (let ((backend (gptel-get-backend (pro-ai--backend-name (pro-ai--backend-choice)))))
+      (when backend
+        (setq gptel-backend backend
+              gptel-model (pro-ai--select-model (pro-ai--backend-choice)))))
     (setq gptel-use-curl t
           gptel-track-response pro-ai-enable-gptel-history)
     (call-interactively #'gptel)))
@@ -187,9 +185,9 @@
   (interactive)
   (setq pro-ai-backend
         (pcase pro-ai-backend
+          ('aitunnel 'openrouter)
           ('openrouter 'siliconflow)
-          ('siliconflow 'aitunnel)
-          (_ 'openrouter)))
+          (_ 'aitunnel)))
   (message "[pro-ai] backend: %S" pro-ai-backend))
 
 (defun pro-ai-reset-models ()
