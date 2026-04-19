@@ -19,10 +19,8 @@ sudo nixos-rebuild switch --flake .#default
 Готовый хост:
 
 ```bash
-sudo nixos-rebuild switch --flake .#thinkpad
-sudo nixos-rebuild switch --flake .#desktop
-sudo nixos-rebuild switch --flake .#cf19
-sudo nixos-rebuild switch --flake .#huawei
+# Применение конфигурации хоста
+just switch <HOST>  # thinkpad, desktop, cf19, huawei
 ```
 
 Интерактивная установка:
@@ -75,9 +73,11 @@ just headless-report
 - `just install` - интерактивная установка NixOS-хоста
 - `just install-emacs` - синхронизация портативного Emacs в текущий `~/.emacs.d`
 - `just install-plain` - то же самое для plain `.emacs.d`
-- `just flake-check` - проверка только `huawei` перед коммитом или по запросу
-- `just check-huawei` - быстрая сборка профиля `huawei`
-- `just check-all` - явная проверка всех машин
+- `just flake-check` - проверка flake (всех или конкретного хоста)
+- `just check-all` - сборка всех машин
+- `just build <HOST>` - сборка конфигурации (без применения)
+- `just switch <HOST>` - применение конфигурации
+- `just test <HOST>` - тестовый запуск конфигурации
 
 ## Что здесь есть
 

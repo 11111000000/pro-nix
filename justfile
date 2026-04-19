@@ -15,28 +15,16 @@ install-emacs:
 install-plain:
 	./scripts/emacs-sync.sh
 
-build:
-	sudo nixos-rebuild build --flake .#default
+build HOST:
+	sudo nixos-rebuild build --flake .#{{HOST}}
 
-build-huawei:
-	sudo nixos-rebuild build --flake .#huawei
+switch HOST:
+	sudo nixos-rebuild switch --flake .#{{HOST}}
 
-test:
-	sudo nixos-rebuild test --flake .#default
-
-test-huawei:
-	sudo nixos-rebuild test --flake .#huawei
-
-switch:
-	sudo nixos-rebuild switch --flake .#default
-
-switch-huawei:
-	sudo nixos-rebuild switch --flake .#huawei
+test HOST:
+	sudo nixos-rebuild test --flake .#{{HOST}}
 
 flake-check:
-	nix flake check
-
-flake-check-huawei:
 	nix flake check
 
 check-all:
