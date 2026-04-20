@@ -14,7 +14,7 @@
 
 (defun pro-agent-shell-setup ()
   "Настроить agent-shell с оптимизациями для ПРО."
-  (when (require 'agent-shell nil t)
+  (when (or (pro--package-provided-p 'agent-shell) (pro-packages--maybe-install 'agent-shell t) (require 'agent-shell nil t))
     ;; Базовые настройки UI
     (setq agent-shell-header-style 'text)
     (setq agent-shell-show-config-icons t)
