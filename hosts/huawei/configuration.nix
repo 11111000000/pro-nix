@@ -43,16 +43,15 @@ X11Forwarding no
 AllowTcpForwarding no
 '';
 
-  # Firewall: restrict SSH to LAN only
+  # Firewall: restrict SSH to LAN only (declarative)
   networking.firewall.enable = true;
-  networking.firewall.allowedTCPPorts = [];
-  networking.firewall.extraCommands = lib.mkAfter ''
-    iptables -I INPUT -p tcp -s 10.0.0.0/8 --dport 22 -j ACCEPT || true
-    iptables -I INPUT -p tcp -s 172.16.0.0/12 --dport 22 -j ACCEPT || true
-    iptables -I INPUT -p tcp -s 192.168.0.0/16 --dport 22 -j ACCEPT || true
-    iptables -I INPUT -p tcp -s 127.0.0.0/8 --dport 22 -j ACCEPT || true
-    iptables -I INPUT -p tcp --dport 22 -j DROP || true
-  '';
+  networking.firewall.allowedTCPPorts = [ 22 ];
+  networking.firewall.allowedTCPAddresses = lib.mkForce [
+    "10.0.0.0/8"
+    "172.16.0.0/12"
+    "192.168.0.0/16"
+    "127.0.0.0/8"
+  ];
   fileSystems."/boot" = lib.mkForce {
     device = "/dev/disk/by-uuid/6DD0-A9CB";
     fsType = "vfat";
