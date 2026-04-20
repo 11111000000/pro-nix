@@ -43,8 +43,10 @@
 (defun pro-project-switch-buffer ()
   "Переключить буфер внутри проекта."
   (interactive)
-  (when (require 'consult nil t)
-    (consult-buffer)))
+  (if (or (pro--package-provided-p 'consult) (pro-packages--maybe-install 'consult t) (require 'consult nil t))
+      (consult-buffer)
+    (pro-compat--notify-once "consult" "consult-buffer missing — fallback to switch-to-buffer")
+    (call-interactively #'switch-to-buffer)))
 
 (defun pro-project-open-dired ()
   "Открыть dired в корне проекта."

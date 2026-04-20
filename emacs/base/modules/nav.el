@@ -2,15 +2,15 @@
 
 ;; Этот модуль задаёт единый путь поиска по файлам, символам и проектам.
 
-(when (require 'vertico nil t)
+(when (or (pro--package-provided-p 'vertico) (pro-packages--maybe-install 'vertico t) (require 'vertico nil t))
   (vertico-mode 1)
   (setq vertico-cycle t))
 
-(when (require 'orderless nil t)
+(when (or (pro--package-provided-p 'orderless) (pro-packages--maybe-install 'orderless t) (require 'orderless nil t))
   (setq completion-styles '(orderless basic)
         completion-category-defaults nil))
 
-(when (require 'marginalia nil t)
+(when (or (pro--package-provided-p 'marginalia) (pro-packages--maybe-install 'marginalia t) (require 'marginalia nil t))
   (marginalia-mode 1))
 
 (when (or (pro--package-provided-p 'consult) (require 'consult nil t))
