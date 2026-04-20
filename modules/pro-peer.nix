@@ -51,15 +51,18 @@ in
       # SSH hardening defaults for pro-nix peers
       services.openssh = {
         enable = true;
-        permitRootLogin = "no";
-        passwordAuthentication = false;
-        challengeResponseAuthentication = false;
+        settings = {
+          PermitRootLogin = "no";
+          PasswordAuthentication = false;
+          KbdInteractiveAuthentication = false;
+        };
       };
 
-      # A small helper: create directory for pro-peer pubkeys if admin wants to populate it
-      systemd.tmpfiles.rules = lib.mkForce (lib.concatLists [ (if true then [ "f /var/lib/pro-peer/authorized_keys 0600 root root -" ] else []) ]);
-
-      systemd.tmpfiles.rules = [ "d /var/lib/pro-peer 0700 root root -" ];
+      # Ensure directory and placeholder authorized_keys file exist with secure permissions
+      systemd.tmpfiles.rules = [
+        "d /var/lib/pro-peer 0700 root root -",
+        "f /var/lib/pro-peer/authorized_keys 0600 root root -"
+      ];
     })
 
     (lib.mkIf config.pro-peer.enableKeySync {
