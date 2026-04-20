@@ -58,8 +58,7 @@ ollama
   htop
   neofetch
   feh
-  gimp
-  xterm
+   xterm
   pcmanfm
   xfce.thunar
   ffmpegthumbnailer      # Видео-миниатюры для tumbler
@@ -241,8 +240,6 @@ ollama
   pandoc                # Универсальный конвертер документов.
 
   # Офисные приложения держат документальный слой рядом с кодом, а не отдельно от него.
-  libreoffice-fresh  # LibreOffice Impress, Writer, Calc и другие инструменты пакета.
-
   #clamav
   # haskell
   haskellPackages.haskell-language-server
@@ -252,8 +249,6 @@ ollama
   evince
   zathura
   
-  blender
-
   # Финальные Python-обёртки закрывают цикл: любой вызов из PATH попадает в один и тот же исполняемый контур.
   pythonCmd
   python3Cmd
