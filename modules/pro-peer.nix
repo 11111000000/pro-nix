@@ -42,11 +42,10 @@ in
 
   # Collect conditional fragments and merge them into a single `config` attribute
   config = lib.mkMerge [
-    (lib.mkIf (config.pro-peer.enable or true) {
+    (lib.mkIf (config.pro-peer.enable || true) {
       # Avahi for mDNS host discovery in LAN
       services.avahi = {
         enable = true;
-        publish = { _ssh._tcp = { port = 22; }; };
       };
 
       # SSH hardening defaults for pro-nix peers
@@ -73,7 +72,7 @@ in
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = ''/etc/pro-peer-sync-keys.sh --input ${config.pro-peer.keysGpgPath} --out /var/lib/pro-peer/authorized_keys'';
+          ExecStart = builtins.concatStringsSep " " [ "/etc/pro-peer-sync-keys.sh" "--input" config.pro-peer.keysGpgPath "--out" "/var/lib/pro-peer/authorized_keys" ];
         };
       };
 
@@ -84,7 +83,7 @@ in
       };
     })
 
-    (lib.mkIf (config.pro-peer.allowTorHiddenService and config.pro-peer.torBackupRecipient != null) {
+    (lib.mkIf (config.pro-peer.allowTorHiddenService && (config.pro-peer.torBackupRecipient != null)) {
       environment.systemPackages = with pkgs; [ gnupg tar ];
       environment.etc."pro-peer-backup-hiddenservice.sh".source = ./scripts/backup-hiddenservice.sh;
       environment.etc."pro-peer-backup-hiddenservice.sh".mode = "0755";
@@ -93,7 +92,10 @@ in
         description = "Backup tor hidden service key encrypted to recipient";
         after = [ "tor.service" ];
         wantedBy = [ "multi-user.target" ];
-        serviceConfig = { Type = "oneshot"; ExecStart = ''/etc/pro-peer-backup-hiddenservice.sh --hidden-dir /var/lib/tor/ssh_hidden_service --recipient "${config.pro-peer.torBackupRecipient}" --out-dir /var/lib/pro-peer ''; };
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = builtins.concatStringsSep " " [ "/etc/pro-peer-backup-hiddenservice.sh" "--hidden-dir" "/var/lib/tor/ssh_hidden_service" "--recipient" config.pro-peer.torBackupRecipient "--out-dir" "/var/lib/pro-peer" ];
+        };
       };
     })
 
@@ -102,9 +104,12 @@ in
       systemd.services.yggdrasil = {
         description = "Yggdrasil mesh daemon (pro-peer)";
         wantedBy = [ "multi-user.target" ];
-        serviceConfig = { ExecStart = ''${pkgs.yggdrasil}/bin/yggdrasil -useconffile ${config.pro-peer.yggdrasilConfigPath or "/etc/yggdrasil.conf"}''; Restart = "on-failure"; };
+        serviceConfig = {
+          ExecStart = builtins.concatStringsSep " " [ (builtins.toString pkgs.yggdrasil + "/bin/yggdrasil") "-useconffile" (if config.pro-peer.yggdrasilConfigPath != null then config.pro-peer.yggdrasilConfigPath else "/etc/yggdrasil.conf") ];
+          Restart = "on-failure";
+        };
       };
-      environment.etc."yggdrasil.conf".source = lib.mkIf (config.pro-peer.yggdrasilConfigPath == null) ''{ Peers: [] }'' '';
+      environment.etc."yggdrasil.conf".text = if config.pro-peer.yggdrasilConfigPath == null then ''{ Peers: [] }'' else null;
     })
 
     (lib.mkIf config.pro-peer.enableWireguardHelper {
@@ -123,16 +128,19 @@ in
       environment.etc."pro-peer-tor-note".text = ''Tor hidden service for SSH is enabled. See /var/lib/tor/ssh_hidden_service/hostname'';
     })
 
-    (lib.mkIf (config.pro-peer.allowTorHiddenService) (let torDir = "/var/lib/tor/ssh_hidden_service"; in {
-      services.tor = { enable = true; extraConfig = ''HiddenServiceDir ${torDir}
-HiddenServicePort 22 127.0.0.1:22
-''; };
+    (lib.mkIf (config.pro-peer.allowTorHiddenService) {
+      services.tor = {
+        enable = true;
+        extraConfig = builtins.concatStringsSep "\n" [ "HiddenServiceDir /var/lib/tor/ssh_hidden_service" "HiddenServicePort 22 127.0.0.1:22" ];
+      };
       systemd.services."pro-peer-tor-key-perms" = {
         description = "Ensure tor hidden service permissions";
         after = [ "tor.service" ];
         wantedBy = [ "multi-user.target" ];
-        serviceConfig = { Type = "oneshot"; ExecStart = ''chown -R debian-tor:debian-tor ${torDir} || true
-chmod 700 ${torDir} || true''; };
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = builtins.concatStringsSep " && " [ "chown -R debian-tor:debian-tor /var/lib/tor/ssh_hidden_service || true" "chmod 700 /var/lib/tor/ssh_hidden_service || true" ];
+        };
       };
     })
   ];
