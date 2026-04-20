@@ -101,9 +101,10 @@
   # and the setuid bit is managed correctly by the activation scripts.
   # Note: this is also set in modules/pro-users.nix for host-wide defaults.
   security.sudo.enable = true;
-  # Require password for wheel users by default; pro-users module may override
-  # with wheelNeedsPassword = false for convenience on trusted hosts.
-  security.sudo.wheelNeedsPassword = true;
+  # Prefer wheel users to require a password by default, but allow host modules
+  # (eg. modules/pro-users.nix) to override this. Use lib.mkDefault so later
+  # module definitions can set a different value without an option conflict.
+  security.sudo.wheelNeedsPassword = lib.mkDefault true;
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 5: Аппаратная поддержка и базовые сервисы
