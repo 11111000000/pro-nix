@@ -16,7 +16,7 @@
   (when (derived-mode-p 'emacs-lisp-mode 'lisp-interaction-mode)
     (eval-buffer)))
 
-(when (require 'rainbow-delimiters nil t)
+(when (or (pro--package-provided-p 'rainbow-delimiters) (pro-packages--maybe-install 'rainbow-delimiters t) (require 'rainbow-delimiters nil t))
   (add-hook 'emacs-lisp-mode-hook #'rainbow-delimiters-mode)
   (add-hook 'lisp-interaction-mode-hook #'rainbow-delimiters-mode))
 

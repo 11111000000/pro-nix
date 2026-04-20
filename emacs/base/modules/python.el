@@ -15,7 +15,7 @@
   (when buffer-file-name
     (compile (format "python %s" (shell-quote-argument buffer-file-name)))))
 
-(when (require 'eglot nil t)
+(when (or (pro--package-provided-p 'eglot) (pro-packages--maybe-install 'eglot t) (require 'eglot nil t))
   (add-hook 'python-ts-mode-hook #'eglot-ensure))
 
 (add-hook 'python-ts-mode-hook #'pro-python-setup)

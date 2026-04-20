@@ -14,7 +14,7 @@
   (interactive)
   (message "[pro-java] project entrypoint is intentionally minimal"))
 
-(when (require 'eglot nil t)
+(when (or (pro--package-provided-p 'eglot) (pro-packages--maybe-install 'eglot t) (require 'eglot nil t))
   (add-hook 'java-ts-mode-hook #'eglot-ensure))
 
 (add-hook 'java-ts-mode-hook #'pro-java-setup)

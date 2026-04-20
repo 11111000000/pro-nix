@@ -18,7 +18,7 @@
 (when (fboundp 'global-prettify-symbols-mode)
   (global-prettify-symbols-mode 1))
 
-(when (require 'eldoc nil t)
+(when (or (pro--package-provided-p 'eldoc) (pro-packages--maybe-install 'eldoc t) (require 'eldoc nil t))
   (setq eldoc-idle-delay 0.4))
 
 (provide 'text)

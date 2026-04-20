@@ -5,7 +5,7 @@
 (defun pro-feeds-open ()
   "Открыть ленты, если пакет доступен."
   (interactive)
-  (when (require 'elfeed nil t)
+  (when (or (pro--package-provided-p 'elfeed) (pro-packages--maybe-install 'elfeed t) (require 'elfeed nil t))
     (elfeed)))
 
 (provide 'feeds)

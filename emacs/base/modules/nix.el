@@ -3,7 +3,7 @@
 (defvar pro-nix-rebuild-target "default"
   "Целевой nixos-конфиг для `nixos-rebuild`.")
 
-(when (require 'nix-mode nil t)
+(when (or (pro--package-provided-p 'nix-mode) (pro-packages--maybe-install 'nix-mode t) (require 'nix-mode nil t))
   (add-to-list 'auto-mode-alist '("\\.nix\\'" . nix-mode))
   (add-hook 'nix-mode-hook (lambda ()
                              (setq-local indent-tabs-mode nil)

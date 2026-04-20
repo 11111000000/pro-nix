@@ -13,8 +13,8 @@
 (when (or (pro--package-provided-p 'marginalia) (pro-packages--maybe-install 'marginalia t) (require 'marginalia nil t))
   (marginalia-mode 1))
 
-(when (or (pro--package-provided-p 'consult) (require 'consult nil t))
-  (when (require 'consult-xref nil t)
+  (when (or (pro--package-provided-p 'consult) (pro-packages--maybe-install 'consult t) (require 'consult nil t))
+  (when (or (pro--package-provided-p 'consult-xref) (pro-packages--maybe-install 'consult-xref t) (require 'consult-xref nil t))
     (setq xref-show-definitions-function #'consult-xref
           xref-show-xrefs-function #'consult-xref)))
 

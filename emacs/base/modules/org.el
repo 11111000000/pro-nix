@@ -2,7 +2,7 @@
 
 ;; Этот модуль делает Org удобным для заметок, таблиц, задач и ТЗ.
 
-(when (require 'org nil t)
+(when (or (pro--package-provided-p 'org) (pro-packages--maybe-install 'org t) (require 'org nil t))
   (setq org-startup-indented t
         org-hide-emphasis-markers t
         org-src-fontify-natively t
@@ -16,7 +16,7 @@
         org-image-actual-width nil
         org-table-formula-use-constants nil))
 
-(when (require 'org-tempo nil t)
+(when (or (pro--package-provided-p 'org-tempo) (pro-packages--maybe-install 'org-tempo t) (require 'org-tempo nil t))
   (setq org-structure-template-alist
         '(("s" . "src")
           ("e" . "example")
