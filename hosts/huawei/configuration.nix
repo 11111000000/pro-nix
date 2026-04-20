@@ -4,7 +4,7 @@
   imports = [ ../../modules/pro-users.nix ];
 
   networking.hostName = "huawei";
-  system.stateVersion = "25.05";
+  system.stateVersion = "25.11";
 
   hardware.enableAllFirmware = true;
   hardware.cpu.intel.updateMicrocode = true;

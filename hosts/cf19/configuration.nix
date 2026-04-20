@@ -5,7 +5,7 @@
 
   # CF-19: Panasonic Let's Note CF-MX — BIOS-загрузка через GRUB без EFI-слоя.
   networking.hostName = "cf19";
-  system.stateVersion = "25.05";
+  system.stateVersion = "25.11";
 
   # Аппаратная поддержка
   hardware.enableAllFirmware = true;
