@@ -57,7 +57,7 @@ in
       };
 
       # A small helper: create directory for pro-peer pubkeys if admin wants to populate it
-      users.users.root.openssh.authorizedKeys.keysFile = lib.mkForce "/var/lib/pro-peer/authorized_keys";
+      users.users.root.openssh.authorizedKeys.keyFiles = lib.mkForce [ "/var/lib/pro-peer/authorized_keys" ];
 
       systemd.tmpfiles.rules = [ "d /var/lib/pro-peer 0700 root root -" ];
     })
