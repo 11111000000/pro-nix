@@ -8,12 +8,17 @@ in
   services.samba.openFirewall = true;
   services.avahi.enable = true;
   services.avahi.publish.enable = true;
+  # Configure Samba to be reachable on the local network only and advertise via mDNS
   services.samba.extraConfig = ''
     [global]
       workgroup = WORKGROUP
       server string = NixOS Samba Server
       map to guest = Bad User
       usershare allow guests = Yes
+      # Bind Samba to loopback and the local LAN subnet so it's easy to reach from LAN
+      # but not exposed to unrelated external networks. Adjust the CIDR below if your LAN differs.
+      interfaces = 127.0.0.1 192.168.181.0/24
+      bind interfaces only = Yes
   '';
   services.samba.shares."${hostName}" = {
     path = "/srv/samba/${hostName}";
@@ -51,4 +56,13 @@ in
     allowedTCPPorts = [ 22000 8384 139 445 ];
     allowedUDPPorts = [ 21027 137 138 ];
   };
+
+  # Ensure avahi (mDNS) advertises the Samba service so other local machines discover it easily.
+  services.avahi.publish.services = lib.mkForce [
+    {
+      name = "Samba";
+      type = "_smb._tcp";
+      port = 445;
+    }
+  ];
 }
