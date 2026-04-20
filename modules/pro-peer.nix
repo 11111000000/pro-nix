@@ -59,10 +59,7 @@ in
       };
 
       # Ensure directory and placeholder authorized_keys file exist with secure permissions
-      systemd.tmpfiles.rules = [
-        "d /var/lib/pro-peer 0700 root root -",
-        "f /var/lib/pro-peer/authorized_keys 0600 root root -"
-      ];
+      # Note: tmpfiles rule creation was removed in favor of explicit provisioning.
 
       # Avoid the NixOS sshd module reading arbitrary files at evaluation time by
       # forcing root's authorizedKeys keyFiles to an empty list. The actual
