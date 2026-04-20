@@ -20,7 +20,7 @@ cp -f "$repo_root/emacs-keys.org" "$target_dir/keys.org.example"
 
 cat > "$target_dir/modules.el" <<'EOF'
 ;; Список модулей для портативного профиля.
-(setq pro-emacs-modules '(core ui text nav keys org lisp nix python c java haskell project git ai feeds chat agent exwm))
+(setq pro-emacs-modules '(core ui packages package-bootstrap text nav keys org lisp nix python c java haskell project git ai feeds chat agent exwm))
 EOF
 
 if [ "$target_dir" = "$HOME/.config/emacs" ]; then

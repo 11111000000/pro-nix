@@ -41,8 +41,8 @@
              (format-time-string "%F-%H-%M-%S.md")
              (agent-shell--dot-subdir "transcripts"))))
     
-    ;; Предпочтительная конфигурация агента
-    (setq agent-shell-preferred-agent-config 'opencode)
+    ;; Prefer the bundled agent config if available; avoid hard dependency on opencode.
+    (setq agent-shell-preferred-agent-config 'gptel)
     (setq agent-shell-session-strategy 'prompt)))
 
 ;; Инициализация настроек
@@ -62,6 +62,6 @@
         (when (fboundp 'agent-shell-interrupt)
           (define-key map (kbd "C-c C-g") #'agent-shell-interrupt))
         (when (fboundp 'agent-shell-show-usage)
-          (define-key map (kbd "C-c C-u") #'agent-shell-show-usage)))))
+          (define-key map (kbd "C-c C-u") #'agent-shell-show-usage))))))
 
 (provide 'agent-shell)

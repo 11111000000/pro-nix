@@ -28,7 +28,7 @@
 (defun pro-keys-apply-binding (key command)
   "Привязать KEY к COMMAND, если KEY не пустой."
   (when (and key command (not (string-empty-p key)))
-    (if (symbolp command)
+    (if (and (symbolp command) (fboundp command))
         (global-set-key (kbd key) command)
       (message "[pro-keys] command %s not found for key %s" command key))))
 

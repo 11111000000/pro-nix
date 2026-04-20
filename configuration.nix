@@ -158,7 +158,11 @@
 # Включены дополнительные механизмы для поддержки AppImage, динамических бинарников, 
 # а также активация экспериментальных функций системы сборки Nix (flakes). 
 
-  programs.nix-ld.enable = true;  
+  # nix-ld injects a compatibility library path which can cause GTK/GLib
+  # library version mismatches for GUI applications (see docs/research/analysis-results.txt).
+  # Disable by default to avoid `GdkDisplayManager` / GLib type registration errors
+  # (telegram-desktop and other GTK apps may crash if nix-ld provides incompatible libs).
+  programs.nix-ld.enable = false;
 
   # Включение flakes, регулярная очистка и оптимизация кэша пакетов.
   nix = {
@@ -230,7 +234,10 @@
     LANG = "ru_RU.UTF-8";
     LC_CTYPE = "ru_RU.UTF-8";
     GTK_KEY_THEME = "Emacs";
-    QT_QPA_PLATFORMTHEME = lib.mkForce "qt5ct";
+    # Avoid forcing Qt to load GTK platformtheme plugin (libqgtk3), which can
+    # cause GTK/GLib symbol conflicts and crashes in mixed GTK/Qt applications
+    # (see analysis-results.txt). Leave empty to use default Qt theming.
+    QT_QPA_PLATFORMTHEME = "";
     XCURSOR_THEME = "Adwaita";
     XCURSOR_SIZE = "24";
   };

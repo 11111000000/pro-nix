@@ -30,9 +30,6 @@ flake-check:
 check-all:
 	nix run .#check-all
 
-check-huawei:
-	nix build .#nixosConfigurations.huawei.config.system.build.toplevel --no-link
-
 headless-tty:
 	./scripts/emacs-verify.sh tty
 

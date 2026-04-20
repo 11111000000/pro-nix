@@ -3,10 +3,6 @@
 let
   emacsPackages = pkgs.emacsPackagesFor emacsPkg;
   emacsRuntime = emacsPackages.emacsWithPackages (epkgs: with epkgs; [
-    consult
-    vertico
-    orderless
-    marginalia
     magit
     ligature
     kind-icon
@@ -14,12 +10,8 @@ let
     treemacs-icons-dired
     nerd-icons-ibuffer
     eldoc-box
-    which-key
-    rainbow-delimiters
-    corfu
     nix-mode
     exwm
-    gptel
   ]);
   xvfbRun = pkgs."xvfb-run";
 

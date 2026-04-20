@@ -4,6 +4,11 @@
 (require 'seq)
 (require 'subr-x)
 
+(defun pro-ai--ensure-gptel-openai ()
+  "Load gptel OpenAI backend support if available."
+  (or (featurep 'gptel-openai)
+      (require 'gptel-openai nil t)))
+
 (defcustom pro-ai-backend 'aitunnel
   "Предпочтительный AI-backend."
   :type '(choice (const openrouter) (const siliconflow) (const aitunnel))
@@ -130,7 +135,9 @@
          (auth-user (or (pro-ai--provider-field config 'auth_user) "token"))
          (key (pro-ai--load-key-from-authinfo auth-host auth-user))
          (models (pro-ai--provider-models config)))
-    (when (and key host endpoint models (fboundp 'gptel-make-openai))
+    (when (and key host endpoint models
+               (pro-ai--ensure-gptel-openai)
+               (fboundp 'gptel-make-openai))
       (setq gptel--known-backends
             (assq-delete-all backend-name gptel--known-backends))
       (gptel-make-openai backend-name
@@ -158,9 +165,30 @@
          (models (pro-ai--provider-models config)))
     (or preferred (car models))))
 
+(defun pro-ai--backend-display-name (backend)
+  "Вернуть читаемое имя BACKEND, если возможно."
+  (cond
+   ((and backend (fboundp 'gptel-backend-name))
+    (condition-case nil
+        (format "%s" (gptel-backend-name backend))
+      (error (format "%s" backend))))
+   (backend (format "%s" backend))
+   (t "<nil>")))
+
+(defun pro-ai--model-display-name (model)
+  "Вернуть читаемое имя MODEL."
+  (cond
+   ((and model (fboundp 'gptel--model-name))
+    (condition-case nil
+        (format "%s" (gptel--model-name model))
+      (error (format "%s" model))))
+   (model (format "%s" model))
+   (t "<nil>")))
+
 (defun pro-ai--activate-backend (provider)
   "Сделать PROVIDER активным в gptel."
   (let ((backend-name (pro-ai--backend-name provider)))
+    (pro-ai--ensure-gptel-openai)
     (when (and (fboundp 'gptel-get-backend)
                (gptel-get-backend backend-name))
       (setq gptel-backend (gptel-get-backend backend-name)
@@ -171,13 +199,13 @@
   "Открыть AI-буфер с учётом выбранного backend-а."
   (interactive)
   (when (require 'gptel nil t)
-    (when (fboundp 'pro-ai-load-keys)
-      (ignore-errors (pro-ai-load-keys)))
-
     (pro-ai--ensure-backends)
     (pro-ai--activate-backend (pro-ai--backend-choice))
     (setq gptel-use-curl t
-          gptel-track-response pro-ai-enable-gptel-history)
+           gptel-track-response pro-ai-enable-gptel-history)
+    (message "[pro-ai] active: backend=%s model=%s"
+             (pro-ai--backend-display-name (and (boundp 'gptel-backend) gptel-backend))
+             (pro-ai--model-display-name (and (boundp 'gptel-model) gptel-model)))
     (call-interactively #'gptel)))
 
 (defun pro-ai-load-keys ()
@@ -256,5 +284,15 @@ by providers and prints a short status message."
 
   ;; Advice для оптимизации обработки
   (advice-add 'agent-shell--handle :around #'pro-ai-agent-shell--reload-after-first-turn))
+
+;; Auto-activate default backend when gptel loads
+(with-eval-after-load 'gptel
+  (pro-ai--ensure-backends)
+  (setq gptel-backend (and (fboundp 'gptel-get-backend)
+                           (gptel-get-backend "Aitunnel")))
+  (when gptel-backend
+    (setq gptel-model (pro-ai--select-model 'aitunnel)))
+  (message "[pro-ai] default backend: %s"
+           (pro-ai--backend-display-name (and (boundp 'gptel-backend) gptel-backend))))
 
 (provide 'ai)

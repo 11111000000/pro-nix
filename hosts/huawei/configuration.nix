@@ -11,6 +11,12 @@
   hardware.uinput.enable = true;
   hardware.firmware = [ pkgs.sof-firmware ];
 
+  boot.kernelParams = [
+    "mem_sleep_default=s2idle"
+    "i915.enable_psr=0"
+    "nvme_core.default_ps_max_latency_us=0"
+    "acpi_backlight=native"
+  ];
   boot.resumeDevice = "/dev/nvme0n1p3";
   boot.extraModprobeConfig = ''
     options snd-intel-dspcfg dsp_driver=1

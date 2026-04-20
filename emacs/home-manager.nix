@@ -2,7 +2,7 @@
 
 let
   cfg = config.pro.emacs;
-  defaultModules = [ "core" "ui" "git" "nix" "js" "ai" "exwm" ];
+  defaultModules = [ "core" "ui" "packages" "package-bootstrap" "text" "nav" "keys" "org" "lisp" "python" "c" "java" "haskell" "project" "git" "ai" "feeds" "chat" "agent" "exwm" ];
   defaultModulesText = lib.concatStringsSep " " defaultModules;
   hmPackages = with pkgs; [ fd ripgrep home-manager fnm git ];
   guiPackages = with pkgs; [ xclip rxvt-unicode obexd ];
@@ -104,6 +104,8 @@ let
       executable = true;
     };
 
+    # opencode integration removed. See docs/opencode-integration.md.
+
     home.file.".config/pro/exwm-session" = {
       text = ''
         #!/usr/bin/env bash
@@ -120,6 +122,7 @@ let
 
         eval $(ssh-agent -s)
         export SSH_AUTH_SOCK
+        # Ensure nix-ld is not used inside EXWM/Emacs session by clearing preload.
         export NIX_LD_PRELOAD=""
         xset -b
         xhost +SI:localuser:$USER

@@ -34,6 +34,22 @@
 
   console.font = lib.mkForce "${pkgs.kbd}/share/consolefonts/latarcyrheb-sun16.psfu.gz";
 
+  powerManagement.resumeCommands = lib.mkAfter ''
+    for n in XHCI RP05; do
+      if awk -v d="$n" '$1==d && $3 ~ /\*enabled/' /proc/acpi/wakeup >/dev/null 2>&1; then
+        echo "$n" > /proc/acpi/wakeup || true
+      fi
+    done
+  '';
+
+  powerManagement.powerUpCommands = lib.mkAfter ''
+    for n in XHCI RP05; do
+      if awk -v d="$n" '$1==d && $3 ~ /\*enabled/' /proc/acpi/wakeup >/dev/null 2>&1; then
+        echo "$n" > /proc/acpi/wakeup || true
+      fi
+    done
+  '';
+
   fileSystems."/" = lib.mkForce {
     device = "/dev/disk/by-uuid/d7d6e5f8-2c00-47ad-931a-a6b73a1cdcc2";
     fsType = "ext4";

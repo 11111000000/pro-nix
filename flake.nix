@@ -24,8 +24,6 @@
       };
 
       hosts = {
-        thinkpad = mkHost [ ./hosts/thinkpad/configuration.nix ];
-        desktop = mkHost [ ./hosts/desktop/configuration.nix ];
         cf19 = mkHost [ ./hosts/cf19/configuration.nix ];
         huawei = mkHost [ ./hosts/huawei/configuration.nix ];
       };
@@ -39,8 +37,6 @@
         meta.description = "Build all machine configurations explicitly";
         program = toString (pkgs.writeShellScript "check-all-hosts" ''
           set -eu
-          nix build .#nixosConfigurations.thinkpad.config.system.build.toplevel
-          nix build .#nixosConfigurations.desktop.config.system.build.toplevel
           nix build .#nixosConfigurations.cf19.config.system.build.toplevel
           nix build .#nixosConfigurations.huawei.config.system.build.toplevel
         '');

@@ -6,7 +6,7 @@
   services.xserver.desktopManager.cinnamon.enable = true;
   # Сеансовые команды на уровне дисплей-менеджера собирают те детали, которые должны появиться до запуска графической среды, но не жить в системе как закон.
   services.xserver.displayManager.sessionCommands = ''
-    export PATH="/run/wrappers/bin:$HOME/.opencode/bin:$HOME/.local/bin:/run/current-system/sw/bin:$PATH"
+    export PATH="/run/wrappers/bin:$HOME/.local/bin:/run/current-system/sw/bin:$PATH"
     export EMACS_STARTUP_LOG_DIR="$HOME/.cache/emacs-startup"
     export EMACS_STARTUP_LOG_FILE="$EMACS_STARTUP_LOG_DIR/gdm-exwm.log"
     mkdir -p "$EMACS_STARTUP_LOG_DIR"

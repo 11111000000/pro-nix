@@ -11,23 +11,8 @@
   boot.kernelParams = [ "mem_sleep_default=deep" ];
   boot.extraModulePackages = [ ];
 
-  fileSystems."/" =
-    { device = "/dev/disk/by-uuid/b7a0681a-d1e2-4898-b213-f060d77b292a";
-      fsType = "ext4";
-    };
-
-  fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/6DD0-A9CB";
-      fsType = "vfat";
-      options = [ "fmask=0077" "dmask=0077" ];
-    };
-
-  swapDevices =
-    [ { device = "/dev/disk/by-uuid/422bf68d-025a-4c1b-a3ba-c282ab7d4884"; }
-    ];
-
-  # swapDevices в hardware конфиге лучше закомментировать (или удалить), если используется только zram через configuration.nix:
-  # swapDevices = [ ];
+  # Host-specific storage belongs in the host profile, not in this shared scan file.
+  # Keep this file limited to hardware that is shared across targets.
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
