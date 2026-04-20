@@ -131,14 +131,16 @@
   '';
   
   # Параметры сна/гибернации.
-  services.logind.extraConfig = ''
-    [Login]
-    LidSwitchIgnoreInhibited=no
-    HandlePowerKey=suspend-then-hibernate
-    HandleLidSwitch=suspend-then-hibernate
-    HandleLidSwitchExternalPower=suspend
-    HandleLidSwitchDocked=suspend
-  '';
+  # Configure systemd-logind via structured settings (replacement for extraConfig)
+  services.logind.settings = {
+    Login = {
+      LidSwitchIgnoreInhibited = "no";
+      HandlePowerKey = "suspend-then-hibernate";
+      HandleLidSwitch = "suspend-then-hibernate";
+      HandleLidSwitchExternalPower = "suspend";
+      HandleLidSwitchDocked = "suspend";
+    };
+  };
 
   services.upower = {
     enable = true;

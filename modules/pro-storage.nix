@@ -9,17 +9,17 @@ in
   services.avahi.enable = true;
   services.avahi.publish.enable = true;
   # Configure Samba to be reachable on the local network only and advertise via mDNS
-  services.samba.extraConfig = ''
-    [global]
-      workgroup = WORKGROUP
-      server string = NixOS Samba Server
-      map to guest = Bad User
-      usershare allow guests = Yes
-      # Bind Samba to loopback and the local LAN subnet so it's easy to reach from LAN
-      # but not exposed to unrelated external networks. Adjust the CIDR below if your LAN differs.
-      interfaces = 127.0.0.1 192.168.181.0/24
-      bind interfaces only = Yes
-  '';
+  # Use the structured settings API for newer NixOS releases
+  services.samba.settings.global = lib.mkForce {
+    workgroup = "WORKGROUP";
+    "server string" = "NixOS Samba Server";
+    "map to guest" = "Bad User";
+    "usershare allow guests" = "Yes";
+    # Bind Samba to loopback and the local LAN subnet so it's easy to reach from LAN
+    # but not exposed to unrelated external networks. Adjust the CIDR below if your LAN differs.
+    interfaces = "127.0.0.1 192.168.181.0/24";
+    "bind interfaces only" = "Yes";
+  };
   services.samba.shares."${hostName}" = {
     path = "/srv/samba/${hostName}";
     browseable = "yes";
