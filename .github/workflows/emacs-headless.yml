@@ -32,10 +32,12 @@ jobs:
         run: |
           ./scripts/emacs-headless-test.sh tty
 
-      - name: Check for missing-key warnings
+      - name: Summarize headless logs
         run: |
           LOGDIR=$(ls -td logs/emacs-headless/* | head -n1)
           echo "Checking logs in $LOGDIR"
+          ./scripts/parse-emacs-logs.sh "$LOGDIR" | tee run-summary.txt
+          # Fail build if critical warnings are present
           if rg "command .* not found for key" "$LOGDIR"; then
             echo "Found key binding warnings" >&2
             rg "command .* not found for key" "$LOGDIR" >&2
@@ -43,3 +45,9 @@ jobs:
           else
             echo "No missing key commands found"
           fi
+
+      - name: Upload headless logs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: emacs-headless-logs
+          path: logs/emacs-headless
