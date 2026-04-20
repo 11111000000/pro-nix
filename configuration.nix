@@ -61,9 +61,7 @@
   boot.plymouth.theme = "spinner";                     # Спиннер выбран как спокойная форма ожидания без декоративного шума.
 
   boot.kernelPackages = pkgs.linuxPackages_6_6;        # LTS-ядро здесь поддерживает устойчивость сна и пробуждения на этом поколении железа.
-  boot.kernelParams = [ "mem_sleep_default=s2idle" "i915.enable_psr=0" "nvme_core.default_ps_max_latency_us=0" "acpi_backlight=native" ];
   boot.kernel.sysctl."kernel.sysrq" = 1;               # SysRq оставлен как аварийный выход, когда система перестаёт отвечать как среда, а не как инструмент.
-  boot.resumeDevice = "/dev/nvme0n1p3";                 # Устройство resume фиксирует путь к гибернации на этой машине.
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 3: Сетевая конфигурация и имя машины
@@ -97,6 +95,9 @@
     LC_TELEPHONE = "ru_RU.UTF-8";
     LC_TIME = "ru_RU.UTF-8";
   };
+  # Enable and configure sudo via NixOS module so the binary is installed
+  # and the setuid bit is managed correctly by the activation scripts.
+  security.sudo.enable = true;
   security.sudo.wheelNeedsPassword = false;
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -118,7 +119,7 @@
   services.blueman.enable = true;           # Графический интерфейс управления Bluetooth.
 
   powerManagement.enable = true;           # Общесистемное управление питанием.
-    powerManagement.resumeCommands = ''
+  powerManagement.resumeCommands = ''
     modprobe -r battery ac 2>/dev/null || modprobe -r battery
     sleep 1
     modprobe battery
@@ -127,12 +128,6 @@
     udevadm settle -t 5 || true
     ${pkgs.upower}/bin/upower --enumerate >/dev/null 2>&1 || true
     systemctl try-restart upower.service 2>/dev/null || true
-
-    for n in XHCI RP05; do
-      if awk -v d="$n" '$1==d && $3 ~ /\*enabled/' /proc/acpi/wakeup >/dev/null 2>&1; then
-        echo "$n" > /proc/acpi/wakeup || true
-      fi
-    done
   '';
   
   # Параметры сна/гибернации.
@@ -241,12 +236,4 @@
   };
 
   system.stateVersion = "25.05";
-
-   powerManagement.powerUpCommands = ''
-     for n in XHCI RP05; do
-       if awk -v d="$n" '$1==d && $3 ~ /\*enabled/' /proc/acpi/wakeup >/dev/null 2>&1; then
-         echo "$n" > /proc/acpi/wakeup || true
-       fi
-     done
-   '';
 }
