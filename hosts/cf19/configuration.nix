@@ -78,12 +78,8 @@ AllowTcpForwarding no
 
   # Firewall: allow SSH only from private networks and loopback; all other SSH connections dropped
   networking.firewall.enable = true;
-  networking.firewall.allowedTCPPorts = [ 22 ];
-  networking.firewall.allowedTCPAddresses = lib.mkForce [
-    "10.0.0.0/8"
-    "172.16.0.0/12"
-    "192.168.0.0/16"
-    "127.0.0.0/8"
+  networking.firewall.allowedTCPPorts = [
+    { port = 22; allowedAddresses = [ "10.0.0.0/8" "172.16.0.0/12" "192.168.0.0/16" "127.0.0.0/8" ]; }
   ];
   fileSystems."/boot" = lib.mkForce {
     device = "/dev/disk/by-uuid/c3ff38e8-0de3-427a-983f-86871ed38d32";
