@@ -58,12 +58,22 @@ in
         };
       };
 
-      # Ensure directory and placeholder authorized_keys file exist with secure permissions
-      # Note: tmpfiles rule creation was removed in favor of explicit provisioning.
+      # Ensure directory for runtime-managed authorized_keys exists with
+      # secure permissions and provide a visible placeholder so state is
+      # inspectable. We avoid pointing Nix's sshd module at a runtime file
+      # (which could be unavailable during evaluation) but provide tmpfiles
+      # and an on-disk placeholder for operators.
+      systemd.tmpfiles.rules = lib.mkForce [
+        "d /var/lib/pro-peer 0700 root root -"
+        "f /var/lib/pro-peer/authorized_keys 0600 root root -"
+      ];
 
-      # Avoid the NixOS sshd module reading arbitrary files at evaluation time by
-      # forcing root's authorizedKeys keyFiles to an empty list. The actual
-      # authorized_keys is managed at runtime by the pro-peer sync service.
+      environment.etc."pro-peer/authorized_keys".text = "# Managed at runtime by pro-peer-sync-keys\n";
+
+      # Keep sshd's Nix config from reading arbitrary files at evaluation
+      # time by forcing an empty authorizedKeys declaration. The runtime
+      # service writes to /var/lib/pro-peer/authorized_keys which SSH will
+      # read at service start.
       users.users.root.openssh.authorizedKeys = lib.mkForce { keys = []; keyFiles = []; };
     })
 
@@ -130,19 +140,19 @@ in
 
     (lib.mkIf config.pro-peer.enableWireguardHelper {
       environment.systemPackages = with pkgs; [ wireguard-tools ];
+      # Install a small wrapper script that normalizes wg-quick behavior so
+      # the systemd unit can remain simple and not embed shell operators.
+      environment.etc."pro-peer-wg-quick-wrapper".source = ./scripts/pro-peer-wg-quick-wrapper.sh;
+      environment.etc."pro-peer-wg-quick-wrapper".mode = "0755";
+
       systemd.services."pro-peer-wg-quick" = {
         description = "Bring up WireGuard interface via wg-quick for pro-peer";
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           Type = "oneshot";
-          # systemd does not interpret shell operators unless run via a shell.
-          # Use bash -c so the `|| true` is evaluated as intended and the
-          # service won't fail the unit when wg-quick returns non-zero.
-          ExecStart = builtins.concatStringsSep " " [
-            "${pkgs.bash}/bin/bash"
-            "-c"
-            (let wg = if config.pro-peer.wireguardConfigPath != null then config.pro-peer.wireguardConfigPath else "wg0"; in "/run/current-system/sw/bin/wg-quick up " + wg + " || true")
-          ];
+          ExecStart = ''/etc/pro-peer-wg-quick-wrapper ${if config.pro-peer.wireguardConfigPath != null then config.pro-peer.wireguardConfigPath else "wg0"}'';
+          # The wrapper normalizes exit codes and always returns 0.
+          RemainAfterExit = "yes";
           CPUAccounting = "true";
           CPUQuota = "30%";
         };
@@ -161,22 +171,16 @@ in
           HiddenServicePort = "22 127.0.0.1:22";
         };
       };
-      systemd.services."pro-peer-tor-key-perms" = {
-        description = "Ensure tor hidden service permissions";
-        after = [ "tor.service" ];
-        wantedBy = [ "multi-user.target" ];
-        serviceConfig = {
-          Type = "oneshot";
-          # Wrap in bash -c so shell operators are recognized by systemd.
-          ExecStart = builtins.concatStringsSep " " [
-            "${pkgs.bash}/bin/bash"
-            "-c"
-            "chown -R debian-tor:debian-tor /var/lib/tor/ssh_hidden_service || true && chmod 700 /var/lib/tor/ssh_hidden_service || true"
-          ];
-          CPUAccounting = "true";
-          CPUQuota = "20%";
-        };
-      };
+
+      # Ensure the hidden service directory exists with correct ownership and
+      # permissions using systemd-tmpfiles rules. This is declarative and will
+      # be applied early in boot, avoiding a oneshot service which embeds shell
+      # logic.
+      systemd.tmpfiles.rules = lib.mkIf config.pro-peer.allowTorHiddenService (
+        lib.mkForce [
+          "d /var/lib/tor/ssh_hidden_service 0700 debian-tor debian-tor -"
+        ]
+      );
     })
   ];
 
