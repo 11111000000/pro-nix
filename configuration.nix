@@ -99,8 +99,11 @@
   };
   # Enable and configure sudo via NixOS module so the binary is installed
   # and the setuid bit is managed correctly by the activation scripts.
+  # Note: this is also set in modules/pro-users.nix for host-wide defaults.
   security.sudo.enable = true;
-  security.sudo.wheelNeedsPassword = false;
+  # Require password for wheel users by default; pro-users module may override
+  # with wheelNeedsPassword = false for convenience on trusted hosts.
+  security.sudo.wheelNeedsPassword = true;
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 5: Аппаратная поддержка и базовые сервисы
@@ -173,6 +176,12 @@
     settings.experimental-features = [ "nix-command" "flakes" ];
     settings.connect-timeout = 5;
     settings.fallback = true;
+    # Use cgroups so Nix places build processes into cgroups and systemd
+    # resource controls (CPUQuota/MemoryMax) can be applied per-build.
+    settings.use-cgroups = true;
+    # Limit parallel builds to a conservative number to avoid saturating CPU.
+    # Set to 2 for interactive responsiveness on typical desktop machines.
+    settings.max-jobs = 2;
     # Сначала используем публичный кэш и его Fastly-зеркало, чтобы сборка быстрее уходила в готовые бинарники.
     settings.substituters = lib.mkForce [
       "https://cache.nixos.org"
@@ -192,6 +201,17 @@
   # Позволяем использовать не полностью открытые пакеты.
   nixpkgs.config = {
     allowUnfree = true;
+  };
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Раздел 7.1: Steam и игровые приложения
+#
+# Здесь включается поддержка Steam и игровых приложений для запуска коммерческих игр.
+
+  programs.steam = {
+    enable = true;
+    remotePlay.openFirewall = true; # Открываем порты для Remote Play
+    dedicatedServer.openFirewall = true; # Открываем порты для выделенных серверов
   };
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -234,6 +254,28 @@
     enableRootSlice = true;
     enableSystemSlice = true;
     enableUserSlices = true;
+  };
+  # Prevent individual services (notably the nix daemon) from taking all CPU.
+  # Limit the nix-daemon service and enable default CPU accounting so user processes
+  # inherit reasonable defaults. Tweak values to taste (CPUQuota is a percentage).
+  systemd.services."nix-daemon".serviceConfig = {
+    # Do not let the daemon saturate the machine — allow up to 75% of total CPU.
+    CPUQuota = "75%";
+    # Lower CPUWeight so other services keep some proportionate share.
+    CPUWeight = "200";
+  };
+
+  # Make systemd enable CPU accounting and set a default weight for slices.
+  # This helps ensure user processes (user.slice) are subject to accounting and
+  # will respect per-unit limits when applied.
+  # Use structured systemd settings (replacement for deprecated extraConfig).
+  systemd.settings = {
+    Manager = {
+      DefaultCPUAccounting = "yes";
+      DefaultCPUWeight = "100";
+      DefaultTasksMax = "8192";
+      DefaultCPUQuotaPerSecUSec = "100000";
+    };
   };
   
   environment.variables = {

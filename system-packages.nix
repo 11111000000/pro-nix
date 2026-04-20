@@ -17,11 +17,13 @@ let
   pipxPkg = pkgs.pipx;
 
   aiderCmd = pkgs.writeShellScriptBin "aider" ''
-    exec ${pipxPkg}/bin/pipx run aider-chat "$@"
+    # Run under a user transient scope so a runaway agent can't fully saturate CPU.
+    exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 ${pipxPkg}/bin/pipx run aider-chat -- "$@"
   '';
 
   opencodeCmd = pkgs.writeShellScriptBin "opencode" ''
-    exec ${pkgs.nodejs_20}/bin/npx --yes @opencode/cli "$@"
+    # Run opencode under a user transient scope with CPU limits to avoid heavy spikes.
+    exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 ${pkgs.nodejs_20}/bin/npx --yes @opencode/cli -- "$@"
   '';
 
   # Python-слой здесь держит минимальную воспроизводимость: `requests` уже есть, а `pip` остаётся доступным для локальных окружений и одноразовых установок.
@@ -58,6 +60,8 @@ let
     deluge
     haskellPackages.haskell-language-server
     ollama
+    steam
+    steam-run
   ];
 
 in
@@ -138,10 +142,10 @@ github-cli
   # Браузеры обернуты в мягкий лимит памяти, чтобы графический поток не вытеснял остальной рабочий контур.
   # Обёртки `writeShellScriptBin` намеренно переопределяют стандартные команды и прячут этот предел от повседневной рутины.
   (writeShellScriptBin "chromium" ''
-    exec systemd-run --user --scope -p MemoryMax=4500M -p MemoryHigh=4G -- ${chromium}/bin/chromium "$@"
+    exec systemd-run --user --scope -p MemoryMax=4500M -p MemoryHigh=4G -p CPUQuota=90% -- ${chromium}/bin/chromium "$@"
   '')
   (writeShellScriptBin "firefox" ''
-    exec systemd-run --user --scope -p MemoryMax=2500M -p MemoryHigh=2G -- ${firefox}/bin/firefox "$@"
+    exec systemd-run --user --scope -p MemoryMax=2500M -p MemoryHigh=2G -p CPUQuota=90% -- ${firefox}/bin/firefox "$@"
   '')
   (writeShellScriptBin "emacs-panic" ''
     pkill -INT -u "$USER" -x emacs >/dev/null 2>&1 || pkill -INT -u "$USER" -f 'emacs.*daemon' >/dev/null 2>&1 || true

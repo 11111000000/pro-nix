@@ -16,6 +16,11 @@
 
   users.groups.pro = { };
 
+  # Ensure sudo is enabled and users in wheel can use it without a password.
+  # This makes it explicit for hosts that import this module.
+  security.sudo.enable = true;
+  security.sudo.wheelNeedsPassword = false;
+
   security.sudo.extraRules = [
     {
       users = [ "az" "zo" "la" "bo" ];

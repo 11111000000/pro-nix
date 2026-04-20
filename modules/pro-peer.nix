@@ -75,9 +75,13 @@ in
       systemd.services."pro-peer-sync-keys" = {
         description = "Pro‑peer: sync authorized_keys from encrypted file";
         wantedBy = [ "multi-user.target" ];
+        # Limit CPU usage of this occasional oneshot task so it cannot
+        # saturate interactive sessions when it runs (small conservative quota).
         serviceConfig = {
           Type = "oneshot";
           ExecStart = builtins.concatStringsSep " " [ "/etc/pro-peer-sync-keys.sh" "--input" config.pro-peer.keysGpgPath "--out" "/var/lib/pro-peer/authorized_keys" ];
+          CPUAccounting = "true";
+          CPUQuota = "30%";
         };
       };
 
@@ -100,6 +104,8 @@ in
         serviceConfig = {
           Type = "oneshot";
           ExecStart = builtins.concatStringsSep " " [ "/etc/pro-peer-backup-hiddenservice.sh" "--hidden-dir" "/var/lib/tor/ssh_hidden_service" "--recipient" config.pro-peer.torBackupRecipient "--out-dir" "/var/lib/pro-peer" ];
+          CPUAccounting = "true";
+          CPUQuota = "30%";
         };
       };
     })
@@ -109,9 +115,14 @@ in
       systemd.services.yggdrasil = {
         description = "Yggdrasil mesh daemon (pro-peer)";
         wantedBy = [ "multi-user.target" ];
+        # Give the mesh daemon a modest share of CPU but prevent it from
+        # saturating the machine during heavy network activity.
         serviceConfig = {
           ExecStart = builtins.concatStringsSep " " [ (builtins.toString pkgs.yggdrasil + "/bin/yggdrasil") "-useconffile" (if config.pro-peer.yggdrasilConfigPath != null then config.pro-peer.yggdrasilConfigPath else "/etc/yggdrasil.conf") ];
           Restart = "on-failure";
+          CPUAccounting = "true";
+          CPUQuota = "40%";
+          CPUWeight = "150";
         };
       };
       environment.etc."yggdrasil.conf".text = if config.pro-peer.yggdrasilConfigPath == null then ''{ Peers: [] }'' else null;
@@ -125,6 +136,8 @@ in
         serviceConfig = {
           Type = "oneshot";
           ExecStart = (let wg = if config.pro-peer.wireguardConfigPath != null then config.pro-peer.wireguardConfigPath else "wg0"; in builtins.concatStringsSep " " [ "/run/current-system/sw/bin/wg-quick" "up" wg "||" "true" ]);
+          CPUAccounting = "true";
+          CPUQuota = "30%";
         };
       };
     })
@@ -148,6 +161,8 @@ in
         serviceConfig = {
           Type = "oneshot";
           ExecStart = builtins.concatStringsSep " && " [ "chown -R debian-tor:debian-tor /var/lib/tor/ssh_hidden_service || true" "chmod 700 /var/lib/tor/ssh_hidden_service || true" ];
+          CPUAccounting = "true";
+          CPUQuota = "20%";
         };
       };
     })

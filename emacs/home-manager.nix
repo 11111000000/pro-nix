@@ -147,7 +147,7 @@ let
         printf '%s\n' "[exwm-session-start $(date '+%F %T%z')] importing env and launching emacs"
         systemctl --user import-environment DISPLAY XAUTHORITY PATH DBUS_SESSION_BUS_ADDRESS XDG_RUNTIME_DIR XDG_CURRENT_DESKTOP
         printf '%s\n' "[exwm-session-start $(date '+%F %T%z')] exec systemd-run emacs"
-        exec /run/current-system/sw/bin/systemd-run --user --scope -p MemoryMax=2G -p MemoryHigh=1800M -p CPUQuota=200% -- ${emacsPkg}/bin/emacs --init-directory "$HOME/.config/emacs"
+        exec /run/current-system/sw/bin/systemd-run --user --scope -p MemoryMax=2G -p MemoryHigh=1800M -p CPUQuota=120% -p CPUWeight=200 -- ${emacsPkg}/bin/emacs --init-directory "$HOME/.config/emacs"
       '';
       executable = true;
     };
