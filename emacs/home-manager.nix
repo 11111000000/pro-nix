@@ -169,6 +169,12 @@ in
       description = "Дополнительные пакеты для Emacs-профиля.";
     };
 
+    providedPackages = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      description = "List of Emacs package names (symbols) provided by Nix and exposed to the runtime as pro-packages-provided-by-nix.";
+    };
+
     defaultModules = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = defaultModules;
@@ -187,6 +193,12 @@ in
         LANG = "ru_RU.UTF-8";
         EMACSLOADPATH = "${config.home.homeDirectory}/.config/emacs/modules:";
       };
+
+      # Generate provided-packages.el for runtime if configured
+      home.file.".config/emacs/provided-packages.el".text = let
+        pkgsList = cfg.providedPackages;
+        sexp = lib.concatStringsSep " " (map (p: p) pkgsList);
+      in ''(setq pro-packages-provided-by-nix '(${sexp}))'';
     }
     portableFiles
     (lib.mkIf cfg.gui.enable guiFiles)
