@@ -131,7 +131,7 @@ in
     (lib.mkIf (config.pro-peer.allowTorHiddenService) {
       services.tor = {
         enable = true;
-        extraConfig = builtins.concatStringsSep "\n" [ "HiddenServiceDir /var/lib/tor/ssh_hidden_service" "HiddenServicePort 22 127.0.0.1:22" ];
+        settings = builtins.concatStringsSep "\n" [ "HiddenServiceDir /var/lib/tor/ssh_hidden_service" "HiddenServicePort 22 127.0.0.1:22" ];
       };
       systemd.services."pro-peer-tor-key-perms" = {
         description = "Ensure tor hidden service permissions";
