@@ -1,0 +1,45 @@
+name: Emacs Headless CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  headless-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v20
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      - name: Install Emacs via Nix
+        run: |
+          nix-env -iA nixpkgs.emacs
+
+      - name: Make script executable
+        run: |
+          chmod +x ./scripts/emacs-headless-test.sh
+
+      - name: Run headless tests (auto install)
+        env:
+          PRO_PACKAGES_AUTO_INSTALL: '1'
+          EMACS_BIN: emacs
+        run: |
+          ./scripts/emacs-headless-test.sh tty
+
+      - name: Check for missing-key warnings
+        run: |
+          LOGDIR=$(ls -td logs/emacs-headless/* | head -n1)
+          echo "Checking logs in $LOGDIR"
+          if rg "command .* not found for key" "$LOGDIR"; then
+            echo "Found key binding warnings" >&2
+            rg "command .* not found for key" "$LOGDIR" >&2
+            exit 1
+          else
+            echo "No missing key commands found"
+          fi
