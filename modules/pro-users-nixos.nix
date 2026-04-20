@@ -20,6 +20,11 @@ in
       pro.emacs = {
         enable = true;
         gui.enable = true;
+        # Packages that Nix will provide to Emacs at runtime. Keep this
+        # list minimal and reproducible to avoid network installs on
+        # user machines. Users may extend via `extraPackages` in their
+        # host config; this list is authoritative for the portable profile.
+        providedPackages = [ "consult" "magit" "vertico" "orderless" "marginalia" "corfu" "gptel" ];
       };
     };
   }) users);
