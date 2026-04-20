@@ -1,4 +1,4 @@
-{ pkgs, emacsPkg ? pkgs.emacs }:
+{ pkgs, emacsPkg ? pkgs.emacs, enableOptional ? false }:
 
 let
   emacsPackages = pkgs.emacsPackagesFor emacsPkg;
@@ -44,7 +44,25 @@ let
 '';
 in
 
-with pkgs; [
+with pkgs;
+
+let
+  optionalPackages = [
+    chromium
+    firefox
+    tor-browser
+    telegram-desktop
+    element-desktop
+    jami
+    ffmpeg-full
+    deluge
+    haskellPackages.haskell-language-server
+    ollama
+  ];
+
+in
+
+  (if enableOptional then optionalPackages else []) ++ [
   kbd
   # Редакторный контур и его спутники: здесь живут инструменты, которые держат текст, ссылки и навигацию в одном рабочем ритме.
   emacsRuntime
@@ -67,7 +85,6 @@ github-cli
   pipxPkg
   aiderCmd
   opencodeCmd
-  ollama
   htop
   neofetch
   feh

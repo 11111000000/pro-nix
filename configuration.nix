@@ -203,7 +203,9 @@
     extraPortals = lib.mkForce [ pkgs.xdg-desktop-portal-gtk ];
   };
 
-  environment.systemPackages = with pkgs; [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; });
+  # By default optional heavy packages are disabled. To enable them set
+  # `enableOptional = true` when importing `system-packages.nix`.
+  environment.systemPackages = with pkgs; [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; });
 
   fonts.packages = with pkgs; [
     terminus_font

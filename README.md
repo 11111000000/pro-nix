@@ -24,6 +24,8 @@ Rules:
 - `~/.emacs.d/keys.org` is for user overrides only.
 - Keep changes checkable in text.
 
+Optional heavy packages (browsers, messaging, HLS, etc.) are disabled by default to keep builds small. See `docs/optional-packages.md` to enable them per-host or via Home Manager.
+
 Emacs Lisp rules:
 - Keep functions small and explicit.
 - Prefer one file per concern.
