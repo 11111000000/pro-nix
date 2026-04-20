@@ -20,6 +20,11 @@
          (t pro-emacs-base-default-modules)))
     pro-emacs-base-default-modules))
 
+;; Load Nix-provided package facts early if present.
+(let ((provided (expand-file-name "provided-packages.el" (expand-file-name ".config/emacs/" (getenv "HOME")))))
+  (when (file-exists-p provided)
+    (load provided nil t)))
+
 (defun pro-emacs-base--resolve-module (name)
   (let ((user-file (pro-emacs-base--module-file pro-emacs-base-user-modules-dir name))
         (system-file (and pro-emacs-base-system-modules-dir

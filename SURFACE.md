@@ -53,6 +53,7 @@ This repository provides a portable NixOS configuration plus a portable Emacs la
 - `modules/pro-services.nix` contains shared network, SSH, Tor, I2P, firewall, and trust policy.
 - `modules/pro-storage.nix` contains Samba, Syncthing, Avahi discovery, and storage-related firewall policy.
 - `modules/pro-privacy.nix` contains Tor, I2P, and privacy-related firewall policy.
+- `system-packages.nix` contains the workspace package set and the system agent tools available immediately on PATH (`goose`, `aider`, `opencode`, and `pipx`).
 - `emacs/base/modules/*.el` contains the modular Emacs base by concern.
 - `emacs/base/modules/ai.el` loads AI provider policy and model defaults from `emacs/base/modules/ai-models.json` with user override via `~/.config/emacs/ai-models.json`.
 - `emacs/base/init.el` and `emacs/base/site-init.el` form the portable Emacs loader.
@@ -66,6 +67,7 @@ This repository provides a portable NixOS configuration plus a portable Emacs la
 - `docs/plans/emacs-headless-tests.md` documents the headless verification contract.
 - `docs/plans/emacs-headless-changelog.md` records the headless Emacs test and log workflow changes.
 - `docs/plans/repo-agent-guide.md` documents the agent-facing build/test entrypoint.
+- `docs/plans/agent-tooling.md` documents the supported open-source agent matrix and install policy.
 - `docs/plans/install-matrix.md` documents the complete installation guide for all environments.
 - `bootstrap/install.sh`, `bootstrap/install-pro.sh`, and `bootstrap/choose-host.sh` implement the interactive NixOS installer flow.
 - `scripts/emacs-sync.sh` syncs the portable Emacs tree into a plain `~/.emacs.d`.

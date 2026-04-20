@@ -7,7 +7,7 @@
 (defun pro-git-status ()
   "Открыть статус репозитория."
   (interactive)
-  (when (require 'magit nil t)
+  (when (or (pro--package-provided-p 'magit) (require 'magit nil t))
     (let ((root (or (and (fboundp 'pro-project-root) (pro-project-root)) default-directory)))
       (magit-status root))))
 
@@ -20,7 +20,7 @@
 (defun pro-git-dispatch ()
   "Открыть магитовский диспетчер."
   (interactive)
-  (when (require 'magit nil t)
+  (when (or (pro--package-provided-p 'magit) (require 'magit nil t))
     (magit-dispatch)))
 
 (provide 'git)

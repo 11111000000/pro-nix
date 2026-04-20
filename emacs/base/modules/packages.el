@@ -29,6 +29,11 @@ Higher numbers win when the same package exists in several archives."
         package-archive-priorities pro-packages-archive-priorities
         package-install-upgrade-built-in nil)
   (package-initialize)
+  ;; Make sure use-package is available (it may be provided by Nix or ELPA)
+  (unless (require 'use-package nil t)
+    (unless package-archive-contents (package-refresh-contents))
+    (package-install 'use-package)
+    (require 'use-package))
   (require 'package-vc)
   (message "[pro-packages] archives=%d priority=%S"
            (length package-archives)

@@ -198,15 +198,17 @@
 (defun pro-ai-open-entry ()
   "Открыть AI-буфер с учётом выбранного backend-а."
   (interactive)
-  (when (require 'gptel nil t)
-    (pro-ai--ensure-backends)
-    (pro-ai--activate-backend (pro-ai--backend-choice))
-    (setq gptel-use-curl t
-           gptel-track-response pro-ai-enable-gptel-history)
-    (message "[pro-ai] active: backend=%s model=%s"
-             (pro-ai--backend-display-name (and (boundp 'gptel-backend) gptel-backend))
-             (pro-ai--model-display-name (and (boundp 'gptel-model) gptel-model)))
-    (call-interactively #'gptel)))
+  (if (or (pro--package-provided-p 'gptel) (require 'gptel nil t))
+      (progn
+        (pro-ai--ensure-backends)
+        (pro-ai--activate-backend (pro-ai--backend-choice))
+        (setq gptel-use-curl t
+              gptel-track-response pro-ai-enable-gptel-history)
+        (message "[pro-ai] active: backend=%s model=%s"
+                 (pro-ai--backend-display-name (and (boundp 'gptel-backend) gptel-backend))
+                 (pro-ai--model-display-name (and (boundp 'gptel-model) gptel-model)))
+        (call-interactively #'gptel))
+    (pro-compat--notify-once "gptel" "gptel missing — AI entry unavailable")))
 
 (defun pro-ai-load-keys ()
   "Load common AI provider keys from ~/.authinfo and export to env.

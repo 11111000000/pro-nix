@@ -14,6 +14,15 @@ let
     exwm
   ]);
   xvfbRun = pkgs."xvfb-run";
+  pipxPkg = pkgs.pipx;
+
+  aiderCmd = pkgs.writeShellScriptBin "aider" ''
+    exec ${pipxPkg}/bin/pipx run aider-chat "$@"
+  '';
+
+  opencodeCmd = pkgs.writeShellScriptBin "opencode" ''
+    exec ${pkgs.nodejs_20}/bin/npx --yes @opencode/cli "$@"
+  '';
 
   # Python-слой здесь держит минимальную воспроизводимость: `requests` уже есть, а `pip` остаётся доступным для локальных окружений и одноразовых установок.
   myPython = pkgs.python3.withPackages (ps: [ ps.requests ps.pip ]);
@@ -54,7 +63,11 @@ with pkgs; [
   just
 git
 github-cli
-ollama
+  goose
+  pipxPkg
+  aiderCmd
+  opencodeCmd
+  ollama
   htop
   neofetch
   feh
@@ -67,12 +80,6 @@ ollama
   nodejs_20
   esbuild
   nodePackages.prettier # Форматирование JS/TS для Apheleia (Emacs).
-  # OpenCode CLI: install from npm package if available in nodePackages
-  # The package name in npm is `@opencode/cli` upstream; prefer the packaged
-  # derivation from nixpkgs (nodePackages). If the name isn't available in
-  # this pkgs tree, `nix build` will fail and we'll need to pin or vendor it.
-  # prefer the packaged opencode derivation from nixpkgs if available
-  opencode
   networkmanagerapplet  # Индикатор Wi-Fi в трее.
   blueman               # Графический интерфейс для Bluetooth.
   obexd                 # Передача файлов по Bluetooth.

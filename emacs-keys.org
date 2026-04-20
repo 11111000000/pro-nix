@@ -20,6 +20,7 @@
 | EXWM      | s-&     | async-shell-command     | Запуск команды                   |
 | ORG       | C-c K   | pro-org-open-keys-file  | Открыть файл клавиш              |
 | AI        | C-c a   | pro-ai-open-entry       | Вход в AI                        |
+| AI        | C-c A   | pro-agent-open          | agent-shell                      |
 | Package   | C-c P p | pro-packages-menu       | Список пакетов                   |
 | Package   | C-c P i | pro-packages-install    | Установить пакет из ELPA         |
 | Package   | C-c P v | pro-packages-install-vc | Установить пакет из VC           |

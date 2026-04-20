@@ -6,6 +6,19 @@ To add keybindings:
 3. For overrides, edit `~/.emacs.d/keys.org` with `:org` prefix.
 4. Run `just install-emacs` to apply changes.
 
+### Agent Tools
+
+The system profile now exposes these agent commands on PATH:
+
+- `goose`
+- `aider`
+- `opencode`
+- `agent-shell` in Emacs
+
+In Emacs, `C-c a` opens the main AI buffer and `C-c A` opens `agent-shell`.
+
+See `docs/agents.md` and `docs/plans/agent-tooling.md` for setup and policy.
+
 Rules:
 - `emacs-keys.org` is the source of truth for shared keybindings.
 - `~/.emacs.d/keys.org` is for user overrides only.
