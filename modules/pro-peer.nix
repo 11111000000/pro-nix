@@ -42,7 +42,7 @@ in
 
   # Collect conditional fragments and merge them into a single `config` attribute
   config = lib.mkMerge [
-    (lib.mkIf (config.pro-peer.enable || true) {
+    (lib.mkIf config.pro-peer.enable {
       # Avahi for mDNS host discovery in LAN
       services.avahi = {
         enable = true;
@@ -135,7 +135,10 @@ in
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = (let wg = if config.pro-peer.wireguardConfigPath != null then config.pro-peer.wireguardConfigPath else "wg0"; in builtins.concatStringsSep " " [ "/run/current-system/sw/bin/wg-quick" "up" wg "||" "true" ]);
+          # systemd does not interpret shell operators unless run via a shell.
+          # Use bash -c so the `|| true` is evaluated as intended and the
+          # service won't fail the unit when wg-quick returns non-zero.
+          ExecStart = builtins.concatStringsSep " " [ "${pkgs.bash}/bin/bash" "-c" (let wg = if config.pro-peer.wireguardConfigPath != null then config.pro-peer.wireguardConfigPath else "wg0"; in '"/run/current-system/sw/bin/wg-quick up ' + wg + ' || true"') ];
           CPUAccounting = "true";
           CPUQuota = "30%";
         };
@@ -160,7 +163,8 @@ in
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = builtins.concatStringsSep " && " [ "chown -R debian-tor:debian-tor /var/lib/tor/ssh_hidden_service || true" "chmod 700 /var/lib/tor/ssh_hidden_service || true" ];
+          # Wrap in bash -c so shell operators are recognized by systemd.
+          ExecStart = builtins.concatStringsSep " " [ "${pkgs.bash}/bin/bash" "-c" '"chown -R debian-tor:debian-tor /var/lib/tor/ssh_hidden_service || true && chmod 700 /var/lib/tor/ssh_hidden_service || true"' ];
           CPUAccounting = "true";
           CPUQuota = "20%";
         };
