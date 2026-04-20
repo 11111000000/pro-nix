@@ -22,6 +22,14 @@ services.avahi = {
 networking.hostName = "cf19"; # индивидуально
 ```
 
+В этом репозитории можно включить модуль `modules/pro-peer.nix`, который включает Avahi и базовые настройки SSH. Пример включения (в `configuration.nix`):
+
+```nix
+imports = [ ./modules/pro-peer.nix ];
+# Затем в секции конфигурации хоста можно включить:
+pro-peer.enable = true;
+```
+
 2) Проверка
 
 - `systemctl enable --now avahi-daemon` (если не NixOS)
