@@ -34,6 +34,7 @@
     ./modules/pro-storage.nix
     ./modules/pro-privacy.nix
     ./modules/pro-peer.nix
+    ./modules/headscale.nix
     ./modules/pro-desktop.nix
     ./modules/nix-cuda-compat.nix
 
