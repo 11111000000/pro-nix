@@ -27,6 +27,32 @@
     device = "/dev/disk/by-uuid/b7a0681a-d1e2-4898-b213-f060d77b292a";
     fsType = "ext4";
   };
+
+  # Pro-peer configuration: enable LAN discovery, key sync only (no Tor by default on laptop)
+  pro-peer.enable = true;
+  pro-peer.enableKeySync = true;
+  pro-peer.keysGpgPath = "/etc/pro-peer/authorized_keys.gpg";
+  pro-peer.keySyncInterval = "1h";
+  pro-peer.allowTorHiddenService = false;
+
+  # SSH hardening
+  services.openssh.extraConfig = ''
+PermitEmptyPasswords no
+MaxAuthTries 3
+X11Forwarding no
+AllowTcpForwarding no
+'';
+
+  # Firewall: restrict SSH to LAN only
+  networking.firewall.enable = true;
+  networking.firewall.allowedTCPPorts = [];
+  networking.firewall.extraCommands = lib.mkAfter ''
+    iptables -I INPUT -p tcp -s 10.0.0.0/8 --dport 22 -j ACCEPT || true
+    iptables -I INPUT -p tcp -s 172.16.0.0/12 --dport 22 -j ACCEPT || true
+    iptables -I INPUT -p tcp -s 192.168.0.0/16 --dport 22 -j ACCEPT || true
+    iptables -I INPUT -p tcp -s 127.0.0.0/8 --dport 22 -j ACCEPT || true
+    iptables -I INPUT -p tcp --dport 22 -j DROP || true
+  '';
   fileSystems."/boot" = lib.mkForce {
     device = "/dev/disk/by-uuid/6DD0-A9CB";
     fsType = "vfat";

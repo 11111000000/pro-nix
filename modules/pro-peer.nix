@@ -112,7 +112,10 @@ in
       systemd.services."pro-peer-wg-quick" = {
         description = "Bring up WireGuard interface via wg-quick for pro-peer";
         wantedBy = [ "multi-user.target" ];
-        serviceConfig = { Type = "oneshot"; ExecStart = ''/run/current-system/sw/bin/wg-quick up ${config.pro-peer.wireguardConfigPath or "wg0"} || true''; };
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = (let wg = if config.pro-peer.wireguardConfigPath != null then config.pro-peer.wireguardConfigPath else "wg0"; in builtins.concatStringsSep " " [ "/run/current-system/sw/bin/wg-quick" "up" wg "||" "true" ]);
+        };
       };
     })
 
