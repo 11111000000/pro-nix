@@ -45,9 +45,15 @@ AllowTcpForwarding no
 
   # Firewall: restrict SSH to LAN only (declarative)
   networking.firewall.enable = true;
-  networking.firewall.allowedTCPPorts = [
-    { port = 22; allowedAddresses = [ "10.0.0.0/8" "172.16.0.0/12" "192.168.0.0/16" "127.0.0.0/8" ]; }
-  ];
+  networking.firewall.allowedTCPPorts = [ 22 ];
+  networking.firewall.extraCommands = lib.mkAfter ''
+    # allow SSH from RFC1918 ranges and loopback
+    iptables -I INPUT -p tcp -s 10.0.0.0/8 --dport 22 -j ACCEPT || true
+    iptables -I INPUT -p tcp -s 172.16.0.0/12 --dport 22 -j ACCEPT || true
+    iptables -I INPUT -p tcp -s 192.168.0.0/16 --dport 22 -j ACCEPT || true
+    iptables -I INPUT -p tcp -s 127.0.0.0/8 --dport 22 -j ACCEPT || true
+    iptables -I INPUT -p tcp --dport 22 -j DROP || true
+  '';
   fileSystems."/boot" = lib.mkForce {
     device = "/dev/disk/by-uuid/6DD0-A9CB";
     fsType = "vfat";

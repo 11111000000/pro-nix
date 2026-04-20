@@ -78,9 +78,15 @@ AllowTcpForwarding no
 
   # Firewall: allow SSH only from private networks and loopback; all other SSH connections dropped
   networking.firewall.enable = true;
-  networking.firewall.allowedTCPPorts = [
-    { port = 22; allowedAddresses = [ "10.0.0.0/8" "172.16.0.0/12" "192.168.0.0/16" "127.0.0.0/8" ]; }
-  ];
+  networking.firewall.allowedTCPPorts = [ 22 ];
+  networking.firewall.extraCommands = lib.mkAfter ''
+    # allow SSH from RFC1918 ranges and loopback
+    iptables -I INPUT -p tcp -s 10.0.0.0/8 --dport 22 -j ACCEPT || true
+    iptables -I INPUT -p tcp -s 172.16.0.0/12 --dport 22 -j ACCEPT || true
+    iptables -I INPUT -p tcp -s 192.168.0.0/16 --dport 22 -j ACCEPT || true
+    iptables -I INPUT -p tcp -s 127.0.0.0/8 --dport 22 -j ACCEPT || true
+    iptables -I INPUT -p tcp --dport 22 -j DROP || true
+  '';
   fileSystems."/boot" = lib.mkForce {
     device = "/dev/disk/by-uuid/c3ff38e8-0de3-427a-983f-86871ed38d32";
     fsType = "ext4";
