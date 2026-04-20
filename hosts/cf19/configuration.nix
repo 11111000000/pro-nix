@@ -66,9 +66,12 @@
 
   # Ensure Nix experimental features required for this configuration are enabled
   # This writes into the generated /etc/nix/nix.conf via the nix.extraOptions option
+  # Ensure Nix experimental features required for this configuration are enabled.
+  # Keep this minimal and explicit; the generated /etc/nix/nix.conf will include
+  # these extra options after a successful rebuild.
   nix = {
     extraOptions = ''
-      experimental-features = nix-command flakes cgroups
+experimental-features = nix-command flakes cgroups
     '';
   };
 
