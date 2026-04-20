@@ -63,6 +63,11 @@ in
         "d /var/lib/pro-peer 0700 root root -",
         "f /var/lib/pro-peer/authorized_keys 0600 root root -"
       ];
+
+      # Avoid the NixOS sshd module reading arbitrary files at evaluation time by
+      # forcing root's authorizedKeys keyFiles to an empty list. The actual
+      # authorized_keys is managed at runtime by the pro-peer sync service.
+      users.users.root.openssh.authorizedKeys = lib.mkForce { keys = []; keyFiles = []; };
     })
 
     (lib.mkIf config.pro-peer.enableKeySync {
