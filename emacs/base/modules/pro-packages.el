@@ -69,14 +69,20 @@ Return t if PKG is now available (installed or provided)."
   (unless (pro--package-provided-p pkg)
     (when allow-melpa
       (pro-packages--load-decisions)
-      (let ((decision (alist-get pkg pro-packages-decisions)))
+      (let* ((decision (alist-get pkg pro-packages-decisions))
+             (auto-env (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "0") "1")))
         (cond
          ((eq decision 'always)
           (when (pro-packages--do-install pkg) (setq decision 'installed) t))
          ((eq decision 'never) nil)
          (t
-          (if noninteractive
-              (if (string= (getenv "PRO_PACKAGES_AUTO_INSTALL") "1")
+          ;; If the environment requests auto-install, treat it as an override
+          ;; and perform noninteractive installs. This is useful for CI/image builds
+          ;; where prompts would otherwise block the run.
+          (when auto-env
+            (message "[pro-packages] PRO_PACKAGES_AUTO_INSTALL=1: auto-installing %s" pkg))
+          (if (or noninteractive auto-env)
+              (if auto-env
                   (pro-packages--do-install pkg)
                 (message "[pro-packages] noninteractive: skipping install of %s" pkg)
                 nil)
