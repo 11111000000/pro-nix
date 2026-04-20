@@ -212,7 +212,7 @@ ollama
 
   # Темы курсора X11 нужны как визуальная интонация, а не как отдельный дизайн-проект.
   xorg.xcursorthemes
-  gnome.adwaita-icon-theme
+  pkgs.adwaita-icon-theme
   
   # Аудио и видео работают как бытовая акустика рабочего места.
   ffmpeg-full
