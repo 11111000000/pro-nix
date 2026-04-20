@@ -64,6 +64,14 @@
   # do not set torBackupRecipient in repo (secrets must be provided out-of-band)
   pro-peer.torBackupRecipient = null;
 
+  # Ensure Nix experimental features required for this configuration are enabled
+  # This writes into the generated /etc/nix/nix.conf via the nix.extraOptions option
+  nix = {
+    extraOptions = ''
+      experimental-features = nix-command flakes cgroups
+    '';
+  };
+
   # SSH hardening: restrict interactive features for remote connections
   services.openssh = {
     extraConfig = ''
