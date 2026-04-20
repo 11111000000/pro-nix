@@ -68,6 +68,11 @@ ollama
   nodejs_20
   esbuild
   nodePackages.prettier # Форматирование JS/TS для Apheleia (Emacs).
+  # OpenCode CLI: install from npm package if available in nodePackages
+  # The package name in npm is `@opencode/cli` upstream; prefer the packaged
+  # derivation from nixpkgs (nodePackages). If the name isn't available in
+  # this pkgs tree, `nix build` will fail and we'll need to pin or vendor it.
+  nodePackages."@opencode/cli"
   networkmanagerapplet  # Индикатор Wi-Fi в трее.
   blueman               # Графический интерфейс для Bluetooth.
   obexd                 # Передача файлов по Bluetooth.
