@@ -57,12 +57,8 @@ in
     allowedUDPPorts = [ 21027 137 138 ];
   };
 
-  # Ensure avahi (mDNS) advertises the Samba service so other local machines discover it easily.
-  services.avahi.publish.services = lib.mkForce [
-    {
-      name = "Samba";
-      type = "_smb._tcp";
-      port = 445;
-    }
-  ];
+  # Avahi is enabled above; Samba is configured to bind to the local LAN subnet
+  # and will be discoverable on the local Wi‑Fi network. If additional mDNS
+  # publication is needed, we can add service definition files under
+  # /etc/avahi/services/ via NixOS `environment.etc`.
 }
