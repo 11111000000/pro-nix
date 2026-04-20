@@ -63,7 +63,12 @@
 
 (defun pro-ui--try-require (feature)
   "Безопасно подключить FEATURE."
-  (require feature nil t))
+  (or (and (boundp 'pro-packages-provided-by-nix)
+           (memq feature pro-packages-provided-by-nix)
+           (require feature nil t))
+      (when (and (fboundp 'pro-packages--maybe-install)
+                 (pro-packages--maybe-install feature t))
+        (require feature nil t))))
 
 (defun pro-ui-apply-icons ()
   "Подключить полезные иконки без обязательной зависимости."
