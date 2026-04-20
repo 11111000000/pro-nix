@@ -64,7 +64,7 @@ in
 
     (lib.mkIf config.pro-peer.enableKeySync {
       environment.systemPackages = with pkgs; [ gnupg ];
-      environment.etc."pro-peer-sync-keys.sh".source = ./scripts/pro-peer-sync-keys.sh;
+      environment.etc."pro-peer-sync-keys.sh".source = ../scripts/pro-peer-sync-keys.sh;
       environment.etc."pro-peer-sync-keys.sh".mode = "0755";
 
       systemd.services."pro-peer-sync-keys" = {
@@ -85,7 +85,7 @@ in
 
     (lib.mkIf (config.pro-peer.allowTorHiddenService && (config.pro-peer.torBackupRecipient != null)) {
       environment.systemPackages = with pkgs; [ gnupg tar ];
-      environment.etc."pro-peer-backup-hiddenservice.sh".source = ./scripts/backup-hiddenservice.sh;
+      environment.etc."pro-peer-backup-hiddenservice.sh".source = ../scripts/backup-hiddenservice.sh;
       environment.etc."pro-peer-backup-hiddenservice.sh".mode = "0755";
 
       systemd.services."pro-peer-backup-hiddenservice" = {
