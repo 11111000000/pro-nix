@@ -15,8 +15,10 @@
 
   services.resolved.enable = true;
 
-  security.audit.enable = false;
-  security.auditd.enable = false;
+  # Enable kernel auditing and auditd service so we can collect audit logs.
+  # auditd is lightweight but requires kernel audit support; enabling helps security visibility.
+  security.audit.enable = true;
+  security.auditd.enable = true;
 
   services.fail2ban = {
     enable = true;
