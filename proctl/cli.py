@@ -516,6 +516,12 @@ def main():
     p.add_argument("--dst", required=True)
     p.add_argument("--as-root", action="store_true")
 
+    p = sub.add_parser("exec")
+    p.add_argument("--host", default="local")
+    p.add_argument("--cmd", required=True)
+    p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--as-root", action="store_true")
+
 
     p = sub.add_parser("rebuild")
     p.add_argument("--host", default="local")
@@ -637,6 +643,15 @@ def main():
             mv_cmd = f"sudo mv {remote_tmp} {shlex.quote(dst)} && sudo chown root:root {shlex.quote(dst)} && sudo chmod 600 {shlex.quote(dst)}"
             res = run_command_on_host(host, mv_cmd, dry=False, stream=False, use_pkexec=as_root)
             json_exit({"cmd": mv_cmd, "result": res})
+    elif args.cmd == "exec":
+        host = args.host
+        cmd = args.cmd
+        dry = args.dry_run
+        as_root = getattr(args, 'as_root', False)
+        if dry:
+            json_exit({"preview": cmd})
+        res = run_command_on_host(host, cmd, dry=False, stream=True, use_pkexec=as_root)
+        json_exit({"cmd": cmd, "result": res})
     else:
         parser.print_help()
 
