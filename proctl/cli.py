@@ -82,6 +82,114 @@ def run_local_command(cmd, capture_output=True, stream=False):
             return {"rc": 1, "stdout": "", "stderr": str(e)}
 
 
+def parse_host(host_spec: str):
+    """Разобрать спецификатор host.
+
+    Форматы:
+      - local
+      - ssh:user@host:port
+      - ssh:user@host
+      - host (будет трактоваться как ssh:host с текущим user)
+    Возвращает словарь с ключом type: "local" или "ssh" и соответствующими полями.
+    """
+    if not host_spec or host_spec == "local":
+        return {"type": "local"}
+    if host_spec.startswith("ssh:"):
+        spec = host_spec[4:]
+    else:
+        spec = host_spec
+    # spec может быть user@host:port or user@host or host:port or host
+    user = None
+    port = None
+    host = spec
+    if "@" in spec:
+        user, host = spec.split("@", 1)
+    if ":" in host:
+        host, port_s = host.split(":", 1)
+        try:
+            port = int(port_s)
+        except Exception:
+            port = None
+    return {"type": "ssh", "user": user or os.environ.get("USER"), "host": host, "port": port}
+
+
+def run_command_on_host(host_spec: str, cmd: str, dry: bool = False, stream: bool = False, use_pkexec: bool = False):
+    """Выполнить команду локально или по SSH на удалённом хосте.
+
+    Если dry=True — не выполняем, только возвращаем подготовленную команду.
+    Если use_pkexec=True — обернуть команду в pkexec для выполнения с root правами.
+    Возвращаем структуру с полями: rc/stdout/stderr или out_path при stream.
+    """
+    host = parse_host(host_spec)
+    if use_pkexec:
+        # pkexec требует, чтобы команда была одним аргументом в sh -c
+        cmd_exec = f"pkexec sh -c {shlex.quote(cmd)}"
+    else:
+        cmd_exec = cmd
+    if dry:
+        return {"preview": cmd_exec}
+    if host["type"] == "local":
+        return run_local_command(cmd_exec, stream=stream)
+    # remote via ssh
+    ssh_parts = ["ssh", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=accept-new"]
+    if host.get("port"):
+        ssh_parts += ["-p", str(host["port"])]
+    target = host["host"]
+    if host.get("user"):
+        target = f"{host['user']}@{target}"
+    # Escape command for remote shell
+    remote_cmd = shlex.quote(cmd_exec)
+    full = ssh_parts + [target, remote_cmd]
+    try:
+        p = subprocess.run(full, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return {"rc": p.returncode, "stdout": p.stdout.decode(errors="replace"), "stderr": p.stderr.decode(errors="replace")}
+    except Exception as e:
+        return {"rc": 1, "stdout": "", "stderr": str(e)}
+
+
+def upload_file_to_host(host_spec: str, src: str, dst: str, owner: str = "root:root", mode: str = "0600", dry: bool = False):
+    """Загрузить локальный файл SRC на хост DST путь DST.
+
+    Для remote используем scp в /tmp и затем sudo mv; для local — используем sudo cp.
+    Возвращаем preview если dry, иначе результат выполнения.
+    """
+    host = parse_host(host_spec)
+    src = os.path.abspath(src)
+    if not os.path.exists(src):
+        return {"rc": 1, "stderr": f"Исходный файл не найден: {src}"}
+    if host["type"] == "local":
+        cmd = f"sudo install -m {mode} {shlex.quote(src)} {shlex.quote(dst)} && sudo chown {shlex.quote(owner)} {shlex.quote(dst)}"
+        if dry:
+            return {"preview": cmd}
+        return run_local_command(cmd)
+    else:
+        # remote: scp to /tmp, then sudo mv
+        tmpname = os.path.basename(dst)
+        remote_tmp = f"/tmp/{tmpname}.proctl" 
+        scp_parts = ["scp"]
+        if host.get("port"):
+            scp_parts += ["-P", str(host["port"])]
+        scp_target = host["host"]
+        if host.get("user"):
+            scp_target = f"{host['user']}@{scp_target}"
+        scp_parts += [src, f"{scp_target}:{remote_tmp}"]
+        scp_cmd = " ".join(shlex.quote(p) for p in scp_parts)
+        mv_cmd = f"sudo mv {remote_tmp} {shlex.quote(dst)} && sudo chown {shlex.quote(owner)} {shlex.quote(dst)} && sudo chmod {shlex.quote(mode)} {shlex.quote(dst)}"
+        preview = scp_cmd + " && " + mv_cmd
+        if dry:
+            return {"preview": preview}
+        # run scp
+        try:
+            scp_proc = subprocess.run(scp_parts, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if scp_proc.returncode != 0:
+                return {"rc": scp_proc.returncode, "stdout": scp_proc.stdout.decode(errors="replace"), "stderr": scp_proc.stderr.decode(errors="replace")}
+        except Exception as e:
+            return {"rc": 1, "stderr": str(e)}
+        # run mv over ssh
+        mv_res = run_command_on_host(host_spec, mv_cmd)
+        return mv_res
+
+
 SCRIPT_MAP = {
     # ключ -> (описание, команда-шаблон)
     "pro-peer-sync-keys": ("Синхронизировать authorized_keys из зашифрованного файла",
