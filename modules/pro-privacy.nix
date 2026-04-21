@@ -47,6 +47,9 @@
     };
   };
 
+  # Ensure awk is available during activation scripts (used by activate).
+  environment.systemPackages = with pkgs; [ gawk ];
+
   # Открытые порты для служб приватности — доступны локально/для роутинга.
   networking.firewall = {
     allowedTCPPorts = [ 9050 9051 9052 9053 7657 4444 4445 ];
