@@ -95,12 +95,56 @@
 (defun pro-ui-apply-completion ()
   "Подключить полезные подсказки для завершения."
   (when (display-graphic-p)
+    ;; Configure Corfu (in-buffer completion UI) with sane defaults.
     (when (pro-ui--try-require 'corfu)
-      (global-corfu-mode 1)
+      ;; Prefer automatic completion but keep it conservative when needed.
       (setq corfu-auto t
-            corfu-cycle t))
-    (when (and (pro-ui--try-require 'kind-icon)
-               (boundp 'corfu-margin-formatters))
+            corfu-auto-prefix 2
+            corfu-auto-delay 0.2
+            corfu-cycle t
+            corfu-count 14
+            corfu-separator ?\s
+            corfu-echo-documentation nil
+            corfu-preselect 'prompt)
+      (when (fboundp 'global-corfu-mode) (global-corfu-mode 1))
+      (when (fboundp 'corfu-history-mode) (corfu-history-mode 1)))
+
+    ;; Integrate Cape (completion at point extensions) if available.
+    (when (pro-ui--try-require 'cape)
+      ;; Common useful CAPF backends. Order matters: more specific first.
+      (dolist (fn '(cape-file cape-keyword cape-dabbrev))
+        (unless (member fn completion-at-point-functions)
+          (add-to-list 'completion-at-point-functions fn)))
+      ;; Provide a helper to disable slow ispell capf in programming/text modes.
+      (defun pro-ui--disable-ispell-capf ()
+        "Remove `ispell-completion-at-point' from `completion-at-point-functions'."
+        (setq-local completion-at-point-functions
+                    (remq #'ispell-completion-at-point completion-at-point-functions)))
+      (add-hook 'prog-mode-hook #'pro-ui--disable-ispell-capf)
+      (add-hook 'text-mode-hook #'pro-ui--disable-ispell-capf))
+
+    ;; Enable Corfu in the minibuffer when Vertico/MCT are not active.
+    (defun pro-ui--maybe-enable-corfu-in-minibuffer ()
+      "Enable `corfu-mode' in minibuffer unless Vertico/MCT is active." 
+      (unless (or (bound-and-true-p vertico--input) (bound-and-true-p mct--active))
+        (setq-local corfu-auto nil) ; prefer manual completion in minibuffer
+        (when (fboundp 'corfu-mode) (corfu-mode 1))))
+    (add-hook 'minibuffer-setup-hook #'pro-ui--maybe-enable-corfu-in-minibuffer)
+
+    ;; Vertico keybindings: make C-n/C-p behave like minibuffer navigation
+    (when (and (boundp 'vertico-map) (keymapp vertico-map))
+      (define-key vertico-map (kbd "C-n") #'vertico-next)
+      (define-key vertico-map (kbd "C-p") #'vertico-previous)
+      (define-key vertico-map (kbd "M-n") #'vertico-next)
+      (define-key vertico-map (kbd "M-p") #'vertico-previous))
+
+    ;; Corfu for terminal sessions.
+    (unless (display-graphic-p)
+      (when (pro-ui--try-require 'corfu-terminal)
+        (when (fboundp 'corfu-terminal-mode) (corfu-terminal-mode 1))))
+
+    ;; Optional cosmetics: candidate icons in the margin.
+    (when (and (pro-ui--try-require 'kind-icon) (boundp 'corfu-margin-formatters))
       (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))))
 
 (provide 'ui)

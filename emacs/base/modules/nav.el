@@ -12,7 +12,15 @@
   ;; проверяем наличие определения функции и безопасно включаем режим.
   (when (fboundp 'vertico-mode)
     (vertico-mode 1)
-    (setq vertico-cycle t)))
+    (setq vertico-cycle t))
+  ;; Navigation keys inside Vertico
+  (when (and (boundp 'vertico-map) (keymapp vertico-map))
+    (define-key vertico-map (kbd "C-n") #'vertico-next)
+    (define-key vertico-map (kbd "C-p") #'vertico-previous)
+    (define-key vertico-map (kbd "C-j") #'vertico-next)
+    (define-key vertico-map (kbd "C-k") #'vertico-previous)
+    ;; Accept candidate with RET but keep original behavior in certain contexts
+    (define-key vertico-map (kbd "RET") #'vertico-exit)))
 
 (when (or (pro--package-provided-p 'orderless) (pro-packages--maybe-install 'orderless t) (require 'orderless nil t))
   (setq completion-styles '(orderless basic)
@@ -29,7 +37,35 @@
     ;; хендлеры xref только при наличии consult-xref.
     (when (fboundp 'consult-xref)
       (setq xref-show-definitions-function #'consult-xref
-            xref-show-xrefs-function #'consult-xref))))
+            xref-show-xrefs-function #'consult-xref)))
+  ;; Remap common commands to consult variants for a consistent UX
+  (when (fboundp 'consult-find)
+    (define-key global-map [remap find-file] #'consult-find))
+  (when (fboundp 'consult-buffer)
+    (define-key global-map [remap switch-to-buffer] #'consult-buffer))
+  (when (fboundp 'consult-goto-line)
+    (define-key global-map [remap goto-line] #'consult-goto-line))
+  ;; Ensure embark is available and configured when consult is present
+  (when (or (pro--package-provided-p 'embark) (pro-packages--maybe-install 'embark t) (require 'embark nil t))
+    (when (fboundp 'embark-act)
+      (global-set-key (kbd "C-.") #'embark-act)
+      (global-set-key (kbd "C-;") #'embark-dwim))
+    ;; Setup embark-consult integration if available
+    (when (or (pro--package-provided-p 'embark-consult) (pro-packages--maybe-install 'embark-consult t) (require 'embark-consult nil t))
+      ;; No-op: loading the package is sufficient; it wires into consult/embark
+      ))
+  (when (fboundp 'consult-imenu)
+    (define-key global-map [remap imenu] #'consult-imenu))
+  (when (fboundp 'consult-bookmark)
+    (define-key global-map [remap bookmark-jump] #'consult-bookmark))
+  (when (fboundp 'consult-yank-pop)
+    (define-key global-map [remap yank-pop] #'consult-yank-pop))
+  (when (fboundp 'consult-complex-command)
+    (define-key global-map [remap repeat-complex-command] #'consult-complex-command))
+  ;; Helpful consult defaults
+  (when (fboundp 'consult-line)
+    (setq consult-preview-key "M-.")
+    (setq consult-line-start-from-top t)))
 
 (defun pro-nav-search-project ()
   "Искать в текущем проекте, если доступен project root."
