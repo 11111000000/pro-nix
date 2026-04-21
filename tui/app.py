@@ -34,6 +34,17 @@ class TextArea(Static):
     """
     def on_mount(self) -> None:
         self._lines: list[str] = []
+        # top line index currently shown
+        self._top = 0
+
+    def _window_size(self) -> int:
+        # derive a sensible page size from the widget height; fall back to 10
+        try:
+            h = int(self.size.height)  # type: ignore[attr-defined]
+            # reserve a couple of lines for header/footer
+            return max(5, h - 3)
+        except Exception:
+            return 10
 
     def append(self, text: str) -> None:
         # Accept multi-line input and append all lines
@@ -42,11 +53,41 @@ class TextArea(Static):
         # Keep the last 500 lines to avoid unbounded growth
         if len(self._lines) > 500:
             self._lines = self._lines[-500:]
-        self.update("\n".join(self._lines))
+        # auto-scroll to end when appending new content
+        self._top = max(0, len(self._lines) - self._window_size())
+        self._render_view()
 
     def clear(self) -> None:
         self._lines = []
-        self.update("")
+        self._top = 0
+        self._render_view()
+
+    def _render_view(self) -> None:
+        # render visible window
+        win = self._window_size()
+        start = max(0, min(self._top, max(0, len(self._lines) - 1)))
+        end = start + win
+        view = self._lines[start:end]
+        self.update("\n".join(view))
+
+    # Scrolling API used by the app
+    def scroll_lines(self, delta: int) -> None:
+        if not self._lines:
+            return
+        self._top = max(0, min(self._top + delta, max(0, len(self._lines) - self._window_size())))
+        self._render_view()
+
+    def page(self, forward: bool = True) -> None:
+        n = self._window_size()
+        self.scroll_lines(n if forward else -n)
+
+    def go_top(self) -> None:
+        self._top = 0
+        self._render_view()
+
+    def go_end(self) -> None:
+        self._top = max(0, len(self._lines) - self._window_size())
+        self._render_view()
 
 
 class Menu(Static):
@@ -177,6 +218,20 @@ class ProNixApp(App):
             asyncio.create_task(self._run_and_show([sys.executable, str(PROCTL), 'diagnostics']))
         elif key == '3':
             asyncio.create_task(self._run_and_show([sys.executable, str(PROCTL), 'exec', 'uname', '-a']))
+        elif key in ('j', 'J', 'down'):
+            # single-line scroll down
+            self.output.scroll_lines(1)
+        elif key in ('k', 'K', 'up'):
+            # single-line scroll up
+            self.output.scroll_lines(-1)
+        elif key in (' ', 'pagedown'):
+            self.output.page(forward=True)
+        elif key in ('b', 'pageup'):
+            self.output.page(forward=False)
+        elif key == 'g':
+            self.output.go_top()
+        elif key == 'G':
+            self.output.go_end()
         elif key in ('q', 'Q'):
             # try to terminate running process, then exit
             try:
