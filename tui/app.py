@@ -64,12 +64,19 @@ class OnboardWizard(Widget):
         yield Button("Далее", id="wizard_next")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Универсальная обработка нажатий в визарде.
+
+        Обрабатываем переключение run-as-root, навигацию шагов, проверку/установку секрета,
+        запуск действий и отмену.
+        """
+        # Toggle as-root
         if event.button.id == "as_root_toggle":
             cur = getattr(self, 'as_root', False)
             self.as_root = not cur
-            # обновить метку кнопки
             event.button.label = f"Run as root: {'ON' if self.as_root else 'OFF'}"
             return
+
+        # Next button navigation
         if event.button.id == "wizard_next":
             if self.step == 1:
                 host_inp = self.query_one("#host_input", Input)
@@ -79,13 +86,70 @@ class OnboardWizard(Widget):
                 self.step = 2
                 self.mount_step2()
             elif self.step == 2:
-                inp = self.query_one("#key_input", Input)
-                self.keypath = inp.value.strip()
+                # require secret validation before proceeding
+                if not getattr(self, 'secret_valid', False):
+                    self.app.main_log.write("Сначала проверьте секрет или установите его на хосте.")
+                    return
                 self.step = 3
                 self.mount_step3()
             elif self.step == 3:
-                # should not happen; final button handled separately
-                pass
+                # move to preview/confirm step
+                self.step = 4
+                self.mount_step3()
+            return
+
+        # Validate join-secret on the target host
+        if event.button.id == "wizard_validate_secret":
+            try:
+                secret = self.query_one("#secret_input", Input).value.strip()
+            except Exception:
+                secret = ""
+            if not secret:
+                self.app.main_log.write("Секрет не введён")
+                return
+            self.app.main_log.write("Проверяем секрет на хосте...")
+            import asyncio
+
+            async def do_check():
+                res = await asyncio.to_thread(call_proctl, ["check-join-secret", "--host", getattr(self, 'host_spec', 'local'), "--secret", secret])
+                if res.get('ok'):
+                    self.secret_valid = True
+                    self.app.main_log.write("Секрет валиден — можно продолжать")
+                else:
+                    self.secret_valid = False
+                    self.app.main_log.write("Секрет не прошёл проверку: %s" % str(res.get('error', res)))
+
+            asyncio.create_task(do_check())
+            return
+
+        # Set join-secret on the target host (operator action)
+        if event.button.id == "wizard_set_secret":
+            try:
+                secret = self.query_one("#secret_input", Input).value.strip()
+            except Exception:
+                secret = ""
+            if not secret:
+                self.app.main_log.write("Секрет не введён")
+                return
+            self.app.main_log.write("Устанавливаем секрет на хосте (operator)...")
+            import asyncio
+
+            async def do_set():
+                res = await asyncio.to_thread(call_proctl, ["set-join-secret", "--host", getattr(self, 'host_spec', 'local'), "--secret", secret])
+                self.app.main_log.write(json.dumps(res, ensure_ascii=False, indent=2))
+                # auto-validate
+                res2 = await asyncio.to_thread(call_proctl, ["check-join-secret", "--host", getattr(self, 'host_spec', 'local'), "--secret", secret])
+                if res2.get('ok'):
+                    self.secret_valid = True
+                    self.app.main_log.write("Секрет записан и проверен.")
+                else:
+                    self.secret_valid = False
+                    self.app.main_log.write("Ошибка валидации после установки: %s" % str(res2.get('error', res2)))
+
+            asyncio.create_task(do_set())
+            return
+
+        # Execute (final run) handled below
 
     def mount_step2(self):
         self.clear()
