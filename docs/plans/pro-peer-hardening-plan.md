@@ -17,11 +17,16 @@
 
 Фаза 1 — базовое развертывание (LAN trust)
 
-1. Включить `pro-peer.enable = true` на всех хостах (выполнено).
+1. Включить `pro-peer.enable = true` на всех хостах (выполнено — модуль присутствует в `modules/pro-peer.nix`).
 2. Включить `pro-peer.enableKeySync = true` и разместить `authorized_keys.gpg` в `/etc/pro-peer/authorized_keys.gpg`.
-3. Запустить и проверить systemd сервис `pro-peer-sync-keys.service` и timer.
-4. Проверить Avahi: `ping host.local` из другого хоста.
-5. Проверить SSH из LAN: `ssh user@host.local` — должен работать только по ключу.
+   - Скрипт `scripts/pro-peer-sync-keys.sh` теперь tolerant: если файл отсутствует, юнит завершится успешно (no-op).
+   - Рекомендуется операторный playbook `scripts/rotate-authorized-keys.sh` (еще не реализован) для безопасной доставки и ротации.
+3. Запустить и проверить systemd сервис `pro-peer-sync-keys.service` и timer (systemctl status/journalctl). Убедиться, что
+   файл `/var/lib/pro-peer/authorized_keys` создан и имеет права 600 root:root после успешной расшифровки.
+4. Проверить Avahi: `ping host.local` из другого хоста. Если `avahi-daemon` ранее падал из‑за отсутствия
+   runtime каталога `/run/avahi-daemon`, модуль теперь добавляет tmpfiles правило для его создания (см. modules/pro-peer.nix).
+5. Проверить SSH из LAN: `ssh user@host.local` — должен работать только по ключу. Для специализированных ключей можно
+   использовать forced-command acceptor (`scripts/pro-peer-acceptor.sh`) чтобы ограничить разрешённые команды (например nix copy).
 
 Фаза 2 — ограничение поверхностей атаки
 
