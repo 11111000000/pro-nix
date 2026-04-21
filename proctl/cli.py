@@ -282,6 +282,7 @@ def cmd_check_join_secret(args):
             ok = _check_secret(stored, secret)
             os.remove(tmp_path)
             json_exit({"ok": ok})
+
         except Exception as e:
             json_exit({"error": str(e)}, code=1)
 
@@ -445,6 +446,44 @@ def cmd_diagnostics(args):
     json_exit({"cmd": cmd, "out": outpath, "rc": res.get("rc", 0)})
 
 
+def cmd_list_ifaces(args):
+    host = args.host
+    # List network interfaces and return names; for remote use ip -o link
+    if parse_host(host)["type"] == "local":
+        res = run_local_command("ip -o link show")
+        out = res.get("stdout", "")
+        if not out:
+            json_exit({"error": "no output from ip link"}, code=2)
+        names = []
+        for line in out.splitlines():
+            parts = line.split(':')
+            if len(parts) >= 2:
+                names.append(parts[1].strip())
+        json_exit({"ifaces": names})
+    else:
+        parsed = parse_host(host)
+        ssh_parts = ["ssh", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=accept-new"]
+        if parsed.get("port"):
+            ssh_parts += ["-p", str(parsed.get("port"))]
+        target = parsed.get("host")
+        if parsed.get("user"):
+            target = f"{parsed['user']}@{target}"
+        ssh_parts += [target, "ip -o link show"]
+        try:
+            p = subprocess.run(ssh_parts, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if p.returncode != 0:
+                json_exit({"error": p.stderr.decode(errors='replace')}, code=2)
+            out = p.stdout.decode(errors='replace')
+            names = []
+            for line in out.splitlines():
+                parts = line.split(':')
+                if len(parts) >= 2:
+                    names.append(parts[1].strip())
+            json_exit({"ifaces": names})
+        except Exception as e:
+            json_exit({"error": str(e)}, code=1)
+
+
 def cmd_rebuild(args):
     host = args.host
     flake = args.flake
@@ -509,6 +548,7 @@ def main():
     p = sub.add_parser("enable-discovery")
     p.add_argument("--host", default="local")
     p.add_argument("--enable", action="store_true")
+    p.add_argument("--iface", required=False, help="Имя интерфейса overlay (например wg0). Если не указано, proctl попытается обнаружить интерфейс автоматически")
 
     p = sub.add_parser("restore-backup")
     p.add_argument("--host", default="local")
@@ -521,6 +561,9 @@ def main():
     p.add_argument("--cmd", required=True)
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--as-root", action="store_true")
+
+    p = sub.add_parser("list-ifaces")
+    p.add_argument("--host", default="local")
 
 
     p = sub.add_parser("rebuild")

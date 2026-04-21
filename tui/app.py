@@ -107,6 +107,12 @@ class OnboardWizard(Widget):
             if not secret:
                 self.app.main_log.write("Секрет не введён")
                 return
+
+        if event.button.id == "toggle_avahi":
+            cur = getattr(self, 'enable_avahi', False)
+            self.enable_avahi = not cur
+            event.button.label = f"Enable Avahi on overlay: {'ON' if self.enable_avahi else 'OFF'}"
+            return
             self.app.main_log.write("Проверяем секрет на хосте...")
             import asyncio
 
