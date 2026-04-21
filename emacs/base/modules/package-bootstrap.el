@@ -7,7 +7,7 @@
   '(gptel agent-shell magit consult vertico orderless marginalia corfu which-key rainbow-delimiters embark embark-consult)
   "Packages that should be present in a fresh Emacs user layer.")
 
- (defun pro-package-bootstrap-install-targets ()
+(defun pro-package-bootstrap-install-targets ()
    "Install the default package set if it is missing.
 
 This runner honors the pro-packages prompt-and-install policy: it will
@@ -36,3 +36,8 @@ prompt the user where appropriate.
            (message "[pro-package-bootstrap] missing %S (skipped)" pkg-sym)))))))
 
 (provide 'package-bootstrap)
+
+;; Auto-run bootstrap installer when environment requests auto-install.
+(when (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "1") "1")
+  ;; Run lazily but during init so missing packages are available later.
+  (ignore-errors (pro-package-bootstrap-install-targets)))
