@@ -90,38 +90,32 @@ in
     # firewall rules below to restrict access to RFC1918 private nets.
     allowedTCPPorts = [ 22000 8384 ];
     allowedUDPPorts = [ 21027 137 138 ];
-
-    # Extra commands: allow SMB (139/445) only from RFC1918 networks and
-    # drop/deny from elsewhere. This provides network-level protection even
-    # if Samba is enabled on the host.
-    # Prefer nftables when available. Construct an nftables table+chain that
-    # allows SMB ports only from RFC1918 and drops elsewhere. If nftables is
-    # not available, fall back to iptables commands for compatibility.
-    # Use declarative nftables ruleset to restrict SMB ports to RFC1918 networks.
-    # This is applied declaratively by NixOS and is preferred over procedural
-    # extraCommands. Keep a minimal, idempotent ruleset that permits
-    # established traffic, allows SMB from private networks and drops others.
-    networking.nftables.enable = true;
-    networking.nftables.rules = lib.mkForce ''
-      table inet pro-nix-smb {
-        chain input {
-          type filter hook input priority 0;
-          policy accept;
-
-          # allow established
-          ct state established,related accept
-
-          # allow SMB from RFC1918
-          ip saddr 10.0.0.0/8 tcp dport {139,445} accept
-          ip saddr 172.16.0.0/12 tcp dport {139,445} accept
-          ip saddr 192.168.0.0/16 tcp dport {139,445} accept
-
-          # drop SMB from elsewhere
-          tcp dport {139,445} drop
-        }
-      }
-    '';
   };
+
+  # Use declarative nftables ruleset to restrict SMB ports to RFC1918 networks.
+  # This is applied declaratively by NixOS and is preferred over procedural
+  # extraCommands. Keep a minimal, idempotent ruleset that permits established
+  # traffic, allows SMB from private networks and drops others.
+  networking.nftables.enable = true;
+  networking.nftables.rules = lib.mkForce ''
+    table inet pro-nix-smb {
+      chain input {
+        type filter hook input priority 0;
+        policy accept;
+
+        # allow established
+        ct state established,related accept
+
+        # allow SMB from RFC1918
+        ip saddr 10.0.0.0/8 tcp dport {139,445} accept
+        ip saddr 172.16.0.0/12 tcp dport {139,445} accept
+        ip saddr 192.168.0.0/16 tcp dport {139,445} accept
+
+        # drop SMB from elsewhere
+        tcp dport {139,445} drop
+      }
+    }
+  '';
 
   # Avahi is enabled above; Samba is configured to bind to the local LAN subnet
   # and will be discoverable on the local Wi‑Fi network. If additional mDNS
