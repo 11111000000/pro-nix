@@ -120,4 +120,8 @@ AllowTcpForwarding no
   swapDevices = [
     { device = "/dev/disk/by-uuid/68ade83c-1e5b-4f37-a13f-2c386be87be6"; }
   ];
+
+  # Enable fbterm service on tty2 for improved font rendering/color in a
+  # framebuffer terminal. This is experimental; disable if it causes issues.
+  systemd.services."fbterm-tty2".enable = true;
 }
