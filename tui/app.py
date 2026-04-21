@@ -160,7 +160,8 @@ class OnboardWizard(Widget):
 
     def mount_step3(self):
         self.clear()
-        self.mount(Label("Onboarding Wizard — шаг 3/3"))
+        self.clear()
+        self.mount(Label("Onboarding Wizard — шаг 3/4"))
         self.mount(Label(f"Host: {getattr(self, 'host_spec', 'local')}"))
         self.mount(Label(f"Hostname: {getattr(self, 'hostname', '')}"))
         self.mount(Label(f"Keys: {getattr(self, 'keypath', '')}"))
@@ -173,7 +174,14 @@ class OnboardWizard(Widget):
             preview_lines.append("run pro-peer-sync-keys")
         for ln in preview_lines:
             self.mount(Label(ln))
-        # dry-run checkbox simulated by default; require explicit confirmation
+        # Options for discovery and overlay
+        self.enable_avahi = False
+        self.mount(Label("Опции включения discovery (будут применяться после подтверждения):"))
+        self.mount(Button("Enable Avahi on overlay: OFF", id="toggle_avahi"))
+        self.mount(Label("WireGuard config (локальный путь, опционально):"))
+        self.mount(Input(placeholder="/path/to/wg0.conf", id="wg_input"))
+        self.mount(Label("(Tor hidden service: загрузите зашифрованный blob вручную и распакуйте через оператора)"))
+        # Confirmation
         self.mount(Label("Для выполнения введите слово 'APPLY' в поле ниже и нажмите 'Выполнить'"))
         self.mount(Input(placeholder="APPLY", id="confirm_input"))
         self.mount(Button("Выполнить", id="wizard_run"))
@@ -205,6 +213,11 @@ class OnboardWizard(Widget):
             asyncio.create_task(self.perform_actions_async())
         if event.button.id == "wizard_cancel":
             self.remove()
+        if event.button.id == "toggle_avahi":
+            cur = getattr(self, 'enable_avahi', False)
+            self.enable_avahi = not cur
+            event.button.label = f"Enable Avahi on overlay: {'ON' if self.enable_avahi else 'OFF'}"
+            return
 
     async def perform_actions_async(self):
         host = getattr(self, 'host_spec', 'local')
@@ -219,9 +232,9 @@ class OnboardWizard(Widget):
             res = await asyncio.to_thread(call_proctl, cmd)
             self.app.main_log.write(json.dumps(res, ensure_ascii=False, indent=2))
         # Step: upload keys
-            if getattr(self, 'keypath', ''):
-                self.app.main_log.write(f"Загружаем ключи {self.keypath} -> /etc/pro-peer/authorized_keys.gpg на {host}")
-            cmd = ["upload-file", "--host", host, "--src", self.keypath, "--dst", "/etc/pro-peer/authorized_keys.gpg"]
+        if getattr(self, 'keypath', ''):
+            self.app.main_log.write(f"Загружаем ключи {self.keypath} -> /etc/pro-peer/authorized_keys.gpg на {host}")
+        cmd = ["upload-file", "--host", host, "--src", self.keypath, "--dst", "/etc/pro-peer/authorized_keys.gpg"]
             if getattr(self, 'as_root', False):
                 cmd += ["--as-root"]
             res2 = await asyncio.to_thread(call_proctl, cmd)
@@ -242,6 +255,32 @@ class OnboardWizard(Widget):
                 cmd3 += ["--as-root"]
             res3 = await asyncio.to_thread(call_proctl, cmd3)
             self.app.main_log.write(json.dumps(res3, ensure_ascii=False, indent=2))
+        # WireGuard deploy step
+        try:
+            wgpath = self.query_one("#wg_input", Input).value.strip()
+        except Exception:
+            wgpath = ""
+        if wgpath:
+            self.app.main_log.write(f"Deploying WireGuard config {wgpath} to {host}")
+            up_cmd = ["upload-file", "--host", host, "--src", wgpath, "--dst", "/etc/wireguard/wg0.conf"]
+            if getattr(self, 'as_root', False):
+                up_cmd += ["--as-root"]
+            up_res = await asyncio.to_thread(call_proctl, up_cmd)
+            self.app.main_log.write(json.dumps(up_res, ensure_ascii=False, indent=2))
+            # bring up wg
+            bring_cmd = ["exec", "--host", host, "--cmd", "wg-quick up wg0"]
+            if getattr(self, 'as_root', False):
+                bring_cmd += ["--as-root"]
+            bring_res = await asyncio.to_thread(call_proctl, bring_cmd)
+            self.app.main_log.write(json.dumps(bring_res, ensure_ascii=False, indent=2))
+        # enable avahi on overlay if requested
+        if getattr(self, 'enable_avahi', False):
+            self.app.main_log.write("Enabling Avahi on overlay (enable-discovery)")
+            en_cmd = ["enable-discovery", "--host", host, "--enable"]
+            if getattr(self, 'as_root', False):
+                en_cmd += ["--as-root"]
+            en_res = await asyncio.to_thread(call_proctl, en_cmd)
+            self.app.main_log.write(json.dumps(en_res, ensure_ascii=False, indent=2))
         self.app.main_log.write("Onboarding завершён.")
         # remove wizard widget
         self.remove()
