@@ -17,10 +17,10 @@ interactive sessions it delegates to `pro-packages--maybe-install` to
 prompt the user where appropriate.
 "
    (interactive)
-   (let ((auto (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "0") "1")))
-     (unless pro-packages--refreshed
-       (condition-case _ (package-refresh-contents) (error nil))
-       (setq pro-packages--refreshed t))
+      (let ((auto (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "0") "1")))
+        (unless pro-packages--refreshed
+          (condition-case _ (package-refresh-contents) (error nil))
+          (setq pro-packages--refreshed t))
      (dolist (pkg pro-package-bootstrap-targets)
        (let ((pkg-sym (if (symbolp pkg) pkg (intern pkg))))
          (cond
