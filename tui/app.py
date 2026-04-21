@@ -92,10 +92,25 @@ class TextArea(Static):
 
 class Menu(Static):
     def compose(self) -> ComposeResult:
-        yield Button('1) List interfaces', id='list-ifaces')
-        yield Button('2) Diagnostics', id='diagnostics')
-        yield Button('3) Run uname -a', id='run-cmd')
+        yield Button('1) Overview', id='overview')
+        yield Button('2) Network', id='network')
+        yield Button('3) Services', id='services')
+        yield Button('4) Crypto', id='crypto')
+        yield Button('5) Peers', id='peers')
+        yield Button('6) Deploy', id='deploy')
+        yield Button('7) Diagnostics', id='diagnostics')
+        yield Button('8) Logs', id='logs')
+        yield Button('9) Advanced', id='advanced')
         yield Button('Q) Quit', id='quit')
+
+
+class ContentPanel(Static):
+    """Central panel for rendering main content (tables, status, checklists)."""
+    def on_mount(self) -> None:
+        self.update('Select a section from the left to begin.')
+
+    def show_text(self, text: str) -> None:
+        self.update(text)
 
 
 class ProNixApp(App):
@@ -107,6 +122,9 @@ class ProNixApp(App):
             with Vertical():
                 yield Menu()
             with Vertical():
+                # left: menu, center: content panel, right: live log
+                self.content = ContentPanel()
+                yield self.content
                 self.output = TextArea()
                 yield self.output
         yield Footer()
@@ -129,6 +147,13 @@ class ProNixApp(App):
         except Exception:
             # some environments (like certain terminals) may not support this
             pass
+        # initial render
+        try:
+            self._render_overview()
+        except Exception:
+            pass
+        # pending confirmation action state
+        self._pending_action: dict | None = None
 
     async def on_button_pressed(self, event) -> None:
         btn = event.button.id
@@ -149,6 +174,31 @@ class ProNixApp(App):
             cmd = [sys.executable, str(PROCTL), 'diagnostics']
         elif btn == 'run-cmd':
             cmd = [sys.executable, str(PROCTL), 'exec', 'uname', '-a']
+        elif btn == 'overview':
+            # render the overview content synchronously
+            self._render_overview()
+            return
+        elif btn == 'network':
+            self._render_network()
+            return
+        elif btn == 'services':
+            self._render_services()
+            return
+        elif btn == 'crypto':
+            self._render_crypto()
+            return
+        elif btn == 'peers':
+            self._render_peers()
+            return
+        elif btn == 'deploy':
+            self._render_deploy()
+            return
+        elif btn == 'logs':
+            self._render_logs()
+            return
+        elif btn == 'advanced':
+            self._render_advanced()
+            return
         else:
             self.output.append(f'Unknown action: {btn}')
             return
@@ -202,6 +252,11 @@ class ProNixApp(App):
         thread = threading.Thread(target=target, daemon=True)
         thread.start()
         # return immediately; the background thread will update the UI
+        # also ensure content panel shows the running task
+        try:
+            self.content.show_text(f'Running: {" ".join(cmd)}\nSee logs on the right for live output.')
+        except Exception:
+            pass
 
     def on_key(self, event) -> None:
         # numeric shortcuts
@@ -214,10 +269,24 @@ class ProNixApp(App):
             return
         if key == '1':
             asyncio.create_task(self._run_and_show([sys.executable, str(PROCTL), 'list-ifaces']))
+            # also show overview
+            self._render_overview()
         elif key == '2':
             asyncio.create_task(self._run_and_show([sys.executable, str(PROCTL), 'diagnostics']))
+            # also show checklist
+            self._render_checklist()
         elif key == '3':
             asyncio.create_task(self._run_and_show([sys.executable, str(PROCTL), 'exec', 'uname', '-a']))
+            self._render_services()
+        elif key in ('A',):
+            # restart avahi
+            self._request_confirm('Restart avahi-daemon (requires sudo)', ['sudo','systemctl','restart','avahi-daemon'])
+        elif key in ('S',):
+            # restart sshd
+            self._request_confirm('Restart sshd (requires sudo)', ['sudo','systemctl','restart','sshd'])
+        elif key in ('K',):
+            # run key sync
+            self._request_confirm('Run pro-peer key sync (sudo)', ['sudo','/etc/pro-peer-sync-keys.sh','--input','/etc/pro-peer/authorized_keys.gpg','--out','/var/lib/pro-peer/authorized_keys'])
         elif key in ('j', 'J', 'down'):
             # single-line scroll down
             self.output.scroll_lines(1)
@@ -241,6 +310,26 @@ class ProNixApp(App):
             except Exception:
                 pass
             self.exit()
+        # confirmation handling
+        if key in ('y', 'Y') and self._pending_action:
+            # execute pending action
+            cmd = self._pending_action.get('cmd')
+            desc = self._pending_action.get('desc')
+            self._pending_action = None
+            if cmd:
+                asyncio.create_task(self._run_and_show(cmd))
+                try:
+                    self.content.show_text(f'Executing: {desc}\nSee logs on the right for output.')
+                except Exception:
+                    pass
+            return
+        if key in ('n', 'N') and self._pending_action:
+            self._pending_action = None
+            try:
+                self.content.show_text('Action cancelled')
+            except Exception:
+                pass
+            return
 
     async def _on_sigint(self) -> None:
         """Handle SIGINT (Ctrl-C). If a process is running, terminate it.
@@ -263,6 +352,196 @@ class ProNixApp(App):
             return
         self._last_sigint = now
         self.output.append('Press Ctrl-C again quickly to quit')
+
+    # ------------------------- Render helpers -------------------------
+    def _run_cmd(self, cmd: list[str], timeout: int = 5) -> tuple[int, str, str]:
+        try:
+            p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+            return p.returncode, p.stdout.strip(), p.stderr.strip()
+        except subprocess.TimeoutExpired:
+            return 252, '', 'timeout'
+        except FileNotFoundError:
+            return 253, '', f'not found: {cmd[0]}'
+        except Exception as e:
+            return 254, '', str(e)
+
+    def _render_overview(self) -> None:
+        import socket, platform, shutil
+
+        lines = []
+        lines.append(f'Host: {socket.gethostname()}')
+        lines.append(f'OS: {platform.system()} {platform.release()} ({platform.version()})')
+
+        # Loadavg
+        try:
+            with open('/proc/loadavg', 'r') as f:
+                load = f.read().strip().split()[:3]
+            lines.append(f'Load (1/5/15): {load[0]} {load[1]} {load[2]}')
+        except Exception:
+            lines.append('Load: unavailable')
+
+        # Memory
+        try:
+            mem = {}
+            with open('/proc/meminfo') as f:
+                for ln in f:
+                    k, v = ln.split(':', 1)
+                    mem[k.strip()] = v.strip()
+            total = int(mem.get('MemTotal','0').split()[0])
+            free = int(mem.get('MemAvailable', mem.get('MemFree','0')).split()[0])
+            used_pct = (total - free) * 100 // total if total else 0
+            lines.append(f'Memory: {used_pct}% used ({(total-free)//1024}MB/{total//1024}MB)')
+        except Exception:
+            lines.append('Memory: unavailable')
+
+        # Disk
+        try:
+            du = shutil.disk_usage('/')
+            used_pct = du.used * 100 // du.total
+            lines.append(f'Disk /: {used_pct}% used ({du.free//1024//1024}MB free)')
+        except Exception:
+            lines.append('Disk: unavailable')
+
+        # IPs (brief)
+        rc, out, err = self._run_cmd(['ip','-4','addr','show'])
+        if rc == 0 and out:
+            ip_lines = out.splitlines()[:8]
+            lines.append('Interfaces (ipv4):')
+            lines.extend(ip_lines)
+        else:
+            lines.append('Interfaces: unavailable')
+
+        # Services quick status
+        services = ['sshd','avahi-daemon','pro-peer-sync-keys','tor','yggdrasil','headscale','i2p']
+        svc_lines = []
+        for s in services:
+            rc, out, err = self._run_cmd(['systemctl','is-active', s])
+            state = out if rc==0 else 'inactive'
+            svc_lines.append(f'{s}: {state}')
+        lines.append('Services: ' + ', '.join(svc_lines))
+
+        # show checklist hint
+        lines.append('\nChecklist:')
+        lines.append(' - Avahi running? (Network -> check)')
+        lines.append(' - SSH configured for key auth? (Services -> check)')
+        lines.append(' - Encrypted authorized_keys present? (Crypto -> check)')
+
+        try:
+            self.content.show_text('\n'.join(lines))
+        except Exception:
+            pass
+
+    def _render_network(self) -> None:
+        lines = []
+        lines.append('Network Overview')
+        rc, out, err = self._run_cmd(['ip','-brief','addr'])
+        if rc == 0 and out:
+            lines.extend(out.splitlines())
+        else:
+            lines.append('ip command unavailable or failed')
+
+        rc, out, err = self._run_cmd(['ip','route','show','default'])
+        if rc == 0 and out:
+            lines.append('\nDefault route:')
+            lines.extend(out.splitlines())
+
+        # DNS servers
+        try:
+            with open('/etc/resolv.conf') as f:
+                dns = [ln.strip() for ln in f if ln.startswith('nameserver')]
+            lines.append('\nDNS:')
+            lines.extend(dns if dns else ['(none)'])
+        except Exception:
+            lines.append('\nDNS: unavailable')
+
+        # Avahi status
+        rc, out, err = self._run_cmd(['systemctl','is-active','avahi-daemon'])
+        lines.append(f'Avahi: {out if rc==0 else "inactive"}')
+
+        try:
+            self.content.show_text('\n'.join(lines))
+        except Exception:
+            pass
+
+    def _render_services(self) -> None:
+        lines = []
+        lines.append('Services Status')
+        services = ['sshd','avahi-daemon','pro-peer-sync-keys','tor','yggdrasil','headscale','i2p']
+        for s in services:
+            rc, out, err = self._run_cmd(['systemctl','is-active', s])
+            enabled_rc, enabled_out, _ = self._run_cmd(['systemctl','is-enabled', s])
+            state = out if rc==0 else 'inactive'
+            enabled = enabled_out if enabled_rc==0 else 'disabled'
+            lines.append(f'{s:20} {state:10} {enabled:10}')
+
+        try:
+            self.content.show_text('\n'.join(lines))
+        except Exception:
+            pass
+
+    def _render_crypto(self) -> None:
+        self.content.show_text('Crypto: select encrypted authorized_keys.gpg in Crypto screen (coming soon)')
+
+    def _render_peers(self) -> None:
+        self.content.show_text('Peers: discovery will list mDNS peers (coming soon)')
+
+    def _render_deploy(self) -> None:
+        self.content.show_text('Deploy: run pro-peer-master flow (coming soon)')
+
+    def _render_logs(self) -> None:
+        # list recent logs
+        base = os.path.expanduser('~/.local/share/pro-nix/ui-logs')
+        try:
+            files = sorted([os.path.join(base,f) for f in os.listdir(base)], key=os.path.getmtime, reverse=True)
+            if not files:
+                self.content.show_text('No saved logs')
+                return
+            head = files[:5]
+            lines = ['Recent logs:']
+            for p in head:
+                lines.append(p)
+            self.content.show_text('\n'.join(lines))
+        except Exception:
+            self.content.show_text('No logs directory or inaccessible')
+
+    def _render_advanced(self) -> None:
+        self.content.show_text('Advanced: headscale/tor/yggdrasil/i2p helpers (coming soon)')
+
+    # ------------------------- Checklist helpers -------------------------
+    def _render_checklist(self) -> None:
+        """Render checklist with actionable hints into the content panel."""
+        items = []
+        # Avahi
+        rc, out, err = self._run_cmd(['systemctl','is-active','avahi-daemon'])
+        avahi_state = 'OK' if rc==0 and out=='active' else 'MISSING'
+        items.append(f'Avahi (mDNS): {avahi_state}  [A=restart]')
+        # SSH
+        rc, out, err = self._run_cmd(['systemctl','is-active','sshd'])
+        ssh_state = 'OK' if rc==0 and out=='active' else 'MISSING'
+        items.append(f'SSHD: {ssh_state}  [S=restart]')
+        # authorized_keys.gpg
+        path = '/etc/pro-peer/authorized_keys.gpg'
+        if os.path.exists(path):
+            items.append(f'Encrypted authorized_keys: present ({path})  [K=sync keys]')
+        else:
+            items.append(f'Encrypted authorized_keys: MISSING ({path})')
+        # pro-peer sync service
+        rc, out, err = self._run_cmd(['systemctl','is-active','pro-peer-sync-keys'])
+        pp_state = 'OK' if rc==0 and out=='active' else 'inactive'
+        items.append(f'pro-peer-sync-keys: {pp_state}  [K=run sync]')
+
+        lines = ['Checklist:'] + ['  ' + it for it in items] + ['', 'Confirm actions: press uppercase key to request confirmation, then Y to proceed.']
+        try:
+            self.content.show_text('\n'.join(lines))
+        except Exception:
+            pass
+
+    def _request_confirm(self, desc: str, cmd: list[str]) -> None:
+        self._pending_action = {'desc': desc, 'cmd': cmd}
+        try:
+            self.content.show_text(f'Confirm: {desc}\nPress Y to proceed or N to cancel')
+        except Exception:
+            pass
 
 
 def main() -> None:
