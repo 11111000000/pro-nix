@@ -92,29 +92,18 @@ in
     allowedUDPPorts = [ 21027 137 138 ];
   };
 
-  # Use declarative nftables ruleset to restrict SMB ports to RFC1918 networks.
-  # This is applied declaratively by NixOS and is preferred over procedural
-  # extraCommands. Keep a minimal, idempotent ruleset that permits established
-  # traffic, allows SMB from private networks and drops others.
-  networking.nftables.enable = true;
-  networking.nftables.rules = lib.mkForce ''
-    table inet pro-nix-smb {
-      chain input {
-        type filter hook input priority 0;
-        policy accept;
-
-        # allow established
-        ct state established,related accept
-
-        # allow SMB from RFC1918
-        ip saddr 10.0.0.0/8 tcp dport {139,445} accept
-        ip saddr 172.16.0.0/12 tcp dport {139,445} accept
-        ip saddr 192.168.0.0/16 tcp dport {139,445} accept
-
-        # drop SMB from elsewhere
-        tcp dport {139,445} drop
-      }
-    }
+  # Use firewall.extraCommands to install idempotent iptables rules that allow
+  # SMB only from RFC1918 networks. Some NixOS releases may not expose the
+  # "networking.nftables" option; using extraCommands keeps compatibility.
+  networking.firewall.extraCommands = ''
+    # Allow SMB from 10/8 if not already present
+    iptables -C INPUT -p tcp -m multiport --dports 139,445 -s 10.0.0.0/8 -j ACCEPT 2>/dev/null || iptables -I INPUT -p tcp -m multiport --dports 139,445 -s 10.0.0.0/8 -j ACCEPT || true
+    # Allow SMB from 172.16/12
+    iptables -C INPUT -p tcp -m multiport --dports 139,445 -s 172.16.0.0/12 -j ACCEPT 2>/dev/null || iptables -I INPUT -p tcp -m multiport --dports 139,445 -s 172.16.0.0/12 -j ACCEPT || true
+    # Allow SMB from 192.168/16
+    iptables -C INPUT -p tcp -m multiport --dports 139,445 -s 192.168.0.0/16 -j ACCEPT 2>/dev/null || iptables -I INPUT -p tcp -m multiport --dports 139,445 -s 192.168.0.0/16 -j ACCEPT || true
+    # Drop SMB from elsewhere if not already present
+    iptables -C INPUT -p tcp -m multiport --dports 139,445 -j DROP 2>/dev/null || iptables -A INPUT -p tcp -m multiport --dports 139,445 -j DROP || true
   '';
 
   # Avahi is enabled above; Samba is configured to bind to the local LAN subnet
