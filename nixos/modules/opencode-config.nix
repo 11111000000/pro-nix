@@ -34,7 +34,8 @@ in {
         "  fi"
         "done"
       ];
-      textInteractive = ''#'';
+      # textInteractive removed: not a valid option for activation scripts in
+      # this NixOS release. Keep script minimal and non-interactive.
     };
   };
 }
