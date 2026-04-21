@@ -84,6 +84,7 @@ class OnboardWizard(Widget):
     def mount_step3(self):
         self.clear()
         self.mount(Label("Onboarding Wizard — шаг 3/3"))
+        self.mount(Label(f"Host: {getattr(self, 'host_spec', 'local')}"))
         self.mount(Label(f"Hostname: {getattr(self, 'hostname', '')}"))
         self.mount(Label(f"Keys: {getattr(self, 'keypath', '')}"))
         self.mount(Label("Preview действий:"))
@@ -95,7 +96,10 @@ class OnboardWizard(Widget):
             preview_lines.append("run pro-peer-sync-keys")
         for ln in preview_lines:
             self.mount(Label(ln))
-        self.mount(Button("Выполнить (с подтверждением)", id="wizard_run"))
+        # dry-run checkbox simulated by default; require explicit confirmation
+        self.mount(Label("Для выполнения введите слово 'APPLY' в поле ниже и нажмите 'Выполнить'"))
+        self.mount(Input(placeholder="APPLY", id="confirm_input"))
+        self.mount(Button("Выполнить", id="wizard_run"))
         self.mount(Button("Отмена", id="wizard_cancel"))
 
     def on_mount(self) -> None:
@@ -110,31 +114,41 @@ class OnboardWizard(Widget):
             # handled above
             return
         if event.button.id == "wizard_run":
-            # perform actions: call proctl via sibling app call
-            self.perform_actions()
+            # confirmation required
+            try:
+                confirm = self.query_one("#confirm_input", Input).value.strip()
+            except Exception:
+                confirm = ""
+            if confirm != "APPLY":
+                self.app.main_log.write("Подтверждение не введено или неверно. Введите 'APPLY' в поле подтверждения.")
+                return
+            # perform actions asynchronously
+            import asyncio
+
+            asyncio.create_task(self.perform_actions_async())
         if event.button.id == "wizard_cancel":
             self.remove()
 
-    def perform_actions(self):
-        # simple synchronous execution calls proctl; in full app should be async
-        host = "local"
-        if getattr(self, 'hostname', ''):
-            res = call_proctl(["set-hostname", "--host", host, "--hostname", self.hostname])
-        if getattr(self, 'keypath', ''):
-            res2 = call_proctl(["upload-file", "--host", host, "--src", self.keypath, "--dst", "/etc/pro-peer/authorized_keys.gpg"])
-            res3 = call_proctl(["run-script", "--host", host, "--script", "pro-peer-sync-keys"])
-        # show simple result
+    async def perform_actions_async(self):
+        host = getattr(self, 'host_spec', 'local')
         self.app.main_log.clear()
-        self.app.main_log.write("Onboarding completed (резюме):")
-        try:
+        self.app.main_log.write("Запуск Onboarding действий...")
+        # Step: set hostname
+        if getattr(self, 'hostname', ''):
+            self.app.main_log.write(f"Выполняем set-hostname {self.hostname} на {host} (pkexec)")
+            res = await asyncio.to_thread(call_proctl, ["set-hostname", "--host", host, "--hostname", self.hostname])
             self.app.main_log.write(json.dumps(res, ensure_ascii=False, indent=2))
-        except Exception:
-            pass
-        try:
+        # Step: upload keys
+        if getattr(self, 'keypath', ''):
+            self.app.main_log.write(f"Загружаем ключи {self.keypath} -> /etc/pro-peer/authorized_keys.gpg на {host}")
+            res2 = await asyncio.to_thread(call_proctl, ["upload-file", "--host", host, "--src", self.keypath, "--dst", "/etc/pro-peer/authorized_keys.gpg"])
             self.app.main_log.write(json.dumps(res2, ensure_ascii=False, indent=2))
+            # run sync
+            self.app.main_log.write("Запускаем pro-peer-sync-keys")
+            res3 = await asyncio.to_thread(call_proctl, ["run-script", "--host", host, "--script", "pro-peer-sync-keys"])
             self.app.main_log.write(json.dumps(res3, ensure_ascii=False, indent=2))
-        except Exception:
-            pass
+        self.app.main_log.write("Onboarding завершён.")
+        # remove wizard widget
         self.remove()
 
 
