@@ -50,6 +50,20 @@ in
           enable = true; # advertise the host via mDNS
         };
       };
+      # Provide an Avahi service file advertising SSH over mDNS so non-Linux
+      # clients (macOS, iOS, Android apps with Bonjour support) can discover
+      # the host and connect to port 22.
+      environment.etc."avahi/services/ssh.service".text = ''
+        <?xml version="1.0" standalone='no'?>
+        <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+        <service-group>
+          <name replace-wildcards="yes">%h</name>
+          <service>
+            <type>_ssh._tcp</type>
+            <port>22</port>
+          </service>
+        </service-group>
+      '';
 
       # SSH hardening defaults for pro-nix peers
        services.openssh = {
@@ -85,6 +99,15 @@ in
       # present to avoid overwriting other modules' firewall configuration.
       networking.firewall = lib.mkIf true {
         allowedUDPPorts = lib.mkForce (lib.concatLists [ (config.networking.firewall.allowedUDPPorts or []) [ 5353 ] ]);
+        # Ensure IPv6 mDNS and IPv4 multicast for discovery are permitted. Use
+        # extraCommands for idempotent rules that allow multicast traffic used
+        # by Avahi (224.0.0.251 and ff02::fb) in addition to UDP/5353.
+        extraCommands = lib.mkForce ''
+          # Allow IPv4 mDNS UDP port 5353 (multicast 224.0.0.251)
+          iptables -C INPUT -p udp --dport 5353 -d 224.0.0.251 -j ACCEPT 2>/dev/null || iptables -I INPUT -p udp --dport 5353 -d 224.0.0.251 -j ACCEPT || true
+          # Allow IPv6 mDNS (multicast ff02::fb)
+          ip6tables -C INPUT -p udp --dport 5353 -d ff02::fb -j ACCEPT 2>/dev/null || ip6tables -I INPUT -p udp --dport 5353 -d ff02::fb -j ACCEPT || true
+        '';
       };
 
       environment.etc."pro-peer/authorized_keys".text = "# Managed at runtime by pro-peer-sync-keys\n";
