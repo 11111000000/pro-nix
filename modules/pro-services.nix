@@ -15,8 +15,9 @@
 
   services.resolved.enable = true;
 
-  # Enable kernel auditing and auditd service so we can collect audit logs.
-  # auditd is lightweight but requires kernel audit support; enabling helps security visibility.
+  # Аудит ядра: включаем auditd для централизованного сбора событий безопасности.
+  # Примечание: auditd требует поддержки аудита в ядре; при отсутствии поддержки
+  # эта опция будет неэффективна.
   security.audit.enable = true;
   security.auditd.enable = true;
 
