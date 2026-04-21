@@ -1,3 +1,4 @@
+<!-- Русский: комментарии и пояснения оформлены в стиле учебника -->
 # Project: Layered Emacs base with portable adapters
 
 ## Purpose

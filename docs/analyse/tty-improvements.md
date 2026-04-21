@@ -1,3 +1,4 @@
+<!-- Русский: комментарии и пояснения оформлены в стиле учебника -->
 # TTY improvements research
 
 ## Current state in this config

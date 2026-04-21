@@ -1,3 +1,4 @@
+<!-- Русский: комментарии и пояснения оформлены в стиле учебника -->
 % pro-packages: specification
 
 This document specifies the `pro-packages` runtime behaviour for the

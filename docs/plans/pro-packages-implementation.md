@@ -1,3 +1,4 @@
+<!-- Русский: комментарии и пояснения оформлены в стиле учебника -->
 # pro-packages Implementation Plan
 
 This document describes the concrete implementation steps for the

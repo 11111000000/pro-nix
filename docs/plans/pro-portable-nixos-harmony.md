@@ -1,3 +1,4 @@
+<!-- Русский: комментарии и пояснения оформлены в стиле учебника -->
 # Plan: Harmonic `pro` architecture
 
 ## Purpose

@@ -1,3 +1,4 @@
+<!-- Русский: комментарии и пояснения оформлены в стиле учебника -->
 # pro.old -> pro-nix: priority transfer analysis
 
 ## Thesis

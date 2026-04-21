@@ -1,3 +1,4 @@
+<!-- Русский: комментарии и пояснения оформлены в стиле учебника -->
 # Browser freshness and EXWM launchers
 
 ## Goal

@@ -1,3 +1,4 @@
+<!-- Русский: комментарии и пояснения оформлены в стиле учебника -->
 # Plan: WireGuard + Headscale (self-hosted control plane)
 
 Цель
