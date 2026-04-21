@@ -41,5 +41,17 @@
           nix build .#nixosConfigurations.huawei.config.system.build.toplevel
         '');
       };
+      # Add a convenience app to run the Textual TUI (pro-nix manager)
+      apps.${system}.pro-nix = {
+        type = "app";
+        program = toString (pkgs.writeShellScript "pro-nix-tui" ''
+          set -eu
+          # Run the Textual TUI from the repo
+          python3 ./tui/app.py
+        '');
+        meta = {
+          description = "Запустить текстовый TUI менеджер pro-nix (Textual)";
+        };
+      };
     };
 }

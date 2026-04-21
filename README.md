@@ -34,19 +34,59 @@ Emacs Lisp rules:
 
 Keybindings are automatically loaded from `~/.emacs.d/keys.el`.
 
-Quick start (high level)
+Проект pro-nix — кратко
 
-1. Clone the repository and review `SURFACE.md` to understand the public contract.
-2. For NixOS hosts: apply the configuration for a host (example `cf19`):
-   `sudo nixos-rebuild switch --flake .#cf19` (or `su -` then `nixos-rebuild switch --flake .#cf19`).
-3. If `pro-peer` mode is used, operator must place `/etc/pro-peer/authorized_keys.gpg` on the host
-   (see `docs/plans/pro-peer-hardening-plan.md`); `pro-peer-sync-keys.service` will decrypt it.
-4. For Emacs development: run `just install-emacs` to compile keybindings and install packages.
+pro-nix предоставляет переносимую NixOS конфигурацию и модульный Emacs‑слой
+с фокусом на reproducibility, безопасности и agent‑workflow. Репозиторий включает
+модули для peer‑сетей (Avahi, pro-peer SSH key sync), систему управления пакетами
+и вспомогательные скрипты для headless Emacs verification и диагностики.
 
-Notes about compatibility and safety
+Быстрый старт — установка и запуск TUI
 
-- The repo supports a range of NixOS versions. Some options (eg. `networking.nftables`) are
-  not available on older releases — the config contains fallbacks to ensure compatibility.
-- Be cautious with Samba exposure: Samba is hardened by default, and SMB ports are restricted to
-  RFC1918 networks via firewall rules. See `docs/ops/samba-hardening.md` for details and
-  per-host override instructions.
+1. Клонируйте репозиторий:
+   git clone https://github.com/11111000000/pro-nix.git
+   cd pro-nix
+
+2. Прототип TUI (Textual) можно запустить из корня репозитория:
+   python3 ./tui/app.py
+
+   Также в flake добавлено удобное приложение:
+   nix run .#pro-nix
+
+3. Для установки на NixOS хосте примените конфигурацию для выбранного хоста
+   (пример для `cf19`):
+   sudo nixos-rebuild switch --flake .#cf19
+
+4. Если вы используете pro-peer (centralized keys): оператор должен доставить
+   /etc/pro-peer/authorized_keys.gpg на хост (см. docs/plans/pro-peer-hardening-plan.md).
+
+Ключевые части репозитория
+- modules/pro-peer.nix — pro-peer: avahi, ssh hardening, pro-peer sync service.
+- modules/pro-storage.nix — Samba/Syncthing defaults и firewall‑hardening.
+- emacs/base/* — модульный Emacs‑слой, включающий UI и провайдера агентов.
+- scripts/* — вспомогательные скрипты: run-samba-diagnostics.sh, pro-peer-sync-keys.sh и др.
+- tui/ — Textual TUI prototype (tui/app.py).
+- proctl/ — CLI‑адаптер, который используется TUI и Emacs для выполнения операций
+  в стандартизированном JSON формате.
+
+Как работать (коротко)
+- Используйте TUI (nix run .#pro-nix или python3 ./tui/app.py) для: первичной настройки
+  хоста (hostname, загрузка ключей), синхронизации ключей, запуска диагностики,
+  просмотра логов и управления сервисами.
+- Emacs: модуль emacs/pro-manage.el предоставляет базовые команды для интеграции
+  с proctl; этот интерфейс расширяется параллельно с TUI.
+
+Безопасность и привилегии
+- По умолчанию все опасные операции показываются в режиме предварительного просмотра
+  (dry‑run). Чтобы выполнить их из UI, требуется подтверждение и явная команда с
+  повышением прав (pkexec/sudo). Все действия логируются в ~/.local/share/pro-nix/actions.log.
+
+Документация
+- docs/plans/pro-peer-hardening-plan.md — пошаговый план настроек pro-peer.
+- docs/ops/samba-hardening.md — рекомендации по безопасному использованию Samba.
+- docs/ops/README.md — оперативные заметки.
+
+Если вы хотите, я могу:
+ - развить TUI до полноценного Onboarding Wizard и добавить поддержку multi-host;
+ - расширить Emacs интерфейс до паритета с TUI;
+ - добавить тесты/CI шаги для proctl и TUI.
