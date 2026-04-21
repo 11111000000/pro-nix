@@ -288,14 +288,21 @@ by providers and prints a short status message."
   ;; Advice для оптимизации обработки
   (advice-add 'agent-shell--handle :around #'pro-ai-agent-shell--reload-after-first-turn))
 
-;; Auto-activate default backend when gptel loads
+;; Auto-activate default backend when gptel loads. Be defensive: some
+;; gptel installations raise an error when asking for an unknown backend
+;; name. Use condition-case to avoid aborting init if a backend is not
+;; available.
 (with-eval-after-load 'gptel
   (pro-ai--ensure-backends)
-  (setq gptel-backend (and (fboundp 'gptel-get-backend)
-                           (gptel-get-backend "Aitunnel")))
-  (when gptel-backend
-    (setq gptel-model (pro-ai--select-model 'aitunnel)))
-  (message "[pro-ai] default backend: %s"
-           (pro-ai--backend-display-name (and (boundp 'gptel-backend) gptel-backend))))
+  (let ((backend
+         (when (fboundp 'gptel-get-backend)
+           (condition-case _err
+               (gptel-get-backend "Aitunnel")
+             (error nil)))))
+    (when backend
+      (setq gptel-backend backend
+            gptel-model (pro-ai--select-model 'aitunnel)))
+    (message "[pro-ai] default backend: %s"
+             (pro-ai--backend-display-name backend))))
 
 (provide 'ai)

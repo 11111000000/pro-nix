@@ -17,7 +17,10 @@ interactive sessions it delegates to `pro-packages--maybe-install` to
 prompt the user where appropriate.
 "
    (interactive)
-      (let ((auto (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "0") "1")))
+      ;; Default to auto-install enabled when the environment variable is
+      ;; not present. This makes fresh profiles bootstrap missing packages
+      ;; automatically.
+      (let ((auto (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "1") "1")))
         (unless pro-packages--refreshed
           (condition-case _ (package-refresh-contents) (error nil))
           (setq pro-packages--refreshed t))

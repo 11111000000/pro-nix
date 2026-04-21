@@ -7,7 +7,8 @@
   (princ (concat "E2E: " msg "\n")))
 
 (defun ee/feature-assert (feat)
-  (if (featurep feat)
+  "Try to require FEAT and report status. Fail if not available." 
+  (if (require feat nil t)
       (ee/report (format "feature %s: OK" feat))
     (progn (ee/report (format "feature %s: MISSING" feat)) (kill-emacs 2))))
 
