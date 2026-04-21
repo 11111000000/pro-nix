@@ -158,10 +158,16 @@ def upload_file_to_host(host_spec: str, src: str, dst: str, owner: str = "root:r
     if not os.path.exists(src):
         return {"rc": 1, "stderr": f"Исходный файл не найден: {src}"}
     if host["type"] == "local":
-        cmd = f"sudo install -m {mode} {shlex.quote(src)} {shlex.quote(dst)} && sudo chown {shlex.quote(owner)} {shlex.quote(dst)}"
+        # Backup existing file if present
+        backup_cmds = []
+        if os.path.exists(dst):
+            bak = f"{dst}.bak.{int(datetime.utcnow().timestamp())}"
+            backup_cmds.append(f"sudo cp -a {shlex.quote(dst)} {shlex.quote(bak)}")
+        install_cmd = f"sudo install -m {mode} {shlex.quote(src)} {shlex.quote(dst)} && sudo chown {shlex.quote(owner)} {shlex.quote(dst)}"
+        full_cmd = " && ".join(backup_cmds + [install_cmd]) if backup_cmds else install_cmd
         if dry:
-            return {"preview": cmd}
-        return run_local_command(cmd)
+            return {"preview": full_cmd}
+        return run_local_command(full_cmd)
     else:
         # remote: scp to /tmp, then sudo mv
         tmpname = os.path.basename(dst)
@@ -174,8 +180,11 @@ def upload_file_to_host(host_spec: str, src: str, dst: str, owner: str = "root:r
             scp_target = f"{host['user']}@{scp_target}"
         scp_parts += [src, f"{scp_target}:{remote_tmp}"]
         scp_cmd = " ".join(shlex.quote(p) for p in scp_parts)
+        # Prepare backup of existing remote dst if exists
+        bak = f"{dst}.bak.{int(datetime.utcnow().timestamp())}"
+        check_and_backup = f"if [ -e {shlex.quote(dst)} ]; then sudo cp -a {shlex.quote(dst)} {shlex.quote(bak)}; fi"
         mv_cmd = f"sudo mv {remote_tmp} {shlex.quote(dst)} && sudo chown {shlex.quote(owner)} {shlex.quote(dst)} && sudo chmod {shlex.quote(mode)} {shlex.quote(dst)}"
-        preview = scp_cmd + " && " + mv_cmd
+        preview = scp_cmd + " && " + check_and_backup + " && " + mv_cmd
         if dry:
             return {"preview": preview}
         # run scp
@@ -185,8 +194,9 @@ def upload_file_to_host(host_spec: str, src: str, dst: str, owner: str = "root:r
                 return {"rc": scp_proc.returncode, "stdout": scp_proc.stdout.decode(errors="replace"), "stderr": scp_proc.stderr.decode(errors="replace")}
         except Exception as e:
             return {"rc": 1, "stderr": str(e)}
-        # run mv over ssh
-        mv_res = run_command_on_host(host_spec, mv_cmd)
+        # run backup+mv over ssh
+        full_remote_cmd = check_and_backup + " && " + mv_cmd
+        mv_res = run_command_on_host(host_spec, full_remote_cmd)
         return mv_res
 
 

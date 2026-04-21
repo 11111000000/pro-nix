@@ -148,17 +148,26 @@ class OnboardWizard(Widget):
         self.app.main_log.write("Запуск Onboarding действий...")
         # Step: set hostname
         if getattr(self, 'hostname', ''):
-            self.app.main_log.write(f"Выполняем set-hostname {self.hostname} на {host} (pkexec)")
-            res = await asyncio.to_thread(call_proctl, ["set-hostname", "--host", host, "--hostname", self.hostname])
+            self.app.main_log.write(f"Выполняем set-hostname {self.hostname} на {host} (pkexec={getattr(self,'as_root',False)})")
+            cmd = ["set-hostname", "--host", host, "--hostname", self.hostname]
+            if getattr(self, 'as_root', False):
+                cmd += ["--as-root"]
+            res = await asyncio.to_thread(call_proctl, cmd)
             self.app.main_log.write(json.dumps(res, ensure_ascii=False, indent=2))
         # Step: upload keys
         if getattr(self, 'keypath', ''):
             self.app.main_log.write(f"Загружаем ключи {self.keypath} -> /etc/pro-peer/authorized_keys.gpg на {host}")
-            res2 = await asyncio.to_thread(call_proctl, ["upload-file", "--host", host, "--src", self.keypath, "--dst", "/etc/pro-peer/authorized_keys.gpg"])
+            cmd = ["upload-file", "--host", host, "--src", self.keypath, "--dst", "/etc/pro-peer/authorized_keys.gpg"]
+            if getattr(self, 'as_root', False):
+                cmd += ["--as-root"]
+            res2 = await asyncio.to_thread(call_proctl, cmd)
             self.app.main_log.write(json.dumps(res2, ensure_ascii=False, indent=2))
             # run sync
             self.app.main_log.write("Запускаем pro-peer-sync-keys")
-            res3 = await asyncio.to_thread(call_proctl, ["run-script", "--host", host, "--script", "pro-peer-sync-keys"])
+            cmd3 = ["run-script", "--host", host, "--script", "pro-peer-sync-keys"]
+            if getattr(self, 'as_root', False):
+                cmd3 += ["--as-root"]
+            res3 = await asyncio.to_thread(call_proctl, cmd3)
             self.app.main_log.write(json.dumps(res3, ensure_ascii=False, indent=2))
         self.app.main_log.write("Onboarding завершён.")
         # remove wizard widget
