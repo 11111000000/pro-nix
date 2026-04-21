@@ -27,7 +27,6 @@ in {
         "  homedir=$(getent passwd \"$u\" | cut -d: -f6)"
         "  target=\"$homedir/.opencode/config.json\""
         "  if [ ! -e \"$target\" ]; then"
-        (lib.getEnv "OPENCODE_TEMPLATE" "")
         "    mkdir -p \"$(dirname \"$target\")\""
         "    cp -n \"${config.opencode.userTemplate}\" \"$target\" || true"
         "    chown $u:$u \"$target\" || true"
