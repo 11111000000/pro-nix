@@ -17,7 +17,7 @@ nix --extra-experimental-features 'nix-command flakes' flake check --show-trace 
 echo "  2. Проверка синтаксиса configuration.nix..."
 nix-instantiate --parse --show-trace configuration.nix > /dev/null
 
-# 3. Проверка, что все пользователи присутствуют в модуле pro-users.nix
+# 3. Проверка структуры пользователей в модуле pro-users.nix
 echo "  3. Проверка структуры пользователей..."
 if [[ -f modules/pro-users.nix ]]; then
     echo "    Проверяю, что модуль users содержит всех четырёх пользователей..."
@@ -25,7 +25,7 @@ if [[ -f modules/pro-users.nix ]]; then
     nix-instantiate --eval --strict --json \
         -I nixpkgs=channel:nixos-unstable \
         -E 'with import <nixpkgs> {}; (import <nixpkgs/nixos> { configuration = { imports = [ (./. + "/modules/pro-users.nix") ]; }; }).config.users.users' \
-        | jq -r 'keys[]' | grep -E '^(az|zoya|lada|boris)$' | wc -l | grep -q 4 || {
+        | jq -r 'keys[]' | grep -E '^(az|zo|la|bo)$' | wc -l | grep -q 4 || {
         echo "❌ Не все четыре пользователя найдены в pro-users.nix"
         exit 1
     }
