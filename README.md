@@ -1,4 +1,4 @@
-### Adding Keybindings
+### Добавление горячих клавиш
 
 To add keybindings:
 1. Edit `emacs-keys.org` in org-mode.
