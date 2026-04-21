@@ -9,8 +9,10 @@ Textual TUI для управления pro-nix (MVP prototype).
 """
 
 from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer, Static, Button, Input, TextLog, DataTable, TreeControl, TreeNode
+from textual.widgets import Header, Footer, Static, Button, Input, TextLog, Label
 from textual.containers import Horizontal, Vertical
+from textual.widget import Widget
+from textual.reactive import reactive
 import subprocess
 import json
 import os
@@ -36,7 +38,104 @@ def call_proctl(args):
 class HostsTree(Static):
     """Панель списка хостов"""
     def compose(self) -> ComposeResult:
-        yield TreeControl("Hosts", {})
+        # В простом прототипе hosts отражаются через кнопку Refresh
+        yield Label("Список хостов обновляется по нажатию кнопки 'Refresh Hosts'")
+
+
+class OnboardWizard(Widget):
+    """Простой интерактивный визард для первичной настройки хоста.
+
+    Шаги:
+      1) Ввод hostname
+      2) Указание пути к authorized_keys.gpg (локальный)
+      3) Preview и запуск загрузки и синхронизации
+    """
+    step = reactive(1)
+
+    def compose(self) -> ComposeResult:
+        yield Label("Onboarding Wizard — шаг 1/3", id="wizard_title")
+        yield Label("Шаг 1: введите новое имя хоста (или оставьте пустым, чтобы пропустить):")
+        yield Input(placeholder="host.local", id="hostname_input")
+        yield Button("Далее", id="wizard_next")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "wizard_next":
+            if self.step == 1:
+                inp = self.query_one("#hostname_input", Input)
+                self.hostname = inp.value.strip()
+                self.step = 2
+                self.mount_step2()
+            elif self.step == 2:
+                inp = self.query_one("#key_input", Input)
+                self.keypath = inp.value.strip()
+                self.step = 3
+                self.mount_step3()
+            elif self.step == 3:
+                # should not happen; final button handled separately
+                pass
+
+    def mount_step2(self):
+        self.clear()
+        self.mount(Label("Onboarding Wizard — шаг 2/3"))
+        self.mount(Label("Шаг 2: укажите локальный путь до authorized_keys.gpg или оставьте пустым"))
+        self.mount(Input(placeholder="/path/to/authorized_keys.gpg", id="key_input"))
+        self.mount(Button("Далее", id="wizard_next"))
+
+    def mount_step3(self):
+        self.clear()
+        self.mount(Label("Onboarding Wizard — шаг 3/3"))
+        self.mount(Label(f"Hostname: {getattr(self, 'hostname', '')}"))
+        self.mount(Label(f"Keys: {getattr(self, 'keypath', '')}"))
+        self.mount(Label("Preview действий:"))
+        preview_lines = []
+        if getattr(self, 'hostname', ''):
+            preview_lines.append(f"hostnamectl set-hostname {self.hostname}")
+        if getattr(self, 'keypath', ''):
+            preview_lines.append(f"upload {self.keypath} -> /etc/pro-peer/authorized_keys.gpg")
+            preview_lines.append("run pro-peer-sync-keys")
+        for ln in preview_lines:
+            self.mount(Label(ln))
+        self.mount(Button("Выполнить (с подтверждением)", id="wizard_run"))
+        self.mount(Button("Отмена", id="wizard_cancel"))
+
+    def on_mount(self) -> None:
+        # focus hostname input initially
+        try:
+            self.query_one(Input).focus()
+        except Exception:
+            pass
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "wizard_next":
+            # handled above
+            return
+        if event.button.id == "wizard_run":
+            # perform actions: call proctl via sibling app call
+            self.perform_actions()
+        if event.button.id == "wizard_cancel":
+            self.remove()
+
+    def perform_actions(self):
+        # simple synchronous execution calls proctl; in full app should be async
+        host = "local"
+        if getattr(self, 'hostname', ''):
+            res = call_proctl(["set-hostname", "--host", host, "--hostname", self.hostname])
+        if getattr(self, 'keypath', ''):
+            res2 = call_proctl(["upload-file", "--host", host, "--src", self.keypath, "--dst", "/etc/pro-peer/authorized_keys.gpg"])
+            res3 = call_proctl(["run-script", "--host", host, "--script", "pro-peer-sync-keys"])
+        # show simple result
+        self.app.main_log.clear()
+        self.app.main_log.write("Onboarding completed (резюме):")
+        try:
+            self.app.main_log.write(json.dumps(res, ensure_ascii=False, indent=2))
+        except Exception:
+            pass
+        try:
+            self.app.main_log.write(json.dumps(res2, ensure_ascii=False, indent=2))
+            self.app.main_log.write(json.dumps(res3, ensure_ascii=False, indent=2))
+        except Exception:
+            pass
+        self.remove()
 
 
 class MainApp(App):
