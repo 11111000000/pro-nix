@@ -1,0 +1,23 @@
+name: Opencode smoke
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup curl
+        run: sudo apt-get update && sudo apt-get install -y curl
+      - name: Run opencode release smoke (downloaded)
+        run: |
+          curl -fsSL "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-linux-x64.tar.gz" -o /tmp/opencode-linux-x64.tar.gz
+          tar -xzf /tmp/opencode-linux-x64.tar.gz -C /tmp
+          chmod +x /tmp/opencode
+          /tmp/opencode --version
+      - name: Run repo smoke script
+        run: ./scripts/opencode-smoke.sh

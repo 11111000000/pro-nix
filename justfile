@@ -21,25 +21,24 @@ build HOST:
 
 
 
-switch:
-	# Determine the local host name and switch to it. If no hostname is set locally,
-	# instruct the user how to set it or call `just switch <host>` explicitly.
-	HOST=$(cat /etc/hostname 2>/dev/null || hostname -s 2>/dev/null || true)
-	if [ -z "$HOST" ]; then
-           echo "No local hostname detected. Run: just switch <host> or set the host name with: sudo hostnamectl set-hostname <name>" >&2
-           exit 1
-	fi
-	if [ ! -f ./hosts/${HOST}/configuration.nix ]; then
-	   echo "Detected hostname '$HOST' but no matching host configuration found in ./hosts/." >&2
-	   echo "Available hosts:" >&2
-	   ls -1 hosts || true
-	   echo "Run: just switch <host> to choose one of the above or add ./hosts/$HOST/configuration.nix" >&2
-	   exit 1
-	fi
-	sudo nixos-rebuild switch --flake .#${HOST}
 
-switch HOST:
-	sudo nixos-rebuild switch --flake .#{{HOST}}
+switch HOST='':
+	@HOST="{{HOST}}"; \
+	if [ -z "$HOST" ]; then \
+	  HOST="$(cat /etc/hostname 2>/dev/null || hostname -s 2>/dev/null || true)"; \
+	fi; \
+	if [ -z "$HOST" ]; then \
+	  echo "No local hostname detected. Run: just switch <host> or set the host name with: sudo hostnamectl set-hostname <name>" >&2; \
+	  exit 1; \
+	fi; \
+	if [ ! -f "./hosts/$HOST/configuration.nix" ]; then \
+	  echo "Detected hostname '$HOST' but no matching host configuration found in ./hosts/." >&2; \
+	  echo "Available hosts:" >&2; \
+	  ls -1 hosts || true; \
+	  echo "Run: just switch <host> to choose one of the above or add ./hosts/$HOST/configuration.nix" >&2; \
+	  exit 1; \
+	fi; \
+	sudo nixos-rebuild switch --flake ".#$HOST"
 
 test HOST:
 	sudo nixos-rebuild test --flake .#{{HOST}}

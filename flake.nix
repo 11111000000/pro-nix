@@ -58,6 +58,7 @@
         '');
         meta.description = "Smoke-run the official opencode linux-x64 release";
       };
+      # (opencode-store removed — using system-packages.nix opencodeBin instead)
     # Утилита: добавляем удобное приложение для запуска TUI (Textual pro-nix manager)
       apps.${system}.pro-nix = {
         type = "app";

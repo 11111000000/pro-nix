@@ -1,35 +1,34 @@
-;;; pro-manage.el --- Простая обёртка для proctl в Emacs  -*- lexical-binding: t; -*-
-;;
-;; Минимальный Emacs‑клиент для взаимодействия с proctl.
-;; Все комментарии и описания на русском.
+;; Minimal Emacs frontend skeleton for pro-nix management
+;; Place in emacs local load-path or load from init
 
-(require 'json)
-(require 'button)
+(defvar pro-manage-buffer-name "*pro-manage*")
 
-(defvar pro-manage--proctl "./proctl/cli.py" "Путь к proctl CLI")
+(defun pro-manage--list-services ()
+  "Call proctl list-services (stub) and return an alist of (name . status)."
+  ;; For prototype, read systemctl --type=service --no-legend
+  (let ((out (shell-command-to-string "systemctl --no-legend --type=service --state=running --all --no-pager | awk '{print $1" "$3}'")))
+    (mapcar (lambda (line)
+              (let ((parts (split-string (string-trim line))))
+                (cons (car parts) (mapconcat 'identity (cdr parts) " "))))
+            (split-string out "\n" t))))
 
-(defun pro-manage--call (args callback)
-  "Выполнить proctl с ARGS асинхронно и вызвать CALLBACK при завершении.
-CALLBACK получает один аргумент — распарсенный JSON или alist с :error.")
-  (let ((buf (generate-new-buffer "*proctl-temp*")))
-    (set-process-sentinel
-     (apply #'start-process "proctl" buf pro-manage--proctl args)
-     (lambda (proc _)
-       (when (= (process-exit-status proc) 0)
-         (with-current-buffer buf
-           (let ((out (buffer-string)))
-             (kill-buffer buf)
-             (condition-case err
-                 (funcall callback (json-parse-string out :object-type 'alist))
-               (error (funcall callback `((:error . "parse-error"))))))))) )))
+(defun pro-manage ()
+  "Open pro-manage buffer.")
 
-(defun pro-manage-list-hosts ()
-  "Показать список хостов." 
+(defun pro-manage--render ()
+  (let ((buf (get-buffer-create pro-manage-buffer-name)))
+    (with-current-buffer buf
+      (read-only-mode -1)
+      (erase-buffer)
+      (insert (format "Pro-nix Management\n\n"))
+      (insert (format "Services:\n"))
+      (dolist (s (pro-manage--list-services))
+        (insert (format "- %s: %s\n" (car s) (cdr s))))
+      (read-only-mode 1)))
+  (switch-to-buffer pro-manage-buffer-name))
+
+(defun pro-manage ()
   (interactive)
-  (pro-manage--call '("list-hosts")
-                     (lambda (res)
-                       (if (assoc :error res)
-                           (message "Ошибка: %s" (alist-get :error res))
-                         (message "hosts: %s" (alist-get 'hosts res))))))
+  (pro-manage--render))
 
 (provide 'pro-manage)

@@ -159,6 +159,7 @@ github-cli
   pipxPkg
   aiderCmd
   opencodeCmd
+  opencodeBin
   htop
   neofetch
   feh
