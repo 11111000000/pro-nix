@@ -208,6 +208,135 @@ def upload_file_to_host(host_spec: str, src: str, dst: str, owner: str = "root:r
         return out
 
 
+def _hash_secret(secret: str):
+    import hashlib, base64
+    salt = os.urandom(16)
+    h = hashlib.sha256(salt + secret.encode()).hexdigest()
+    return {"salt": base64.b64encode(salt).decode(), "hash": h}
+
+
+def _check_secret(stored: dict, secret: str):
+    import hashlib, base64
+    salt = base64.b64decode(stored["salt"].encode())
+    h = hashlib.sha256(salt + secret.encode()).hexdigest()
+    return h == stored.get("hash")
+
+
+def cmd_set_join_secret(args):
+    host = args.host
+    secret = args.secret
+    dry = args.dry_run
+    as_root = getattr(args, 'as_root', False)
+    data = _hash_secret(secret)
+    tmp = tempfile.mkstemp(prefix="join-secret-", text=True)
+    os.close(tmp[0])
+    with open(tmp[1], 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False)
+    dst = "/etc/pro-peer/join-secret.json"
+    if dry:
+        return json_exit({"preview": f"write join-secret -> {dst}"})
+    # upload to host
+    res = upload_file_to_host(host, tmp[1], dst, owner="root:root", mode="0600", dry=False)
+    os.remove(tmp[1])
+    json_exit({"result": res})
+
+
+def cmd_check_join_secret(args):
+    host = args.host
+    secret = args.secret
+    # For remote check, fetch the file via scp to temp and verify
+    if parse_host(host)["type"] == "local":
+        path = "/etc/pro-peer/join-secret.json"
+        if not os.path.exists(path):
+            json_exit({"error": "join-secret not found"}, code=2)
+        with open(path, 'r', encoding='utf-8') as f:
+            stored = json.load(f)
+        ok = _check_secret(stored, secret)
+        json_exit({"ok": ok})
+    else:
+        # copy remote file to tmp
+        tmp = tempfile.mkstemp(prefix="join-secret-", text=True)
+        os.close(tmp[0])
+        tmp_path = tmp[1]
+        scp_parts = ["scp"]
+        parsed = parse_host(host)
+        if parsed.get("port"):
+            scp_parts += ["-P", str(parsed.get("port"))]
+        scp_target = parsed["host"]
+        if parsed.get("user"):
+            scp_target = f"{parsed['user']}@{scp_target}"
+        remote_path = "/etc/pro-peer/join-secret.json"
+        scp_parts += [f"{scp_target}:{remote_path}", tmp_path]
+        try:
+            p = subprocess.run(scp_parts, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if p.returncode != 0:
+                json_exit({"error": p.stderr.decode(errors='replace')}, code=2)
+            with open(tmp_path, 'r', encoding='utf-8') as f:
+                stored = json.load(f)
+            ok = _check_secret(stored, secret)
+            os.remove(tmp_path)
+            json_exit({"ok": ok})
+        except Exception as e:
+            json_exit({"error": str(e)}, code=1)
+
+
+def cmd_enable_discovery(args):
+    host = args.host
+    enable = args.enable
+    # avahi service content
+    service_text = '''<?xml version="1.0" standalone='no'?>
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+<service-group>
+  <name replace-wildcards="yes">%h</name>
+  <service>
+    <type>_ssh._tcp</type>
+    <port>22</port>
+  </service>
+</service-group>
+'''
+    dst = "/etc/avahi/services/ssh.service"
+    if parse_host(host)["type"] == "local":
+        if enable:
+            with open(dst, 'w', encoding='utf-8') as f:
+                f.write(service_text)
+            subprocess.run(["sudo", "systemctl", "restart", "avahi-daemon"], check=False)
+            json_exit({"result": "enabled", "path": dst})
+        else:
+            disabled = dst + ".disabled"
+            if os.path.exists(dst):
+                subprocess.run(["sudo", "mv", dst, disabled], check=False)
+            subprocess.run(["sudo", "systemctl", "restart", "avahi-daemon"], check=False)
+            json_exit({"result": "disabled", "path": disabled})
+    else:
+        # remote: write to temp and scp, then mv with sudo
+        tmp = tempfile.mkstemp(prefix="ssh-svc-", text=True)
+        os.close(tmp[0])
+        with open(tmp[1], 'w', encoding='utf-8') as f:
+            f.write(service_text)
+        parsed = parse_host(host)
+        scp_parts = ["scp"]
+        if parsed.get("port"):
+            scp_parts += ["-P", str(parsed.get("port"))]
+        scp_target = parsed["host"]
+        if parsed.get("user"):
+            scp_target = f"{parsed['user']}@{scp_target}"
+        remote_tmp = f"/tmp/ssh.service.{int(datetime.utcnow().timestamp())}"
+        scp_parts += [tmp[1], f"{scp_target}:{remote_tmp}"]
+        try:
+            p = subprocess.run(scp_parts, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if p.returncode != 0:
+                json_exit({"error": p.stderr.decode(errors='replace')}, code=2)
+            if enable:
+                mv_cmd = f"sudo mv {remote_tmp} {dst} && sudo systemctl restart avahi-daemon"
+            else:
+                mv_cmd = f"sudo mv {dst} {dst}.disabled 2>/dev/null || true && sudo systemctl restart avahi-daemon"
+            res = run_command_on_host(host, mv_cmd)
+            os.remove(tmp[1])
+            json_exit({"result": res})
+        except Exception as e:
+            json_exit({"error": str(e)}, code=1)
+
+
 SCRIPT_MAP = {
     # ключ -> (описание, команда-шаблон)
     "pro-peer-sync-keys": ("Синхронизировать authorized_keys из зашифрованного файла",
@@ -361,6 +490,19 @@ def main():
     p.add_argument("--host", default="local")
     p.add_argument("--user", required=False)
     p.add_argument("--key", required=False)
+
+    p = sub.add_parser("set-join-secret")
+    p.add_argument("--host", default="local")
+    p.add_argument("--secret", required=True)
+    p.add_argument("--dry-run", action="store_true")
+
+    p = sub.add_parser("check-join-secret")
+    p.add_argument("--host", default="local")
+    p.add_argument("--secret", required=True)
+
+    p = sub.add_parser("enable-discovery")
+    p.add_argument("--host", default="local")
+    p.add_argument("--enable", action="store_true")
 
     p = sub.add_parser("rebuild")
     p.add_argument("--host", default="local")
