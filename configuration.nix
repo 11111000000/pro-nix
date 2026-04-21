@@ -44,6 +44,7 @@
     ./modules/headscale.nix
     ./modules/pro-desktop.nix
     ./modules/nix-cuda-compat.nix
+    ./nixos/modules/opencode-config.nix
 
     # Локальные переопределения конкретного хоста оставлены там, где они действительно принадлежат машине, а не профилю.
   ] ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ] ++ [
