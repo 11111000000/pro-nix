@@ -115,12 +115,19 @@ let
     # Prefer using steam-run if it's available in PATH at runtime. Using an
     # absolute store path here is brittle because steam-run may not be in the
     # system profile; checking PATH makes the wrapper more robust.
-    if command -v steam-run >/dev/null 2>&1 && [[ "$BIN" = /nix/store/* ]]; then
-      STEAM_RUN_CMD=$(command -v steam-run)
-      exec "$STEAM_RUN_CMD" "$BIN" -- "$@"
-    else
-      exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 "$BIN" -- "$@"
+    # If BIN is in the Nix store, try running it directly under the
+    # Nix glibc dynamic loader first (this often fixes issues where the
+    # upstream binary expects a system loader). If that fails and
+    # steam-run is available, fall back to steam-run (FHS). Otherwise
+    # run normally via systemd-run.
+    if [[ "$BIN" = /nix/store/* ]]; then
+      exec "${pkgs.glibc}/lib/ld-linux-x86-64.so.2" "$BIN" -- "$@" || true
+      if command -v steam-run >/dev/null 2>&1; then
+        STEAM_RUN_CMD=$(command -v steam-run)
+        exec "$STEAM_RUN_CMD" "$BIN" -- "$@"
+      fi
     fi
+    exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 "$BIN" -- "$@"
   '';
 
   # Deterministic package: fetch official release tarball and expose
