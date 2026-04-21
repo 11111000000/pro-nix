@@ -19,6 +19,8 @@
   (global-prettify-symbols-mode 1))
 
 (when (or (pro--package-provided-p 'eldoc) (pro-packages--maybe-install 'eldoc t) (require 'eldoc nil t))
-  (setq eldoc-idle-delay 0.4))
+  ;; Guard eldoc function presence; some Emacs builds may not provide it.
+  (when (boundp 'eldoc-idle-delay)
+    (setq eldoc-idle-delay 0.4)))
 
 (provide 'text)

@@ -25,11 +25,12 @@
 (defun pro-project-ripgrep ()
   "Искать в текущем проекте через Consult."
   (interactive)
-  (if (or (pro--package-provided-p 'consult) (require 'consult nil t))
-      (consult-ripgrep (or (pro-project-root) default-directory))
-    (pro-compat--notify-once "consult" "consult-ripgrep missing — fallback to grep")
-    (let ((default-directory (or (pro-project-root) default-directory)))
-      (call-interactively #'grep))))
+    (if (or (pro--package-provided-p 'consult) (require 'consult nil t))
+        (when (fboundp 'consult-ripgrep)
+          (consult-ripgrep (or (pro-project-root) default-directory))
+        (pro-compat--notify-once "consult" "consult-ripgrep missing — fallback to grep")
+        (let ((default-directory (or (pro-project-root) default-directory)))
+          (call-interactively #'grep)))))
 
 (defun pro-project-find-file ()
   "Открыть файл внутри текущего проекта."

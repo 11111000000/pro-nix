@@ -17,12 +17,14 @@
         org-table-formula-use-constants nil))
 
 (when (or (pro--package-provided-p 'org-tempo) (pro-packages--maybe-install 'org-tempo t) (require 'org-tempo nil t))
-  (setq org-structure-template-alist
-        '(("s" . "src")
-          ("e" . "example")
-          ("q" . "quote")
-          ("v" . "verse")
-          ("c" . "center"))))
+  ;; org-tempo registers templates; ensure functions exist before setting the alist.
+  (when (boundp 'org-structure-template-alist)
+    (setq org-structure-template-alist
+          '(("s" . "src")
+            ("e" . "example")
+            ("q" . "quote")
+            ("v" . "verse")
+            ("c" . "center")))))
 
 (defun pro-org-open-keys-file ()
   "Открыть пользовательский файл клавиш."

@@ -17,8 +17,10 @@
     (eval-buffer)))
 
 (when (or (pro--package-provided-p 'rainbow-delimiters) (pro-packages--maybe-install 'rainbow-delimiters t) (require 'rainbow-delimiters nil t))
-  (add-hook 'emacs-lisp-mode-hook #'rainbow-delimiters-mode)
-  (add-hook 'lisp-interaction-mode-hook #'rainbow-delimiters-mode))
+  ;; Guard mode function in case package is partially loaded.
+  (when (fboundp 'rainbow-delimiters-mode)
+    (add-hook 'emacs-lisp-mode-hook #'rainbow-delimiters-mode)
+    (add-hook 'lisp-interaction-mode-hook #'rainbow-delimiters-mode)))
 
 (add-hook 'emacs-lisp-mode-hook #'pro-lisp-setup)
 (add-hook 'lisp-interaction-mode-hook #'pro-lisp-setup)
