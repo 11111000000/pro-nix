@@ -1,10 +1,15 @@
 ;;; nav.el --- поиск и навигация -*- lexical-binding: t; -*-
 
-;; Этот модуль задаёт единый путь поиска по файлам, символам и проектам.
+;; Модуль: nav.el — поиск и навигация.
+;;
+;; Назначение:
+;; Задаёт единый набор команд и поведения для поиска по файлам, символам и
+;; проектам. Оборачивает использование пакетов vertico/consult/orderless и
+;; включает разумные fallbacks, если пакеты недоступны во время инициализации.
 
 (when (or (pro--package-provided-p 'vertico) (pro-packages--maybe-install 'vertico t) (require 'vertico nil t))
-  ;; vertico-mode might not be defined (package not fully loaded or autoloads missing).
-  ;; Guard the call to avoid "Symbol's function definition is void: vertico-mode" during init.
+  ;; vertico-mode может быть не загружен на этапе инициализации; поэтому
+  ;; проверяем наличие определения функции и безопасно включаем режим.
   (when (fboundp 'vertico-mode)
     (vertico-mode 1)
     (setq vertico-cycle t)))
@@ -14,13 +19,14 @@
         completion-category-defaults nil))
 
 (when (or (pro--package-provided-p 'marginalia) (pro-packages--maybe-install 'marginalia t) (require 'marginalia nil t))
-  ;; marginalia-mode might not be autoloaded even if the package is present.
+  ;; marginalia-mode может не иметь автозагрузки; включаем только при наличии.
   (when (fboundp 'marginalia-mode)
     (marginalia-mode 1)))
 
 (when (or (pro--package-provided-p 'consult) (pro-packages--maybe-install 'consult t) (require 'consult nil t))
   (when (or (pro--package-provided-p 'consult-xref) (pro-packages--maybe-install 'consult-xref t) (require 'consult-xref nil t))
-    ;; consult-xref might not be loaded yet; only assign functions if available.
+    ;; consult-xref может отсутствовать на этапе инициализации; присваиваем
+    ;; хендлеры xref только при наличии consult-xref.
     (when (fboundp 'consult-xref)
       (setq xref-show-definitions-function #'consult-xref
             xref-show-xrefs-function #'consult-xref))))
