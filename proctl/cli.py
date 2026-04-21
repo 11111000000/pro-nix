@@ -159,6 +159,7 @@ def upload_file_to_host(host_spec: str, src: str, dst: str, owner: str = "root:r
         return {"rc": 1, "stderr": f"Исходный файл не найден: {src}"}
     if host["type"] == "local":
         # Backup existing file if present
+        bak = None
         backup_cmds = []
         if os.path.exists(dst):
             bak = f"{dst}.bak.{int(datetime.utcnow().timestamp())}"
@@ -167,7 +168,11 @@ def upload_file_to_host(host_spec: str, src: str, dst: str, owner: str = "root:r
         full_cmd = " && ".join(backup_cmds + [install_cmd]) if backup_cmds else install_cmd
         if dry:
             return {"preview": full_cmd}
-        return run_local_command(full_cmd)
+        res = run_local_command(full_cmd)
+        out = {"rc": res.get("rc"), "stdout": res.get("stdout"), "stderr": res.get("stderr")}
+        if bak:
+            out["backup"] = bak
+        return out
     else:
         # remote: scp to /tmp, then sudo mv
         tmpname = os.path.basename(dst)
@@ -197,7 +202,10 @@ def upload_file_to_host(host_spec: str, src: str, dst: str, owner: str = "root:r
         # run backup+mv over ssh
         full_remote_cmd = check_and_backup + " && " + mv_cmd
         mv_res = run_command_on_host(host_spec, full_remote_cmd)
-        return mv_res
+        out = {"rc": mv_res.get("rc"), "stdout": mv_res.get("stdout"), "stderr": mv_res.get("stderr")}
+        # remote backup path (on remote host) — we return the remote path so UI may offer restore
+        out["backup"] = bak
+        return out
 
 
 SCRIPT_MAP = {
