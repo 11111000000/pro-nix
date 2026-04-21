@@ -58,9 +58,15 @@ def json_exit(obj, code=0):
 
 
 def run_local_command(cmd, capture_output=True, stream=False):
-    """Запустить команду локально. Возвращаемку stdout/rc/path.
+    """Запустить команду локально. Возвращаем словарь с результатами.
 
-    Для больших выходных данных можно писать во временный файл и вернуть путь.
+    Возвращаемые поля:
+      - rc: код возврата
+      - stdout, stderr: строковые буферы (если не stream)
+      - out_path: путь к временному файлу, если использован stream
+
+    Для больших объёмов вывода рекомендуется использовать stream=True —
+    тогда вывод будет записан во временный файл, и будет возвращён `out_path`.
     """
     if stream:
         # простая streaming обёртка — пишем в tmp файл и возвращаем путь
@@ -503,6 +509,12 @@ def main():
     p = sub.add_parser("enable-discovery")
     p.add_argument("--host", default="local")
     p.add_argument("--enable", action="store_true")
+
+    p = sub.add_parser("restore-backup")
+    p.add_argument("--host", default="local")
+    p.add_argument("--backup", required=True)
+    p.add_argument("--dst", required=True)
+    p.add_argument("--as-root", action="store_true")
 
     p = sub.add_parser("rebuild")
     p.add_argument("--host", default="local")
