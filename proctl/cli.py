@@ -323,11 +323,13 @@ def main():
     p.add_argument("--unit", required=True)
     p.add_argument("--action", choices=["start", "stop", "restart", "status"], required=True)
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--as-root", action="store_true", help="Выполнить команду с повышением прав (pkexec/sudo)")
 
     p = sub.add_parser("run-script")
     p.add_argument("--host", default="local")
     p.add_argument("--script", required=True)
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--as-root", action="store_true", help="Выполнить скрипт с повышением прав (pkexec/sudo)")
 
     p = sub.add_parser("diagnostics")
     p.add_argument("--host", default="local")
@@ -343,11 +345,13 @@ def main():
     p.add_argument("--flake", required=True)
     p.add_argument("--preview", action="store_true")
     p.add_argument("--run", action="store_true")
+    p.add_argument("--as-root", action="store_true", help="Выполнить rebuild с повышением прав (sudo)")
 
     p = sub.add_parser("set-hostname")
     p.add_argument("--host", default="local")
     p.add_argument("--hostname", required=True)
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--as-root", action="store_true", help="Выполнить изменение hostname с повышением прав")
 
     p = sub.add_parser("upload-file")
     p.add_argument("--host", default="local")
@@ -356,6 +360,7 @@ def main():
     p.add_argument("--owner", default="root:root")
     p.add_argument("--mode", default="0600")
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--as-root", action="store_true", help="Если установлен, выполнить финальный mv/install как root на целевой стороне")
 
     args = parser.parse_args()
     if args.cmd == "list-hosts":
