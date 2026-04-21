@@ -32,8 +32,21 @@
   # I2P: ещё один стек приватной сети, включается как опция.
   services.i2p.enable = true;
 
-  # Мосты Tor хранятся в отдельном файле для runtime-управления без rebuild
-  environment.etc."tor/bridges.conf".source = ../conf/tor-bridges.conf;
+  # Install example/template of bridges into /etc so operator can copy/edit it.
+  # We don't manage the runtime /etc/tor/bridges.conf directly (that file must
+  # be editable by the admin). Instead we place a template at
+  # /etc/tor/bridges.conf.example and ensure at boot that a real
+  # /etc/tor/bridges.conf exists by copying the template if missing.
+  environment.etc."tor/bridges.conf.example".source = ../conf/tor-bridges.conf;
+
+  systemd.services."tor-ensure-bridges" = {
+    description = "Ensure /etc/tor/bridges.conf exists (create from template)";
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = ''/bin/sh -c 'mkdir -p /etc/tor && if [ ! -e /etc/tor/bridges.conf ]; then cp /etc/tor/bridges.conf.example /etc/tor/bridges.conf && chown root:root /etc/tor/bridges.conf && chmod 0640 /etc/tor/bridges.conf; fi'"'';
+    };
+  };
 
   # Открытые порты для служб приватности — доступны локально/для роутинга.
   networking.firewall = {
