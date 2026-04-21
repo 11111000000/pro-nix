@@ -1,3 +1,4 @@
+<!-- Русский: комментарии и пояснения оформлены в стиле учебника -->
 # Plan: Tor Hidden Services (reachability без port‑forwarding)
 
 Цель

@@ -1,3 +1,4 @@
+<!-- Русский: комментарии и пояснения оформлены в стиле учебника -->
 # Security and operational guidance for peer networking
 
 This file summarises key security recommendations applicable across the peer networking plans.

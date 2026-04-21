@@ -1,3 +1,4 @@
+<!-- Русский: комментарии и пояснения оформлены в стиле учебника -->
 Operational Notes
 
 This directory contains operational documentation and quick runbooks for

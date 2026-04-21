@@ -1,3 +1,4 @@
+<!-- Русский: комментарии и пояснения оформлены в стиле учебника -->
 # Plan: Emacs 30+ package management for `pro-nix`
 
 ## Goal
