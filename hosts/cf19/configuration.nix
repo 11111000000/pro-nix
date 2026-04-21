@@ -85,6 +85,11 @@ experimental-features = nix-command flakes cgroups
     '';
   };
 
+  # Enable automatic opencode user config installation if missing
+  opencode.enable = true;
+  # Optionally override the shipped template (kept commented by default)
+  # opencode.userTemplate = /etc/nixos/opencode-template.json;
+
   # SSH hardening: restrict interactive features for remote connections
   services.openssh = {
     extraConfig = ''
