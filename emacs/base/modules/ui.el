@@ -131,6 +131,13 @@
         (when (fboundp 'corfu-mode) (corfu-mode 1))))
     (add-hook 'minibuffer-setup-hook #'pro-ui--maybe-enable-corfu-in-minibuffer)
 
+    ;; Vertico keybindings: make C-n/C-p behave like minibuffer navigation
+    (when (and (boundp 'vertico-map) (keymapp vertico-map))
+      (define-key vertico-map (kbd "C-n") #'vertico-next)
+      (define-key vertico-map (kbd "C-p") #'vertico-previous)
+      (define-key vertico-map (kbd "M-n") #'vertico-next)
+      (define-key vertico-map (kbd "M-p") #'vertico-previous))
+
     ;; Corfu for terminal sessions.
     (unless (display-graphic-p)
       (when (pro-ui--try-require 'corfu-terminal)
