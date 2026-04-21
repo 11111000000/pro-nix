@@ -49,4 +49,24 @@
   (let ((json (expand-file-name "emacs/base/modules/ai-models.json" (pro-test--repo-root))))
     (should (file-readable-p json))))
 
+
+(ert-deftest pro-test-agents-launchable ()
+  "Ensure the common agent CLIs are available and can be started.
+
+This test checks that each expected agent executable is on `exec-path` and
+that we can spawn it (using `start-process`). We use a harmless `--help`
+argument where available; the objective is only to ensure the command
+can be launched in this environment, not to validate its output."
+  (dolist (cmd '("goose" "aider" "opencode"))
+    (let ((exe (executable-find cmd)))
+      (should (format "%s is not on PATH" cmd) exe)
+      (condition-case err
+          (let ((proc (start-process (concat "pro-test-" cmd) nil exe "--help")))
+            (should (processp proc))
+            ;; If the process is still running, kill it to avoid leaks.
+            (when (process-live-p proc)
+              (ignore-errors (kill-process proc))
+              (ignore-errors (delete-process proc))))
+        (error (should (format "failed to start %s: %s" cmd (error-message-string err)) nil))))))
+
 (provide 'tests)
