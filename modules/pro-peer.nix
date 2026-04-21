@@ -63,9 +63,16 @@ in
       # inspectable. We avoid pointing Nix's sshd module at a runtime file
       # (which could be unavailable during evaluation) but provide tmpfiles
       # and an on-disk placeholder for operators.
-      systemd.tmpfiles.rules = lib.mkForce [
+      # Add tmpfiles rules for runtime-managed pro-peer state. Do not force
+      # the entire `systemd.tmpfiles.rules` option here so other modules
+      # (and package-provided defaults like avahi) can append their rules.
+      systemd.tmpfiles.rules = [
         "d /var/lib/pro-peer 0700 root root -"
         "f /var/lib/pro-peer/authorized_keys 0600 root root -"
+        # Ensure Avahi's runtime directory exists early so the daemon doesn't
+        # fail when systemd starts it before tmpfiles are applied by other
+        # packages. Ownership matches the avahi package expectations.
+        "d /run/avahi-daemon 0755 avahi avahi -"
       ];
 
       environment.etc."pro-peer/authorized_keys".text = "# Managed at runtime by pro-peer-sync-keys\n";
@@ -95,12 +102,12 @@ in
         };
       };
 
-      systemd.timers."pro-peer-sync-keys.timer" = {
-        description = "Periodic pro-peer key sync";
-        timerConfig = { OnUnitActiveSec = config.pro-peer.keySyncInterval; };
-        wantedBy = [ "timers.target" ];
-      };
-    })
+        systemd.timers."pro-peer-sync-keys.timer" = {
+          description = "Periodic pro-peer key sync";
+          timerConfig = { OnUnitActiveSec = config.pro-peer.keySyncInterval; };
+          wantedBy = [ "timers.target" ];
+        };
+      })
 
     (lib.mkIf (config.pro-peer.allowTorHiddenService && (config.pro-peer.torBackupRecipient != null)) {
       environment.systemPackages = with pkgs; [ gnupg tar ];
@@ -176,11 +183,12 @@ in
       # permissions using systemd-tmpfiles rules. This is declarative and will
       # be applied early in boot, avoiding a oneshot service which embeds shell
       # logic.
-      systemd.tmpfiles.rules = lib.mkIf config.pro-peer.allowTorHiddenService (
-        lib.mkForce [
-          "d /var/lib/tor/ssh_hidden_service 0700 debian-tor debian-tor -"
-        ]
-      );
+      # If Tor hidden service is enabled, add a tmpfiles rule to ensure the
+      # directory exists with correct ownership. Again, append to the global
+      # rules list rather than forcing it.
+      systemd.tmpfiles.rules = lib.mkIf config.pro-peer.allowTorHiddenService [
+        "d /var/lib/tor/ssh_hidden_service 0700 debian-tor debian-tor -"
+      ];
     })
   ];
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/run/current-system/sw/bin/bash
 set -euo pipefail
 
 usage() {
@@ -23,7 +23,14 @@ if [ -z "$INPUT" ] || [ -z "$OUT" ]; then
 fi
 
 if [ ! -f "$INPUT" ]; then
-  echo "Encrypted keys file not found: $INPUT" >&2; exit 1
+  # Do not treat missing encrypted keys as a fatal error. It's common for
+  # operator-managed secrets to be absent on a fresh system; in that case
+  # log and exit successfully so the oneshot service does not cause
+  # `nixos-rebuild switch` to fail. The operator can populate
+  # /etc/pro-peer/authorized_keys.gpg later and trigger the service.
+  echo "Encrypted keys file not found: $INPUT" >&2
+  echo "No-op: leaving /var/lib/pro-peer/authorized_keys unchanged." >&2
+  exit 0
 fi
 
 tmp=$(mktemp)
