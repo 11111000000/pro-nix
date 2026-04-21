@@ -516,6 +516,7 @@ def main():
     p.add_argument("--dst", required=True)
     p.add_argument("--as-root", action="store_true")
 
+
     p = sub.add_parser("rebuild")
     p.add_argument("--host", default="local")
     p.add_argument("--flake", required=True)
@@ -603,6 +604,39 @@ def main():
             json_exit({"rc": p.returncode, "stdout": stdout, "stderr": stderr})
         except Exception as e:
             json_exit({"error": str(e)}, code=1)
+    elif args.cmd == "restore-backup":
+        # restore-backup --host <spec> --backup <path> --dst <dst> [--as-root]
+        host = args.host
+        backup = args.backup
+        dst = args.dst
+        as_root = getattr(args, 'as_root', False)
+        # For local host, just sudo cp
+        if parse_host(host)["type"] == "local":
+            if not os.path.exists(backup):
+                json_exit({"error": f"backup not found: {backup}"}, code=2)
+            cmd = f"sudo cp -a {shlex.quote(backup)} {shlex.quote(dst)} && sudo chown root:root {shlex.quote(dst)} && sudo chmod 600 {shlex.quote(dst)}"
+            res = run_local_command(cmd)
+            json_exit({"cmd": cmd, "result": res})
+        else:
+            # remote: scp backup to /tmp and sudo mv into place
+            parsed = parse_host(host)
+            scp_parts = ["scp"]
+            if parsed.get("port"):
+                scp_parts += ["-P", str(parsed.get("port"))]
+            scp_target = parsed["host"]
+            if parsed.get("user"):
+                scp_target = f"{parsed['user']}@{scp_target}"
+            remote_tmp = f"/tmp/{os.path.basename(backup)}.restore.{int(datetime.utcnow().timestamp())}"
+            scp_parts += [backup, f"{scp_target}:{remote_tmp}"]
+            try:
+                p = subprocess.run(scp_parts, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                if p.returncode != 0:
+                    json_exit({"error": p.stderr.decode(errors='replace')}, code=2)
+            except Exception as e:
+                json_exit({"error": str(e)}, code=1)
+            mv_cmd = f"sudo mv {remote_tmp} {shlex.quote(dst)} && sudo chown root:root {shlex.quote(dst)} && sudo chmod 600 {shlex.quote(dst)}"
+            res = run_command_on_host(host, mv_cmd, dry=False, stream=False, use_pkexec=as_root)
+            json_exit({"cmd": mv_cmd, "result": res})
     else:
         parser.print_help()
 
