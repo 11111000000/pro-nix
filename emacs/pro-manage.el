@@ -1,34 +1,43 @@
-;; Minimal Emacs frontend skeleton for pro-nix management
-;; Place in emacs local load-path or load from init
+;;; emacs/pro-manage.el --- Prototype pro-nix Emacs UI -*- lexical-binding: t; -*-
+;; Minimal prototype: list systemd services and allow refresh
 
-(defvar pro-manage-buffer-name "*pro-manage*")
+(require 'tabulated-list)
 
-(defun pro-manage--list-services ()
-  "Call proctl list-services (stub) and return an alist of (name . status)."
-  ;; For prototype, read systemctl --type=service --no-legend
-  (let ((out (shell-command-to-string "systemctl --no-legend --type=service --state=running --all --no-pager | awk '{print $1" "$3}'")))
+(defvar pro-manage-buffer-name "*pro-nix*")
+
+(defun pro-manage--fetch-services ()
+  "Fetch list of services (synchronously) by calling systemctl. Returns list of (name desc active enabled)."
+  (let ((out (shell-command-to-string "systemctl list-units --type=service --no-legend --all --no-pager")))
     (mapcar (lambda (line)
-              (let ((parts (split-string (string-trim line))))
-                (cons (car parts) (mapconcat 'identity (cdr parts) " "))))
+              (let* ((cols (split-string (string-trim line)))
+                     (name (nth 0 cols))
+                     (load (nth 1 cols))
+                     (active (nth 2 cols))
+                     (sub (nth 3 cols))
+                     (desc (mapconcat 'identity (nthcdr 4 cols) " ")))
+                (list name (vector name active desc))))
             (split-string out "\n" t))))
 
-(defun pro-manage ()
-  "Open pro-manage buffer.")
+(defun pro-manage--refresh ()
+  (let ((inhibit-read-only t))
+    (setq tabulated-list-entries (pro-manage--fetch-services))
+    (tabulated-list-print t)))
 
-(defun pro-manage--render ()
+(define-derived-mode pro-manage-mode tabulated-list-mode "pro-manage"
+  "Major mode for pro-nix management UI (prototype)."
+  (setq tabulated-list-format [("Service" 40 t) ("Active" 12 t) ("Description" 0 t)])
+  (setq tabulated-list-padding 2)
+  (add-hook 'tabulated-list-revert-hook 'pro-manage--refresh nil t)
+  (tabulated-list-init-header))
+
+(defun pro-manage ()
+  "Open pro-nix management buffer (prototype)."
+  (interactive)
   (let ((buf (get-buffer-create pro-manage-buffer-name)))
     (with-current-buffer buf
-      (read-only-mode -1)
-      (erase-buffer)
-      (insert (format "Pro-nix Management\n\n"))
-      (insert (format "Services:\n"))
-      (dolist (s (pro-manage--list-services))
-        (insert (format "- %s: %s\n" (car s) (cdr s))))
-      (read-only-mode 1)))
-  (switch-to-buffer pro-manage-buffer-name))
-
-(defun pro-manage ()
-  (interactive)
-  (pro-manage--render))
+      (pro-manage-mode)
+      (pro-manage--refresh))
+    (pop-to-buffer buf)))
 
 (provide 'pro-manage)
+;;; pro-manage.el ends here
