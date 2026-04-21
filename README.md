@@ -1,93 +1,183 @@
-Pro‑Nix — portable NixOS configs and ops tooling
-===============================================
+Pro‑Nix — переносимая конфигурация NixOS и операционные инструменты
+===============================================================
 
-Purpose
--------
-Pro‑Nix provides a portable, modular collection of NixOS configurations, an
-Emacs layer and small operational tooling (TUI, CLI, scripts) aimed at
-reproducible host provisioning, secure peer key management and agent‑driven
-workflows.
-
-Status
+Кратко
 ------
-- Actively developed prototype with production‑grade modules and many
-  operational notes in docs/. Some parts are experimental (TUI prototype,
-  agent integrations).
+Pro‑Nix — набор модульных NixOS‑модулей, сопутствующих утилит и операционных
+скриптов для воспроизводимой настройки хостов, централизованного управления
+ключами и интеграции с Emacs/агентами. Цель — дать переносимую, проверяемую
+и безопасную основу для управления хостами и рабочего процесса оператора.
 
-Quick start
------------
-Requirements
-- Nix with flakes enabled
-- sudo/root to run `nixos-rebuild` on target hosts
-- Python 3.10+ for the TUI prototype
+Зачем это нужно
+---------------
+- Управлять конфигурациями несколько хостов единым набором модулей.
+- Централизованно распределять публичные SSH‑ключи и безопасно внедрять их на
+  целевые машины (pro‑peer).
+- Быстро диагностировать и валидировать headless Emacs‑окружение и другую
+  инфраструктуру с помощью сценариев и TUI.
 
-Run the TUI (prototype)
-1. From repository root:
+Статус
+------
+Проект активен: большинство модулей рабочие и снабжены планами/заметками в
+docs/. Некоторые части (TUI, экспериментальные агент‑интеграции) — прототипы.
+
+Быстрый старт
+-------------
+1) Склонируйте репозиторий:
+
+   git clone https://github.com/11111000000/pro-nix.git
+   cd pro-nix
+
+2) Запуск прототипа TUI (локально, для тестирования):
 
    python3 ./tui/app.py
 
-2. Alternatively, with flakes:
+   Альтернатива (через flake):
 
    nix run .#pro-nix
 
-Apply a host configuration (example for host `cf19`)
-
-1. Choose the host entry under hosts/ (for example `cf19`).
-2. On the host run:
+3) Применение конфигурации на NixOS‑хосте (пример для `cf19`):
 
    sudo nixos-rebuild switch --flake .#cf19
 
-If you use pro-peer (centralized SSH keys)
-- Operator must provide `/etc/pro-peer/authorized_keys.gpg` to the host.
-  See docs/plans/pro-peer-hardening-plan.md for details and hardening steps.
+Требования
+- Nix (с поддержкой flakes)
+- Python 3.10+ для запуска TUI (опционально)
+- root/sudo на целевом хосте для применения конфигурации
 
-Repository layout (short)
-- flake.nix, flake.lock — flake entry point and lockfile
-- hosts/ — per‑host NixOS configurations (examples: cf19, huawei)
-- modules/ — reusable NixOS modules (pro-peer, pro-storage, pro-desktop, pro-users, etc.)
-- tui/ — Textual prototype TUI (Python). Contains pyproject.toml and app entrypoint
-- proctl/ — CLI adapter used by TUI and Emacs; communicates using JSON
-- scripts/ — operational scripts and diagnostics (samba diagnostics, emacs headless tests, nix helpers)
-- conf/ — configuration templates (X, GTK, qt, etc.)
-- docs/ — plans, specs and operational notes (important reference for usage and hardening)
+Если вы используете pro‑peer (централизованные ключи)
+- Оператор должен доставить зашифрованный файл `/etc/pro-peer/authorized_keys.gpg`
+  на хост. Без него автоматическая синхронизация ключей не сработает. См.
+  docs/plans/pro-peer-hardening-plan.md для пошаговой инструкции и требований по
+  безопасности.
 
-Key features
-- Modular NixOS modules focused on reproducibility and hardening
-- pro-peer: centralized peer key distribution and services (Avahi, sync helpers)
-- Emacs layer and agent tooling: integration points and headless Emacs verification
-- TUI/CLI utilities for onboarding, key sync and diagnostics
+Структура репозитория (основные части)
+- flake.nix, flake.lock — flake‑вход и блокировка зависимостей
+- hosts/ — конфигурации для отдельных хостов (пример: cf19, huawei)
+- modules/ — переиспользуемые NixOS‑модули
+  - modules/pro-peer.nix — pro‑peer (Avahi, SSH‑жёсткая конфигурация, сервис синхронизации)
+  - modules/pro-storage.nix — Samba/Syncthing и firewall‑hardening
+  - modules/pro-desktop.nix, pro-users*.nix — десктопные и пользовательские модули
+- tui/ — прототип Textual TUI (Python). Файлы: app.py, textual_app.py, pyproject.toml
+- proctl/ — CLI‑адаптер (Python) для унифицированных операций; взаимодействует
+  с TUI и Emacs по JSON‑протоколу
+- scripts/ — вспомогательные скрипты: диагностика, тесты, E2E‑скрипты и др.
+- conf/ — шаблоны конфигураций (GTK, X, qt, systemd extras и пр.)
+- docs/ — спецификации, планы и оперативные заметки
 
-Security and privileges
-- Dangerous or destructive operations default to dry‑run / preview mode in the UI.
-- Executing privileged actions requires explicit confirmation and elevation
-  (sudo/pkexec). Actions are logged under `~/.local/share/pro-nix/actions.log`.
+Ключевые возможности (подробно)
+1. Модульная Nix‑архитектура
+   - Модули сделаны для повторного использования и простого комбинирования
+     под различные хосты. Цель — уменьшить дублирование и повысить
+     воспроизводимость.
 
-Development
+2. pro‑peer — централизованное управление ключами
+   - Сервис/механизм для доставки и синхронизации публичных SSH‑ключей по
+     хостам. Предусматривает использование Avahi для обнаружения и
+     безопасную доставку зашифрованного `authorized_keys.gpg`.
+
+3. proctl — унифицированный CLI
+   - Маленький адаптер, который принимает команды и возвращает JSON.
+   - Используется TUI и Emacs для запуска операций (onboarding, sync, diag).
+
+4. TUI (Textual) — удобный прототип для оператора
+   - Быстрая интерактивная утилита для первичной настройки хоста, загрузки
+     ключей, запуска диагностики и управления сервисами.
+
+5. Интеграция с Emacs и агентами
+   - В репозитории присутствует модуль Emacs (emacs/*) и набор инструкций по
+     интеграции agent‑workflow (docs/agents.md). Есть сценарии для
+     headless Emacs‑проверок.
+
+6. Сценарии диагностики и E2E‑тесты
+   - scripts/* содержит множество вспомогательных скриптов: проверка Samba,
+     headless Emacs тесты, сбор логов, сбор информации о пакетах и пр.
+
+Безопасность и привилегии
+- Опасные операции отображаются в режиме предварительного просмотра (dry‑run).
+- Для выполнения действий, затрагивающих систему, требуется подтверждение и
+  повышение привилегий (sudo/pkexec).
+- Все действия логируются в `~/.local/share/pro-nix/actions.log`.
+
+Разработка
 - Python/TUI
-  - Use a virtualenv or your system Python. Entry point: `tui/app.py` or `nix run .#pro-nix`.
-- Nix
-  - Use flakes: `nix flake show` and `nix build` / `nix run` as needed.
-- Tests and verification
-  - There are headless Emacs verification scripts and small E2E helpers under scripts/.
+  - Рекомендуется виртуальное окружение. Запуск: `python3 ./tui/app.py`.
+  - pyproject.toml в tui/ содержит зависимости для разработки.
+- Nix/Flakes
+  - Команды: `nix flake show`, `nix run .#pro-nix`, `nix build .#<attr>`.
+- Тестирование
+  - Есть набор скриптов для автоматизированной проверки (см. scripts/).
 
-Important docs
-- docs/plans/pro-peer-hardening-plan.md — pro-peer setup and operator instructions
-- docs/ops/samba-hardening.md — Samba recommendations
-- docs/agents.md and docs/plans/agent-tooling.md — agent integration and usage
-- HOLO.md — architectural notes
-- CHANGELOG.md — release notes and history
+Логи и отладка
+- Временные/операционные логи хранятся в logs/ (есть примеры emacs‑headless).
+- Скрипты в scripts/ помогают собирать и парсить логи (`parse-emacs-logs.sh`,
+  `emacs-headless-report.sh`).
 
-Contributing
-- Open issues and pull requests are welcome. Prefer small, focused changes.
-- Follow repository conventions in AGENTS.md and SURFACE.md for larger design decisions.
+Документация (важные файлы)
+- docs/plans/pro-peer-hardening-plan.md — настройка и ответственность оператора
+- docs/ops/samba-hardening.md — рекомендации по безопасному использованию Samba
+- docs/agents.md, docs/plans/agent-tooling.md — интеграция агентов и сценарии
+- HOLO.md — архитектурные заметки
+- CHANGELOG.md — изменения и история проекта
 
-License
-- No LICENSE file detected in repo root. If this should be public, add a LICENSE
-  file with the desired terms (MIT, Apache‑2.0, etc.).
+Вклад и стиль работы
+- Pull requests и issues приветствуются. Старайтесь делать небольшие, атомарные
+  изменения и сопровождать их описанием мотивации.
+- Для архитектурных изменений смотрите AGENTS.md, SURFACE.md и договорённости в
+  репозитории.
 
-Contact / authors
-- Repository maintained by the pro‑nix authors. See git history for contributors.
+Лицензия
+- В корне репозитория не найден файл LICENSE. Если проект должен быть
+  публичным — добавьте файл LICENSE с выбранной лицензией (например, MIT или
+  Apache‑2.0). Пока лицензия не указана, не предполагается открытая лицензионная
+  политика.
 
-Commit
-------
-Replace README with a current overview, quick start and links to docs.
+Контакты
+- Автор(ы) и история правок видны в git‑логе репозитория.
+
+Дальше
+- Могу дополнить README примерами common tasks (onboarding checklist,
+  recovery steps) или перевести его в двуязычный формат. Скажите, что
+  добавить дальше.
+
+Onboarding — чеклист (оператор + хост)
+-----------------------------------
+Ниже короткий чеклист, который покрывает наиболее типовые шаги при
+вводе нового хоста в управление pro‑nix.
+
+1) Подготовка оператора (на стороне управления):
+   - Убедитесь, что у вас есть доступ к репозиторию и что flake собирается
+     локально: `nix flake show`.
+   - При необходимости подготовьте `authorized_keys.gpg` для pro‑peer и
+     передайте его оператору, который будет класть его в `/etc/pro-peer/`.
+
+2) Подготовка хоста (начальная настройка):
+   - Установите NixOS и включите flakes (см. документацию Nix).
+   - Склонируйте репозиторий на хост (или используйте network share).
+   - Проверьте конфигурацию конкретного хоста в `hosts/<host>/configuration.nix`.
+
+3) Первичный деплой конфигурации на хосте:
+   - Выполните `sudo nixos-rebuild switch --flake .#<host>`.
+   - При наличии pro‑peer: убедитесь, что `/etc/pro-peer/authorized_keys.gpg`
+     присутствует и имеет корректные права; затем запустите службу синхронизации.
+
+4) Проверки после деплоя:
+   - Прогоните базовую диагностику: `./scripts/run-samba-diagnostics.sh` (если
+     используется Samba) и `scripts/emacs-headless-test.sh` для проверки Emacs.
+   - Проверьте логи systemd: `journalctl -u pro-peer -b` и `journalctl -xe`.
+
+5) Ввод в эксплуатацию (operator / user):
+   - Используйте TUI или `proctl` для финальной загрузки ключей, проверки статуса
+     и запуска сервисов.
+   - Зафиксируйте в инвентаре хоста его роль, имя, IP и особенности конфигурации.
+
+Recovery / common troubleshooting
+- Если служба pro-peer не запускается: `journalctl -u pro-peer -b` и `systemctl
+  status pro-peer`.
+- При проблемах с SSH‑ключами: проверьте расшифровку `/etc/pro-peer/authorized_keys.gpg`
+  и права доступа на файл; можно временно развернуть debug copy в `~/.ssh/authorized_keys`.
+- Для диагностики Emacs headless используйте `scripts/emacs-headless-test.sh` и
+  соберите отчёт через `scripts/emacs-headless-report.sh`.
+
+Если хотите, я могу расширить чеклист до подробного Onboarding Wizard (шаг‑за‑шаг
+в TUI) или добавить файл CHECKLIST.md с отдельным форматом для операторов.

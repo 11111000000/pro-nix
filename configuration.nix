@@ -266,6 +266,9 @@
     monospace = [ "Aporetic Sans Mono" "Terminus" ];
   };
 
+  # Optional guidance: hosts that need to force VT native resolution can add
+  # a kernel parameter like "video=1920x1080" in their host configuration.
+
   # Deploy fontconfig and desktop/GTK/Qt configuration files so desktop
   # environments and toolkits pick up the Aporetic fonts as defaults.
   environment.etc."fonts.conf".source = ./conf/fonts.conf;

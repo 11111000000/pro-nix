@@ -92,8 +92,7 @@
   (pcase (pro-keys--section-kind section)
     (:exwm (pro-keys-apply-exwm-binding key command))
     (:org (with-eval-after-load 'org
-            (when (boundp 'org-mode-map)
-              (define-key org-mode-map (kbd key) command))))
+            (define-key org-mode-map (kbd key) command)))
     (_ (pro-keys-apply-binding key command))))
 
 (defun pro-keys-load-org-file (file)

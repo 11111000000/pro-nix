@@ -63,4 +63,7 @@ AllowTcpForwarding no
   swapDevices = [
     { device = "/dev/disk/by-uuid/422bf68d-025a-4c1b-a3ba-c282ab7d4884"; }
   ];
+
+  # Enable opencode default config installation for users
+  opencode.enable = true;
 }

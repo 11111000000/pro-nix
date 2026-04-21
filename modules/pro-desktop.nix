@@ -21,6 +21,18 @@
   console.earlySetup = true;
   console.font = "${pkgs.terminus_font}/share/consolefonts/ter-v16n.psf.gz";
 
+  # Make VT feel calmer: hide blinking cursor by default. Can be overridden
+  # per-host if needed.
+  vt.global_cursor_default = 0;
+
+  # Provide extra getty instances so several textual consoles are available
+  # from X (Ctrl+Alt+F2 / Ctrl+Alt+F3). Individual hosts may override.
+  systemd.services."getty@tty2".enable = true;
+  systemd.services."getty@tty3".enable = true;
+
+  # Optional: if a host needs to force native resolution on VT, set
+  # boot.kernelParams = [ "video=1920x1080" ]; in that host's configuration.
+
   services.xserver.xkb = {
     layout = "us,ru";
     options = "grp:ralt_toggle,caps:ctrl_modifier,grp_led:caps";
