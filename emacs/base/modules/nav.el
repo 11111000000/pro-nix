@@ -45,6 +45,15 @@
     (define-key global-map [remap switch-to-buffer] #'consult-buffer))
   (when (fboundp 'consult-goto-line)
     (define-key global-map [remap goto-line] #'consult-goto-line))
+  ;; Ensure embark is available and configured when consult is present
+  (when (or (pro--package-provided-p 'embark) (pro-packages--maybe-install 'embark t) (require 'embark nil t))
+    (when (fboundp 'embark-act)
+      (global-set-key (kbd "C-.") #'embark-act)
+      (global-set-key (kbd "C-;") #'embark-dwim))
+    ;; Setup embark-consult integration if available
+    (when (or (pro--package-provided-p 'embark-consult) (pro-packages--maybe-install 'embark-consult t) (require 'embark-consult nil t))
+      ;; No-op: loading the package is sufficient; it wires into consult/embark
+      ))
   (when (fboundp 'consult-imenu)
     (define-key global-map [remap imenu] #'consult-imenu))
   (when (fboundp 'consult-bookmark)
