@@ -85,9 +85,9 @@ in
     openDefaultPorts = false;
   };
 
-  # NOTE: fail2ban configuration can be added per-host if desired. Avoid
-  # enabling a global jail here to keep host-specific tuning (filters/log
-  # paths) local to the machine.
+  # Примечание: конфигурацию fail2ban лучше задавать на уровне хоста. Глобальное
+  # включение jail может привести к неверной работе из-за различий путей логов и
+  # фильтров между машинами; оставляем настройку локальной ответственности.
 
   networking.firewall = {
     # Keep application ports open (exposed generally). We remove SMB ports
