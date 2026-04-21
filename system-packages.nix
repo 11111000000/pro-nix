@@ -121,14 +121,16 @@ let
     # upstream binary expects a system loader). If that fails and
     # steam-run is available, fall back to steam-run (FHS). Otherwise
     # run normally via systemd-run.
-    if [[ "$BIN" = /nix/store/* ]]; then
-      exec "${pkgs.glibc}/lib/ld-linux-x86-64.so.2" "$BIN" -- "$@" || true
-      if command -v steam-run >/dev/null 2>&1; then
-        STEAM_RUN_CMD=$(command -v steam-run)
-        exec "$STEAM_RUN_CMD" "$BIN" -- "$@"
-      fi
+    # Prefer to run the selected binary under steam-run (FHS) when
+    # available. This makes upstream prebuilt binaries behave more like a
+    # generic Linux environment. If steam-run is not present, fall back to
+    # running under systemd-run to limit resource usage.
+    if command -v steam-run >/dev/null 2>&1; then
+      STEAM_RUN_CMD=$(command -v steam-run)
+      exec "$STEAM_RUN_CMD" "$BIN" -- "$@"
+    else
+      exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 "$BIN" -- "$@"
     fi
-    exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 "$BIN" -- "$@"
   '';
 
   # Deterministic package: fetch official release tarball and expose
