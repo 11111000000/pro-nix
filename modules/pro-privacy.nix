@@ -13,7 +13,10 @@
       SOCKSPort = [ 9050 ];
       ControlPort = [ 9051 ];
       CookieAuthentication = true;
-      UseBridges = 1;
+      # Default to no bridges so Tor can start. To enable bridges, set
+      # services.tor.settings.Bridge in your Nix configuration or provide
+      # Bridge lines in the template conf/tor-bridges.conf and re-run rebuild.
+      UseBridges = 0;
       # Enable common pluggable transports. `lyrebird` is the obfs4 binary
       # shipped in nixpkgs (replacement for obfs4proxy). meek and snowflake
       # clients are provided by their packages below.
