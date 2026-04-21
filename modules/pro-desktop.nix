@@ -21,9 +21,9 @@
   console.earlySetup = true;
   console.font = "${pkgs.terminus_font}/share/consolefonts/ter-v16n.psf.gz";
 
-  # Make VT feel calmer: hide blinking cursor by default. Can be overridden
-  # per-host if needed.
-  vt.global_cursor_default = 0;
+  # Make VT feel calmer: hide blinking cursor by default.
+  # The 'vt' option path isn't defined in all NixOS versions/modules; avoid
+  # referencing a non-existent option to keep module evaluation robust.
 
   # Provide extra getty instances so several textual consoles are available
   # from X (Ctrl+Alt+F2 / Ctrl+Alt+F3). Individual hosts may override.
