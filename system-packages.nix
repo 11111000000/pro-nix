@@ -44,10 +44,12 @@ let
     # present, fall back to the previous search order (user-local, home,
     # cached, bootstrap).
     STORE_BIN="${toString opencodeBin}/bin/opencode"
-    if [ -x "$STORE_BIN" ]; then
-      # Quick sanity check: try to run `--version` with a short timeout.
-      # If this fails (unsupported format / crashes), don't use the store
-      # binary so we fall back to user cache or bootstrap.
+    # By default, do not prefer the Nix store binary because some upstream
+    # prebuilt releases contain ELF metadata (verdef) that our runtime
+    # cannot handle. To use the store binary explicitly set
+    # OPENCODE_USE_STORE=1 in the environment. When enabled, perform a
+    # quick sanity check before selecting it.
+    if [ "${OPENCODE_USE_STORE:-0}" = "1" ] && [ -x "$STORE_BIN" ]; then
       if command -v timeout >/dev/null 2>&1; then
         if timeout 2s "$STORE_BIN" --version >/dev/null 2>&1; then
           BIN="$STORE_BIN"
@@ -56,7 +58,6 @@ let
           BIN=""
         fi
       else
-        # No timeout available; use the store binary but be conservative.
         BIN="$STORE_BIN"
       fi
     else
