@@ -186,7 +186,7 @@
 
   # Включение flakes, регулярная очистка и оптимизация кэша пакетов.
   nix = {
-    settings.experimental-features = [ "nix-command" "flakes" ];
+    settings.experimental-features = [ "nix-command" "flakes" "cgroups" ];
     settings.connect-timeout = 5;
     settings.fallback = true;
     # Use cgroups so Nix places build processes into cgroups and systemd
