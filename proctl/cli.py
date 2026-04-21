@@ -333,6 +333,11 @@ def main():
     p.add_argument("--host", default="local")
     p.add_argument("--which", choices=["all", "samba", "pro-peer", "emacs"], default="all")
 
+    p = sub.add_parser("ssh-test")
+    p.add_argument("--host", default="local")
+    p.add_argument("--user", required=False)
+    p.add_argument("--key", required=False)
+
     p = sub.add_parser("rebuild")
     p.add_argument("--host", default="local")
     p.add_argument("--flake", required=True)
@@ -383,6 +388,40 @@ def main():
         if args.dry_run:
             json_exit({"preview": res.get("preview")})
         json_exit({"result": res})
+    elif args.cmd == "ssh-test":
+        # ssh-test --host <spec> --user <user> [--key <path>]
+        host = args.host
+        user = args.user
+        key = getattr(args, 'key', None)
+        # Build ssh command: ssh -o BatchMode=yes [-i key] user@host true
+        target = host
+        if not host.startswith("ssh:") and not host == "local":
+            # allow plain host names
+            target = f"ssh:{host}"
+        parsed = parse_host(target)
+        if parsed["type"] == "local":
+            # local test: try to run su -c 'true' as user? Instead, just check that authorized_keys contains user's key if possible
+            # For MVP return not implemented
+            json_exit({"error": "ssh-test for local host not implemented; use remote host or run manual test"}, code=2)
+        # remote
+        ssh_cmd_parts = ["ssh", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=accept-new"]
+        if parsed.get("port"):
+            ssh_cmd_parts += ["-p", str(parsed.get("port"))]
+        if key:
+            ssh_cmd_parts += ["-i", key]
+        target_host = parsed["host"]
+        if parsed.get("user"):
+            target_host = f"{parsed['user']}@{target_host}"
+        elif user:
+            target_host = f"{user}@{target_host}"
+        ssh_cmd_parts += [target_host, "true"]
+        try:
+            p = subprocess.run(ssh_cmd_parts, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout = p.stdout.decode(errors="replace")
+            stderr = p.stderr.decode(errors="replace")
+            json_exit({"rc": p.returncode, "stdout": stdout, "stderr": stderr})
+        except Exception as e:
+            json_exit({"error": str(e)}, code=1)
     else:
         parser.print_help()
 
