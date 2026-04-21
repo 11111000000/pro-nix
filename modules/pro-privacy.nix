@@ -22,7 +22,6 @@
         "meek exec ${pkgs.meek}/bin/meek-client"
         "snowflake exec ${pkgs.snowflake}/bin/snowflake-client"
       ];
-      Include = "/etc/tor/bridges.conf";
       DNSPort = [ 9053 ];
       AutomapHostsOnResolve = true;
       AutomapHostsSuffixes = [ ".onion" ".exit" ];
