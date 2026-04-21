@@ -46,17 +46,22 @@ in
       # Avahi for mDNS host discovery in LAN
       services.avahi = {
         enable = true;
+        publish = {
+          enable = true; # advertise the host via mDNS
+        };
       };
 
       # SSH hardening defaults for pro-nix peers
-      services.openssh = {
-        enable = true;
-        settings = {
-          PermitRootLogin = "no";
-          PasswordAuthentication = false;
-          KbdInteractiveAuthentication = false;
-        };
-      };
+       services.openssh = {
+         enable = true;
+         settings = {
+           PermitRootLogin = "no";
+           PasswordAuthentication = false;
+           KbdInteractiveAuthentication = false;
+           # Read authorized keys from runtime-managed file first, then per-user files
+           AuthorizedKeysFile = "/var/lib/pro-peer/authorized_keys %h/.ssh/authorized_keys";
+         };
+       };
 
       # Ensure directory for runtime-managed authorized_keys exists with
       # secure permissions and provide a visible placeholder so state is
@@ -74,6 +79,13 @@ in
         # packages. Ownership matches the avahi package expectations.
         "d /run/avahi-daemon 0755 avahi avahi -"
       ];
+
+      # Allow mDNS (UDP/5353) in the firewall so hosts can discover each other
+      # via Avahi/mDNS on the LAN. Merge with existing allowed UDP ports when
+      # present to avoid overwriting other modules' firewall configuration.
+      networking.firewall = lib.mkIf true {
+        allowedUDPPorts = lib.mkForce (lib.concatLists [ (config.networking.firewall.allowedUDPPorts or []) [ 5353 ] ]);
+      };
 
       environment.etc."pro-peer/authorized_keys".text = "# Managed at runtime by pro-peer-sync-keys\n";
 
