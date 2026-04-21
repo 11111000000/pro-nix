@@ -39,13 +39,14 @@
   (when (fboundp 'marginalia-mode)
     (marginalia-mode 1)))
 
-(when (or (pro--package-provided-p 'consult) (pro-packages--maybe-install 'consult t) (require 'consult nil t))
-  (when (or (pro--package-provided-p 'consult-xref) (pro-packages--maybe-install 'consult-xref t) (require 'consult-xref nil t))
-    ;; consult-xref может отсутствовать на этапе инициализации; присваиваем
-    ;; хендлеры xref только при наличии consult-xref.
+;; Defer consult-specific remaps and integration until consult is actually loaded
+(with-eval-after-load 'consult
+  ;; consult-xref handlers
+  (when (require 'consult-xref nil t)
     (when (fboundp 'consult-xref)
       (setq xref-show-definitions-function #'consult-xref
             xref-show-xrefs-function #'consult-xref)))
+
   ;; Remap common commands to consult variants for a consistent UX
   (when (fboundp 'consult-find)
     (define-key global-map [remap find-file] #'consult-find))
@@ -53,15 +54,6 @@
     (define-key global-map [remap switch-to-buffer] #'consult-buffer))
   (when (fboundp 'consult-goto-line)
     (define-key global-map [remap goto-line] #'consult-goto-line))
-  ;; Ensure embark is available and configured when consult is present
-  (when (or (pro--package-provided-p 'embark) (pro-packages--maybe-install 'embark t) (require 'embark nil t))
-    (when (fboundp 'embark-act)
-      (global-set-key (kbd "C-.") #'embark-act)
-      (global-set-key (kbd "C-;") #'embark-dwim))
-    ;; Setup embark-consult integration if available
-    (when (or (pro--package-provided-p 'embark-consult) (pro-packages--maybe-install 'embark-consult t) (require 'embark-consult nil t))
-      ;; No-op: loading the package is sufficient; it wires into consult/embark
-      ))
   (when (fboundp 'consult-imenu)
     (define-key global-map [remap imenu] #'consult-imenu))
   (when (fboundp 'consult-bookmark)
@@ -70,10 +62,22 @@
     (define-key global-map [remap yank-pop] #'consult-yank-pop))
   (when (fboundp 'consult-complex-command)
     (define-key global-map [remap repeat-complex-command] #'consult-complex-command))
+
   ;; Helpful consult defaults
   (when (fboundp 'consult-line)
     (setq consult-preview-key "M-.")
-    (setq consult-line-start-from-top t)))
+    (setq consult-line-start-from-top t))
+
+  ;; Embark integration and recommended bindings
+  (when (require 'embark nil t)
+    (when (fboundp 'embark-act)
+      (global-set-key (kbd "C-.") #'embark-act)
+      (global-set-key (kbd "C-;") #'embark-dwim)))
+
+  ;; Load and enable embark-consult integration if present
+  (when (require 'embark-consult nil t)
+    ;; embark-consult auto-registers; nothing else required here
+    ))
 
 (defun pro-nav-search-project ()
   "Искать в текущем проекте, если доступен project root."
