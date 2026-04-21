@@ -1,26 +1,51 @@
-# modules/pro-users.nix: Ядро пользовательской конфигурации NixOS
+# modules/pro-users.nix
+# Назначение: декларация базовых пользовательских аккаунтов и правил sudo для
+# репозитория pro-nix.
+#
+# Описание:
+# - Создаёт набор системных пользователей (az, zo, la, bo) с минимальными
+#   профилями и нужными группами для работы рабочего окружения (networkmanager,
+#   bluetooth, docker и т.д.).
+# - Обеспечивает явную установку правил sudo для этих пользователей. Это
+#   намеренная системная политика: управление привилегиями централизовано в
+#   модуле, а каждый хост лишь импортирует его.
+#
+# Правило оформления:
+# - Комментарии здесь описывают политику (что и почему), не технические мелочи
+#   реализации; низкоуровневые замечания оставлены около соответствующих опций.
 
 { config, pkgs, lib, emacsPkg ? pkgs.emacs, ... }:
 
 {
+  # Создаём стандартные пользовательские учётные записи для этого коллектива.
+  # Формируем список через listToAttrs для компактности конфигурации.
   users.users = builtins.listToAttrs (map (name: {
     inherit name;
     value = {
       isNormalUser = true;
       description = name;
+      # Группы: необходимы для доступа к сетевым, вводным и dev-ресурсам.
       extraGroups = [ "networkmanager" "wheel" "bluetooth" "docker" "input" "uinput" "pro" ];
+      # Минимальный набор программ в пользовательском профиле.
       packages = with pkgs; [ git ];
       openssh.authorizedKeys.keys = [ ];
     };
   }) [ "az" "zo" "la" "bo" ]);
 
+  # Локальная служебная группа для дополнительных прав/доступов, используемых
+  # внутри репозитория и вспомогательных сервисов.
   users.groups.pro = { };
 
-  # Ensure sudo is enabled and users in wheel can use it without a password.
-  # This makes it explicit for hosts that import this module.
+  # Политика sudo: явно включаем sudo и разрешаем пользователям группы wheel
+  # получать права без запроса пароля. Это удобная политика для управляемых
+  # машин в пределах этой коллекции хостов; при необходимости хост может
+  # переопределить эту настройку.
   security.sudo.enable = true;
   security.sudo.wheelNeedsPassword = false;
 
+  # Дополнительные правила sudo: разрешаем перечисленным пользователям запуск
+  # любых команд без пароля (NOPASSWD). Это декларация доступа, следует
+  # применять осторожно и контролировать список учёток.
   security.sudo.extraRules = [
     {
       users = [ "az" "zo" "la" "bo" ];
@@ -28,12 +53,15 @@
     }
   ];
 
+  # Настройки home-manager, передаём инъекции аргументов и включаем
+  # использование пользовательских пакетов.
   home-manager = {
     extraSpecialArgs = { inherit pkgs emacsPkg; };
     backupFileExtension = "backup";
     useUserPackages = true;
   };
 
+  # Импорт вспомогательных NixOS-специфичных определений пользователей.
   imports = [
     ./pro-users-nixos.nix
   ];
