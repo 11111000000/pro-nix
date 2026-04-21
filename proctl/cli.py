@@ -339,6 +339,19 @@ def main():
     p.add_argument("--preview", action="store_true")
     p.add_argument("--run", action="store_true")
 
+    p = sub.add_parser("set-hostname")
+    p.add_argument("--host", default="local")
+    p.add_argument("--hostname", required=True)
+    p.add_argument("--dry-run", action="store_true")
+
+    p = sub.add_parser("upload-file")
+    p.add_argument("--host", default="local")
+    p.add_argument("--src", required=True)
+    p.add_argument("--dst", required=True)
+    p.add_argument("--owner", default="root:root")
+    p.add_argument("--mode", default="0600")
+    p.add_argument("--dry-run", action="store_true")
+
     args = parser.parse_args()
     if args.cmd == "list-hosts":
         cmd_list_hosts(args)
@@ -354,6 +367,22 @@ def main():
         cmd_diagnostics(args)
     elif args.cmd == "rebuild":
         cmd_rebuild(args)
+    elif args.cmd == "set-hostname":
+        # set-hostname via run_command_on_host
+        host = args.host
+        name = args.hostname
+        cmd = f"hostnamectl set-hostname {shlex.quote(name)}"
+        if args.dry_run:
+            log_action({"host": host, "action": "set-hostname", "cmd": cmd, "dry_run": True})
+            json_exit({"preview": cmd})
+        res = run_command_on_host(host, cmd, dry=False, stream=False, use_pkexec=True)
+        log_action({"host": host, "action": "set-hostname", "cmd": cmd, "result": res})
+        json_exit({"cmd": cmd, "result": res})
+    elif args.cmd == "upload-file":
+        res = upload_file_to_host(args.host, args.src, args.dst, owner=args.owner, mode=args.mode, dry=args.dry_run)
+        if args.dry_run:
+            json_exit({"preview": res.get("preview")})
+        json_exit({"result": res})
     else:
         parser.print_help()
 
