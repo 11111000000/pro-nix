@@ -33,7 +33,16 @@
     "mem_sleep_default=s2idle"
   ];
 
-  console.font = lib.mkForce "${pkgs.kbd}/share/consolefonts/latarcyrheb-sun16.psfu.gz";
+  # Use a sharper Terminus bitmap font with good Cyrillic coverage
+  # (earlier config used latarcyrheb-sun16 which is less legible at higher
+  # framebuffer/KMS resolutions).
+  console.font = lib.mkForce "${pkgs.terminus_font}/share/consolefonts/ter-v16n.psf.gz";
+
+  # Ensure additional virtual consoles are available so switching from the
+  # graphical session (Ctrl+Alt+F*) reliably reaches a text login. Enable
+  # getty instances for tty2 and tty3 in addition to the default tty1.
+  systemd.services."getty@tty2".enable = true;
+  systemd.services."getty@tty3".enable = true;
 
   powerManagement.resumeCommands = lib.mkAfter ''
     for n in XHCI RP05; do
