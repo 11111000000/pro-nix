@@ -1,0 +1,14 @@
+/* minimal styling for textual prototype */
+Screen {
+  background: $panel;
+}
+
+#menu {
+  width: 30%;
+  border: round $accent;
+}
+
+#main {
+  padding: 1 1;
+  border: round $muted;
+}

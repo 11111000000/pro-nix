@@ -42,6 +42,22 @@
           nix build .#nixosConfigurations.huawei.config.system.build.toplevel
         '');
       };
+
+      # Add a reproducible opencode package entry that fetches the official
+      # release tarball and exposes it as an app for testing/CI. This gives a
+      # deterministic path for environments where npx can't reach the registry.
+      apps.${system}.opencode-release = {
+        type = "app";
+        program = toString (pkgs.writeShellScript "opencode-release" ''
+          set -eu
+          OUT="$TMPDIR/opencode-bin"
+          mkdir -p "$OUT"
+          URL="https://github.com/anomalyco/opencode/releases/latest/download/opencode-linux-x64.tar.gz"
+          curl -fsSL "$URL" | tar xz -C "$OUT"
+          exec "$OUT/opencode" --version
+        '');
+        meta.description = "Smoke-run the official opencode linux-x64 release";
+      };
     # Утилита: добавляем удобное приложение для запуска TUI (Textual pro-nix manager)
       apps.${system}.pro-nix = {
         type = "app";

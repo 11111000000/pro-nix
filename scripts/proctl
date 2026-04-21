@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cmd=${1-}
+shift || true
+
+case "$cmd" in
+  diagnostics)
+    ./scripts/run-samba-diagnostics.sh "$@"
+    ;;
+  status)
+    echo "status: stub - $@"
+    ;;
+  list-ifaces)
+    ip -o link show | awk -F': ' '{print $2}' | jq -R -s -c 'split("\n")[:-1]'
+    ;;
+  exec)
+    sudo "$@"
+    ;;
+  *)
+    echo "unknown cmd $cmd" >&2
+    exit 2
+    ;;
+esac

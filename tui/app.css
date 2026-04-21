@@ -1,0 +1,9 @@
+/* Minimal styling for prototype */
+#left {
+  width: 30%;
+  padding: 1;
+}
+#right {
+  width: 70%;
+  padding: 1;
+}

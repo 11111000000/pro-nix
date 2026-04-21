@@ -1,0 +1,9 @@
+[project]
+name = "pro-nix-tui"
+version = "0.1.0"
+dependencies = [
+    "textual>=0.18.0",
+]
+
+[tool.textual]
+theme = "dark"

@@ -1,88 +1,72 @@
-<!-- Русский: комментарии и пояснения оформлены в стиле учебника -->
-Proctl — спецификация JSON API
-=================================
+# proctl — CLI control surface specification
 
-Цель
-----
-proctl — это тонкий CLI‑адаптер между UI (Textual / Emacs) и логикой репозитория
-(скрипты, systemd, nixos-rebuild и т.д.). Он даёт единый JSON‑ориентированный
-интерфейс: UI вызывает proctl, получает JSON и отображает результат пользователю.
+This document specifies the command API for the `proctl` local CLI that provides a stable programmatic interface used by the TUI and the Emacs frontend. The CLI communicates using JSON on stdout for structured commands and returns non-zero exit codes on error. Long outputs (logs) are written to a file and `{"out_path": "/path/to/file"}` is returned when appropriate.
 
-Основные принципы
------------------
-- Все команды по умолчанию работают в режиме preview/dry‑run, если это потенциально
-  опасная операция (запись в /etc, смена хоста, рестарт системных сервисов и т.д.).
-- proctl логирует все операции (audit) в ~/.local/share/pro-nix/actions.log.
-- proctl поддерживает локальное и удалённое исполнение (через SSH): host spec
-  может быть `local` или `ssh:user@host[:port]`.
+Design principles
+- Small API surface: only commands required by UI and automation.
+- Deterministic JSON outputs with `status`, `code`, `msg`, and optional `data` fields.
+- Preserve human readable output on stderr for operators.
 
-Общий формат ответов
---------------------
-- Успех: JSON объект, например:
+Global options
+- --host <spec>  # user@host[:port] or local
+- --dry-run      # do not perform changes, only show planned commands
+- --as-root      # run privileged subcommands via sudo/polkit (UI must confirm)
 
-  {
-    "result": "ok",
-    "data": { ... }
-  }
+Base JSON response format
+```
+{
+  "status": "ok" | "error",
+  "code": 0,            # 0 for success, non-zero for specific errors
+  "msg": "human readable summary",
+  "data": { ... }       # optional structured data
+}
+```
 
-- Ошибка: exit code != 0 и JSON с полем `error`:
+Commands
 
-  {
-    "error": "описание ошибки"
-  }
+1) list-services
+Usage: proctl list-services --host <spec>
+Output: data.services = [{name, description, active, enabled}]
 
-Команды (MVP)
--------------
-- list-hosts
-  - Описание: вернуть список известных/сконфигурированных хостов.
-  - Выход: { "hosts": [{"name":"local","type":"local","desc":"Локальная машина"}, ...] }
+2) service-action
+Usage: proctl service-action --host <spec> --service <name> --action start|stop|restart|status
+Output: usual JSON with data.output (path to logfile) if long.
 
-- host-status --host <spec>
-  - Описание: состояние host (проактивные проверки): systemd services, ssh listening
-  - Выход: { "host": "local", "services": [{"unit":"avahi-daemon","active":true}, ...], "ssh_listening": true }
+3) run-script
+Usage: proctl run-script --host <spec> --script <name> [--args '...'] [--dry-run] [--as-root]
+Purpose: run named scripts shipped in `scripts/` by name.
 
-- list-services --host <spec>
-  - Описание: список systemd unit'ов (services) на хосте
-  - Выход: { "services": [{"unit":"sshd.service","active":"active","description":"OpenSSH server"}, ...] }
+4) upload-file
+Usage: proctl upload-file --host <spec> --src <local-path> --dst <remote-path> [--as-root]
+Behavior: uploads file via scp; creates a timestamped backup of dst if exists. Returns data.backup = "/var/lib/pro-nix/backups/...." and data.dst
 
-- service-action --host <spec> --unit <unit> --action start|stop|restart|status [--dry-run]
-  - Dry‑run: возвращает команду, которая будет выполнена
-    { "preview": "systemctl restart sshd.service" }
-  - Run: выполняет команду и возвращает stdout/stderr/rc (или путь к файлу с output при streaming)
+5) restore-backup
+Usage: proctl restore-backup --host <spec> --backup <path> [--as-root]
+Behavior: restore backup to original path; returns status JSON and log path.
 
-- run-script --host <spec> --script <key> [--dry-run]
-  - script key мапится на набор безопасных операций (pro-peer-sync-keys, backup-hiddenservice, run-samba-diagnostics)
-  - Dry‑run: возвращает команду
-  - Run: выполняет и возвращает result + out_path если есть
+6) check-join-secret
+Usage: proctl check-join-secret --host <spec> --secret-file <local-path>
+Behavior: opens secret file and verifies structure, returns status and data.valid = true|false and data.reason.
 
-- upload-file --host <spec> --src <local> --dst <remote> [--owner root:root] [--mode 0600] [--dry-run]
-  - Для local: делает install/cp с sudo
-  - Для remote: делает scp -> sudo mv на целевой машине
-  - Выход: preview или результат выполнения
+7) set-join-secret
+Usage: proctl set-join-secret --host <spec> --secret-file <local-path> [--as-root]
+Behavior: uploads secret to /etc/pro-peer/join-secret.json with secure perms; returns data.backup.
 
-- set-hostname --host <spec> --hostname <name> [--dry-run]
-  - Устанавливает hostname через hostnamectl. По умолчанию использует pkexec при локальном запуске
-    или выполняется по SSH удалённо (через sudo на целевой стороне). Возвращает preview или результат.
+8) list-ifaces
+Usage: proctl list-ifaces --host <spec>
+Output: data.ifaces = [{name, ip4, ip6, state}]
 
-- diagnostics --host <spec> --which <all|samba|pro-peer|emacs>
-  - Собирает bundle и возвращает путь к архиву
+9) enable-discovery
+Usage: proctl enable-discovery --host <spec> --iface <name> [--dry-run] [--as-root]
+Behavior: places Avahi service file and restarts avahi-daemon on the host; returns data.service_file and data.backup.
 
-- rebuild --host <spec> --flake <flake> --preview|--run
-  - preview: возвращает команду и предупреждения
-  - run: выполняет nixos-rebuild switch и streams output (возвращает out_path)
-
-Streaming
----------
-Для длинных операций proctl генерирует временный файл и возвращает его путь в поле `out_path`.
-UI может открыть этот файл (или tail). Для future work можно добавить JSON‑L streaming channel.
+10) exec
+Usage: proctl exec --host <spec> --cmd "..." [--as-root] [--dry-run]
+Behavior: executes arbitrary command on host via ssh (or locally), writes stdout/stderr to a log file and returns path.
 
 Audit log
----------
-proctl пишет записи в ~/.local/share/pro-nix/actions.log в формате JSON‑line; записи содержат
-timestamp, user, host, action, cmd (previewed), dry_run flag и rc/summary по завершении.
+- proctl appends JSONL records to ~/.local/share/pro-nix/actions.log with fields:
+  timestamp, user, host, action, cmd_preview, dry_run, result_code, out_path
 
-Безопасность
-------------
-- proctl не хранит приватные ключи в явном виде.
-- Для операций с повышенными привилегиями proctl запускает pkexec/sudo по запросу UI
-  (опция `--as-root` или UI подтверждение). proctl делает бэкап файлов перед перезаписью.
+Errors
+- All non-successful actions should return status="error" and code != 0 with diagnostic msg in msg and optional data.error_details.
