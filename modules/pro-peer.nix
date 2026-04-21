@@ -40,19 +40,18 @@ in
     };
   };
 
-  # Collect conditional fragments and merge them into a single `config` attribute
+  # Собираем условные фрагменты конфигурации и объединяем их в единый атрибут `config`.
   config = lib.mkMerge [
     (lib.mkIf config.pro-peer.enable {
-      # Avahi for mDNS host discovery in LAN
+      # Avahi — служба mDNS для обнаружения хостов в локальной сети (LAN).
       services.avahi = {
         enable = true;
         publish = {
           enable = true; # advertise the host via mDNS
         };
       };
-      # Provide an Avahi service file advertising SSH over mDNS so non-Linux
-      # clients (macOS, iOS, Android apps with Bonjour support) can discover
-      # the host and connect to port 22.
+      # Добавляем файл службы Avahi, рекламирующий SSH через mDNS, чтобы клиенты
+      # (macOS, iOS, Android с Bonjour) могли обнаруживать хост и подключаться по 22 порту.
       environment.etc."avahi/services/ssh.service".text = ''
         <?xml version="1.0" standalone='no'?>
         <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
@@ -65,26 +64,26 @@ in
         </service-group>
       '';
 
-      # SSH hardening defaults for pro-nix peers
+      # Жёсткие (безопасные) дефолты для SSH на хостах pro-nix.
        services.openssh = {
          enable = true;
          settings = {
            PermitRootLogin = "no";
            PasswordAuthentication = false;
            KbdInteractiveAuthentication = false;
-           # Read authorized keys from runtime-managed file first, then per-user files
+            # Читаем авторизованные ключи сначала из runtime‑управляемого файла,
+            # затем из пользовательских файлов.
            AuthorizedKeysFile = "/var/lib/pro-peer/authorized_keys %h/.ssh/authorized_keys";
          };
        };
 
-      # Ensure directory for runtime-managed authorized_keys exists with
-      # secure permissions and provide a visible placeholder so state is
-      # inspectable. We avoid pointing Nix's sshd module at a runtime file
-      # (which could be unavailable during evaluation) but provide tmpfiles
-      # and an on-disk placeholder for operators.
-      # Add tmpfiles rules for runtime-managed pro-peer state. Do not force
-      # the entire `systemd.tmpfiles.rules` option here so other modules
-      # (and package-provided defaults like avahi) can append their rules.
+      # Обеспечиваем существование директории для runtime‑файла authorized_keys
+      # с безопасными правами и положением-заглушкой на диске, чтобы состояние
+      # было проверяемым. Не указываем sshd модулю путь на runtime-файл — это
+      # может быть недоступно на стадии вычисления конфигурации. Вместо этого
+      # добавляем правила tmpfiles, которые создадут необходимые пути при старте.
+      # Правила tmpfiles добавляются как дополнение, а не заменяют глобальные
+      # правила, чтобы другие модули могли дописывать свои записи.
       systemd.tmpfiles.rules = [
         "d /var/lib/pro-peer 0700 root root -"
         "f /var/lib/pro-peer/authorized_keys 0600 root root -"
@@ -94,18 +93,17 @@ in
         "d /run/avahi-daemon 0755 avahi avahi -"
       ];
 
-      # Allow mDNS (UDP/5353) in the firewall so hosts can discover each other
-      # via Avahi/mDNS on the LAN. Merge with existing allowed UDP ports when
-      # present to avoid overwriting other modules' firewall configuration.
+      # Разрешаем mDNS (UDP/5353) в брандмауэре, чтобы хосты могли находить друг
+      # друга в LAN через Avahi. Список портов объединяется с существующим,
+      # чтобы не перезаписывать настройки других модулей.
       networking.firewall = lib.mkIf true {
-        # Add mDNS (UDP/5353) to allowed UDP ports as a low-priority default
-        # so other modules or host configs can override without causing
-        # evaluation recursion. Use mkDefault rather than mkForce to avoid
-        # forcing a value that reads back into config during module merging.
+        # Добавляем 5353 в allowedUDPPorts как низкоприоритетный дефолт через
+        # lib.mkDefault. Это позволяет другим модулям или хостовым конфигам
+        # переопределять значение и предотвращает рекурсию при оценке config.*.
         allowedUDPPorts = lib.mkDefault (lib.concatLists [ (config.networking.firewall.allowedUDPPorts or []) [ 5353 ] ]);
-        # Ensure IPv6 mDNS and IPv4 multicast for discovery are permitted. Use
-        # extraCommands for idempotent rules that allow multicast traffic used
-        # by Avahi (224.0.0.251 and ff02::fb) in addition to UDP/5353.
+        # Дополнительно добавляем idempotent правила через extraCommands, чтобы
+        # разрешить IPv4 и IPv6 multicast (224.0.0.251 и ff02::fb), используемые
+        # Avahi для обнаружения в сети.
         extraCommands = lib.mkForce ''
           # Allow IPv4 mDNS UDP port 5353 (multicast 224.0.0.251)
           iptables -C INPUT -p udp --dport 5353 -d 224.0.0.251 -j ACCEPT 2>/dev/null || iptables -I INPUT -p udp --dport 5353 -d 224.0.0.251 -j ACCEPT || true
@@ -116,10 +114,10 @@ in
 
       environment.etc."pro-peer/authorized_keys".text = "# Managed at runtime by pro-peer-sync-keys\n";
 
-      # Keep sshd's Nix config from reading arbitrary files at evaluation
-      # time by forcing an empty authorizedKeys declaration. The runtime
-      # service writes to /var/lib/pro-peer/authorized_keys which SSH will
-      # read at service start.
+      # Избегаем указания sshd на произвольные файлы во время вычисления
+      # конфигурации: принудительно делаем пустую декларацию authorizedKeys.
+      # Фактический runtime‑файл записывается службой синхронизации в
+      # /var/lib/pro-peer/authorized_keys и будет прочитан при запуске SSH.
       users.users.root.openssh.authorizedKeys = lib.mkForce { keys = []; keyFiles = []; };
     })
 
@@ -131,8 +129,8 @@ in
       systemd.services."pro-peer-sync-keys" = {
         description = "Pro‑peer: sync authorized_keys from encrypted file";
         wantedBy = [ "multi-user.target" ];
-        # Limit CPU usage of this occasional oneshot task so it cannot
-        # saturate interactive sessions when it runs (small conservative quota).
+        # Ограничиваем использование CPU для одноразовой задачи синхронизации
+        # ключей, чтобы не блокировать интерактивные сессии в момент её работы.
         serviceConfig = {
           Type = "oneshot";
           ExecStart = builtins.concatStringsSep " " [ "/etc/pro-peer-sync-keys.sh" "--input" config.pro-peer.keysGpgPath "--out" "/var/lib/pro-peer/authorized_keys" ];
@@ -171,8 +169,8 @@ in
       systemd.services.yggdrasil = {
         description = "Yggdrasil mesh daemon (pro-peer)";
         wantedBy = [ "multi-user.target" ];
-        # Give the mesh daemon a modest share of CPU but prevent it from
-        # saturating the machine during heavy network activity.
+        # Даём демону mesh небольшую долю CPU и защищаем систему от его
+        # перегрузки при интенсивной сетевой активности.
         serviceConfig = {
           ExecStart = builtins.concatStringsSep " " [ (builtins.toString pkgs.yggdrasil + "/bin/yggdrasil") "-useconffile" (if config.pro-peer.yggdrasilConfigPath != null then config.pro-peer.yggdrasilConfigPath else "/etc/yggdrasil.conf") ];
           Restart = "on-failure";
@@ -186,8 +184,9 @@ in
 
     (lib.mkIf config.pro-peer.enableWireguardHelper {
       environment.systemPackages = with pkgs; [ wireguard-tools ];
-      # Install a small wrapper script that normalizes wg-quick behavior so
-      # the systemd unit can remain simple and not embed shell operators.
+      # Устанавливаем небольшой оболочный wrapper для нормализации поведения
+      # wg-quick; это позволяет systemd‑юниту оставаться простым и не
+      # включать сложную shell‑логику.
       environment.etc."pro-peer-wg-quick-wrapper".source = ./scripts/pro-peer-wg-quick-wrapper.sh;
       environment.etc."pro-peer-wg-quick-wrapper".mode = "0755";
 
@@ -218,10 +217,9 @@ in
         };
       };
 
-      # Ensure the hidden service directory exists with correct ownership and
-      # permissions using systemd-tmpfiles rules. This is declarative and will
-      # be applied early in boot, avoiding a oneshot service which embeds shell
-      # logic.
+      # Для Tor hidden service гарантируем существование каталога с корректными
+      # правами через systemd‑tmpfiles — декларативный способ, применяемый при
+      # загрузке, что предпочтительнее запуска oneshot‑скриптов с shell‑логикой.
       # If Tor hidden service is enabled, add a tmpfiles rule to ensure the
       # directory exists with correct ownership. Again, append to the global
       # rules list rather than forcing it.
