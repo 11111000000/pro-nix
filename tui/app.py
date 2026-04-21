@@ -311,6 +311,7 @@ class MainApp(App):
                 yield Button("List Services", id="list_services")
                 yield Button("Run Onboarding Wizard", id="onboard_wizard")
                 yield Button("Run Pro-peer Sync (preview)", id="run_sync")
+                yield Button("Restore Last Backup", id="restore_backup")
         yield Footer()
 
     def on_mount(self):
@@ -345,6 +346,17 @@ class MainApp(App):
             host = "local"
             res = call_proctl(["run-script", "--host", host, "--script", "pro-peer-sync-keys", "--dry-run"])
             self.main_log.clear()
+            self.main_log.write(json.dumps(res, ensure_ascii=False, indent=2))
+        elif id == "restore_backup":
+            # For prototype: ask for backup path via env or prompt
+            backup = os.environ.get("PRO_NIX_LAST_BACKUP")
+            if not backup:
+                self.main_log.write("PRO_NIX_LAST_BACKUP not set; укажите путь к backup через переменную окружения PRO_NIX_LAST_BACKUP")
+                return
+            host = "local"
+            dst = os.environ.get("PRO_NIX_LAST_DST", "/etc/pro-peer/authorized_keys.gpg")
+            self.main_log.write(f"Восстанавливаем backup {backup} -> {dst} на {host}")
+            res = call_proctl(["restore-backup", "--host", host, "--backup", backup, "--dst", dst, "--as-root"]) 
             self.main_log.write(json.dumps(res, ensure_ascii=False, indent=2))
         elif id == "onboard_wizard":
             # Simple linear wizard prototype: set hostname, upload keys, sync
