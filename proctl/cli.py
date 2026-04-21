@@ -249,9 +249,11 @@ def cmd_service_action(args):
     if dry:
         log_action({"host": host, "action": "service-action", "unit": unit, "cmd": cmd, "dry_run": True})
         json_exit({"preview": cmd})
-    # run it
+    # run it (support local or remote execution and optional elevation)
     log_action({"host": host, "action": "service-action", "unit": unit, "cmd": cmd, "dry_run": False})
-    res = run_local_command(cmd)
+    # args may have as_root flag
+    use_pkexec = getattr(args, 'as_root', False)
+    res = run_command_on_host(host, cmd, dry=False, stream=False, use_pkexec=use_pkexec)
     json_exit({"cmd": cmd, "result": res})
 
 
@@ -259,6 +261,7 @@ def cmd_run_script(args):
     host = args.host
     key = args.script
     dry = args.dry_run
+    as_root = getattr(args, 'as_root', False)
     if key not in SCRIPT_MAP:
         json_exit({"error": f"Unknown script key: {key}"}, code=2)
     desc, template = SCRIPT_MAP[key]
@@ -270,9 +273,9 @@ def cmd_run_script(args):
     if dry:
         log_action({"host": host, "action": "run-script", "script": key, "cmd": cmd, "dry_run": True})
         json_exit({"preview": cmd})
-    # execute
+    # execute (support remote/privileged)
     log_action({"host": host, "action": "run-script", "script": key, "cmd": cmd, "dry_run": False})
-    res = run_local_command(cmd, stream=True)
+    res = run_command_on_host(host, cmd, dry=False, stream=True, use_pkexec=as_root)
     json_exit({"cmd": cmd, "result": res})
 
 
@@ -294,14 +297,15 @@ def cmd_rebuild(args):
     flake = args.flake
     preview = args.preview
     runflag = args.run
-    cmd = f"sudo nixos-rebuild switch --flake {shlex.quote(flake)}"
+    cmd = f"nixos-rebuild switch --flake {shlex.quote(flake)}"
+    use_pkexec = getattr(args, 'as_root', False)
     if preview:
         log_action({"host": host, "action": "rebuild-preview", "cmd": cmd})
         # For preview we can attempt a dry evaluation (nix --extra-experimental-features flakes eval?)
         json_exit({"preview": cmd})
     if runflag:
         log_action({"host": host, "action": "rebuild-run", "cmd": cmd})
-        res = run_local_command(cmd, stream=True)
+        res = run_command_on_host(host, cmd, dry=False, stream=True, use_pkexec=use_pkexec)
         json_exit({"cmd": cmd, "result": res})
     json_exit({"error": "Specify --preview or --run"}, code=2)
 
