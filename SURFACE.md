@@ -8,19 +8,19 @@
 
 ## Public Contract
 
-This repository provides a portable NixOS configuration plus a portable Emacs layer with these guarantees:
+Репозиторий предоставляет переносимую NixOS конфигурацию и модульный Emacs‑слой с следующими гарантиями:
 
-1. The system can be installed from a downloaded repo and a bootstrap script.
-2. The repo supports machine-specific overrides when needed.
-3. Emacs Lisp lives in normal `.el` files, not inline in Nix.
-4. The system ships a base Emacs/EXWM setup that works by default on NixOS.
-5. The Emacs layer can also be used without NixOS via Home Manager.
-6. User Emacs modules override the base naturally when names match.
-7. The base can be disabled without removing the system package set.
-8. The repository provides headless Emacs verification for both TTY and Xorg, with persistent logs.
-9. The repository provides a root-level agent workflow via `justfile` and `ENVIRONMENT.md`.
-10. Global Emacs keybindings live in `emacs-keys.org` with user override via `~/.emacs.d/keys.org`.
-11. The repository provides simple and harmonious installation commands for NixOS, portable Emacs, and plain `.emacs.d`.
+1. Система может быть установлена из репозитория с помощью bootstrap-скрипта.
+2. Поддерживаются машинно-специфичные переопределения конфигурации.
+3. Emacs Lisp хранится в обычных `.el` файлах, а не инлайном в Nix.
+4. По умолчанию поставляется базовый Emacs/EXWM профиль, работоспособный на NixOS.
+5. Emacs‑слой может использоваться без NixOS через Home Manager.
+6. Пользовательские Emacs‑модули переопределяют базовые при совпадении имён.
+7. Базовый профиль можно отключить, не удаляя набор системных пакетов.
+8. Репозиторий предоставляет headless‑проверки Emacs (TTY и Xorg) и логи выполнения.
+9. Есть стандартизованный workflow агентов (`justfile`, `ENVIRONMENT.md`).
+10. Глобальные биндинги Emacs находятся в `emacs-keys.org`; локальные переопределения — в `~/.emacs.d/keys.org`.
+11. Репозиторий предлагает простые команды для установки: NixOS, portable Emacs и plain `~/.emacs.d`.
 
 ## Emacs Lisp Style
 
