@@ -10,7 +10,7 @@
 { config, pkgs, lib, emacsPkg ? pkgs.emacs, ... }:
 
   let
-  local = if builtins.pathExists ./local.nix then import ./local.nix else { };
+  local = if builtins.pathExists ./local.nix then import ./local.nix else { ];
   hostName = local.hostName or "nixos";
   emacsPkg = pkgs.emacs30 or pkgs.emacs;
   in
@@ -72,6 +72,11 @@
 
   networking.hostName = lib.mkDefault hostName;  # Базовое имя задаётся только как запасной вариант, а машина может переопределить его на своём уровне.
 
+  # Enable pro-peer discovery and key sync by default so hosts in the same
+  # LAN advertise via mDNS and can receive centrally-managed authorized_keys.
+  pro-peer.enable = true;
+  pro-peer.enableKeySync = true;
+
   # Старую беспроводную схему не используем: сеть должна управляться одной понятной системой, а не несколькими конкурирующими.
   # networking.wireless.enable = true;
 
@@ -96,7 +101,7 @@
     LC_PAPER = "ru_RU.UTF-8";
     LC_TELEPHONE = "ru_RU.UTF-8";
     LC_TIME = "ru_RU.UTF-8";
-  };
+  ];
   # Enable and configure sudo via NixOS module so the binary is installed
   # and the setuid bit is managed correctly by the activation scripts.
   # Note: this is also set in modules/pro-users.nix for host-wide defaults.
@@ -116,12 +121,12 @@
   services.libinput = {
     enable = true;                      # Универсальный драйвер для всех устройств ввода.
     touchpad.disableWhileTyping = true;  # Блокировать случайные нажатия тачпада во время печати.
-  };
+  ];
 
   hardware.bluetooth.enable = true;         # Включаем поддержку Bluetooth.
   hardware.bluetooth.settings = {
-    General = { AutoEnable = true; };       # Адаптер включается автоматически.
-  };
+    General = { AutoEnable = true; ];       # Адаптер включается автоматически.
+  ];
   services.blueman.enable = true;           # Графический интерфейс управления Bluetooth.
 
   powerManagement.enable = true;           # Общесистемное управление питанием.
@@ -145,8 +150,8 @@
       HandleLidSwitch = "suspend-then-hibernate";
       HandleLidSwitchExternalPower = "suspend";
       HandleLidSwitchDocked = "suspend";
-    };
-  };
+    ];
+  ];
 
   services.upower = {
     enable = true;
@@ -155,7 +160,7 @@
     percentageCritical = 10;
     percentageAction = 8;
     criticalPowerAction = "Hibernate";
-  };
+  ];
   services.power-profiles-daemon.enable = true;    # Современный демон профилей питания.
 
   services.xserver.videoDrivers = [ "modesetting" ];   # Драйвер видео: для большинства Intel Xe рекомендуется modesetting.
@@ -195,14 +200,14 @@
       automatic = true;
       dates = "weekly";
       options = "--delete-older-than 14d";
-    };
+    ];
     optimise.automatic = true;
-  };
+  ];
 
   # Позволяем использовать не полностью открытые пакеты.
   nixpkgs.config = {
     allowUnfree = true;
-  };
+  ];
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 7.1: Steam и игровые приложения
@@ -213,7 +218,7 @@
     enable = true;
     remotePlay.openFirewall = true; # Открываем порты для Remote Play
     dedicatedServer.openFirewall = true; # Открываем порты для выделенных серверов
-  };
+  ];
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 7: Дополнительные службы и системная среда
@@ -224,7 +229,7 @@
   xdg.portal = {
     enable = true;
     extraPortals = lib.mkForce [ pkgs.xdg-desktop-portal-gtk ];
-  };
+  ];
 
   # By default optional heavy packages are disabled. To enable them set
   # `enableOptional = true` when importing `system-packages.nix`.
@@ -249,10 +254,10 @@
   ];
 
   # Prefer Aporetic Sans as the system sans font and Aporetic Sans Mono for monospace.
-  fonts.fontconfig.defaultFonts = {
+  fonts.fontconfig.defaultFonts.sans = [
     sans = [ "Aporetic Sans" "DejaVu Sans" ];
     monospace = [ "Aporetic Sans Mono" "Terminus" ];
-  };
+  ];
 
   # Deploy fontconfig and desktop/GTK/Qt configuration files so desktop
   # environments and toolkits pick up the Aporetic fonts as defaults.
@@ -271,7 +276,7 @@
     enableRootSlice = true;
     enableSystemSlice = true;
     enableUserSlices = true;
-  };
+  ];
   # Prevent individual services (notably the nix daemon) from taking all CPU.
   # Limit the nix-daemon service and enable default CPU accounting so user processes
   # inherit reasonable defaults. Tweak values to taste (CPUQuota is a percentage).
@@ -280,7 +285,7 @@
     CPUQuota = "75%";
     # Lower CPUWeight so other services keep some proportionate share.
     CPUWeight = "200";
-  };
+  ];
 
   # Make systemd enable CPU accounting and set a default weight for slices.
   # This helps ensure user processes (user.slice) are subject to accounting and
@@ -292,8 +297,8 @@
       DefaultCPUWeight = "100";
       DefaultTasksMax = "8192";
       DefaultCPUQuotaPerSecUSec = "100000";
-    };
-  };
+    ];
+  ];
   
   environment.variables = {
     LANG = "ru_RU.UTF-8";
@@ -305,7 +310,7 @@
     QT_QPA_PLATFORMTHEME = "";
     XCURSOR_THEME = "Adwaita";
     XCURSOR_SIZE = "24";
-  };
+  ];
 
   system.stateVersion = "25.11";
 }
