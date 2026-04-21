@@ -155,13 +155,22 @@ class OnboardWizard(Widget):
             res = await asyncio.to_thread(call_proctl, cmd)
             self.app.main_log.write(json.dumps(res, ensure_ascii=False, indent=2))
         # Step: upload keys
-        if getattr(self, 'keypath', ''):
-            self.app.main_log.write(f"Загружаем ключи {self.keypath} -> /etc/pro-peer/authorized_keys.gpg на {host}")
+            if getattr(self, 'keypath', ''):
+                self.app.main_log.write(f"Загружаем ключи {self.keypath} -> /etc/pro-peer/authorized_keys.gpg на {host}")
             cmd = ["upload-file", "--host", host, "--src", self.keypath, "--dst", "/etc/pro-peer/authorized_keys.gpg"]
             if getattr(self, 'as_root', False):
                 cmd += ["--as-root"]
             res2 = await asyncio.to_thread(call_proctl, cmd)
             self.app.main_log.write(json.dumps(res2, ensure_ascii=False, indent=2))
+            # if backup present, surface restore option
+            backup = None
+            try:
+                backup = res2.get('result', {}).get('backup')
+            except Exception:
+                backup = None
+            if backup:
+                self.app.main_log.write("Backup created: " + str(backup))
+                self.app.main_log.write("Чтобы восстановить, используйте proctl restore-backup --host ... --backup <path> --dst <dst>")
             # run sync
             self.app.main_log.write("Запускаем pro-peer-sync-keys")
             cmd3 = ["run-script", "--host", host, "--script", "pro-peer-sync-keys"]
