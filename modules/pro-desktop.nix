@@ -72,8 +72,9 @@
     cantarell-fonts
   ];
 
-  # Моноширинный набор отражает выбор консольной и редакторной дисциплины.
-  # В современных версиях NixOS ключи семейств — 'sansSerif', 'serif', 'monospace'.
+  # Шрифтовая политика: выбор системных семейств для fontconfig.
+  # Примечание: в современных версиях NixOS используются имена семейств
+  # 'sansSerif', 'serif', 'monospace' — здесь задаём удобный набор по умолчанию.
   fonts.fontconfig.defaultFonts = {
     sansSerif = [ "Aporetic Sans" "DejaVu Sans" ];
     monospace = [ "Aporetic Sans Mono" "Terminus" ];
