@@ -13,16 +13,24 @@
   (when (fboundp 'vertico-mode)
     (vertico-mode 1)
     (setq vertico-cycle t))
-  ;; Navigation keys inside Vertico
-  (when (and (boundp 'vertico-map) (keymapp vertico-map))
-    (define-key vertico-map (kbd "C-n") #'vertico-next)
-    (define-key vertico-map (kbd "C-p") #'vertico-previous)
-    (define-key vertico-map (kbd "C-j") #'vertico-next)
-    (define-key vertico-map (kbd "C-k") #'vertico-previous)
-    ;; Accept candidate with RET but keep original behavior in certain contexts
-    (define-key vertico-map (kbd "RET") #'vertico-exit)))
+  ;; Install navigation keys after vertico is loaded to avoid timing issues.
+  (with-eval-after-load 'vertico
+    (when (and (boundp 'vertico-map) (keymapp vertico-map))
+      (define-key vertico-map (kbd "C-n") #'vertico-next)
+      (define-key vertico-map (kbd "C-p") #'vertico-previous)
+      (define-key vertico-map (kbd "C-j") #'vertico-next)
+      (define-key vertico-map (kbd "C-k") #'vertico-previous)
+      ;; Accept candidate with RET but keep original behavior in certain contexts
+      (define-key vertico-map (kbd "RET") #'vertico-exit))))
 
-(when (or (pro--package-provided-p 'orderless) (pro-packages--maybe-install 'orderless t) (require 'orderless nil t))
+;; Configure Orderless for fuzzy matching only after the style is registered.
+;; Setting `completion-styles' to include a style name that is not registered
+;; triggers errors (see "Invalid completion style orderless"). Therefore we
+;; defer changing `completion-styles' until orderless is actually available.
+(when (or (and (require 'orderless nil t))
+          (and (fboundp 'pro-packages--maybe-install)
+               (pro-packages--maybe-install 'orderless t)
+               (require 'orderless nil t)))
   (setq completion-styles '(orderless basic)
         completion-category-defaults nil))
 
