@@ -48,25 +48,30 @@ in
     # so the service starts reliably on dynamic Wi‑Fi networks.
     "bind interfaces only" = "No";
   };
-  services.samba.shares."${hostName}" = {
-    path = "/srv/samba/${hostName}";
-    browseable = "yes";
-    "read only" = "no";
-    "guest ok" = "no";
-    "force group" = "pro";
-    "create mask" = "0775";
-    "directory mask" = "2775";
-    "valid users" = "az zo la bo";
-  };
-  services.samba.shares.public = {
-    path = "/srv/samba/public";
-    browseable = "yes";
-    "read only" = "no";
-    "guest ok" = "yes";
-    "guest only" = "yes";
-    "force user" = "az";
-    "create mask" = "0775";
-    "directory mask" = "2775";
+  # Define Samba shares via the structured `services.samba.settings.shares`
+  # mapping to avoid deprecated `services.samba.shares` usage.
+  services.samba.settings.shares = {
+    "${hostName}" = {
+      path = "/srv/samba/${hostName}";
+      browseable = "yes";
+      "read only" = "no";
+      "guest ok" = "no";
+      "force group" = "pro";
+      "create mask" = "0775";
+      "directory mask" = "2775";
+      "valid users" = "az zo la bo";
+    };
+
+    public = {
+      path = "/srv/samba/public";
+      browseable = "yes";
+      "read only" = "no";
+      "guest ok" = "yes";
+      "guest only" = "yes";
+      "force user" = "az";
+      "create mask" = "0775";
+      "directory mask" = "2775";
+    };
   };
 
   systemd.tmpfiles.rules = [
