@@ -61,6 +61,11 @@
         (if file
             (load file nil t)
           (message "[pro-emacs] missing module: %s" module-name))))
-    (message "[pro-emacs] loaded modules: %S" modules)))
+    (message "[pro-emacs] loaded modules: %S" modules)
+    ;; Some key bindings reference commands provided by packages that may
+    ;; have been installed during module initialization. Reload user key
+    ;; bindings now so that any commands installed earlier are bound.
+    (when (fboundp 'pro-keys-reload)
+      (pro-keys-reload))))
 
 (provide 'pro-site-init)
