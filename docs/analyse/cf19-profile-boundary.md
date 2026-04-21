@@ -1,3 +1,4 @@
+<!-- Русский: комментарии и пояснения оформлены в стиле учебника -->
 # CF-19 profile boundary
 
 ## Keep in `configuration.nix`

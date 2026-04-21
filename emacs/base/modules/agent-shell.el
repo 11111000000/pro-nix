@@ -1,3 +1,4 @@
+;; Русский: комментарии и пояснения оформлены в стиле учебника
 ;;; agent-shell.el --- Agent shell configuration -*- lexical-binding: t; -*-
 
 ;; Этот модуль настраивает agent-shell для интеграции с ИИ в ПРО-системе.

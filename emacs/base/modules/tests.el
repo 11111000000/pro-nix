@@ -1,3 +1,4 @@
+;; Русский: комментарии и пояснения оформлены в стиле учебника
 ;;; tests.el --- headless ERT tests -*- lexical-binding: t; -*-
 
 (require 'ert)

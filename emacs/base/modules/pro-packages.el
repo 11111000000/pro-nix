@@ -1,3 +1,4 @@
+;; Русский: комментарии и пояснения оформлены в стиле учебника
 ;;; pro-packages.el --- prompt-and-install package flow -*- lexical-binding: t; -*-
 ;; Minimal engine for prompt-and-install packages when not provided by Nix.
 

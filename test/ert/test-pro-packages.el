@@ -1,3 +1,4 @@
+;; Русский: комментарии и пояснения оформлены в стиле учебника
 (ert-deftest pro-packages-declarations-loaded ()
   "Ensure pro-packages module loads and decisions are available."
   (let* ((init (expand-file-name "emacs/base/init.el" default-directory)))

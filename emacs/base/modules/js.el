@@ -1,3 +1,4 @@
+;; Русский: комментарии и пояснения оформлены в стиле учебника
 ;;; js.el --- JavaScript/TypeScript -*- lexical-binding: t; -*-
 
 (defun pro-js--setup-buffer ()

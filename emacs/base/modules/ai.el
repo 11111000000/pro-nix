@@ -1,3 +1,4 @@
+;; Русский: комментарии и пояснения оформлены в стиле учебника
 ;;; ai.el --- AI policy and entrypoint -*- lexical-binding: t; -*-
 
 (require 'json)

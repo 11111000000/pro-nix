@@ -1,3 +1,4 @@
+;; Русский: комментарии и пояснения оформлены в стиле учебника
 ;;; test-helpers.el --- headless test helpers -*- lexical-binding: t; -*-
 
 (require 'subr-x)

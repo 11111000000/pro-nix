@@ -1,3 +1,4 @@
+;; Русский: комментарии и пояснения оформлены в стиле учебника
 ;;; packages.el --- package archives and VC packages -*- lexical-binding: t; -*-
 
 ;; This module makes Emacs 30+ manage Lisp packages from within Emacs.

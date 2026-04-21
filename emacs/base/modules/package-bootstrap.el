@@ -1,3 +1,4 @@
+;; Русский: комментарии и пояснения оформлены в стиле учебника
 ;;; package-bootstrap.el --- package bootstrap helpers -*- lexical-binding: t; -*-
 
 (require 'package)
