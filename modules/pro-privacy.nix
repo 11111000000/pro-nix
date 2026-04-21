@@ -41,22 +41,7 @@
     allowedUDPPorts = [ 9564 ];
   };
 
-  # Автоматически перезагружать Tor при изменении bridges.conf
-  systemd.services."tor-bridges-reload" = lib.mkIf true {
-    description = "Reload Tor when bridges configuration changes";
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${pkgs.systemd}/bin/systemctl reload tor.service";
-    };
-  };
-
-  systemd.paths."tor-bridges-reload" = lib.mkIf true {
-    description = "Watch for changes to /etc/tor/bridges.conf";
-    wantedBy = [ "multi-user.target" ];
-    pathConfig = {
-      PathExists = "/etc/tor/bridges.conf";
-      Unit = "tor-bridges-reload.service";
-    };
-  };
+  # NOTE: automatic reload on bridges changes is intentionally omitted here.
+  # Dynamic runtime reloading can be implemented later with a carefully
+  # tested systemd.path/service that avoids triggering during activation.
 }
