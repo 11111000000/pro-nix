@@ -22,9 +22,56 @@ let
     exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 ${pipxPkg}/bin/pipx run aider-chat -- "$@"
   '';
 
+  # Provide a small, robust wrapper for the `opencode` CLI.
+  # The upstream npm package (`@opencode/cli`) is not always available in the
+  # registry in environments where this repo runs. Instead of relying on npx,
+  # prefer the following order at runtime:
+  # 1. If a user-local opencode binary exists (~/.local/bin/opencode or ~/.opencode/bin/opencode) use it
+  # 2. If not present, attempt to download the official Linux x64 release tarball
+  #    from GitHub releases and cache it under ~/.local/share/opencode/opencode
+  # 3. Run the binary under a user transient systemd scope to limit CPU usage
   opencodeCmd = pkgs.writeShellScriptBin "opencode" ''
-    # Run opencode under a user transient scope with CPU limits to avoid heavy spikes.
-    exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 ${pkgs.nodejs_20}/bin/npx --yes @opencode/cli -- "$@"
+    set -euo pipefail
+
+    # Locations we will check for an existing binary
+    USER_LOCAL_BIN="$HOME/.local/bin/opencode"
+    OPENCODE_HOME="$HOME/.opencode/bin/opencode"
+    CACHED="$HOME/.local/share/opencode/opencode"
+
+    choose_exec() {
+      if [ -x "$USER_LOCAL_BIN" ]; then
+        echo "$USER_LOCAL_BIN"
+      elif [ -x "$OPENCODE_HOME" ]; then
+        echo "$OPENCODE_HOME"
+      elif [ -x "$CACHED" ]; then
+        echo "$CACHED"
+      else
+        echo ""
+      fi
+    }
+
+    BIN=$(choose_exec)
+
+    if [ -z "$BIN" ]; then
+      # Try to download the official latest release for linux x64. This is a
+      # best-effort bootstrap only; failure will fall back to failing fast so
+      # the user can install manually via the project's instructions.
+      mkdir -p "$(dirname "$CACHED")"
+      echo "[opencode] bootstrap: downloading official release to $CACHED"
+      if command -v curl >/dev/null 2>&1; then
+        curl -fsSL "https://github.com/anomalyco/opencode/releases/latest/download/opencode-linux-x64.tar.gz" | tar xz -C "$(dirname "$CACHED")"
+      elif command -v wget >/dev/null 2>&1; then
+        wget -qO- "https://github.com/anomalyco/opencode/releases/latest/download/opencode-linux-x64.tar.gz" | tar xz -C "$(dirname "$CACHED")"
+      else
+        echo "[opencode] cannot bootstrap: install curl or wget, or place opencode in $USER_LOCAL_BIN" >&2
+        exit 1
+      fi
+      chmod +x "$CACHED"
+      BIN="$CACHED"
+    fi
+
+    # Run under a user transient scope so a runaway agent can't fully saturate CPU.
+    exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 "$BIN" -- "$@"
   '';
 
   # Python-слой здесь держит минимальную воспроизводимость: `requests` уже есть, а `pip` остаётся доступным для локальных окружений и одноразовых установок.
@@ -89,6 +136,7 @@ github-cli
   goose
   pipxPkg
   aiderCmd
+  opencodeCmd
   htop
   neofetch
   feh
