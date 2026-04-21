@@ -38,19 +38,29 @@ let
     OPENCODE_HOME="$HOME/.opencode/bin/opencode"
     CACHED="$HOME/.local/share/opencode/opencode"
 
-    choose_exec() {
-      if [ -x "$USER_LOCAL_BIN" ]; then
-        echo "$USER_LOCAL_BIN"
-      elif [ -x "$OPENCODE_HOME" ]; then
-        echo "$OPENCODE_HOME"
-      elif [ -x "$CACHED" ]; then
-        echo "$CACHED"
-      else
-        echo ""
-      fi
-    }
+    # Prefer the deterministic Nix-provided binary when available. This
+    # avoids accidentally executing a corrupted user-cached binary in
+    # ~/.local/share/opencode/opencode. If a store-provided opencode is not
+    # present, fall back to the previous search order (user-local, home,
+    # cached, bootstrap).
+    STORE_BIN="${toString opencodeBin}/bin/opencode"
+    if [ -x "$STORE_BIN" ]; then
+      BIN="$STORE_BIN"
+    else
+      choose_exec() {
+        if [ -x "$USER_LOCAL_BIN" ]; then
+          echo "$USER_LOCAL_BIN"
+        elif [ -x "$OPENCODE_HOME" ]; then
+          echo "$OPENCODE_HOME"
+        elif [ -x "$CACHED" ]; then
+          echo "$CACHED"
+        else
+          echo ""
+        fi
+      }
 
-    BIN=$(choose_exec)
+      BIN=$(choose_exec)
+    fi
 
     if [ -z "$BIN" ]; then
       # Try to download the official latest release for linux x64. This is a
@@ -58,20 +68,46 @@ let
       # the user can install manually via the project's instructions.
       mkdir -p "$(dirname "$CACHED")"
       echo "[opencode] bootstrap: downloading official release to $CACHED"
+      tmpdir=$(mktemp -d "$${TMPDIR:-/tmp}/opencode.XXXX")
+      tmpball="$tmpdir/opencode.tar.gz"
+      # ensure we remove the temporary dir on exit
+      trap 'rm -rf "$tmpdir"' EXIT
+
       if command -v curl >/dev/null 2>&1; then
-        curl -fsSL "https://github.com/anomalyco/opencode/releases/latest/download/opencode-linux-x64.tar.gz" | tar xz -C "$(dirname "$CACHED")"
+        curl -fSL -o "$tmpball" "https://github.com/anomalyco/opencode/releases/latest/download/opencode-linux-x64.tar.gz"
       elif command -v wget >/dev/null 2>&1; then
-        wget -qO- "https://github.com/anomalyco/opencode/releases/latest/download/opencode-linux-x64.tar.gz" | tar xz -C "$(dirname "$CACHED")"
+        wget -qO "$tmpball" "https://github.com/anomalyco/opencode/releases/latest/download/opencode-linux-x64.tar.gz"
       else
         echo "[opencode] cannot bootstrap: install curl or wget, or place opencode in $USER_LOCAL_BIN" >&2
         exit 1
       fi
-      chmod +x "$CACHED"
-      BIN="$CACHED"
+
+      # extract to temp and move atomically to avoid leaving a partial binary
+      tar xzf "$tmpball" -C "$tmpdir"
+      if [ -x "$tmpdir/opencode" ]; then
+        mv "$tmpdir/opencode" "$CACHED"
+        chmod +x "$CACHED"
+        BIN="$CACHED"
+      else
+        echo "[opencode] bootstrap failed: archive did not contain opencode binary" >&2
+        exit 1
+      fi
     fi
 
-    # Run under a user transient scope so a runaway agent can't fully saturate CPU.
-    exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 "$BIN" -- "$@"
+    # If the selected binary lives in the Nix store and steam-run is
+    # available, run it under steam-run (FHS) as a compatibility fallback.
+    # Some upstream prebuilt binaries expect a generic Linux FS layout and
+    # fail on NixOS; steam-run is a pragmatic workaround when patchelf is
+    # insufficient.
+    # Prefer using steam-run if it's available in PATH at runtime. Using an
+    # absolute store path here is brittle because steam-run may not be in the
+    # system profile; checking PATH makes the wrapper more robust.
+    if command -v steam-run >/dev/null 2>&1 && [[ "$BIN" = /nix/store/* ]]; then
+      STEAM_RUN_CMD=$(command -v steam-run)
+      exec "$STEAM_RUN_CMD" "$BIN" -- "$@"
+    else
+      exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 "$BIN" -- "$@"
+    fi
   '';
 
   # Deterministic package: fetch official release tarball and expose
@@ -84,6 +120,7 @@ let
       url = "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-linux-x64.tar.gz";
       sha256 = "8cb11723ce0ec82e2b6ff9a2356b12c2f4c4a95a087ba0a3004b19f167951440";
     };
+    nativeBuildInputs = [ pkgs.patchelf ];
     buildInputs = [];
     unpackPhase = ''
       mkdir -p $TMPDIR/unpack
@@ -93,6 +130,11 @@ let
       mkdir -p $out/bin
       cp $TMPDIR/unpack/opencode $out/bin/
       chmod +x $out/bin/opencode
+      # Ensure executable picks up Nix glibc loader and can run on NixOS
+      if [ -x "$out/bin/opencode" ]; then
+        patchelf --set-interpreter "${pkgs.glibc}/lib/ld-linux-x86-64.so.2" "$out/bin/opencode" || true
+        patchelf --set-rpath "${pkgs.glibc}/lib" "$out/bin/opencode" || true
+      fi
     '';
   };
 

@@ -14,7 +14,7 @@
       lib = nixpkgs.lib;
       pkgs = import nixpkgs { inherit system; };
       emacsPkg = pkgs.emacs30 or pkgs.emacs;
-      pythonWithTextual = pkgs.python3.withPackages (ps: with ps; [ textual ]);
+      pythonWithTextual = pkgs.python3.withPackages (ps: with ps; [ textual psutil ]);
 
       mkHost = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;
@@ -22,6 +22,7 @@
         modules = [
           home-manager.nixosModules.home-manager
           ./configuration.nix
+          ./nixos/modules/opencode-config.nix
         ] ++ extraModules;
       };
 
@@ -34,6 +35,7 @@
           url = "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-linux-x64.tar.gz";
           sha256 = "8cb11723ce0ec82e2b6ff9a2356b12c2f4c4a95a087ba0a3004b19f167951440";
         };
+        nativeBuildInputs = [ pkgs.patchelf ];
         unpackPhase = ''
           mkdir -p $TMPDIR/unpack
           tar xzf "$src" -C $TMPDIR/unpack
@@ -42,6 +44,15 @@
           mkdir -p $out/bin
           cp $TMPDIR/unpack/opencode $out/bin/
           chmod +x $out/bin/opencode
+          # Ensure the binary uses the Nix store's dynamic loader so it can
+          # run on NixOS without the FHS compatibility layer. Some upstream
+          # releases expect /lib64/ld-linux-x86-64.so.2 and will fail with
+          # the "stub-ld" message; force the interpreter to the Nix glibc.
+          if [ -x "$out/bin/opencode" ]; then
+            patchelf --set-interpreter "${pkgs.glibc}/lib/ld-linux-x86-64.so.2" "$out/bin/opencode" || true
+            # set a conservative rpath so the loader can find libdl/libc
+            patchelf --set-rpath "${pkgs.glibc}/lib" "$out/bin/opencode" || true
+          fi
         '';
       };
 
