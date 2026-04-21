@@ -23,7 +23,7 @@
   services.xserver.xkb = {
     layout = "us,ru";
     options = "grp:ralt_toggle,caps:ctrl_modifier,grp_led:caps";
-  };
+  ];
 
   # `kbdrate` удерживает TTY в человеческом темпе, чтобы консоль не становилась источником раздражения.
   systemd.services.kbdrate = {
@@ -33,8 +33,8 @@
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "${pkgs.kbd}/bin/kbdrate -d 900 -r 7";
-    };
-  };
+    ];
+  ];
 
   # PipeWire здесь заменяет старый аудиослой и собирает звук в один современный контур.
   hardware.pulseaudio.enable = false;
@@ -45,13 +45,13 @@
     alsa.support32Bit = true;
     pulse.enable = true;
     wireplumber.enable = true;
-  };
+  ];
 
   # Порталы XDG нужны как мост между графическими приложениями и системными возможностями.
   xdg.portal = {
     enable = true;
     extraPortals = lib.mkForce [ pkgs.xdg-desktop-portal-gtk ];
-  };
+  ];
 
   # Шрифты формируют визуальный ритм рабочего места, поэтому они лежат рядом с графическим слоем.
   fonts.packages = with pkgs; [
@@ -73,11 +73,10 @@
   ];
 
   # Моноширинный набор отражает выбор консольной и редакторной дисциплины.
-  # В современных версиях NixOS ключи семейств — 'sansSerif', 'serif', 'monospace'.
-  fonts.fontconfig.defaultFonts = {
-    sansSerif = [ "Aporetic Sans" "DejaVu Sans" ];
+  fonts.fontconfig.defaultFonts.sans = [
+    sans = [ "Aporetic Sans" "DejaVu Sans" ];
     monospace = [ "Aporetic Sans Mono" "Terminus" ];
-  };
+  ];
 
   # Deploy toolkit font config snippets for GTK/Qt/X11 so GNOME/Cinnamon and
   # other desktop environments pick up Aporetic as the default font.
@@ -99,7 +98,7 @@
     QT_QPA_PLATFORMTHEME = lib.mkForce "qt5ct";
     XCURSOR_THEME = "Adwaita";
     XCURSOR_SIZE = "24";
-  };
+  ];
 
   # Firefox оставлен как базовый браузер рабочего окружения.
   programs.firefox.enable = true;

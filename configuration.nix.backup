@@ -72,11 +72,6 @@
 
   networking.hostName = lib.mkDefault hostName;  # Базовое имя задаётся только как запасной вариант, а машина может переопределить его на своём уровне.
 
-  # Enable pro-peer discovery and key sync by default so hosts in the same
-  # LAN advertise via mDNS and can receive centrally-managed authorized_keys.
-  pro-peer.enable = true;
-  pro-peer.enableKeySync = true;
-
   # Старую беспроводную схему не используем: сеть должна управляться одной понятной системой, а не несколькими конкурирующими.
   # networking.wireless.enable = true;
 
@@ -255,7 +250,7 @@
 
   # Prefer Aporetic Sans as the system sans font and Aporetic Sans Mono for monospace.
   fonts.fontconfig.defaultFonts = {
-    sansSerif = [ "Aporetic Sans" "DejaVu Sans" ];
+    sans = [ "Aporetic Sans" "DejaVu Sans" ];
     monospace = [ "Aporetic Sans Mono" "Terminus" ];
   };
 

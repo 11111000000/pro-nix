@@ -98,7 +98,11 @@ in
       # via Avahi/mDNS on the LAN. Merge with existing allowed UDP ports when
       # present to avoid overwriting other modules' firewall configuration.
       networking.firewall = lib.mkIf true {
-        allowedUDPPorts = lib.mkForce (lib.concatLists [ (config.networking.firewall.allowedUDPPorts or []) [ 5353 ] ]);
+        # Add mDNS (UDP/5353) to allowed UDP ports as a low-priority default
+        # so other modules or host configs can override without causing
+        # evaluation recursion. Use mkDefault rather than mkForce to avoid
+        # forcing a value that reads back into config during module merging.
+        allowedUDPPorts = lib.mkDefault (lib.concatLists [ (config.networking.firewall.allowedUDPPorts or []) [ 5353 ] ]);
         # Ensure IPv6 mDNS and IPv4 multicast for discovery are permitted. Use
         # extraCommands for idempotent rules that allow multicast traffic used
         # by Avahi (224.0.0.251 and ff02::fb) in addition to UDP/5353.
