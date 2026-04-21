@@ -73,7 +73,22 @@
   ];
 
   # Моноширинный набор отражает выбор консольной и редакторной дисциплины.
-  fonts.fontconfig.defaultFonts.monospace = [ "Terminus" "Aporetic Sans Mono" ];
+  fonts.fontconfig.defaultFonts = {
+    sans = [ "Aporetic Sans" "DejaVu Sans" ];
+    monospace = [ "Aporetic Sans Mono" "Terminus" ];
+  };
+
+  # Deploy toolkit font config snippets for GTK/Qt/X11 so GNOME/Cinnamon and
+  # other desktop environments pick up Aporetic as the default font.
+  environment.etc."fonts.conf".source = ../conf/fonts.conf;
+  environment.etc."gtk-3.0/settings.ini".source = ../conf/gtk-3.0-settings.ini;
+  environment.etc."gtk-4.0/settings.ini".source = ../conf/gtk-4.0-settings.ini;
+  environment.etc."gtk-2.0/gtkrc".source = ../conf/gtkrc-2.0;
+  environment.etc."xdg/qt5ct/qt5ct.conf".source = ../conf/qt5ct.conf;
+  environment.etc."xdg/qt6ct/qt6ct.conf".source = ../conf/qt6ct.conf;
+  environment.etc."xdg/kdeglobals".source = ../conf/kdeglobals;
+  environment.etc."X11/Xresources".source = ../conf/Xresources;
+  environment.etc."xdg/dunst/dunstrc".source = ../conf/dunstrc;
 
   # Глобальные переменные фиксируют общий язык интерфейса и внешнего вида, чтобы разные программы не спорили о том, как выглядит рабочий день.
   environment.variables = {

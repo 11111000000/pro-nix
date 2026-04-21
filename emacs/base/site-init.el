@@ -25,6 +25,21 @@
   (when (file-exists-p provided)
     (load provided nil t)))
 
+;; If site-init is loaded directly (for testing or containerized runs) try to
+;; locate and load the system support modules (pro-compat, pro-packages)
+;; from the repository so modules relying on pro--package-provided-p and
+;; helpers work even when init.el didn't preload them.
+(unless pro-emacs-base-system-modules-dir
+  (let ((base (file-name-directory (or load-file-name buffer-file-name))))
+    (setq pro-emacs-base-system-modules-dir (expand-file-name "modules" base))))
+
+(let ((compat (expand-file-name "pro-compat.el" pro-emacs-base-system-modules-dir))
+      (packages (expand-file-name "pro-packages.el" pro-emacs-base-system-modules-dir)))
+  (when (file-readable-p compat)
+    (load compat nil t))
+  (when (file-readable-p packages)
+    (load packages nil t)))
+
 (defun pro-emacs-base--resolve-module (name)
   (let ((user-file (pro-emacs-base--module-file pro-emacs-base-user-modules-dir name))
         (system-file (and pro-emacs-base-system-modules-dir

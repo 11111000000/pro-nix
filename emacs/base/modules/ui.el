@@ -4,12 +4,12 @@
 
 (require 'subr-x)
 
-(defcustom pro-ui-code-font-family "Fira Code"
+(defcustom pro-ui-code-font-family "Aporetic Sans Mono"
   "Шрифт для кода."
   :type 'string
   :group 'pro-ui)
 
-(defcustom pro-ui-text-font-family "Fira Sans"
+(defcustom pro-ui-text-font-family "Aporetic Sans"
   "Шрифт для текста интерфейса."
   :type 'string
   :group 'pro-ui)

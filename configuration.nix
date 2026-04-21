@@ -248,7 +248,23 @@
     cantarell-fonts
   ];
 
-  fonts.fontconfig.defaultFonts.monospace = [ "Terminus" "Aporetic Sans Mono" ];
+  # Prefer Aporetic Sans as the system sans font and Aporetic Sans Mono for monospace.
+  fonts.fontconfig.defaultFonts = {
+    sans = [ "Aporetic Sans" "DejaVu Sans" ];
+    monospace = [ "Aporetic Sans Mono" "Terminus" ];
+  };
+
+  # Deploy fontconfig and desktop/GTK/Qt configuration files so desktop
+  # environments and toolkits pick up the Aporetic fonts as defaults.
+  environment.etc."fonts.conf".source = ./conf/fonts.conf;
+  environment.etc."gtk-3.0/settings.ini".source = ./conf/gtk-3.0-settings.ini;
+  environment.etc."gtk-4.0/settings.ini".source = ./conf/gtk-4.0-settings.ini;
+  environment.etc."gtk-2.0/gtkrc".source = ./conf/gtkrc-2.0;
+  environment.etc."xdg/qt5ct/qt5ct.conf".source = ./conf/qt5ct.conf;
+  environment.etc."xdg/qt6ct/qt6ct.conf".source = ./conf/qt6ct.conf;
+  environment.etc."xdg/kdeglobals".source = ./conf/kdeglobals;
+  environment.etc."X11/Xresources".source = ./conf/Xresources;
+  environment.etc."xdg/dunst/dunstrc".source = ./conf/dunstrc;
 
   systemd.oomd = {
     enable = true;

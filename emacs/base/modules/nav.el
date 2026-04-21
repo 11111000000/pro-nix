@@ -18,12 +18,12 @@
   (when (fboundp 'marginalia-mode)
     (marginalia-mode 1)))
 
-  (when (or (pro--package-provided-p 'consult) (pro-packages--maybe-install 'consult t) (require 'consult nil t))
-    (when (or (pro--package-provided-p 'consult-xref) (pro-packages--maybe-install 'consult-xref t) (require 'consult-xref nil t))
-      ;; consult-xref might not be loaded yet; only assign functions if available.
-      (when (fboundp 'consult-xref)
-        (setq xref-show-definitions-function #'consult-xref
-              xref-show-xrefs-function #'consult-xref)))))
+(when (or (pro--package-provided-p 'consult) (pro-packages--maybe-install 'consult t) (require 'consult nil t))
+  (when (or (pro--package-provided-p 'consult-xref) (pro-packages--maybe-install 'consult-xref t) (require 'consult-xref nil t))
+    ;; consult-xref might not be loaded yet; only assign functions if available.
+    (when (fboundp 'consult-xref)
+      (setq xref-show-definitions-function #'consult-xref
+            xref-show-xrefs-function #'consult-xref))))
 
 (defun pro-nav-search-project ()
   "Искать в текущем проекте, если доступен project root."
