@@ -3,8 +3,8 @@
 
 (require 'package)
 
-(defconst pro-package-bootstrap-targets
-  '(gptel agent-shell magit consult vertico orderless marginalia corfu which-key rainbow-delimiters)
+ (defconst pro-package-bootstrap-targets
+  '(gptel agent-shell magit consult vertico orderless marginalia corfu which-key rainbow-delimiters embark embark-consult)
   "Packages that should be present in a fresh Emacs user layer.")
 
  (defun pro-package-bootstrap-install-targets ()
