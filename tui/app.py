@@ -54,13 +54,26 @@ class OnboardWizard(Widget):
 
     def compose(self) -> ComposeResult:
         yield Label("Onboarding Wizard — шаг 1/3", id="wizard_title")
-        yield Label("Шаг 1: введите новое имя хоста (или оставьте пустым, чтобы пропустить):")
-        yield Input(placeholder="host.local", id="hostname_input")
+        yield Label("Шаг 1: укажите хост (local или ssh:user@host:port) и (опционально) новое имя хоста")
+        yield Label("Host spec:")
+        yield Input(placeholder="local", id="host_input")
+        yield Label("Новый hostname (оставьте пустым чтобы не менять):")
+        yield Input(placeholder="hostname.local", id="hostname_input")
+        yield Label("Выполнять с правами root на целевом хосте?")
+        yield Button("Run as root: OFF", id="as_root_toggle")
         yield Button("Далее", id="wizard_next")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "as_root_toggle":
+            cur = getattr(self, 'as_root', False)
+            self.as_root = not cur
+            # обновить метку кнопки
+            event.button.label = f"Run as root: {'ON' if self.as_root else 'OFF'}"
+            return
         if event.button.id == "wizard_next":
             if self.step == 1:
+                host_inp = self.query_one("#host_input", Input)
+                self.host_spec = host_inp.value.strip() or "local"
                 inp = self.query_one("#hostname_input", Input)
                 self.hostname = inp.value.strip()
                 self.step = 2
