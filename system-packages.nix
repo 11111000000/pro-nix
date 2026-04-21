@@ -1,3 +1,4 @@
+# Файл: автосгенерированная шапка — комментарии рефакторятся
 { pkgs, emacsPkg ? pkgs.emacs, enableOptional ? false }:
 
 let
@@ -88,7 +89,6 @@ github-cli
   goose
   pipxPkg
   aiderCmd
-  opencodeCmd
   htop
   neofetch
   feh

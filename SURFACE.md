@@ -1,3 +1,4 @@
+<!-- Русский: комментарии и пояснения оформлены в стиле учебника -->
 ## HDS Rules
 
 1. Surface first: record user-visible contract here before changing implementation.

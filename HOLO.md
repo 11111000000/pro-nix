@@ -1,3 +1,4 @@
+<!-- Русский: комментарии и пояснения оформлены в стиле учебника -->
 ## HDS Workflow
 
 1. Write the rule in text first.
