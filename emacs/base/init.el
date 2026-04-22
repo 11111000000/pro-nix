@@ -13,3 +13,17 @@
   (pro-emacs-base-start))
 
 (provide 'pro-init)
+
+;; After core init: load optional completion keys and external org key loader
+(when (require 'completion-keys nil t)
+  ;; completion-keys binds useful C-c o <letter> keys for CAPE and consult-yasnippet
+  )
+
+;; Try to load external keybindings loader from ~/pro if present
+(let ((keys-loader (expand-file-name "~/pro/организация/про-клавиши-из-org.el")))
+  (when (file-exists-p keys-loader)
+    (condition-case _err
+        (load-file keys-loader)
+      (error (message "pro: failed to load keys loader: %s" keys-loader)))
+    (when (fboundp 'pro/клавиши-из-org)
+      (pro/клавиши-из-org (expand-file-name "~/pro/про-клавиши.org")))))

@@ -93,6 +93,11 @@
     (when (fboundp 'consult-customize)
       (consult-customize consult-dash :initial (thing-at-point 'symbol))))
 
+  ;; consult-yasnippet: allow searching snippets via consult UI when available
+  (when (require 'consult-yasnippet nil t)
+    ;; no extra config required; binding is provided in completion-keys module
+    )
+
   ;; consult-eglot: bind a convenient key in eglot-mode if available
   (when (require 'consult-eglot nil t)
     (with-eval-after-load 'eglot
