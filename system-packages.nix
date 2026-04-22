@@ -22,6 +22,34 @@ let
     exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 "${pipxPkg}/bin/pipx" run aider-chat -- "$@"
   '';
 
+  # Deterministic package: fetch official release tarball and expose
+  # a Nix store package for opencode. Kept here so this module works
+  # standalone even when opencode_from_release is not provided by the
+  # flake specialArgs.
+  opencodeBin = pkgs.stdenv.mkDerivation rec {
+    pname = "opencode";
+    version = "1.14.19";
+    src = pkgs.fetchurl {
+      url = "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-linux-x64.tar.gz";
+      sha256 = "8cb11723ce0ec82e2b6ff9a2356b12c2f4c4a95a087ba0a3004b19f167951440";
+    };
+    nativeBuildInputs = [ pkgs.patchelf ];
+    buildInputs = [];
+    unpackPhase = ''
+      mkdir -p $TMPDIR/unpack
+      tar xzf "$src" -C $TMPDIR/unpack
+    '';
+    installPhase = ''
+      mkdir -p $out/bin
+      cp $TMPDIR/unpack/opencode $out/bin/
+      chmod +x $out/bin/opencode
+      if [ -x "$out/bin/opencode" ]; then
+        patchelf --set-interpreter "${pkgs.glibc}/lib/ld-linux-x86-64.so.2" "$out/bin/opencode" || true
+        patchelf --set-rpath "${pkgs.glibc}/lib" "$out/bin/opencode" || true
+      fi
+    '';
+  };
+
   
 
   # Provide a small, robust wrapper for the `opencode` CLI.
