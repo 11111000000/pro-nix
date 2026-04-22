@@ -59,7 +59,12 @@ argument where available; the objective is only to ensure the command
 can be launched in this environment, not to validate its output."
   (dolist (cmd '("goose" "aider" "opencode"))
     (let ((exe (executable-find cmd)))
-      (should (format "%s is not on PATH" cmd) exe)
+      ;; `should' takes the test form first and an optional message second.
+      ;; The original call passed the message first which triggers eager
+      ;; macro-expansion errors. Use the executable as the test and the
+      ;; formatted string as the failure message.
+      (unless exe
+        (ert-fail (format "%s is not on PATH" cmd)))
       (condition-case err
           (let ((proc (start-process (concat "pro-test-" cmd) nil exe "--help")))
             (should (processp proc))
@@ -67,6 +72,8 @@ can be launched in this environment, not to validate its output."
             (when (process-live-p proc)
               (ignore-errors (kill-process proc))
               (ignore-errors (delete-process proc))))
-        (error (should (format "failed to start %s: %s" cmd (error-message-string err)) nil))))))
+        ;; On error we want the test to fail and present a helpful message,
+        ;; so assert nil with the formatted message as the failure text.
+        (error (ert-fail (format "failed to start %s: %s" cmd (error-message-string err))))))))
 
 (provide 'tests)

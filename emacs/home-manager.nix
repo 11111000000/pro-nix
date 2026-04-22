@@ -186,13 +186,32 @@ in
     {
       programs.home-manager.enable = true;
 
-      home.packages = hmPackages ++ cfg.extraPackages ++ lib.optionals cfg.gui.enable guiPackages;
+      let
+        # Determine which of the configured providedPackages are present
+        # in pkgs.emacsPackages. We will install the available ones into
+        # the user's profile so Emacs finds them on the load-path.
+        providedList = cfg.providedPackages;
+        availableProvided = lib.filter (p: lib.hasAttr p pkgs.emacsPackages) providedList;
+        availableProvidedNix = map (p: pkgs.emacsPackages.${p}) availableProvided;
+        missingProvided = lib.filter (p: !(lib.hasAttr p pkgs.emacsPackages)) providedList;
+      in
+      home.packages = hmPackages ++ cfg.extraPackages ++ availableProvidedNix ++ lib.optionals cfg.gui.enable guiPackages;
 
+      # Make noninteractive installs opt-out disabled by default — enable auto
+      # install for pro-packages via environment variable so headless/CI runs
+      # behave the same as interactive setups.
       home.sessionVariables = {
         QUOTING_STYLE = "literal";
         LANG = "ru_RU.UTF-8";
         EMACSLOADPATH = "${config.home.homeDirectory}/.config/emacs/modules:";
+        PRO_PACKAGES_AUTO_INSTALL = "1";
       };
+
+      # Report which provided packages were satisfied by Nix at activation
+      home.activation.pro-emacs-provided-packages-report = ''
+        echo "pro-emacs: provided packages available: ${lib.concatStringsSep " " availableProvided}" || true
+        echo "pro-emacs: provided packages missing in nix: ${lib.concatStringsSep " " missingProvided}" || true
+      '';
 
       # Copy repo-provided templates from /etc/skel/pro-templates into the
       # user's home if they do not already exist. This runs as part of each
