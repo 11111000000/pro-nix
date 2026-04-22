@@ -35,7 +35,7 @@ This implementation is intentionally small and defensive: it calls
               (unless tab-found
                 (tab-bar-select-tab orig-tab))
               (switch-to-buffer buf)
-          (switch-to-buffer buf))))))
+          (switch-to-buffer buf)))))))
 
 (defun pro/consult-buffer-other-window ()
   "Open buffer from consult-buffer in a new window with alternating splits.
@@ -78,7 +78,14 @@ If ARG is a string, call `find-file' with ARG (behaviour compatible with
    ((and arg (stringp arg))
     (find-file arg))
    (t
-    (let ((start (or (and (fboundp 'pro-project-root) (pro-project-root)) default-directory)))
+  (let ((start (or (and (fboundp 'pro-project-root) (pro-project-root)) default-directory)))
       (if (and (require 'consult nil t) (fboundp 'consult-find))
-          (consult-find start)
+          ;; Prefer consult-find but fall back to consult-ripgrep when the
+          ;; configured backend (fd/find) is not available or returns
+          ;; nothing quickly. Use a quick heuristic: if `executable-find` for
+          ;; fd or find returns nil, prefer `consult-ripgrep` which uses rg.
+          (if (or (executable-find "fd") (executable-find "find"))
+              (consult-find start)
+            (when (fboundp 'consult-ripgrep)
+              (consult-ripgrep start))))
         (call-interactively #'find-file))))))
