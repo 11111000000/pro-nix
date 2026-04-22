@@ -172,7 +172,7 @@ let
     # launching the binary via systemd-run/steam-run (they may detach
     # or change stdio handling). Detect common interactive subcommands
     # and honor OPENCODE_DIRECT_RUN to force direct execution.
-    if [ "${OPENCODE_DIRECT_RUN:-0}" = "1" ] || [ "${1:-}" = "acp" ] || [ "${1:-}" = "acp-shell" ]; then
+    if [ "$${OPENCODE_DIRECT_RUN:-0}" = "1" ] || [ "$${1:-}" = "acp" ] || [ "$${1:-}" = "acp-shell" ]; then
       # Directly exec the binary and forward all args unchanged.
       exec "$BIN" "$@"
     fi
@@ -407,6 +407,9 @@ github-cli
   gnugrep
   silver-searcher
   platinum-searcher
+  ripgrep
+  fd
+  findutils
 
   # Темы курсора X11 нужны как визуальная интонация, а не как отдельный дизайн-проект.
   xorg.xcursorthemes
