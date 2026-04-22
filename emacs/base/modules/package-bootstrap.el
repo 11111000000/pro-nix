@@ -7,7 +7,7 @@
   '(gptel agent-shell magit consult vertico orderless marginalia corfu which-key rainbow-delimiters embark embark-consult)
   "Packages that should be present in a fresh Emacs user layer.")
 
- (defun pro-package-bootstrap-install-targets ()
+(defun pro-package-bootstrap-install-targets ()
    "Install the default package set if it is missing.
 
 This runner honors the pro-packages prompt-and-install policy: it will
@@ -17,10 +17,13 @@ interactive sessions it delegates to `pro-packages--maybe-install` to
 prompt the user where appropriate.
 "
    (interactive)
-   (let ((auto (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "0") "1")))
-     (unless pro-packages--refreshed
-       (condition-case _ (package-refresh-contents) (error nil))
-       (setq pro-packages--refreshed t))
+      ;; Default to auto-install enabled when the environment variable is
+      ;; not present. This makes fresh profiles bootstrap missing packages
+      ;; automatically.
+      (let ((auto (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "1") "1")))
+        (unless pro-packages--refreshed
+          (condition-case _ (package-refresh-contents) (error nil))
+          (setq pro-packages--refreshed t))
      (dolist (pkg pro-package-bootstrap-targets)
        (let ((pkg-sym (if (symbolp pkg) pkg (intern pkg))))
          (cond
@@ -36,3 +39,8 @@ prompt the user where appropriate.
            (message "[pro-package-bootstrap] missing %S (skipped)" pkg-sym)))))))
 
 (provide 'package-bootstrap)
+
+;; Auto-run bootstrap installer when environment requests auto-install.
+(when (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "1") "1")
+  ;; Run lazily but during init so missing packages are available later.
+  (ignore-errors (pro-package-bootstrap-install-targets)))
