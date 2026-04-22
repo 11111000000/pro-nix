@@ -73,7 +73,20 @@ let
     # ~/.local/share/opencode/opencode. If a store-provided opencode is not
     # present, fall back to the previous search order (user-local, home,
     # cached, bootstrap).
-    STORE_BIN="${toString opencodeBin}/bin/opencode"
+    # Determine a store-provided opencode binary at runtime. Prefer an
+    # explicit environment override OPENCODE_STORE_PATH, otherwise pick the
+    # first candidate under /nix/store matching '*opencode*' that contains
+    # a bin/opencode executable.
+    if [ -n "${OPENCODE_STORE_PATH:-}" ]; then
+      STORE_BIN="${OPENCODE_STORE_PATH%/}/bin/opencode"
+    else
+      STORE_CAND=$(ls -d /nix/store/*opencode* 2>/dev/null | head -n1 || true)
+      if [ -n "$STORE_CAND" ]; then
+        STORE_BIN="$STORE_CAND/bin/opencode"
+      else
+        STORE_BIN=""
+      fi
+    fi
     # By default, do not prefer the Nix store binary because some upstream
     # prebuilt releases contain ELF metadata (verdef) that our runtime
     # cannot handle. To use the store binary explicitly set
