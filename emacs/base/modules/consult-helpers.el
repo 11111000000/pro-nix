@@ -55,3 +55,18 @@ of windows to reduce cognitive friction when opening many buffers."
 (provide 'consult-helpers)
 
 ;;; consult-helpers.el ends here
+
+;; A small wrapper around consult-find to set a sensible starting directory.
+;; The problem reported: C-x C-f runs consult-find but finds no files — often
+;; consult-find is invoked with an empty default-directory or a directory that
+;; is ignored by the configured find program. We choose a heuristic: if the
+;; project root is available use it; otherwise fall back to default-directory.
+(defun pro/consult-find (&optional dir)
+  "Call `consult-find' in DIR or in `pro-project-root' if available.
+If DIR is nil, prefer `pro-project-root' then `default-directory'.
+This makes `C-x C-f' more likely to show project files." 
+  (interactive)
+  (let ((start (or dir (and (fboundp 'pro-project-root) (pro-project-root)) default-directory)))
+    (if (and (require 'consult nil t) (fboundp 'consult-find))
+        (consult-find start)
+      (call-interactively #'find-file))))

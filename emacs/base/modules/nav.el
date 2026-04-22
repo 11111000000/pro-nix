@@ -57,7 +57,7 @@
 
   ;; Remap common commands to consult variants for a consistent UX
   (when (fboundp 'consult-find)
-    (define-key global-map [remap find-file] #'consult-find))
+    (define-key global-map [remap find-file] #'pro/consult-find))
   (when (fboundp 'consult-buffer)
     (define-key global-map [remap switch-to-buffer] #'consult-buffer))
   (when (fboundp 'consult-goto-line)
