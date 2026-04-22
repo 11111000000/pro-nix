@@ -2,7 +2,7 @@
 { lib, pkgs, ... }:
 
 {
-  imports = [ ../../modules/pro-users.nix ];
+  imports = [ ../../modules/pro-users.nix ../../nixos/modules/user-templates.nix ];
 
   # CF-19: Panasonic Let's Note CF-MX — BIOS-загрузка через GRUB без EFI-слоя.
   networking.hostName = "cf19";
@@ -87,6 +87,7 @@ experimental-features = nix-command flakes cgroups
 
   # Enable automatic opencode user config installation if missing
   opencode.enable = true;
+  # register repo templates to be copied into /etc/skel/pro-templates
   pro.userTemplates = [
     { source = ../../templates/opencode-default-config.json; targetRel = ".opencode/config.json"; }
   ];

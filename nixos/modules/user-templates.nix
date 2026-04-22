@@ -14,16 +14,17 @@ in {
     };
   };
 
-  config = lib.mkIf (lib.length config.pro.userTemplates > 0) (let
-    entries = config.pro.userTemplates;
-  in lib.foldl' (acc: t: acc // {
-    environment.etc = acc.environment.etc or {} // (let
-      key = "skel/pro-templates/${t.targetRel}";
-    in {
-      "${key}" = {
-        source = t.source;
-        mode = "0644";
-      };
-    });
-  ) { } entries);
+  config = let
+    entries = config.pro.userTemplates or [];
+    addEntry = acc: t: acc // {
+      environment.etc = (acc.environment.etc or {}) // (let
+        key = "skel/pro-templates/${t.targetRel}";
+      in {
+        "${key}" = {
+          source = t.source;
+          mode = "0644";
+        };
+      });
+    };
+  in lib.foldl' addEntry { } entries;
 }
