@@ -61,12 +61,24 @@ of windows to reduce cognitive friction when opening many buffers."
 ;; consult-find is invoked with an empty default-directory or a directory that
 ;; is ignored by the configured find program. We choose a heuristic: if the
 ;; project root is available use it; otherwise fall back to default-directory.
-(defun pro/consult-find (&optional dir)
-  "Call `consult-find' in DIR or in `pro-project-root' if available.
-If DIR is nil, prefer `pro-project-root' then `default-directory'.
-This makes `C-x C-f' more likely to show project files." 
+;; `pro/consult-find' must be compatible with calls coming from remap of
+;; `find-file' which may pass a filename string argument. To avoid "wrong
+;; argument" errors we accept an optional argument: if a string is supplied
+;; treat it as a filename and delegate to `find-file'. Otherwise invoke
+;; `consult-find' starting from the project root (if available) or
+;; `default-directory'.
+(defun pro/consult-find (&optional arg)
+  "Wrapper around `consult-find' that prefers the project root.
+
+If ARG is a string, call `find-file' with ARG (behaviour compatible with
+`find-file'). Otherwise call `consult-find' with the project root or
+`default-directory'."
   (interactive)
-  (let ((start (or dir (and (fboundp 'pro-project-root) (pro-project-root)) default-directory)))
-    (if (and (require 'consult nil t) (fboundp 'consult-find))
-        (consult-find start)
-      (call-interactively #'find-file))))
+  (cond
+   ((and arg (stringp arg))
+    (find-file arg))
+   (t
+    (let ((start (or (and (fboundp 'pro-project-root) (pro-project-root)) default-directory)))
+      (if (and (require 'consult nil t) (fboundp 'consult-find))
+          (consult-find start)
+        (call-interactively #'find-file))))))
