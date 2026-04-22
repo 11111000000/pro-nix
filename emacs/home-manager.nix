@@ -197,14 +197,11 @@ in
       # Copy repo-provided templates from /etc/skel/pro-templates into the
       # user's home if they do not already exist. This runs as part of each
       # user's home-manager activation and uses cp -n to avoid overwriting.
-      home.activation.pro-templates-copy = {
-        text = ''
-          #!/bin/sh -e
-          [ -d /etc/skel/pro-templates ] || exit 0
-          # Copy recursively without overwriting existing files.
-          cp -r -n /etc/skel/pro-templates/. "$HOME/" || true
-        '';
-      };
+      home.activation.pro-templates-copy = ''
+        #!/bin/sh -e
+        [ -d /etc/skel/pro-templates ] || exit 0
+        cp -r -n /etc/skel/pro-templates/. "$HOME/" || true
+      '';
 
       # Generate provided-packages.el for runtime if configured
       home.file.".config/emacs/provided-packages.el".text = let

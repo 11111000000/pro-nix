@@ -23,3 +23,10 @@
 4. Run `just install-emacs` to apply changes.
 
 > Keybindings compile to `~/.emacs.d/keys.el` and load on startup.
+
+## User Templates
+
+1. Keep repo-owned user templates in `templates/`.
+2. NixOS installs them into `/etc/skel/pro-templates` on every host.
+3. Home Manager copies them into user homes only when the file is missing.
+4. Do not overwrite an existing user file during activation.

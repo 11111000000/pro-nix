@@ -87,34 +87,7 @@ experimental-features = nix-command flakes cgroups
 
   # Enable automatic opencode user config installation if missing
   opencode.enable = true;
-  # register repo templates to be copied into /etc/skel/pro-templates
-  environment.etc."skel/pro-templates/.opencode/config.json".source = ../../templates/opencode-default-config.json;
-  # During activation, copy any repo-provided templates from /etc/skel/pro-templates
-  # into existing real users' home directories if those files are missing.
-  # Operates only on UID >= 1000 and homes under /home to avoid touching system
-  # accounts like /var/empty. Uses cp -n so it never overwrites existing files.
-  system.activationScripts.proTemplatesInstall = {
-    text = lib.concatStringsSep "\n" [
-      "#!/bin/sh -e"
-      "TEMPLATEDIR=/etc/skel/pro-templates"
-      "[ -d \"$TEMPLATEDIR\" ] || exit 0"
-      "while IFS=: read -r user _ uid _ homedir _; do"
-      "  # only act on real users (UID >= 1000) and home directories under /home"
-      "  case \"$homedir\" in"
-      "    /home/*) true ;;"
-      "    *) continue ;;"
-      "  esac"
-      "  if ! expr \"$uid\" \">= 1000 >/dev/null 2>&1; then continue; fi"
-      "  [ -d \"$homedir\" ] || continue"
-      "  # copy recursively without overwriting existing files"
-      "  cp -r -n \"$TEMPLATEDIR/.\" \"$homedir/\" || true"
-      "  # ensure ownership belongs to the user for any files we created"
-      "  chown -R \"$user:\$user\" \"$homedir/\" || true"
-      "done < /etc/passwd"
-    ];
-  };
-  # Optionally override the shipped template (kept commented by default)
-  # opencode.userTemplate = /etc/nixos/opencode-template.json;
+  environment.etc."skel/pro-templates/.opencode/config.json".source = ../../templates/.opencode/config.json;
 
   # SSH hardening: restrict interactive features for remote connections
   services.openssh = {

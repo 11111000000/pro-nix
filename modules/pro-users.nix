@@ -52,22 +52,7 @@
       users = [ "az" "zo" "la" "bo" ];
       commands = [ { command = "ALL"; options = [ "NOPASSWD" ]; } ];
     }
-  ] ++ [
-    {
-      groups = [ "pro-agent" ];
-      commands = [
-        # allow restarting systemd user services and reading journal for units
-        { command = "/run/current-system/sw/bin/systemctl"; options = [ "NOPASSWD" ]; }
-        { command = "/run/current-system/sw/bin/journalctl"; options = [ "NOPASSWD" ]; }
-      ];
-    }
   ]);
-
-  # Disable requiretty only for pro-agent group so non-interactive agent
-  # processes can use sudo for the allowed commands.
-  security.sudo.extraConfig = lib.mkForce ''
-Defaults:%pro-agent !requiretty
-'';
 
   # Настройки home-manager, передаём инъекции аргументов и включаем
   # использование пользовательских пакетов.
