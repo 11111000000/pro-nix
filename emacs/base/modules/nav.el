@@ -7,6 +7,9 @@
 ;; проектам. Оборачивает использование пакетов vertico/consult/orderless и
 ;; включает разумные fallbacks, если пакеты недоступны во время инициализации.
 
+;; Utility
+(require 'cl-lib)
+
 (when (or (pro--package-provided-p 'vertico) (pro-packages--maybe-install 'vertico t) (require 'vertico nil t))
   ;; vertico-mode может быть не загружен на этапе инициализации; поэтому
   ;; проверяем наличие определения функции и безопасно включаем режим.
@@ -20,6 +23,11 @@
       (define-key vertico-map (kbd "C-p") #'vertico-previous)
       (define-key vertico-map (kbd "C-j") #'vertico-next)
       (define-key vertico-map (kbd "C-k") #'vertico-previous)
+      ;; Make TAB cycle candidates (and Shift-TAB go back). In terminals TAB
+      ;; is often `C-i', so bind that too — this makes TAB/C-i behave like C-n.
+      (define-key vertico-map (kbd "TAB") #'vertico-next)
+      (define-key vertico-map (kbd "<backtab>") #'vertico-previous)
+      (define-key vertico-map (kbd "C-i") #'vertico-next)
       ;; Accept candidate with RET but keep original behavior in certain contexts
       (define-key vertico-map (kbd "RET") #'vertico-exit))))
 
@@ -77,7 +85,30 @@
   ;; Load and enable embark-consult integration if present
   (when (require 'embark-consult nil t)
     ;; embark-consult auto-registers; nothing else required here
-    ))
+    )
+
+  ;; Useful consult extensions and tweaks (lazy, non-fatal requires)
+  ;; consult-dash: initialize with symbol at point for convenience
+  (when (require 'consult-dash nil t)
+    (when (fboundp 'consult-customize)
+      (consult-customize consult-dash :initial (thing-at-point 'symbol))))
+
+  ;; consult-eglot: bind a convenient key in eglot-mode if available
+  (when (require 'consult-eglot nil t)
+    (with-eval-after-load 'eglot
+      (when (boundp 'eglot-mode-map)
+        (define-key eglot-mode-map (kbd "C-c C-.") #'consult-eglot-symbols))))
+
+  ;; Tweak consult-buffer sources to avoid noisy "Select Project" entries
+  (when (and (boundp 'consult-buffer-sources) (fboundp 'cl-remove))
+    (setq consult-buffer-sources
+          (cl-remove 'consult--source-project-buffer consult-buffer-sources :test #'eq)))
+  ;; Provide helper functions (small and defensive); load only if consult is present
+  (when (require 'consult-helpers nil t)
+    ;; remap consult-buffer to our helper which augments behavior for EXWM/tab-bar
+    (when (fboundp 'pro/consult-buffer)
+      (define-key global-map [remap switch-to-buffer] #'pro/consult-buffer)))
+  )
 
 (defun pro-nav-search-project ()
   "Искать в текущем проекте, если доступен project root."
