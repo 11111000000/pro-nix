@@ -22,7 +22,9 @@
         modules = [
           home-manager.nixosModules.home-manager
           ./configuration.nix
-          ./nixos/modules/opencode-config.nix
+        ./nixos/modules/opencode-config.nix
+        # user-templates is imported directly from configuration.nix to avoid
+        # circular evaluation dependencies
         ] ++ extraModules;
       };
 

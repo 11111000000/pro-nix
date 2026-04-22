@@ -13,7 +13,12 @@
       kept-old-versions 2
       delete-old-versions t)
 (setq backup-directory-alist `(("." . ,(expand-file-name "backups/" user-emacs-directory))))
+;; Ensure the auto-save directory exists; otherwise Emacs reports errors when
+;; trying to write auto-save files for paths (e.g. files in /nix/store).
 (setq auto-save-file-name-transforms `((".*" ,(expand-file-name "auto-save/" user-emacs-directory) t)))
+(let ((pro-auto-dir (expand-file-name "auto-save/" user-emacs-directory)))
+  (unless (file-directory-p pro-auto-dir)
+    (make-directory pro-auto-dir t)))
 
 (when (fboundp 'global-auto-revert-mode)
   (global-auto-revert-mode 1))

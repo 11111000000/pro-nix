@@ -70,6 +70,8 @@
 - `docs/plans/repo-agent-guide.md` documents the agent-facing build/test entrypoint.
 - `docs/plans/agent-tooling.md` documents the supported open-source agent matrix and install policy.
 - `docs/plans/install-matrix.md` documents the complete installation guide for all environments.
+- `templates/` contains user configuration templates that are deployed by the NixOS policy and copied into user homes when missing.
+- The template contract is: repo-owned files under `templates/` are installed into `/etc/skel/pro-templates` on every host, then Home Manager copies them into user homes only if the target file is missing.
 - `bootstrap/install.sh`, `bootstrap/install-pro.sh`, and `bootstrap/choose-host.sh` implement the interactive NixOS installer flow.
 - `scripts/emacs-sync.sh` syncs the portable Emacs tree into a plain `~/.emacs.d`.
 - `scripts/emacs-verify.sh` wraps the headless Emacs verification entrypoint.

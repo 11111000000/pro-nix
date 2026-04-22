@@ -46,7 +46,7 @@
 
   powerManagement.resumeCommands = lib.mkAfter ''
     for n in XHCI RP05; do
-      if awk -v d="$n" '$1==d && $3 ~ /\*enabled/' /proc/acpi/wakeup >/dev/null 2>&1; then
+      if ${pkgs.gawk}/bin/gawk -v d="$n" '$1==d && $3 ~ /\*enabled/' /proc/acpi/wakeup >/dev/null 2>&1; then
         echo "$n" > /proc/acpi/wakeup || true
       fi
     done
@@ -54,7 +54,7 @@
 
   powerManagement.powerUpCommands = lib.mkAfter ''
     for n in XHCI RP05; do
-      if awk -v d="$n" '$1==d && $3 ~ /\*enabled/' /proc/acpi/wakeup >/dev/null 2>&1; then
+      if ${pkgs.gawk}/bin/gawk -v d="$n" '$1==d && $3 ~ /\*enabled/' /proc/acpi/wakeup >/dev/null 2>&1; then
         echo "$n" > /proc/acpi/wakeup || true
       fi
     done
@@ -87,8 +87,7 @@ experimental-features = nix-command flakes cgroups
 
   # Enable automatic opencode user config installation if missing
   opencode.enable = true;
-  # Optionally override the shipped template (kept commented by default)
-  # opencode.userTemplate = /etc/nixos/opencode-template.json;
+  environment.etc."skel/pro-templates/.opencode/config.json".source = ../../templates/.opencode/config.json;
 
   # SSH hardening: restrict interactive features for remote connections
   services.openssh = {

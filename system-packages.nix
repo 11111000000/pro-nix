@@ -19,8 +19,38 @@ let
 
   aiderCmd = pkgs.writeShellScriptBin "aider" ''
     # Run under a user transient scope so a runaway agent can't fully saturate CPU.
-    exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 ${pipxPkg}/bin/pipx run aider-chat -- "$@"
+    exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 "${pipxPkg}/bin/pipx" run aider-chat -- "$@"
   '';
+
+  # Deterministic package: fetch official release tarball and expose
+  # a Nix store package for opencode. Kept here so this module works
+  # standalone even when opencode_from_release is not provided by the
+  # flake specialArgs.
+  opencodeBin = pkgs.stdenv.mkDerivation rec {
+    pname = "opencode";
+    version = "1.14.19";
+    src = pkgs.fetchurl {
+      url = "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-linux-x64.tar.gz";
+      sha256 = "8cb11723ce0ec82e2b6ff9a2356b12c2f4c4a95a087ba0a3004b19f167951440";
+    };
+    nativeBuildInputs = [ pkgs.patchelf ];
+    buildInputs = [];
+    unpackPhase = ''
+      mkdir -p $TMPDIR/unpack
+      tar xzf "$src" -C $TMPDIR/unpack
+    '';
+    installPhase = ''
+      mkdir -p $out/bin
+      cp $TMPDIR/unpack/opencode $out/bin/
+      chmod +x $out/bin/opencode
+      if [ -x "$out/bin/opencode" ]; then
+        patchelf --set-interpreter "${pkgs.glibc}/lib/ld-linux-x86-64.so.2" "$out/bin/opencode" || true
+        patchelf --set-rpath "${pkgs.glibc}/lib" "$out/bin/opencode" || true
+      fi
+    '';
+  };
+
+  
 
   # Provide a small, robust wrapper for the `opencode` CLI.
   # The upstream npm package (`@opencode/cli`) is not always available in the
@@ -43,11 +73,26 @@ let
     # ~/.local/share/opencode/opencode. If a store-provided opencode is not
     # present, fall back to the previous search order (user-local, home,
     # cached, bootstrap).
-    STORE_BIN="${toString opencodeBin}/bin/opencode"
-    if [ -x "$STORE_BIN" ]; then
-      # Quick sanity check: try to run `--version` with a short timeout.
-      # If this fails (unsupported format / crashes), don't use the store
-      # binary so we fall back to user cache or bootstrap.
+    # Determine a store-provided opencode binary at runtime. Prefer an
+    # explicit environment override OPENCODE_STORE_PATH, otherwise pick the
+    # first candidate under /nix/store matching '*opencode*' that contains
+    # a bin/opencode executable.
+    if [ -n "$${OPENCODE_STORE_PATH:-}" ]; then
+      STORE_BIN="$${OPENCODE_STORE_PATH%/}/bin/opencode"
+    else
+      STORE_CAND=$(ls -d /nix/store/*opencode* 2>/dev/null | head -n1 || true)
+      if [ -n "$STORE_CAND" ]; then
+        STORE_BIN="$STORE_CAND/bin/opencode"
+      else
+        STORE_BIN=""
+      fi
+    fi
+    # By default, do not prefer the Nix store binary because some upstream
+    # prebuilt releases contain ELF metadata (verdef) that our runtime
+    # cannot handle. To use the store binary explicitly set
+    # OPENCODE_USE_STORE=1 in the environment. When enabled, perform a
+    # quick sanity check before selecting it.
+    if [ "$${OPENCODE_USE_STORE:-0}" = "1" ] && [ -x "$STORE_BIN" ]; then
       if command -v timeout >/dev/null 2>&1; then
         if timeout 2s "$STORE_BIN" --version >/dev/null 2>&1; then
           BIN="$STORE_BIN"
@@ -56,7 +101,6 @@ let
           BIN=""
         fi
       else
-        # No timeout available; use the store binary but be conservative.
         BIN="$STORE_BIN"
       fi
     else
@@ -120,43 +164,19 @@ let
     # upstream binary expects a system loader). If that fails and
     # steam-run is available, fall back to steam-run (FHS). Otherwise
     # run normally via systemd-run.
-    if [[ "$BIN" = /nix/store/* ]]; then
-      exec "${pkgs.glibc}/lib/ld-linux-x86-64.so.2" "$BIN" -- "$@" || true
-      if command -v steam-run >/dev/null 2>&1; then
-        STEAM_RUN_CMD=$(command -v steam-run)
-        exec "$STEAM_RUN_CMD" "$BIN" -- "$@"
-      fi
+    # Prefer to run the selected binary under steam-run (FHS) when
+    # available. This makes upstream prebuilt binaries behave more like a
+    # generic Linux environment. If steam-run is not present, fall back to
+    # running under systemd-run to limit resource usage.
+    if command -v steam-run >/dev/null 2>&1; then
+      STEAM_RUN_CMD=$(command -v steam-run)
+      exec "$STEAM_RUN_CMD" "$BIN" -- "$@"
+    else
+      exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 "$BIN" -- "$@"
     fi
-    exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 "$BIN" -- "$@"
   '';
-
-  # Deterministic package: fetch official release tarball and expose
-  # a Nix store package for opencode. This avoids relying on npm registry
-  # at runtime and provides reproducible installs for CI and system profiles.
-  opencodeBin = pkgs.stdenv.mkDerivation rec {
-    pname = "opencode";
-    version = "1.14.19";
-    src = pkgs.fetchurl {
-      url = "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-linux-x64.tar.gz";
-      sha256 = "8cb11723ce0ec82e2b6ff9a2356b12c2f4c4a95a087ba0a3004b19f167951440";
-    };
-    nativeBuildInputs = [ pkgs.patchelf ];
-    buildInputs = [];
-    unpackPhase = ''
-      mkdir -p $TMPDIR/unpack
-      tar xzf "$src" -C $TMPDIR/unpack
-    '';
-    installPhase = ''
-      mkdir -p $out/bin
-      cp $TMPDIR/unpack/opencode $out/bin/
-      chmod +x $out/bin/opencode
-      # Ensure executable picks up Nix glibc loader and can run on NixOS
-      if [ -x "$out/bin/opencode" ]; then
-        patchelf --set-interpreter "${pkgs.glibc}/lib/ld-linux-x86-64.so.2" "$out/bin/opencode" || true
-        patchelf --set-rpath "${pkgs.glibc}/lib" "$out/bin/opencode" || true
-      fi
-    '';
-  };
+  # provide opencodeBin from flake/flake.nix instead of duplicating here
+  # (the flake defines opencode_from_release/opencode-release as an app)
 
   # Python-слой здесь держит минимальную воспроизводимость: `requests` уже есть, а `pip` остаётся доступным для локальных окружений и одноразовых установок.
   myPython = pkgs.python3.withPackages (ps: [ ps.requests ps.pip ]);

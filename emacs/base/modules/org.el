@@ -43,10 +43,15 @@
   (setq-local word-wrap t))
 
 (with-eval-after-load 'org
-  (define-key org-mode-map (kbd "C-c |") #'org-table-create-or-convert-from-region)
-  (define-key org-mode-map (kbd "C-c t") #'org-table-transpose-table-at-point)
-  (define-key org-mode-map (kbd "C-c K") #'pro-org-open-keys-file)
-  (define-key org-mode-map (kbd "C-c M") #'pro-org-open-module-list))
+  ;; Ensure we bind keys after org-mode is loaded. Use `org-mode-hook` to
+  ;; avoid assuming `org-mode-map' exists at `with-eval-after-load' time
+  ;; which can happen with some load orders.
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (local-set-key (kbd "C-c |") #'org-table-create-or-convert-from-region)
+              (local-set-key (kbd "C-c t") #'org-table-transpose-table-at-point)
+              (local-set-key (kbd "C-c K") #'pro-org-open-keys-file)
+              (local-set-key (kbd "C-c M") #'pro-org-open-module-list))))
 
 (add-hook 'org-mode-hook #'pro-org-setup)
 

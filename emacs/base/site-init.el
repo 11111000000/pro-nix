@@ -62,10 +62,11 @@
             (load file nil t)
           (message "[pro-emacs] missing module: %s" module-name))))
     (message "[pro-emacs] loaded modules: %S" modules)
-    ;; Some key bindings reference commands provided by packages that may
-    ;; have been installed during module initialization. Reload user key
-    ;; bindings now so that any commands installed earlier are bound.
-    (when (fboundp 'pro-keys-reload)
-      (pro-keys-reload))))
+    ;; После загрузки всех модулей попробуем применить отложенные биндинги
+    ;; клавиш (если модуль keys был загружен и оставил pending записи).
+    (when (fboundp 'pro-keys-apply-pending)
+      (ignore-errors (pro-keys-apply-pending)))
+    (when (fboundp 'pro-keys-report-pending)
+      (ignore-errors (pro-keys-report-pending))))
 
 (provide 'pro-site-init)
