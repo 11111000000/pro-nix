@@ -67,6 +67,6 @@
     (when (fboundp 'pro-keys-apply-pending)
       (ignore-errors (pro-keys-apply-pending)))
     (when (fboundp 'pro-keys-report-pending)
-      (ignore-errors (pro-keys-report-pending))))
+      (ignore-errors (pro-keys-report-pending)))))
 
 (provide 'pro-site-init)
