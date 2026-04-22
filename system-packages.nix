@@ -77,8 +77,8 @@ let
     # explicit environment override OPENCODE_STORE_PATH, otherwise pick the
     # first candidate under /nix/store matching '*opencode*' that contains
     # a bin/opencode executable.
-    if [ -n "${OPENCODE_STORE_PATH:-}" ]; then
-      STORE_BIN="${OPENCODE_STORE_PATH%/}/bin/opencode"
+    if [ -n "$${OPENCODE_STORE_PATH:-}" ]; then
+      STORE_BIN="$${OPENCODE_STORE_PATH%/}/bin/opencode"
     else
       STORE_CAND=$(ls -d /nix/store/*opencode* 2>/dev/null | head -n1 || true)
       if [ -n "$STORE_CAND" ]; then
