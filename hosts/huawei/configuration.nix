@@ -23,7 +23,13 @@
     options snd-intel-dspcfg dsp_driver=1
   '';
 
-  boot.loader.systemd-boot.enable = lib.mkForce false;
+  # Use systemd-boot here: firmware already uses systemd-boot as default. Keep host-specific differences here.
+  boot.loader.systemd-boot.enable = lib.mkForce true;
+  # Disable GRUB to avoid conflicting bootloader state
+  boot.loader.grub.enable = lib.mkForce false;
+  # Ensure we don't write to EFI NVRAM from this host (consistent with cf19 policy)
+  boot.loader.efi.canTouchEfiVariables = lib.mkForce false;
+ 
   fileSystems."/" = lib.mkForce {
     device = "/dev/disk/by-uuid/b7a0681a-d1e2-4898-b213-f060d77b292a";
     fsType = "ext4";
