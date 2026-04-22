@@ -72,3 +72,121 @@
 - Предложенный подход — прагматичный компромисс: переносим высокоэффективные инструменты и helper'ы, оставляя экспериментальную и персональную часть в ~/pro. Это даёт знакомый, продуктивный UX, не жертвуя воспроизводимостью.
 
 Автор плана: OpenCode (автоматизированная миграция)
+
+Углублённый диалектический анализ и конкретизация (расширение плана)
+=================================================================
+
+Цель углублённого анализа: дать исчерпывающий, практический список того, что именно
+перенести из ~/pro в pro-nix (файлы, функции, бинды), почему это важно, и как это
+сделать с минимальным риском. Фокус — на рабочих элементах UX (навигация, автодополнение,
+EXWM-интеграция, keybindings), которые реально используются ежедневно.
+
+1) Структура и источники знания
+- Исходный набор: ~/pro — это зрелая, персональная конфигурация; в ней много мелких
+  утилит и хаков, которые имеют смысл в рабочей среде пользователя.
+- Целевой набор: pro-nix — репозиторий, управляющий конфигурацией для нескольких
+  машин; требования: воспроизводимость, модульность, минимальная зависимость от
+  локального окружения, ясные интерфейсы (defun/defcustom), и безопасные fallbacks.
+
+2) Что именно посмотреть и почему (поля внимания)
+- Навигация: consult/*, vertico, orderless, marginalia, embark/embark-consult,
+  consult-* расширения (dash, eglot, yasnippet, ripgrep/ag). Эти пакеты обеспечивают
+  основной UX поиска/перехода.
+- Автодополнение: corfu + cape + kind-icon + yasnippet + consult-yasnippet. CAPE
+  backends и corfu делают in-buffer completion удобным.
+- Проекты/поиск по проекту: consult-ripgrep, consult-find, pro-project helpers,
+  projectile. pro/consult-find wrapper нужен, чтобы C-x C-f начал с project root.
+- EXWM: simulation keys, rename/management hooks, systemtray integration — это
+  важные плюсы для тех, кто использует Emacs как WM.
+- Keybindings: централизованный loader из org (про-клавиши-из-org.el) — главная
+  точка синхронизации биндов, нужен повсеместно.
+- Малые удобства: pro-tabs, pro-tabs integrations, pro-mалую-механизацию (автомат
+  добавление биндов), pro-ui cosmetics.
+
+3) Что ещё переносить (конкретно) — приоритетный список и мотивация
+- А. Высокий приоритет — перенос без обсуждения
+  1. EXWM: файлы
+     - ~/pro/среда/про-графическую-среду-ядро.el → emacs/base/modules/exwm-core.el (load-safe)
+     - ~/pro/среда/про-графическую-среду-окна.el → emacs/base/modules/exwm-windows.el
+     - ~/pro/среда/про-графическую-среду-трей.el → emacs/base/modules/exwm-tray.el
+     Почему: EXWM поведение (simulation keys, rename, hooks) критично для тех,
+     кто работает в EXWM; перенос уменьшит разрыв UX и багов.
+
+  2. Key loader и keys.org: уже есть, но нужно убедиться в интеграции с
+     pro-nix — перенести ~/pro/организация/про-клавиши-из-org.el и обеспечить
+     его загрузку при старте (с защитой на отсутствие файлов).
+
+  3. pro-tabs (вкладки): ~/pro/среда/про-внешний-вид.el содержит use-package pro-tabs.
+     Если команда использует табы — перенести pro-tabs и его настройки (icons,
+     bindings). Альтернатива — сделать pro-tabs optional module.
+
+  4. pro-mалую-механизацию: utility для добавления биндов в keys.el (key-utils) —
+     переносится как opt-in helper; делает управление биндами простым для пользователей.
+
+- B. Средний приоритет — перенести если есть ресурсы
+  1. pro-быстрый-доступ.el: содержит много consult-related helpers (consult-ag,
+     consult-dash, consult-eglot, consult-yasnippet) — можно вынести полезные
+     функции и оставить остальное.
+  2. pro-интеграции: pro-интеграция с Eglot, pro/consult-eglot (если в pro уже есть
+     расширенные команды) — перенести ключевые бинды.
+  3. UI cosmetics: pro/внешний-вид — pro-tabs, golden-ratio, treemacs bindings,
+     icons; перенести как опциональные настройки.
+
+- C. Низкий приоритет — сделать optional или оставить в ~/pro
+  1. Эксперименты, специфичные для пользователя: opencode wrappers, aide scripts,
+     персональные утилиты.
+
+4) Конкретная карта файлов (source → target) — предварительный список
+- ~/pro/среда/про-графическую-среду-ядро.el → emacs/base/modules/exwm-core.el
+- ~/pro/среда/про-графическую-среду-окна.el → emacs/base/modules/exwm-windows.el
+- ~/pro/среда/про-графическую-среду-трей.el → emacs/base/modules/exwm-tray.el
+- ~/pro/среда/про-внешний-вид.el (pro-tabs части) → emacs/base/modules/pro-tabs.el (opt-in)
+- ~/pro/инструменты/про-малую-механизацию.el → emacs/base/modules/key-utils.el (opt-in)
+- ~/pro/навигация/про-быстрый-доступ.el → emacs/base/modules/pro-quick-access.el (перенести только helper-части: consult-* calls, pro/consult-buffer functions)
+- ~/pro/организация/про-клавиши-из-org.el → (использовать уже) emacs loader (загружать при старте)
+
+5) Дизайн-инварианты и код-стандарты при переносе
+- Ленивые загрузки: require 'feature nil t и fboundp checks перед define-key/setq
+- Один источник правды для биндов: nav.el как primary place; exwm-sim.el для EXWM-related keys
+- Опциональность: модули, специфичные для пользователя, должны быть загружаемыми
+  через defcustom или module flag (pro.emacs.extraModules), чтобы не влиять на
+  воспроизводимость по умолчанию.
+- Документировать каждое отличие: вставлять короткий comment с ссылкой на исходный файл в ~/pro.
+
+6) Тесты и валидация (детализированная)
+- Unit/Smoke assertions (scripts/emacs-e2e-assertions.el): проверить наличия функций и биндов
+  - (fboundp 'consult-find) (fboundp 'consult-buffer) (fboundp 'consult-dash) (fboundp 'consult-eglot)
+  - (lookup-key vertico-map (kbd "TAB")) → vertico-next
+  - (lookup-key eglot-mode-map (kbd "C-c C-.")) → consult-eglot-symbols
+  - проверка темы: (featurep 'pro-tabs) если pro-tabs enabled
+- Integration tests: headless Emacs run to call pro/клавиши-из-org and verify representative key binds
+- Manual smoke tests (checklist): [list as before]
+
+7) CI / PR policy
+- Каждый этап — отдельный PR/commit
+- PR должен включать:
+  - краткое описание: какие файлы перенесены и почему
+  - список тестов (как запускать e2e assertions)
+  - дефолтный fallback: как отключить новую фичу (defcustom или comment)
+
+8) Меры по откату и безопасному развёртыванию
+- Каждый модуль имеет флаг (defcustom pro-enable-EXWM t); если false — модуль
+  не активируется и файл загружается только для чтения.
+- Перед изменениями Nix: создавать snapshot профиля или писать README с командами восстановления.
+
+9) План работ (конкретнее, с шагами и примерными commit messages)
+- Commit 1: "emacs: add exwm-core/win/tray modules (simulation keys, hooks)" — include small unit tests
+- Commit 2: "emacs: add key-utils (pro-mалую-механизацию) and document usage" — add CLI helper
+- Commit 3: "emacs: integrate pro-quick-access helpers (consult helpers)" — move pro/consult-buffer variants
+- Commit 4: "nix: extend provided packages with avy/expand-region/yasnippet/projectile/treemacs" — update modules/pro-users-nixos.nix and nix/provided-packages.nix
+- Commit 5: "tests: add e2e assertions for consult/corfu/exwm-keybindings" — extend scripts
+
+10) Темы для обсуждения перед миграцией (вопросы)
+- Нужна ли 1:1 миграция pro-tabs (включая icons), или делаем opt-in? (рекомендация: opt-in)
+- Какой набор пользователей (machines) должен сразу получить новые пакеты через Nix?
+- Должен ли Right‑Alt grab helper быть включён по умолчанию или опционально? (рекомендация: opt-in, docs+systemd unit)
+
+Резюме
+- Я углубил анализ и описал конкретную карту переносимых файлов, требования к тестам, стратегию постепенной миграции и безопасные меры отката. Следующий шаг — подготовить конкретные патчи по шагам Commit1..Commit5 и сделать PR/commit'ы по одному заданию за раз.
+
+Если подтверждаете, я подготовлю патчи для Commit 1 и Commit 2 (exwm modules и key-utils) и отложу их до вашего разрешения на commit. Пока — никаких коммитов без вашего сигнала.
