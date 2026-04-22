@@ -92,7 +92,7 @@ let
     # cannot handle. To use the store binary explicitly set
     # OPENCODE_USE_STORE=1 in the environment. When enabled, perform a
     # quick sanity check before selecting it.
-    if [ "${OPENCODE_USE_STORE:-0}" = "1" ] && [ -x "$STORE_BIN" ]; then
+    if [ "$${OPENCODE_USE_STORE:-0}" = "1" ] && [ -x "$STORE_BIN" ]; then
       if command -v timeout >/dev/null 2>&1; then
         if timeout 2s "$STORE_BIN" --version >/dev/null 2>&1; then
           BIN="$STORE_BIN"
