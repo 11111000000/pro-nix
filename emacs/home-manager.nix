@@ -182,19 +182,19 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable (lib.mkMerge [
+  config = let
+    # Determine which of the configured providedPackages are present
+    # in pkgs.emacsPackages. We will install the available ones into
+    # the user's profile so Emacs finds them on the load-path.
+    providedList = cfg.providedPackages;
+    availableProvided = lib.filter (p: lib.hasAttr p pkgs.emacsPackages) providedList;
+    # Use builtins.getAttr to safely lookup attributes by name.
+    availableProvidedNix = map (p: builtins.getAttr p pkgs.emacsPackages) availableProvided;
+    missingProvided = lib.filter (p: !(lib.hasAttr p pkgs.emacsPackages)) providedList;
+  in lib.mkIf cfg.enable (lib.mkMerge [
     {
       programs.home-manager.enable = true;
 
-      let
-        # Determine which of the configured providedPackages are present
-        # in pkgs.emacsPackages. We will install the available ones into
-        # the user's profile so Emacs finds them on the load-path.
-        providedList = cfg.providedPackages;
-        availableProvided = lib.filter (p: lib.hasAttr p pkgs.emacsPackages) providedList;
-        availableProvidedNix = map (p: pkgs.emacsPackages.${p}) availableProvided;
-        missingProvided = lib.filter (p: !(lib.hasAttr p pkgs.emacsPackages)) providedList;
-      in
       home.packages = hmPackages ++ cfg.extraPackages ++ availableProvidedNix ++ lib.optionals cfg.gui.enable guiPackages;
 
       # Make noninteractive installs opt-out disabled by default — enable auto

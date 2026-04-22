@@ -101,13 +101,17 @@
      ;; If the command is already available and org loaded, bind directly to
      ;; the org-mode keymap. Otherwise record pending binding to try later.
      (let ((k key) (cmd command))
-       (cond
-        ((and (symbolp cmd) (fboundp cmd) (boundp 'org-mode-map))
-         (define-key org-mode-map (kbd k) cmd))
-        ((and (symbolp cmd) (fboundp cmd))
-         ;; org not yet loaded, arrange to bind when it is
-         (with-eval-after-load 'org
-           (define-key org-mode-map (kbd k) cmd)))
+        (cond
+         ;; If Org is already loaded, bind directly to its keymap. Rely on
+         ;; `featurep' instead of `boundp' to avoid referencing the variable
+         ;; `org-mode-map' before the Org package is fully initialized which
+         ;; can trigger `void-variable' errors during startup.
+         ((and (symbolp cmd) (fboundp cmd) (featurep 'org))
+          (define-key org-mode-map (kbd k) cmd))
+         ((and (symbolp cmd) (fboundp cmd))
+          ;; Org not yet loaded — arrange to bind when it is.
+          (with-eval-after-load 'org
+            (define-key org-mode-map (kbd k) cmd)))
         (t
          (push (list :org k cmd) pro-keys-pending-bindings)))))
     (_ (pro-keys-apply-binding key command))))
@@ -156,11 +160,11 @@
                (push (cons (kbd key) cmd) pro-keys-exwm-global-keys)
              (push entry remaining)))
           (`(:org ,key ,cmd)
-           (if (and (symbolp cmd) (fboundp cmd))
-               (if (boundp 'org-mode-map)
-                   (define-key org-mode-map (kbd key) cmd)
-                 (with-eval-after-load 'org
-                   (define-key org-mode-map (kbd key) cmd)))
+            (if (and (symbolp cmd) (fboundp cmd))
+                (if (featurep 'org)
+                    (define-key org-mode-map (kbd key) cmd)
+                  (with-eval-after-load 'org
+                    (define-key org-mode-map (kbd key) cmd)))
              (push entry remaining)))
           (_ (push entry remaining))))
       (setq pro-keys-pending-bindings (nreverse remaining)))
@@ -192,5 +196,4 @@
   (setq exwm-input-global-keys pro-keys-exwm-global-keys))
 
 (provide 'keys)
-
 
