@@ -225,7 +225,12 @@ in
       # directory exists with correct ownership. Again, append to the global
       # rules list rather than forcing it.
       systemd.tmpfiles.rules = lib.mkIf config.pro-peer.allowTorHiddenService [
-        "d /var/lib/tor/ssh_hidden_service 0700 debian-tor debian-tor -"
+        # Ensure Tor runtime dir and the SSH hidden-service dir exist with
+        # the `tor` user ownership. Previously this used `debian-tor`, which
+        # may not exist on this system and can leave directories owned by
+        # nobody:nogroup causing Tor to fail at startup (permission denied).
+        "d /var/lib/tor 0700 tor tor -"
+        "d /var/lib/tor/ssh_hidden_service 0700 tor tor -"
       ];
     })
   ];
