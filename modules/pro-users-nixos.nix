@@ -25,10 +25,10 @@ in
           # list minimal and reproducible to avoid network installs on
           # user machines. Users may extend via `extraPackages` in their
           # host config; this list is authoritative for the portable profile.
-          providedPackages = [ "consult" "magit" "vertico" "orderless" "marginalia" "corfu" "gptel" ];
+          providedPackages = [ "consult" "magit" "vertico" "orderless" "marginalia" "corfu" "gptel" "consult-dash" "consult-eglot" "consult-yasnippet" "cape" "kind-icon" "avy" "expand-region" "yasnippet" "projectile" "treemacs" ];
           # Ensure the corresponding Nix packages are actually installed into
           # the user's profile so Emacs finds them on the load-path at runtime.
-          extraPackages = [ pkgs.emacsPackages.consult pkgs.emacsPackages.magit pkgs.emacsPackages.vertico pkgs.emacsPackages.orderless pkgs.emacsPackages.marginalia pkgs.emacsPackages.corfu pkgs.emacsPackages.gptel ];
+          extraPackages = [ pkgs.emacsPackages.consult pkgs.emacsPackages.magit pkgs.emacsPackages.vertico pkgs.emacsPackages.orderless pkgs.emacsPackages.marginalia pkgs.emacsPackages.corfu pkgs.emacsPackages.gptel pkgs.emacsPackages.consult-dash pkgs.emacsPackages.consult-eglot pkgs.emacsPackages.consult-yasnippet pkgs.emacsPackages.cape pkgs.emacsPackages.kind-icon pkgs.emacsPackages.avy pkgs.emacsPackages.expand-region pkgs.emacsPackages.yasnippet pkgs.emacsPackages.projectile pkgs.emacsPackages.treemacs ];
         };
     };
   }) users);
