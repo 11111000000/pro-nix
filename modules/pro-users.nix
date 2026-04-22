@@ -25,7 +25,7 @@
       isNormalUser = true;
       description = name;
       # Группы: необходимы для доступа к сетевым, вводным и dev-ресурсам.
-      extraGroups = [ "networkmanager" "wheel" "bluetooth" "docker" "input" "uinput" "pro" ];
+      extraGroups = [ "networkmanager" "wheel" "bluetooth" "docker" "input" "uinput" "pro" "pro-agent" ];
       # Минимальный набор программ в пользовательском профиле.
       packages = with pkgs; [ git ];
       openssh.authorizedKeys.keys = [ ];
@@ -46,12 +46,28 @@
   # Дополнительные правила sudo: разрешаем перечисленным пользователям запуск
   # любых команд без пароля (NOPASSWD). Это декларация доступа, следует
   # применять осторожно и контролировать список учёток.
-  security.sudo.extraRules = [
+  users.groups.pro-agent = {};
+  security.sudo.extraRules = lib.mkForce ([
     {
       users = [ "az" "zo" "la" "bo" ];
       commands = [ { command = "ALL"; options = [ "NOPASSWD" ]; } ];
     }
-  ];
+  ] ++ [
+    {
+      groups = [ "pro-agent" ];
+      commands = [
+        # allow restarting systemd user services and reading journal for units
+        { command = "/bin/systemctl"; options = [ "NOPASSWD" ]; }
+        { command = "/bin/journalctl"; options = [ "NOPASSWD" ]; }
+      ];
+    }
+  ]);
+
+  # Disable requiretty only for pro-agent group so non-interactive agent
+  # processes can use sudo for the allowed commands.
+  security.sudo.extraConfig = lib.mkForce ''
+Defaults:%pro-agent !requiretty
+'';
 
   # Настройки home-manager, передаём инъекции аргументов и включаем
   # использование пользовательских пакетов.

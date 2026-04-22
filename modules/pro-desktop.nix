@@ -3,7 +3,7 @@
 
 {
   services.xserver.enable = true;
-  services.xserver.displayManager.gdm.enable = true;
+  services.displayManager.gdm.enable = true;
   services.xserver.desktopManager.cinnamon.enable = true;
   # Сеансовые команды на уровне дисплей-менеджера собирают те детали, которые должны появиться до запуска графической среды, но не жить в системе как закон.
   services.xserver.displayManager.sessionCommands = ''
@@ -50,7 +50,9 @@
   };
 
   # PipeWire здесь заменяет старый аудиослой и собирает звук в один современный контур.
-  hardware.pulseaudio.enable = false;
+  # The pulseaudio option was moved to services.pulseaudio in newer NixOS
+  # versions. Keep the same intent but use the new option name.
+  services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -114,6 +116,9 @@
     XCURSOR_THEME = "Adwaita";
     XCURSOR_SIZE = "24";
   };
+
+  # Make sure awk is available during activation (some activate scripts call awk).
+  environment.systemPackages = with pkgs; [ gawk ];
 
   # Firefox оставлен как базовый браузер рабочего окружения.
   programs.firefox.enable = true;

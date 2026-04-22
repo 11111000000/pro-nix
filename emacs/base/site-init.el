@@ -61,6 +61,12 @@
         (if file
             (load file nil t)
           (message "[pro-emacs] missing module: %s" module-name))))
-    (message "[pro-emacs] loaded modules: %S" modules)))
+    (message "[pro-emacs] loaded modules: %S" modules)
+    ;; После загрузки всех модулей попробуем применить отложенные биндинги
+    ;; клавиш (если модуль keys был загружен и оставил pending записи).
+    (when (fboundp 'pro-keys-apply-pending)
+      (ignore-errors (pro-keys-apply-pending)))
+    (when (fboundp 'pro-keys-report-pending)
+      (ignore-errors (pro-keys-report-pending)))))
 
 (provide 'pro-site-init)

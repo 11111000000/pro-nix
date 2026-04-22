@@ -28,6 +28,10 @@
 (defvar pro-keys-exwm-global-keys nil
   "Список глобальных клавиш EXWM, собранный из Org-таблиц.")
 
+(defvar pro-keys-pending-bindings nil
+  "Список привязок, которые не удалось применить пока команда не определена.
+Каждый элемент — список (SECTION KEY COMMAND). SECTION — :global/:exwm/:org.")
+
 (defun pro-keys--normalize-command-name (text)
   "Нормализовать TEXT как имя команды."
   (replace-regexp-in-string "^#'" "" (pro-keys--trim text)))
@@ -37,14 +41,16 @@
   (when (and key command (not (string-empty-p key)))
     (if (and (symbolp command) (fboundp command))
         (global-set-key (kbd key) command)
-      (message "[pro-keys] command %s not found for key %s" command key))))
+      ;; Запомним в отложенных привязках — попробуем применить позже.
+      (push (list :global key command) pro-keys-pending-bindings))))
 
 (defun pro-keys-apply-exwm-binding (key command)
   "Добавить EXWM-ключ KEY -> COMMAND в отдельный список."
   (when (and key command (not (string-empty-p key)))
     (let ((fn (if (and (symbolp command) (fboundp command)) command nil)))
-      (when fn
-        (push (cons (kbd key) fn) pro-keys-exwm-global-keys)))))
+      (if fn
+          (push (cons (kbd key) fn) pro-keys-exwm-global-keys)
+        (push (list :exwm key command) pro-keys-pending-bindings)))))
 
 (defun pro-keys--trim (string)
   (string-trim (or string "")))
@@ -91,8 +97,19 @@
   "Применить строку таблицы SECTION KEY COMMAND."
   (pcase (pro-keys--section-kind section)
     (:exwm (pro-keys-apply-exwm-binding key command))
-    (:org (with-eval-after-load 'org
-            (define-key org-mode-map (kbd key) command)))
+    (:org
+     ;; If the command is already available and org loaded, bind directly to
+     ;; the org-mode keymap. Otherwise record pending binding to try later.
+     (let ((k key) (cmd command))
+       (cond
+        ((and (symbolp cmd) (fboundp cmd) (boundp 'org-mode-map))
+         (define-key org-mode-map (kbd k) cmd))
+        ((and (symbolp cmd) (fboundp cmd))
+         ;; org not yet loaded, arrange to bind when it is
+         (with-eval-after-load 'org
+           (define-key org-mode-map (kbd k) cmd)))
+        (t
+         (push (list :org k cmd) pro-keys-pending-bindings)))))
     (_ (pro-keys-apply-binding key command))))
 
 (defun pro-keys-load-org-file (file)
@@ -117,7 +134,55 @@
   (setq pro-keys-exwm-global-keys nil)
   (pro-keys-load-org-file pro-keys-system-file)
   (pro-keys-load-org-file pro-keys-user-file)
+  ;; Попробуем применить отложенные привязки — возможно, нужные функции
+  ;; появились к этому моменту.
+  (pro-keys-apply-pending)
   (message "[pro-keys] loaded system and user overrides"))
+
+(defun pro-keys-apply-pending ()
+  "Попытаться применить ранее отложенные привязки.
+Если команда определена — применяем и удаляем запись из списка pending." 
+  (interactive)
+  (when pro-keys-pending-bindings
+    (let ((remaining nil))
+      (dolist (entry (nreverse pro-keys-pending-bindings))
+        (pcase entry
+          (`(:global ,key ,cmd)
+           (if (and (symbolp cmd) (fboundp cmd))
+               (global-set-key (kbd key) cmd)
+             (push entry remaining)))
+          (`(:exwm ,key ,cmd)
+           (if (and (symbolp cmd) (fboundp cmd))
+               (push (cons (kbd key) cmd) pro-keys-exwm-global-keys)
+             (push entry remaining)))
+          (`(:org ,key ,cmd)
+           (if (and (symbolp cmd) (fboundp cmd))
+               (if (boundp 'org-mode-map)
+                   (define-key org-mode-map (kbd key) cmd)
+                 (with-eval-after-load 'org
+                   (define-key org-mode-map (kbd key) cmd)))
+             (push entry remaining)))
+          (_ (push entry remaining))))
+      (setq pro-keys-pending-bindings (nreverse remaining)))
+    ;; Если exwm уже загружен, обновим глобальные ключи.
+    (when (featurep 'exwm)
+      (setq exwm-input-global-keys pro-keys-exwm-global-keys))))
+
+(defun pro-keys-report-pending ()
+  "Вывести в журнал список отложенных биндингов (если они есть)."
+  (let ((n (length pro-keys-pending-bindings)))
+    (if (zerop n)
+        (message "[pro-keys] no pending bindings")
+      (message "[pro-keys] %d pending bindings remain:" n)
+      (dolist (entry pro-keys-pending-bindings)
+        (pcase entry
+          (`(:global ,key ,cmd)
+           (message "  global: %s -> %s" key cmd))
+          (`(:exwm ,key ,cmd)
+           (message "  exwm: %s -> %s" key cmd))
+          (`(:org ,key ,cmd)
+           (message "  org: %s -> %s" key cmd))
+          (_ (message "  unknown pending entry: %S" entry)))))))
 
 (setq pro-keys-exwm-global-keys nil)
 (pro-keys-load-org-file pro-keys-system-file)
@@ -127,3 +192,5 @@
   (setq exwm-input-global-keys pro-keys-exwm-global-keys))
 
 (provide 'keys)
+
+

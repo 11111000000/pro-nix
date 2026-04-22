@@ -18,27 +18,11 @@ in {
     };
   };
 
+  # Switching to a generic templates mechanism: the universal user-templates
+  # module installs repo templates into /etc/skel/pro-templates and user
+  # home-manager copies them into user homes if missing.
   config = lib.mkIf config.opencode.enable {
-    system.activationScripts.opencode-default-config = {
-      text = lib.concatStringsSep "\n" [
-        "#!/bin/sh -e"
-        "# Create opencode user config if missing"
-        "for u in $(awk -F: '{ if ($3 >= 1000 && $1 != \"nobody\") print $1 }' /etc/passwd); do"
-        "  homedir=$(getent passwd \"$u\" | cut -d: -f6)"
-        "  target=\"$homedir/.opencode/config.json\""
-        "  if [ ! -e \"$target\" ]; then"
-        "    if [ -n \"$OPENCODE_TEMPLATE\" ]; then"
-        "      cp -n \"$OPENCODE_TEMPLATE\" \"$target\" || true"
-        "    else"
-        "      mkdir -p \"$(dirname \"$target\")\""
-        "      cp -n \"${config.opencode.userTemplate}\" \"$target\" || true"
-        "    fi"
-        "    chown $u:$u \"$target\" || true"
-        "  fi"
-        "done"
-      ];
-      # textInteractive removed: not a valid option for activation scripts in
-      # this NixOS release. Keep script minimal and non-interactive.
-    };
+    # Keep the option so hosts can override the shipped template path.
+    opencode = config.opencode or {};
   };
 }

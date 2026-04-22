@@ -22,7 +22,8 @@
         modules = [
           home-manager.nixosModules.home-manager
           ./configuration.nix
-          ./nixos/modules/opencode-config.nix
+        ./nixos/modules/opencode-config.nix
+        ./nixos/modules/user-templates.nix
         ] ++ extraModules;
       };
 
