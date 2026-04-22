@@ -57,8 +57,8 @@
       groups = [ "pro-agent" ];
       commands = [
         # allow restarting systemd user services and reading journal for units
-        { command = "/bin/systemctl"; options = [ "NOPASSWD" ]; }
-        { command = "/bin/journalctl"; options = [ "NOPASSWD" ]; }
+        { command = "/run/current-system/sw/bin/systemctl"; options = [ "NOPASSWD" ]; }
+        { command = "/run/current-system/sw/bin/journalctl"; options = [ "NOPASSWD" ]; }
       ];
     }
   ]);
