@@ -95,6 +95,14 @@
     (when (pro-ui--try-require 'treemacs-icons-dired)
       (add-hook 'dired-mode-hook #'treemacs-icons-dired-enable-once))
 
+    ;; Soft guards: if system reports limited color support, reduce icon work
+    (when (and (display-graphic-p)
+               (or (not (display-color-p)) (< (display-color-cells) 256)))
+      (message "[pro-ui] limited color support detected; disabling heavy icon features")
+      ;; remove heavy hooks if any
+      (when (fboundp 'treemacs-icons-dired-enable-once)
+        (remove-hook 'dired-mode-hook #'treemacs-icons-dired-enable-once)))
+
     ;; If running in a low-color or headless environment, avoid heavy icon setup
     (when (or (not (display-graphic-p)) (not (display-graphic-p)))
       ;; no-op: already guarded above but keep explicit fallback for clarity
@@ -114,14 +122,17 @@
     ;; Configure Corfu (in-buffer completion UI) with sane defaults.
     (when (pro-ui--try-require 'corfu)
       ;; Prefer automatic completion but keep it conservative when needed.
+      ;; Conservative defaults tuned for responsiveness and minimal noise.
       (setq corfu-auto t
             corfu-auto-prefix 2
-            corfu-auto-delay 0.2
+            corfu-auto-delay 0.12
             corfu-cycle t
-            corfu-count 14
+            corfu-count 10
             corfu-separator ?\s
             corfu-echo-documentation nil
-            corfu-preselect 'prompt)
+            corfu-preselect 'prompt
+            corfu-min-width 40
+            corfu-max-width 120)
       (when (fboundp 'global-corfu-mode) (global-corfu-mode 1))
       (when (fboundp 'corfu-history-mode) (corfu-history-mode 1)))
 
@@ -146,6 +157,11 @@
         (setq-local corfu-auto nil) ; prefer manual completion in minibuffer
         (when (fboundp 'corfu-mode) (corfu-mode 1))))
     (add-hook 'minibuffer-setup-hook #'pro-ui--maybe-enable-corfu-in-minibuffer)
+
+    ;; Improve corfu margin formatting experience if kind-icon present
+    (when (and (pro-ui--try-require 'kind-icon) (boundp 'corfu-margin-formatters))
+      (setq kind-icon-default-face 'corfu-default) ;; integrate with corfu theme
+      (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
     ;; Vertico keybindings: make C-n/C-p behave like minibuffer navigation
     (when (and (boundp 'vertico-map) (keymapp vertico-map))

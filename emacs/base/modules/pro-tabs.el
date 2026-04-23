@@ -38,8 +38,8 @@ If `pro-tabs' package is present, delegate to it; otherwise use `tab-bar-new-tab
   (when (fboundp 'pro/register-module-keys)
     (pro/register-module-keys 'tabs
                               '( ("C-c t n" . pro-tabs-open-new-tab)
-                                 ("C-c t x" . pro-tabs-close-tab-and-buffer)
-                                 ("C-c t o" . tab-bar-switch-to-tab)))))
+                                 ("C-c t k" . pro-tabs-close-tab-and-buffer)
+                                 ("C-c t s" . tab-bar-switch-to-tab)))))
 
 (defun pro-tabs-close-tab-and-buffer ()
   "Close current tab and kill its buffer (wrapper)." 
