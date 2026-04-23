@@ -145,7 +145,7 @@
   };
   # Enable and configure sudo via NixOS module so the binary is installed
   # and the setuid bit is managed correctly by the activation scripts.
-  # Note: this is also set in modules/pro-users.nix for host-wide defaults.
+  # Примечание: похожие настройки заданы в modules/pro-users.nix для хостовых значений.
   security.sudo.enable = true;
   # Prefer wheel users to require a password by default, but allow host modules
   # (eg. modules/pro-users.nix) to override this. Use lib.mkDefault so later

@@ -1,12 +1,12 @@
 { pkgs, lib, ... }:
 
 {
-  # Fbterm service for a chosen TTY (example: tty2). This runs fbterm which
-  # renders TrueType fonts via fontconfig and provides smoother fonts and
-  # improved colors compared to the classic Linux VT.
+  # Fbterm service для выбранной TTY (например, tty2). Запускает fbterm, который
+  # рендерит TrueType-шрифты через fontconfig, даёт более гладкие шрифты и
+  # улучшенные цвета по сравнению с классическими виртуальными консолями.
 
-  # Note: enable this per-host by importing this module or copy the service
-  # definition into host configuration. Test on one machine first.
+  # Примечание: включайте модуль на уровне хоста (импортом) или копируйте
+  # определение сервиса в локальную конфигурацию. Рекомендуется сначала протестировать на одной машине.
 
   systemd.services.fbterm-tty2 = {
     description = "Fbterm on tty2 (login)";

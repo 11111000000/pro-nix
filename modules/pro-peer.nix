@@ -9,7 +9,7 @@ in
   options = {
     pro-peer = {
       enable = lib.mkEnableOption "Enable pro peer discovery defaults (Avahi + SSH hardening)";
-      allowTorHiddenService = lib.mkEnableOption "Enable tor hidden-service example for SSH (off by default)";
+      allowTorHiddenService = lib.mkEnableOption "Enable Tor hidden service for SSH (off by default)";
       enableKeySync = lib.mkEnableOption "Enable automatic authorized_keys sync from an encrypted file";
       keysGpgPath = lib.mkOption {
         type = lib.types.str;
@@ -54,7 +54,7 @@ in
       services.avahi = {
         enable = true;
         publish = {
-          enable = true; # advertise the host via mDNS
+          enable = true; # публиковать хост через mDNS
         };
       };
       # Добавляем файл службы Avahi, рекламирующий SSH через mDNS, чтобы клиенты

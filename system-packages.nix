@@ -24,14 +24,14 @@ let
   pipxPkg = pkgs.pipx;
 
   aiderCmd = pkgs.writeShellScriptBin "aider" ''
-    # Run under a user transient scope so a runaway agent can't fully saturate CPU.
+    # Запуск в пользовательской transient-сессии, чтобы ограничить потребление CPU
+    # у потенциально долгоживущих агентов.
     exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 "${pipxPkg}/bin/pipx" run aider-chat -- "$@"
   '';
 
-  # Deterministic package: fetch official release tarball and expose
-  # a Nix store package for opencode. Kept here so this module works
-  # standalone even when opencode_from_release is not provided by the
-  # flake specialArgs.
+  # Детерминированный пакет: скачивает официальную сборку opencode и помещает
+  # её в Nix store. Этот код даёт воспроизводимый бинарный артефакт на случай,
+  # если flake не предоставляет готовую версию.
   opencodeBin = pkgs.stdenv.mkDerivation rec {
     pname = "opencode";
     version = "1.14.19";
@@ -58,31 +58,24 @@ let
 
   
 
-  # Provide a small, robust wrapper for the `opencode` CLI.
-  # The upstream npm package (`@opencode/cli`) is not always available in the
-  # registry in environments where this repo runs. Instead of relying on npx,
-  # prefer the following order at runtime:
-  # 1. If a user-local opencode binary exists (~/.local/bin/opencode or ~/.opencode/bin/opencode) use it
-  # 2. If not present, attempt to download the official Linux x64 release tarball
-  #    from GitHub releases and cache it under ~/.local/share/opencode/opencode
-  # 3. Run the binary under a user transient systemd scope to limit CPU usage
+  # Обёртка для CLI opencode — учебное пояснение
+  # В некоторых окружениях upstream npm-пакет `@opencode/cli` может быть недоступен.
+  # Обёртка реализует детерминированное поведение в рантайме по следующему порядку:
+  # 1) Использовать пользовательский бинарник, если он присутствует (~/.local/bin или ~/.opencode/bin).
+  # 2) Если его нет — попробовать загрузить официальный релиз для linux x64 и закешировать его в ~/.local/share/opencode/opencode.
+  # 3) Запускать бинарник под user transient systemd scope с ограничением ресурсов.
   opencodeCmd = pkgs.writeShellScriptBin "opencode" ''
     set -euo pipefail
 
-    # Locations we will check for an existing binary
+    # Пути, в которых ищем существующий бинарник
     USER_LOCAL_BIN="$HOME/.local/bin/opencode"
     OPENCODE_HOME="$HOME/.opencode/bin/opencode"
     CACHED="$HOME/.local/share/opencode/opencode"
 
-    # Prefer the deterministic Nix-provided binary when available. This
-    # avoids accidentally executing a corrupted user-cached binary in
-    # ~/.local/share/opencode/opencode. If a store-provided opencode is not
-    # present, fall back to the previous search order (user-local, home,
-    # cached, bootstrap).
-    # Determine a store-provided opencode binary at runtime. Prefer an
-    # explicit environment override OPENCODE_STORE_PATH, otherwise pick the
-    # first candidate under /nix/store matching '*opencode*' that contains
-    # a bin/opencode executable.
+    # Предпочитаем бинарник из Nix store, если он совместим. Это снижает риск
+    # выполнения повреждённой версии из пользовательского кеша. Если store-бинарь
+    # отсутствует или не проходит быстрый тест работоспособности — используем
+    # порядок поиска user-local -> home -> cached -> bootstrap.
     if [ -n "$${OPENCODE_STORE_PATH:-}" ]; then
       STORE_BIN="$${OPENCODE_STORE_PATH%/}/bin/opencode"
     else
@@ -93,9 +86,8 @@ let
         STORE_BIN=""
       fi
     fi
-    # Prefer a Nix store binary automatically when available and functional.
-    # Some upstream prebuilt releases may be incompatible; perform a quick
-    # sanity check and skip the store binary if it fails.
+    # Быстрая проверка работоспособности store-бинарника: если он падает на
+    # вызове --version, считаем его несовместимым и пропускаем.
     if [ -x "$STORE_BIN" ]; then
       if command -v timeout >/dev/null 2>&1; then
         if timeout 2s "$STORE_BIN" --version >/dev/null 2>&1; then
@@ -129,9 +121,9 @@ let
     fi
 
     if [ -z "$BIN" ]; then
-      # Try to download the official latest release for linux x64. This is a
-      # best-effort bootstrap only; failure will fall back to failing fast so
-      # the user can install manually via the project's instructions.
+      # Попытка загрузить официальный релиз для linux x64. Это запасной,
+      # best-effort метод; при неудаче скрипт завершится с ошибкой и оператор
+      # установит бинарник вручную.
       mkdir -p "$(dirname "$CACHED")"
       echo "[opencode] bootstrap: downloading official release to $CACHED"
 
@@ -143,7 +135,8 @@ let
         exit 1
       fi
 
-      # Minimal robust temp creation: prefer TMPDIR, fall back to /tmp or $HOME/.cache/tmp
+      # Надёжное создание временной директории: предпочтение TMPDIR, затем /tmp,
+      # затем $HOME/.cache/tmp.
       TMPBASE="${TMPDIR:-/tmp}"
       if [ ! -d "$TMPBASE" ]; then
         TMPBASE="$HOME/.cache/tmp"
@@ -170,7 +163,8 @@ let
         exit 1
       fi
 
-      # extract to temp and move atomically to avoid leaving a partial binary
+      # Извлечь архив во временную папку и переместить атомарно, чтобы не оставить
+      # частичный бинарник в кеше.
       tar xzf "$tmpball" -C "$tmpdir"
       if [ -x "$tmpdir/opencode" ]; then
         mv "$tmpdir/opencode" "$CACHED"
@@ -182,44 +176,32 @@ let
       fi
     fi
 
-    # If the selected binary lives in the Nix store and steam-run is
-    # available, run it under steam-run (FHS) as a compatibility fallback.
-    # Some upstream prebuilt binaries expect a generic Linux FS layout and
-    # fail on NixOS; steam-run is a pragmatic workaround when patchelf is
-    # insufficient.
-    # Prefer using steam-run if it's available in PATH at runtime. Using an
-    # absolute store path here is brittle because steam-run may not be in the
-    # system profile; checking PATH makes the wrapper more robust.
-    # If BIN is in the Nix store, try running it directly under the
-    # Nix glibc dynamic loader first (this often fixes issues where the
-    # upstream binary expects a system loader). If that fails and
-    # steam-run is available, fall back to steam-run (FHS). Otherwise
-    # run normally via systemd-run.
-    # Prefer to run the selected binary under steam-run (FHS) when
-    # available. This makes upstream prebuilt binaries behave more like a
-    # generic Linux environment. If steam-run is not present, fall back to
-    # running under systemd-run to limit resource usage.
-    # For ACP (opencode acp) we must preserve stdin/stdout and avoid
-    # launching the binary via systemd-run/steam-run (they may detach
-    # or change stdio handling). Detect common interactive subcommands
-    # and honor OPENCODE_DIRECT_RUN to force direct execution.
+    # Запуск бинарника: учёт особенностей NixOS и upstream-предположений.
+    # - Некоторые предсобранные бинарники ожидают стандартную иерархию FHS и
+    #   падают на NixOS. В таких случаях полезен steam-run (FHS-обёртка).
+    # - Сначала пробуем запустить напрямую с системным динамическим загрузчиком
+    #   (glibc loader). Если это не помогает и доступен steam-run, используем его.
+    # - Если steam-run недоступен, запускаем под systemd-run с ограничением
+    #   ресурсов.
+    # - Для интерактивных команд (acp, acp-shell) и если OPENCODE_DIRECT_RUN=1,
+    #   нужно сохранить stdin/stdout — тогда выполняем бинарник напрямую.
     if [ "$${OPENCODE_DIRECT_RUN:-0}" = "1" ] || [ "$${1:-}" = "acp" ] || [ "$${1:-}" = "acp-shell" ]; then
-      # Directly exec the binary and forward all args unchanged.
+      # Прямой exec: передаём все аргументы без изменений.
       exec "$BIN" "$@"
     fi
 
     if command -v steam-run >/dev/null 2>&1; then
       STEAM_RUN_CMD=$(command -v steam-run)
-      # Forward args unchanged through steam-run
+      # Передача аргументов через steam-run без изменений.
       exec "$STEAM_RUN_CMD" "$BIN" "$@"
     else
-      # For systemd-run we must place a separator `--' before the command
-      # to separate systemd-run options from the invoked command and its args.
+      # Для systemd-run требуется разделитель `--' перед командой, чтобы
+      # отделить опции systemd-run от аргументов запускаемого процесса.
       exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 -- "$BIN" "$@"
     fi
   '';
-  # provide opencodeBin from flake/flake.nix instead of duplicating here
-  # (the flake defines opencode_from_release/opencode-release as an app)
+  # Примечание: flake/flake.nix может предоставлять opencode_bin; в этом
+  # файле реализован запасной механизм, чтобы модуль работал автономно.
 
   # Python-слой здесь держит минимальную воспроизводимость: `requests` уже есть, а `pip` остаётся доступным для локальных окружений и одноразовых установок.
   myPython = pkgs.python3.withPackages (ps: [ ps.requests ps.pip ]);

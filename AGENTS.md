@@ -3,6 +3,8 @@
 
 - Читайте `AGENTS.md`, затем `SURFACE.md`, затем `README.md` перед внесением изменения в репозиторий.
 - Текст — проверяемый контракт: важные правила фиксируйте в коде/документации.
+
+IMPORTANT: Never commit credentials, private keys, passwords, or other secrets into the repository. This includes files under /etc, any .gpg/.key/plaintext credentials, and any generated tokens. Treat such files as sensitive: keep them encrypted outside the repo and distribute via operator-managed encrypted artifacts (pro-peer style). Additions to the repo that would expose secrets must be rejected.
 - Один файл — одна ответственность; модули должны иметь явные контракты.
 - Предпочитайте явный порядок загрузки над скрытой связностью модулей.
 - Вводите новые абстракции только если они действительно уменьшают сложность.

@@ -17,6 +17,8 @@ let
       (setq pro-emacs-modules '(${defaultModulesText}))
       (setq pro-emacs-base-modules pro-emacs-modules)
     '';
+    # Примечание: файлы с суффиксом .example являются шаблонами. Редактируйте
+    # их в домашней директории пользователя, не изменяя системный шаблон.
 
     home.file.".config/pro/emacs-headless-test.sh".source = ../scripts/emacs-headless-test.sh;
     home.file.".config/pro/emacs-headless-report.sh".source = ../scripts/emacs-headless-report.sh;
