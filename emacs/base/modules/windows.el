@@ -34,6 +34,25 @@
   ;; ace-window: optional fast window selection (no keys set here)
   (when (require 'ace-window nil t)
     (setq aw-scope 'global))
+
+  ;; Simple, conservative display-buffer policy for common transient buffers.
+  ;; Keep this small and opt-in: users can override in their modules or user config.
+  (when (boundp 'display-buffer-alist)
+    ;; vterm buffers: open in a small side window at the bottom
+    (add-to-list 'display-buffer-alist
+                 '("\\*vterm\*" . ((display-buffer-in-side-window)
+                                        (side . bottom)
+                                        (slot . 0)
+                                        (window-height . 0.28)
+                                        (quit . delete-window))))
+
+    ;; *Messages*: reuse existing window or show at the bottom with small height
+    (add-to-list 'display-buffer-alist
+                 '("\\*Messages\\*" . ((display-buffer-reuse-window display-buffer-in-side-window)
+                                             (side . bottom)
+                                             (slot . -1)
+                                             (window-height . 0.12))))
+    )
   )
 
 (provide 'windows)

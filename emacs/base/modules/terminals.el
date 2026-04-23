@@ -32,7 +32,14 @@ This does not control installation of packages; ensure vterm is available in Nix
               ;; enable tab-line in vterm for quick buffer switching
               (when (fboundp 'tab-line-mode) (tab-line-mode 1))
               ;; prefer sane history and copy mode
-              (when (fboundp 'vterm-copy-mode)
-                (vterm-copy-mode 0))))))
+               (when (fboundp 'vterm-copy-mode)
+                 (vterm-copy-mode 0))
+               ;; Install local keymap for vterm helpers if keys module present
+               (when (and (boundp 'pro/registered-module-keys)
+                          (fboundp 'pro/register-module-keys))
+                 ;; register suggested keys for vterm helpers (non-binding)
+                 (pro/register-module-keys 'terminals
+                                           '("C-c v y" . pro/vterm-yank
+                                             "C-c v i" . pro/vterm-interrupt)))))
 
 (provide 'terminals)

@@ -25,6 +25,18 @@
   (when (file-exists-p provided)
     (load provided nil t)))
 
+;; If the user-managed provided-packages file is not present or is read-only
+;; (for example when managed by home-manager), attempt to load a repository
+;; fallback so development and containerized runs can still pick up the
+;; emacs packages list generated from nix/provided-packages.nix.
+(unless (and (file-exists-p (expand-file-name "provided-packages.el" (expand-file-name ".config/emacs/" (getenv "HOME"))))
+             (file-writable-p (expand-file-name "provided-packages.el" (expand-file-name ".config/emacs/" (getenv "HOME")))) )
+  (let ((base (file-name-directory (or load-file-name buffer-file-name)))
+        (repo-provided (expand-file-name "emacs/base/provided-packages.el" (file-name-directory (or load-file-name buffer-file-name)))))
+    (when (file-readable-p repo-provided)
+      (load repo-provided nil t)
+      (message "[pro-site-init] loaded repository-provided packages from %s" repo-provided))))
+
 ;; If site-init is loaded directly (for testing or containerized runs) try to
 ;; locate and load the system support modules (pro-compat, pro-packages)
 ;; from the repository so modules relying on pro--package-provided-p and

@@ -125,5 +125,23 @@ EOF
           };
         };
       };
+
+      devShells.${system}.default = pkgs.mkShell {
+        name = "pro-nix-dev";
+        buildInputs = [ emacsPkg pkgs.ripgrep pkgs.fd pkgs.findutils ];
+        # Compute EMACS_SITE_LISP by joining site-lisp dirs of packages.
+        shellHook = let emacs_site_lisp = lib.concatStringsSep " " (map (p: p + "/share/emacs/site-lisp") [
+          pkgs.emacsPackages.vertico pkgs.emacsPackages.consult pkgs.emacsPackages.orderless
+          pkgs.emacsPackages.marginalia pkgs.emacsPackages.gptel pkgs.emacsPackages.consult-dash
+          pkgs.emacsPackages.consult-eglot pkgs.emacsPackages.consult-yasnippet pkgs.emacsPackages.corfu
+          pkgs.emacsPackages.cape pkgs.emacsPackages.kind-icon pkgs.emacsPackages.avy
+          pkgs.emacsPackages.expand-region pkgs.emacsPackages.yasnippet pkgs.emacsPackages.projectile
+          pkgs.emacsPackages.treemacs pkgs.emacsPackages.vterm pkgs.emacsPackages.ace-window pkgs.emacsPackages.embark
+        ]); in ''
+          echo "Entering pro-nix devshell with Emacs available"
+          export EMACS_SITE_LISP="${emacs_site_lisp}"
+          echo "EMACS_SITE_LISP set to: $EMACS_SITE_LISP"
+        '';
+      };
     };
 }

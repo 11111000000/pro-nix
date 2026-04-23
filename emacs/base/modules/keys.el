@@ -149,7 +149,7 @@
                       (defvar pro-keys-provenance nil "Alist of (KEY . MODULE) provenance."))
                     (push (cons key owner) pro-keys-provenance))))
             (pro-keys--apply-row (nth 0 binding) (nth 1 binding) (nth 2 binding))))
-        (forward-line 1)))))
+        (forward-line 1))))))
 
 (defun pro-keys-reload ()
   "Перезагрузить клавиши из системного и пользовательского слоёв."
@@ -259,4 +259,4 @@ function does not apply the keys; it only writes suggestions for review."
              (insert (format "| %s | %s | %s | suggested from %s |\n" "Suggested" k cmd mod)))))
        pro/registered-module-keys))
     (message "pro: exported registered keys to %s" file)
-    file)
+    file))
