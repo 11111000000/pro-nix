@@ -40,6 +40,23 @@ docs/. Некоторые части (TUI, экспериментальные а
 
    sudo nixos-rebuild switch --flake .#cf19
 
+4) Проверка Emacs после switch
+
+   После `nixos-rebuild switch` запустите headless проверку Emacs, чтобы убедиться,
+   что Nix-пакеты доступны и конфиг работает как ожидалось:
+
+   - Локальная проверка (на хосте):
+
+     ./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el
+
+   - Генерация списка пакетов, если вы изменяли `nix/provided-packages.nix`:
+
+     emacs --batch -l scripts/generate-provided-packages.el --eval '(generate-provided-packages "nix/provided-packages.nix")'
+
+   - Запустить линтер клавиш:
+
+     ./scripts/lint-keys.sh
+
 Требования
 - Nix (с поддержкой flakes)
 - Python 3.10+ для запуска TUI (опционально)
