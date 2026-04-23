@@ -21,12 +21,16 @@ let
     pkgs.emacsPackages.treemacs
     pkgs.emacsPackages.vterm
     pkgs.emacsPackages.ace-window
-    pkgs.emacsPackages.winner
   ];
   names = builtins.concatStringsSep " " (map (p: builtins.substring 0 100 (toString p)) emacsPackages);
 in
 {
-  # This file is a helper placeholder. In your flake/home-manager module
-  # you should create ~/.config/emacs/provided-packages.el with content like:
-  # (setq pro-packages-provided-by-nix '(consult magit vertico ...))
+  # This file is a helper placeholder. To materialize an Emacs Lisp list of
+  # packages provided by Nix, you can run the helper script:
+  #
+  # emacs --batch -l scripts/generate-provided-packages.el \
+  #       --eval '(generate-provided-packages "nix/provided-packages.nix" "~/.config/emacs/provided-packages.el")'
+  #
+  # The script will write `~/.config/emacs/provided-packages.el` which sets
+  # `pro-packages-provided-by-nix` for `site-init.el` to pick up at startup.
 }

@@ -9,7 +9,8 @@ Samba Hardening (pro-nix)
 - `map to guest = Never` — не маппить неизвестных пользователей на guest.
 - `usershare allow guests = No` — отключить гостевые usershare.
 - `server min protocol = SMB2`, `client min protocol = SMB2` — отключить SMBv1.
-- `server signing = required`, `client signing = required` — требовать подпись (mitm/relay защита).
+- `server signing = desired`, `client signing = desired` — предпочитать подпись (mitm/relay защита),
+  сохраняя совместимость с Android и старыми клиентами. Сильные клиенты используют подпись автоматически.
 - `smb encrypt = desired` — по возможности требовать шифрование трафика (SMB3).
 - `restrict anonymous = 2` и `ntlm auth = no` — ограничение анонимного доступа и отключение NTLMv1.
 - `bind interfaces only = No` — не жёстко привязывать интерфейсы (чтобы служба стартовала на динамичных Wi‑Fi).
@@ -20,16 +21,14 @@ Samba Hardening (pro-nix)
   перейти на `server signing = desired` и `ntlm auth = yes` в локальном хостовом оверрайте.
 
 Сеть и firewall
-- SMB-порты (139/445) больше не добавляются в глобальный allowedTCPPorts; вместо этого
-  введены сетевые правила, разрешающие доступ к SMB только из RFC1918 (10/8, 172.16/12, 192.168/16).
-- Для широкей совместимости fallback используется `networking.firewall.extraCommands` с iptables.
-  (На некоторых релизах NixOS опция `networking.nftables` может отсутствовать — поэтому применяется
-  такой совместимый подход.)
+- Доступ ограничивается к RFC1918 сетям на уровне самой Samba через `hosts allow`/`hosts deny`.
+  Это не зависит от реализации фаервола (iptables/nftables) и упрощает переносимость.
 
 Тестирование
 - После применения конфига проверять:
   - `sudo testparm -s` — увидеть активные параметры Samba.
-  - `sudo nft list ruleset` или `sudo iptables -L -n` — убедиться, что правила для 139/445 присутствуют.
+- `sudo ss -ltnp | grep -E ':(139|445)'` — убедиться, что сервис слушает, и проверить mDNS публикацию:
+  `avahi-browse -rt _smb._tcp`.
   - попытаться подключиться из локальной сети и из «внешней» подсети (эмулировать отказ).
 
 Как изменить поведение для конкретного хоста
