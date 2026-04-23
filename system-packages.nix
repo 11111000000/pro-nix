@@ -89,8 +89,8 @@ let
     # выполнения повреждённой версии из пользовательского кеша. Если store-бинарь
     # отсутствует или не проходит быстрый тест работоспособности — используем
     # порядок поиска user-local -> home -> cached -> bootstrap.
-    if [ -n "$${OPENCODE_STORE_PATH:-}" ]; then
-      STORE_BIN="$${OPENCODE_STORE_PATH%/}/bin/opencode"
+    if [ -n "''${OPENCODE_STORE_PATH:-}" ]; then
+      STORE_BIN="''${OPENCODE_STORE_PATH%/}/bin/opencode"
     else
       STORE_CAND=$(ls -d /nix/store/*opencode* 2>/dev/null | head -n1 || true)
       if [ -n "$STORE_CAND" ]; then
@@ -207,7 +207,7 @@ let
     #   ресурсов.
     # - Для интерактивных команд (acp, acp-shell) и если OPENCODE_DIRECT_RUN=1,
     #   нужно сохранить stdin/stdout — тогда выполняем бинарник напрямую.
-    if [ "$${OPENCODE_DIRECT_RUN:-0}" = "1" ] || [ "$${1:-}" = "acp" ] || [ "$${1:-}" = "acp-shell" ]; then
+    if [ "''${OPENCODE_DIRECT_RUN:-0}" = "1" ] || [ "''${1:-}" = "acp" ] || [ "''${1:-}" = "acp-shell" ]; then
       # Прямой exec: передаём все аргументы без изменений.
       exec "$BIN" "$@"
     fi
