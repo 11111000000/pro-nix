@@ -6,7 +6,8 @@ Samba Hardening (pro-nix)
   чтобы снизить риск атак в локальных и общих сетях и при случайной экспозиции портов.
 
 Какие настройки применены
-- `map to guest = Never` — не маппить неизвестных пользователей на guest.
+- `map to guest = Bad User` — маппить неизвестного пользователя на guest, чтобы анонимный доступ
+  к специально отмеченным гостевым шарам работал. Для приватных шaр по‑прежнему требуется логин.
 - `usershare allow guests = No` — отключить гостевые usershare.
 - `server min protocol = SMB2`, `client min protocol = SMB2` — отключить SMBv1.
 - `server signing = desired`, `client signing = desired` — предпочитать подпись (mitm/relay защита),

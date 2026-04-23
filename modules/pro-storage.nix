@@ -23,8 +23,9 @@ in
   services.samba.settings."global" = lib.mkForce {
     workgroup = "WORKGROUP";
     "server string" = "NixOS Samba Server";
-    # Avoid mapping unknown users to guest; explicit users only.
-    "map to guest" = "Never";
+    # Map неизвестного пользователя в гостя, чтобы анонимный доступ к public
+    # реально работал (вместе с "guest ok = yes" на секции шары).
+    "map to guest" = "Bad User";
     # usershare convenience: keep allowed but it's safer to restrict shares
     "usershare allow guests" = "No";
 
