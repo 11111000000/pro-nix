@@ -43,6 +43,6 @@
 | Package   | C-c P b | pro-packages-upgrade-built-ins | Разрешить built-in upgrade |
 | Package   | C-c P a | pro-package-bootstrap-install-targets | Установить базовые пакеты |
 | Git       | C-x g   | pro-git-status          | Статус репозитория               |
-| Git       | C-c g   | pro-git-dispatch        | Magit dispatch                   |
+| Git       | C-c g   | pro-git-status        | Magit status                    |
 | Org       | C-c o   | org-agenda              | Повестка                         |
 | Ключи     | C-c k   | pro-keys-reload         | Перезагрузить клавиши            |
