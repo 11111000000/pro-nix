@@ -5,9 +5,36 @@ REPO_ROOT=$(dirname "$0")/..
 REPO_ROOT=$(cd "$REPO_ROOT" && pwd)
 OUT_TMP=$(mktemp -t emacs-keys-suggestions.XXXXXX)
 
-echo "Generating suggestions via Emacs... -> $OUT_TMP"
-# Use the emacs-pro-wrapper to ensure same -L flags as CI/dev
-"$REPO_ROOT/scripts/emacs-pro-wrapper.sh" --batch -l emacs/base/init.el --eval "(pro/keys-import-suggestions \"$OUT_TMP\")"
+echo "Generating suggestions via static parse -> $OUT_TMP"
+# Extract pro/register-module-keys forms from module files without evaluating them.
+printf "# Generated suggestions at %s\n\n" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$OUT_TMP"
+for f in "$REPO_ROOT"/emacs/base/modules/*.el; do
+  # read file and find pro/register-module-keys occurrences
+  awk 'BEGIN{in=0;cnt=0;buf=""}
+  /pro\/register-module-keys/ {
+    in=1; cnt += gsub(/\(/,"("); buf = buf $0 "\n"; next
+  }
+  in==1 { buf = buf $0 "\n"; n = gsub(/\(/,"(") - gsub(/\)/,"") ;
+    if ( (gsub(/\(/,"(") - gsub(/\)/,"") ) <= 0 || index($0, ")") ) {
+      # try to balance parentheses by simple counting over buffer
+      # extract module symbol and alist
+      if (match(buf, /pro\/register-module-keys[[:space:]]+\'?([^)[:space:]]+)[[:space:]]+'?\(([^)]*)\)/, m)) {
+        module = m[1]; alist = m[2];
+        # print module header
+        printf "# PRO-MODULE: %s\n", module >> out;
+        # find ("KEY" . CMD) pairs
+        while (match(alist, /\("([^"]+)"[[:space:]]*\.[[:space:]]*([^\)\s]+)\)/, mm)) {
+          key = mm[1]; cmd = mm[2];
+          printf "| Suggested | %s | %s | suggested from %s |\n", key, cmd, module >> out;
+          alist = substr(alist, RSTART+RLENGTH);
+        }
+      }
+      in=0; buf="";
+    }
+  }
+' out="$OUT_TMP" "$f"
+done
+
 
 if [ ! -s "$OUT_TMP" ]; then
   echo "No suggestions generated or file empty: $OUT_TMP"

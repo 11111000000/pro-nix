@@ -1,0 +1,48 @@
+#+title: Клавиши PRO
+
+| Секция    | Клавиша | Команда                 | Примечание                       |
+|-----------+---------+-------------------------+----------------------------------|
+| Навигация | C-s     | consult-line            | Поиск по текущему буферу         |
+| Навигация | C-x b   | pro/consult-buffer      | Смена буфера (helper)            |
+| Навигация | C-x C-b | pro/consult-buffer      | Смена буфера                     |
+| Навигация | M-g i   | consult-imenu           | Символы файла                    |
+| Навигация | M-g g   | consult-goto-line       | Переход к строке                 |
+| Поиск     | C-c s   | consult-ripgrep         | Поиск по проекту                 |
+| Поиск     | C-c f   | pro/consult-find        | Поиск файла (project-aware)      |
+| Поиск     | C-c p s | pro-project-ripgrep     | Поиск в проекте                  |
+| Поиск     | C-c p f | pro-project-find-file   | Файл проекта                     |
+| UI        | C-=     | pro-ui-zoom-in          | Увеличить шрифт                  |
+| UI        | C--     | pro-ui-zoom-out         | Уменьшить шрифт                  |
+| UI        | C-0     | pro-ui-zoom-reset       | Сбросить масштаб                 |
+| UI        | M-/     | eldoc-box-help-at-point | Подсказка под курсором           |
+| EXWM      | s-r     | exwm-reset              | Сброс окна EXWM                  |
+| EXWM      | s-w     | exwm-workspace-switch   | Переключить рабочее пространство |
+| EXWM      | s-&     | async-shell-command     | Запуск команды                   |
+| ORG       | C-c K   | pro-org-open-keys-file  | Открыть файл клавиш              |
+| Completion| C-c o f | cape-file               | Источник файлов для CAPF         |
+| Completion| C-c o d | cape-dabbrev            | Слова из буферов                 |
+| Completion| C-c o h | cape-history            | История                          |
+| Completion| C-c o k | cape-keyword            | Ключевые слова языка             |
+| Completion| C-c o s | cape-symbol             | Символы                          |
+| Completion| C-c o a | cape-abbrev             | Аббревиатуры                     |
+| Completion| C-c o . | completion-at-point     | Вызвать CAPF                     |
+| Snippet   | C-c y y | consult-yasnippet       | Выбор сниппета                   |
+| LSP       | C-c C-. | consult-eglot-symbols   | Поиск символов LSP               |
+| Навигация | M-g g   | avy-goto-char           | Прыжок к символу                 |
+| Выделение | M-SPC   | er/expand-region        | Расширение выделения             |
+| Проекты   | C-c p p | projectile-switch-project | Сменить проект                 |
+| Проекты   | C-c p f | projectile-find-file    | Файл в проекте                   |
+| Дерево    | s-d     | treemacs                | Открыть дерево                   |
+| AI        | C-c a   | pro-ai-open-entry       | Вход в AI                        |
+| AI        | C-c A   | pro-agent-open          | agent-shell                      |
+| Package   | C-c P p | pro-packages-menu       | Список пакетов                   |
+| Package   | C-c P i | pro-packages-install    | Установить пакет из ELPA         |
+| Package   | C-c P v | pro-packages-install-vc | Установить пакет из VC           |
+| Package   | C-c P u | pro-packages-upgrade-all| Обновить пакеты                  |
+| Package   | C-c P r | pro-packages-refresh    | Обновить список архивов          |
+| Package   | C-c P b | pro-packages-upgrade-built-ins | Разрешить built-in upgrade |
+| Package   | C-c P a | pro-package-bootstrap-install-targets | Установить базовые пакеты |
+| Git       | C-x g   | pro-git-status          | Статус репозитория               |
+| Git       | C-c g   | pro-git-dispatch        | Magit dispatch                   |
+| Org       | C-c o   | org-agenda              | Повестка                         |
+| Ключи     | C-c k   | pro-keys-reload         | Перезагрузить клавиши            |
