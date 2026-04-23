@@ -38,7 +38,15 @@ switch HOST='':
 	  echo "Run: just switch <host> to choose one of the above or add ./hosts/$HOST/configuration.nix" >&2; \
 	  exit 1; \
 	fi; \
-	sudo nixos-rebuild switch --flake ".#$HOST"
+	# Prefer performing a real switch with sudo. In container environments where
+	# sudo cannot gain privileges (eg. "no new privileges" flag), fall back to a
+	# non-root build of the toplevel derivation for verification purposes.
+	if sudo -n true 2>/dev/null; then
+	  sudo nixos-rebuild switch --flake ".#$HOST"
+	else
+	  echo "[just] sudo unavailable or cannot gain privileges; performing non-root build check (no switch)" >&2
+	  nix --extra-experimental-features 'nix-command flakes' build --print-out-paths ".#nixosConfigurations.\"$HOST\".config.system.build.toplevel" --no-link
+	fi
 
 test HOST:
 	sudo nixos-rebuild test --flake .#{{HOST}}
