@@ -22,7 +22,8 @@ build HOST:
 
 
 
-	scripts/switch.sh "{{HOST}}"
+	switch HOST='':
+		scripts/switch.sh "{{HOST}}"
 
 test HOST:
 	sudo nixos-rebuild test --flake .#{{HOST}}
