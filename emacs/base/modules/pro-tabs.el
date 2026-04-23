@@ -32,6 +32,15 @@ If `pro-tabs' package is present, delegate to it; otherwise use `tab-bar-new-tab
       (when (fboundp 'pro-tabs-open-new-tab) (pro-tabs-open-new-tab))
     (tab-bar-new-tab)))
 
+;; Register suggested keys only after keys module has loaded to avoid
+;; evaluation-time ordering issues when modules are loaded in different contexts.
+(with-eval-after-load 'keys
+  (when (fboundp 'pro/register-module-keys)
+    (pro/register-module-keys 'tabs
+                              '( ("C-c t n" . pro-tabs-open-new-tab)
+                                 ("C-c t k" . pro-tabs-close-tab-and-buffer)
+                                 ("C-c t s" . tab-bar-switch-to-tab)))))
+
 (defun pro-tabs-close-tab-and-buffer ()
   "Close current tab and kill its buffer (wrapper)." 
   (interactive)

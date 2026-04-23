@@ -15,11 +15,11 @@
   # Host-specific storage belongs in the host profile, not in this shared scan file.
   # Keep this file limited to hardware that is shared across targets.
 
-  # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
-  # (the default) this is the recommended approach. When using systemd-networkd it's
-  # still possible to use this option, but it's recommended to use it in conjunction
-  # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
-  # networking.useDHCP не нужен при активном NetworkManager; все управление интерфейсами делается через него.
+  # Контекст:
+  # DHCP — базовый механизм получения сетевых настроек. В крупных конфигурациях
+  # рекомендуется явно задавать поведение для каждого интерфейса при помощи
+  # `networking.interfaces.<interface>.useDHCP`, чтобы избежать неявных конфликтов
+  # между сетевыми менеджерами (NetworkManager, systemd-networkd и т.п.).
   # networking.useDHCP = lib.mkDefault true;
   # networking.interfaces.enp43s0.useDHCP = lib.mkDefault true;
   # networking.interfaces.wlp0s20f3.useDHCP = lib.mkDefault true;

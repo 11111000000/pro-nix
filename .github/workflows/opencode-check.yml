@@ -1,0 +1,33 @@
+name: Opencode Build & Smoke Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix (single-user, no-daemon)
+        run: |
+          curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
+          . $HOME/.nix-profile/etc/profile.d/nix.sh
+          nix --version
+        env:
+          USER: ${{ github.actor }}
+
+      - name: Enable Nix experimental features for flakes
+        run: |
+          export NIX_CONFIG="experimental-features = nix-command flakes"
+          echo "NIX_CONFIG=$NIX_CONFIG" >> $GITHUB_ENV
+
+      - name: Build opencode release derivation
+        run: ./scripts/check-nixos-build.sh opencode-release
+
+      - name: Run opencode launch smoke test
+        run: ./scripts/test-opencode-launch.sh

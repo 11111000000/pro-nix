@@ -3,9 +3,37 @@
 
 - Читайте `AGENTS.md`, затем `SURFACE.md`, затем `README.md` перед внесением изменения в репозиторий.
 - Текст — проверяемый контракт: важные правила фиксируйте в коде/документации.
+
+IMPORTANT: Never commit credentials, private keys, passwords, or other secrets into the repository. This includes files under /etc, any .gpg/.key/plaintext credentials, and any generated tokens. Treat such files as sensitive: keep them encrypted outside the repo and distribute via operator-managed encrypted artifacts (pro-peer style). Additions to the repo that would expose secrets must be rejected.
 - Один файл — одна ответственность; модули должны иметь явные контракты.
 - Предпочитайте явный порядок загрузки над скрытой связностью модулей.
 - Вводите новые абстракции только если они действительно уменьшают сложность.
+
+### Операционный ритуал: всегда тестировать перед `just switch`
+
+- Перед выполнением `just switch` (или любого обновления NixOS через flake) ОБЯЗАТЕЛЬНО выполнить локальные проверки и тесты. Это предотвращает ошибки во время сборки/оценки конфигурации и минимизирует простой.
+- Рекомендуемый краткий чек-лист перед `just switch`:
+  1. Убедитесь, что рабочее дерево чисто: `git status --short`. Если есть незакоммиченные изменения — закоммитьте или закешируйте (`git stash`).
+  2. Запустите локальные E2E/ERT тесты репозитория: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el` или `emacs --batch -l emacs/base/init.el -f ert-run-tests-batch`.
+  3. Проверка Nix-конфигурации (flake): `nix flake check` или `nix build .#nixosConfigurations.<host>.config.system.build.nixos-rebuild --no-link --show-trace` (используйте --show-trace для подробной трассы ошибок).
+  4. Найдите дубликаты опций, которые часто вызывают ошибки Nix (например, `environment.systemPackages`):
+     - `rg "environment.systemPackages" -n || true`
+     - Если найдёте дубли, сверьте их и объедините списки, используя `lib.mkForce` или припишите опцию в одном месте.
+  5. Если Nix-шаг сообщает про "dirty git tree" — это означает, что flake смотрит на рабочую директорию. Очистите её (commit/stash) перед запуском.
+
+Примеры исправления частых ошибок
+
+- "Git tree is dirty":
+  - Решение: `git add -A && git commit -m "WIP: save before nix switch"` или `git stash`.
+
+- "attribute 'environment.systemPackages' already defined":
+  - Найдите все определения: `rg "environment.systemPackages" -n`.
+  - Уберите дублирующие определения, либо используйте `lib.mkForce (config.environment.systemPackages or []) ++ [ ... ]` в одном месте, либо объедините в один общий список.
+  - Запустите `nix --show-trace ...` чтобы получить точное место ошибки.
+
+- Общая отладка Nix: добавьте `--show-trace` к nix команде и читайте трассу; обычно она указывает точный файл и строку с конфликтом.
+
+Норматив: перед `just switch` CI-проход должен быть зелёным, либо пользователь должен подтвердить локальное прохождение тестов.
 
 ### Правила Emacs Lisp
 

@@ -1,11 +1,17 @@
-# Файл: автосгенерированная шапка — комментарии рефакторятся
-{ pkgs, lib, ... }:
+# Раздел: рабочая среда и графический стек — учебное изложение
+#
+# Суть:
+# Этот модуль собирает настройки графического стека (X11/Wayland, менеджер
+# отображения, шрифты, звуковая подсистема) и предъявляет их как набор
+# взаимосвязанных свойств. Комментарии объясняют назначение опций, их влияние
+# на пользовательский опыт и на взаимодействие с другими модулями.
+{ config, pkgs, lib, ... }:
 
 {
   services.xserver.enable = true;
   services.displayManager.gdm.enable = true;
   services.xserver.desktopManager.cinnamon.enable = true;
-  # Сеансовые команды на уровне дисплей-менеджера собирают те детали, которые должны появиться до запуска графической среды, но не жить в системе как закон.
+  # Сеансовые команды на уровне дисплей-менеджера задают окружение до запуска графической среды.
   services.xserver.displayManager.sessionCommands = ''
     export PATH="/run/wrappers/bin:$HOME/.local/bin:/run/current-system/sw/bin:$PATH"
     export EMACS_STARTUP_LOG_DIR="$HOME/.cache/emacs-startup"
@@ -38,7 +44,7 @@
     options = "grp:ralt_toggle,caps:ctrl_modifier,grp_led:caps";
   };
 
-  # `kbdrate` удерживает TTY в человеческом темпе, чтобы консоль не становилась источником раздражения.
+  # `kbdrate` устанавливает скорость повторения клавиш на виртуальной консоли.
   systemd.services.kbdrate = {
     description = "Задание интервалов повторения на виртуальной консоли";
     wantedBy = [ "multi-user.target" ];
@@ -62,13 +68,13 @@
     wireplumber.enable = true;
   };
 
-  # Порталы XDG нужны как мост между графическими приложениями и системными возможностями.
+  # Порталы XDG связывают графические приложения с системными возможностями.
   xdg.portal = {
     enable = true;
     extraPortals = lib.mkForce [ pkgs.xdg-desktop-portal-gtk ];
   };
 
-  # Шрифты формируют визуальный ритм рабочего места, поэтому они лежат рядом с графическим слоем.
+  # Шрифты размещены рядом с графическим слоем.
   fonts.packages = with pkgs; [
     terminus_font
     noto-fonts
@@ -107,7 +113,7 @@
   environment.etc."X11/Xresources".source = ../conf/Xresources;
   environment.etc."xdg/dunst/dunstrc".source = ../conf/dunstrc;
 
-  # Глобальные переменные фиксируют общий язык интерфейса и внешнего вида, чтобы разные программы не спорили о том, как выглядит рабочий день.
+  # Глобальные переменные задают системные настройки локали и темы.
   environment.variables = {
     LANG = "ru_RU.UTF-8";
     LC_CTYPE = "ru_RU.UTF-8";
@@ -117,8 +123,8 @@
     XCURSOR_SIZE = "24";
   };
 
-  # Make sure awk is available during activation (some activate scripts call awk).
-  environment.systemPackages = with pkgs; [ gawk
+  # Ensure awk is available during activation (some activation scripts use awk).
+  environment.systemPackages = lib.mkForce ((config.environment.systemPackages or []) ++ (with pkgs; [ gawk
     # Install a system-wide xsessions entry so GDM shows EXWM for all users.
     (runCommand "pro-exwm-xsession" {} ''
       mkdir -p $out/share/xsessions
@@ -136,9 +142,9 @@ X-GNOME-Bugzilla-Component=window-manager
 EOF
       chmod -R a+rX $out
     '')
-  ];
+  ]));
 
-  # Firefox оставлен как базовый браузер рабочего окружения.
+  # Firefox включён как системный браузер.
   programs.firefox.enable = true;
   programs.firefox.package = pkgs.firefox;
 }

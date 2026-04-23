@@ -9,7 +9,7 @@ in
   options = {
     pro-peer = {
       enable = lib.mkEnableOption "Enable pro peer discovery defaults (Avahi + SSH hardening)";
-      allowTorHiddenService = lib.mkEnableOption "Enable tor hidden-service example for SSH (off by default)";
+      allowTorHiddenService = lib.mkEnableOption "Enable Tor hidden service for SSH (off by default)";
       enableKeySync = lib.mkEnableOption "Enable automatic authorized_keys sync from an encrypted file";
       keysGpgPath = lib.mkOption {
         type = lib.types.str;
@@ -42,13 +42,19 @@ in
   };
 
   # Собираем условные фрагменты конфигурации и объединяем их в единый атрибут `config`.
+  #
+  # Учебная цель раздела:
+  # Объяснить механизмы обнаружения в локальной сети (mDNS/Avahi), управление
+  # ключами SSH и интеграцию с альтернативными сетевыми слоями (Tor, Yggdrasil,
+  # WireGuard). Комментарии показывают архитектуру взаимодействия модулей и
+  # почему используется tmpfiles/systemd для создания runtime-путей.
   config = lib.mkMerge [
     (lib.mkIf config.pro-peer.enable {
       # Avahi — служба mDNS для обнаружения хостов в локальной сети (LAN).
       services.avahi = {
         enable = true;
         publish = {
-          enable = true; # advertise the host via mDNS
+          enable = true; # публиковать хост через mDNS
         };
       };
       # Добавляем файл службы Avahi, рекламирующий SSH через mDNS, чтобы клиенты
@@ -83,7 +89,7 @@ in
       # было проверяемым. Не указываем sshd модулю путь на runtime-файл — это
       # может быть недоступно на стадии вычисления конфигурации. Вместо этого
       # добавляем правила tmpfiles, которые создадут необходимые пути при старте.
-      # Правила tmpfiles добавляются как дополнение, а не заменяют глобальные
+      # Правила tmpfiles добавляются как дополнение и не заменяют глобальные
       # правила, чтобы другие модули могли дописывать свои записи.
       systemd.tmpfiles.rules = [
         "d /var/lib/pro-peer 0700 root root -"
@@ -98,7 +104,7 @@ in
       # друга в LAN через Avahi. Список портов объединяется с существующим,
       # чтобы не перезаписывать настройки других модулей.
       networking.firewall = lib.mkIf true {
-        # Добавляем 5353 в allowedUDPPorts как низкоприоритетный дефолт через
+        # Добавляем 5353 в allowedUDPPorts в качестве низкоприоритетного дефолта.
         # lib.mkDefault. Это позволяет другим модулям или хостовым конфигам
         # переопределять значение и предотвращает рекурсию при оценке config.*.
         allowedUDPPorts = lib.mkDefault (lib.concatLists [ (config.networking.firewall.allowedUDPPorts or []) [ 5353 ] ]);
@@ -123,7 +129,7 @@ in
     })
 
     (lib.mkIf config.pro-peer.enableKeySync {
-      environment.systemPackages = with pkgs; [ gnupg ];
+      environment.systemPackages = lib.mkForce ((config.environment.systemPackages or []) ++ (with pkgs; [ gnupg ]));
       environment.etc."pro-peer-sync-keys.sh".source = ../scripts/pro-peer-sync-keys.sh;
       environment.etc."pro-peer-sync-keys.sh".mode = "0755";
 
@@ -148,7 +154,7 @@ in
       })
 
     (lib.mkIf (config.pro-peer.allowTorHiddenService && (config.pro-peer.torBackupRecipient != null)) {
-      environment.systemPackages = with pkgs; [ gnupg tar ];
+      environment.systemPackages = lib.mkForce ((config.environment.systemPackages or []) ++ (with pkgs; [ gnupg tar ]));
       environment.etc."pro-peer-backup-hiddenservice.sh".source = ../scripts/backup-hiddenservice.sh;
       environment.etc."pro-peer-backup-hiddenservice.sh".mode = "0755";
 
@@ -166,7 +172,7 @@ in
     })
 
     (lib.mkIf config.pro-peer.enableYggdrasil {
-      environment.systemPackages = with pkgs; [ yggdrasil ];
+      environment.systemPackages = lib.mkForce ((config.environment.systemPackages or []) ++ (with pkgs; [ yggdrasil ]));
       systemd.services.yggdrasil = {
         description = "Yggdrasil mesh daemon (pro-peer)";
         wantedBy = [ "multi-user.target" ];
@@ -184,7 +190,7 @@ in
     })
 
     (lib.mkIf config.pro-peer.enableWireguardHelper {
-      environment.systemPackages = with pkgs; [ wireguard-tools ];
+      environment.systemPackages = lib.mkForce ((config.environment.systemPackages or []) ++ (with pkgs; [ wireguard-tools ]));
       # Устанавливаем небольшой оболочный wrapper для нормализации поведения
       # wg-quick; это позволяет systemd‑юниту оставаться простым и не
       # включать сложную shell‑логику.

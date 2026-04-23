@@ -76,4 +76,10 @@ can be launched in this environment, not to validate its output."
         ;; so assert nil with the formatted message as the failure text.
         (error (ert-fail (format "failed to start %s: %s" cmd (error-message-string err))))))))
 
+(ert-deftest pro-test-keys-suite ()
+  "Run keys unit tests." 
+  (let ((tests-file (expand-file-name "emacs/base/modules/tests-keys.el" (pro-test--repo-root))))
+    (when (file-readable-p tests-file)
+      (load tests-file nil t)))
+
 (provide 'tests)

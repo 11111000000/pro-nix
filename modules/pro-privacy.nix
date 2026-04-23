@@ -1,10 +1,14 @@
 # Файл: автосгенерированная шапка — комментарии рефакторятся
-{ pkgs, lib, ... }:
+{ config, pkgs, lib, ... }:
 
 {
-  # Службы приватности и анонимного доступа.
-  # Tor: клиентская конфигурация с локальным SOCKS прокси и ControlPort.
-  # Используем bridges и obfs4 транспорты для обхода сетевых ограничений.
+  # Раздел: приватность и анонимные сети — учебное объяснение
+  #
+  # Суть раздела:
+  # Приводится конфигурация клиентских средств приватности: Tor и сопутствующие
+  # транспорты (obfs4, snowflake, meek). Комментарии поясняют роль ControlPort,
+  # SOCKSPort и шаблоны управления bridges. Это демонстрация практической
+  # интеграции анонимных сетей на хосте.
   services.tor = {
     enable = true;
     client.enable = true;
@@ -31,14 +35,14 @@
     };
   };
 
-  # I2P: ещё один стек приватной сети, включается как опция.
+  # I2P — дополнительный стек приватной сети (опция).
   services.i2p.enable = true;
 
-  # Install example/template of bridges into /etc so operator can copy/edit it.
-  # We don't manage the runtime /etc/tor/bridges.conf directly (that file must
-  # be editable by the admin). Instead we place a template at
-  # /etc/tor/bridges.conf.example and ensure at boot that a real
-  # /etc/tor/bridges.conf exists by copying the template if missing.
+  # Развёртывание шаблона bridges.conf
+  # Шаблон помещается в /etc/tor/bridges.conf.example и копируется в
+  # /etc/tor/bridges.conf при отсутствии последнего. Файл /etc/tor/bridges.conf
+  # должен быть редактируем оператором, поэтому мы не управляем им полностью
+  # декларативно.
   environment.etc."tor/bridges.conf.example".source = ../conf/tor-bridges.conf;
 
   systemd.services."tor-ensure-bridges" = {
@@ -51,7 +55,7 @@
   };
 
   # Ensure awk is available during activation scripts (used by activate).
-  environment.systemPackages = with pkgs; [ gawk ];
+  environment.systemPackages = lib.mkForce ((config.environment.systemPackages or []) ++ (with pkgs; [ gawk ]));
 
   # Открытые порты для служб приватности — доступны локально/для роутинга.
   networking.firewall = {
@@ -59,7 +63,7 @@
     allowedUDPPorts = [ 9564 ];
   };
 
-  # NOTE: automatic reload on bridges changes is intentionally omitted here.
+  # Примечание: автоматическая перезагрузка при изменении bridges намеренно опущена.
   # Dynamic runtime reloading can be implemented later with a carefully
   # tested systemd.path/service that avoids triggering during activation.
 }
