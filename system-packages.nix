@@ -168,11 +168,23 @@ let
     # available. This makes upstream prebuilt binaries behave more like a
     # generic Linux environment. If steam-run is not present, fall back to
     # running under systemd-run to limit resource usage.
+    # For ACP (opencode acp) we must preserve stdin/stdout and avoid
+    # launching the binary via systemd-run/steam-run (they may detach
+    # or change stdio handling). Detect common interactive subcommands
+    # and honor OPENCODE_DIRECT_RUN to force direct execution.
+    if [ "$${OPENCODE_DIRECT_RUN:-0}" = "1" ] || [ "$${1:-}" = "acp" ] || [ "$${1:-}" = "acp-shell" ]; then
+      # Directly exec the binary and forward all args unchanged.
+      exec "$BIN" "$@"
+    fi
+
     if command -v steam-run >/dev/null 2>&1; then
       STEAM_RUN_CMD=$(command -v steam-run)
-      exec "$STEAM_RUN_CMD" "$BIN" -- "$@"
+      # Forward args unchanged through steam-run
+      exec "$STEAM_RUN_CMD" "$BIN" "$@"
     else
-      exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 "$BIN" -- "$@"
+      # For systemd-run we must place a separator `--' before the command
+      # to separate systemd-run options from the invoked command and its args.
+      exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 -- "$BIN" "$@"
     fi
   '';
   # provide opencodeBin from flake/flake.nix instead of duplicating here
@@ -395,6 +407,9 @@ github-cli
   gnugrep
   silver-searcher
   platinum-searcher
+  ripgrep
+  fd
+  findutils
 
   # Темы курсора X11 нужны как визуальная интонация, а не как отдельный дизайн-проект.
   xorg.xcursorthemes

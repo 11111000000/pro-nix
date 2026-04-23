@@ -1,0 +1,6 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "docs/hds-llm-seed-en.md"
+  ]
+}

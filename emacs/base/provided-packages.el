@@ -1,0 +1,9 @@
+;; Repository fallback for provided packages.
+;; This is used when ~/.config/emacs/provided-packages.el is not writable
+;; (for example when managed by home-manager). It is generated from
+;; nix/provided-packages.nix when preparing the repository for development.
+
+(setq pro-packages-provided-by-nix
+      '(magit consult vertico orderless marginalia gptel consult-dash consult-eglot consult-yasnippet corfu cape kind-icon avy expand-region yasnippet projectile treemacs vterm ace-window))
+
+(provide 'provided-packages)

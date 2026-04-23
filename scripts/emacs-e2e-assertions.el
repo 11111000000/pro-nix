@@ -27,6 +27,9 @@
   (ee/feature-assert 'orderless)
   (ee/feature-assert 'corfu)
   (ee/feature-assert 'cape)
+  (ee/feature-assert 'vterm)
+  (ee/feature-assert 'winner)
+  (ee/feature-assert 'ace-window)
   (ee/feature-assert 'embark)
   (ee/feature-assert 'marginalia)
   ;; Sanity checks

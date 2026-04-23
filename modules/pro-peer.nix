@@ -225,8 +225,29 @@ in
       # directory exists with correct ownership. Again, append to the global
       # rules list rather than forcing it.
       systemd.tmpfiles.rules = lib.mkIf config.pro-peer.allowTorHiddenService [
-        "d /var/lib/tor/ssh_hidden_service 0700 debian-tor debian-tor -"
+        # Ensure Tor runtime dir and the SSH hidden-service dir exist with
+        # the `tor` user ownership. Previously this used `debian-tor`, which
+        # may not exist on this system and can leave directories owned by
+        # nobody:nogroup causing Tor to fail at startup (permission denied).
+        "d /var/lib/tor 0700 tor tor -"
+        "d /var/lib/tor/ssh_hidden_service 0700 tor tor -"
       ];
+
+      # Ensure correct ownership/permissions on /var/lib/tor at activation.
+      # Some systems may already have /var/lib/tor owned by another user
+      # (e.g. nobody) which prevents Tor from starting. tmpfiles only creates
+      # the directories if missing and may not fix ownership on existing
+      # directories, so add a lightweight oneshot service that enforces the
+      # expected tor:tor ownership before tor.service runs.
+      systemd.services."pro-peer-ensure-tor-perms" = {
+        description = "Ensure /var/lib/tor ownership and modes for Tor";
+        wantedBy = [ "multi-user.target" ];
+        before = [ "tor.service" ];
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = ''/bin/sh -c 'if [ -d /var/lib/tor ]; then chown -R tor:tor /var/lib/tor || true; chmod 700 /var/lib/tor || true; [ -d /var/lib/tor/ssh_hidden_service ] && chmod 700 /var/lib/tor/ssh_hidden_service || true; fi'"'';
+        };
+      };
     })
   ];
 

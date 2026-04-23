@@ -89,7 +89,7 @@ Each machine-specific layer adds only hardware-specific data.
 ### 3. Equal users
 The system defines four equal accounts:
 - `az`
-- `zo`
+- `za`
 - `la`
 - `bo`
 
@@ -207,7 +207,7 @@ Document precedence, paths, and host rules in `docs/plans` and `docs/analyse`.
 
 - Fresh install works from a downloaded repo.
 - The installer can apply machine-specific overrides only when needed.
-- `az`, `zo`, `la`, and `bo` remain equal.
+- `az`, `za`, `la`, and `bo` remain equal.
 - Emacs Lisp stays in `.el` files.
 - EXWM is available by default but not imposed.
 - User module overrides are natural and simple.

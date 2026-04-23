@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  lint-and-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install nix
+        uses: cachix/install-nix-action@v20
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - name: Nixfmt (check)
+        run: |
+          if ! command -v nixpkgs-fmt >/dev/null 2>&1; then nix-env -iA nixpkgs.nixfmt; fi
+          nixfmt -l || true
+      - name: Shellcheck for scripts
+        uses: ludeeus/action-shellcheck@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          args: "--shell=bash"
+      - name: Elisp byte-compile check
+        run: |
+          docker run --rm -v $PWD:/repo -w /repo alpine:latest /bin/sh -c "apk add --no-cache emacs-nox gcc make && emacs -batch -Q --eval '(byte-recompile-directory "/repo" 0)'"

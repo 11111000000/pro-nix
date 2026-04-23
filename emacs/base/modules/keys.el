@@ -40,6 +40,7 @@
   "Привязать KEY к COMMAND, если KEY не пустой."
   (when (and key command (not (string-empty-p key)))
     (if (and (symbolp command) (fboundp command))
+        ;; Apply now when possible
         (global-set-key (kbd key) command)
       ;; Запомним в отложенных привязках — попробуем применить позже.
       (push (list :global key command) pro-keys-pending-bindings))))
@@ -129,8 +130,26 @@
                (binding (and (pro-keys--table-line-p line)
                              (pro-keys--parse-org-table-line line))))
           (when binding
+            (let ((section (nth 0 binding))
+                  (key (nth 1 binding))
+                  (cmd (nth 2 binding)))
+              ;; If the line contains a provenance marker for a module, record it
+              ;; for potential rollback. We treat lines preceding the table row
+              ;; that match "# PRO-MODULE: <name>" as ownership markers.
+              (save-excursion
+                (let ((owner nil)
+                      (pos (line-beginning-position)))
+                  (when (> pos 1)
+                    (goto-char (1- pos))
+                    (when (re-search-backward "^# PRO-MODULE: \(.*\)$" (point-min) t)
+                      (setq owner (match-string 1))))
+                  (when owner
+                    ;; Record mapping key -> owner in a simple alist
+                    (unless (boundp 'pro-keys-provenance)
+                      (defvar pro-keys-provenance nil "Alist of (KEY . MODULE) provenance."))
+                    (push (cons key owner) pro-keys-provenance))))
             (pro-keys--apply-row (nth 0 binding) (nth 1 binding) (nth 2 binding))))
-        (forward-line 1)))))
+        (forward-line 1))))))
 
 (defun pro-keys-reload ()
   "Перезагрузить клавиши из системного и пользовательского слоёв."
@@ -151,10 +170,10 @@
     (let ((remaining nil))
       (dolist (entry (nreverse pro-keys-pending-bindings))
         (pcase entry
-          (`(:global ,key ,cmd)
-           (if (and (symbolp cmd) (fboundp cmd))
-               (global-set-key (kbd key) cmd)
-             (push entry remaining)))
+           (`(:global ,key ,cmd)
+            (if (and (symbolp cmd) (fboundp cmd))
+                (global-set-key (kbd key) cmd)
+              (push entry remaining)))
           (`(:exwm ,key ,cmd)
            (if (and (symbolp cmd) (fboundp cmd))
                (push (cons (kbd key) cmd) pro-keys-exwm-global-keys)
@@ -197,3 +216,47 @@
 
 (provide 'keys)
 
+;; Registry for module-suggested keys (module -> alist of ("KEY" . SYMBOL))
+(defvar pro/registered-module-keys (make-hash-table :test 'eq)
+  "Hash table mapping module symbol to its suggested keys alist.")
+
+(defun pro/register-module-keys (module keys-alist)
+  "Register KEYS-ALIST suggested by MODULE.
+KEYS-ALIST is an alist of ("KEY" . command-symbol).
+This records suggestions only; it does not apply global bindings.
+Use `pro/export-registered-keys-to-org' or `pro/keys-import-suggestions' to
+persist or apply suggestions." 
+  (when (and module keys-alist)
+    (puthash module keys-alist pro/registered-module-keys)
+    (message "pro: registered %d suggested keys from %s" (length keys-alist) module)))
+
+(defun pro/unregister-module-keys (module)
+  "Unregister keys suggested by MODULE." 
+  (remhash module pro/registered-module-keys)
+  (message "pro: unregistered keys for %s" module))
+
+(defun pro/list-registered-module-keys ()
+  "Return an alist of registered modules and their suggested keys." 
+  (let (out)
+    (maphash (lambda (k v) (push (cons k v) out)) pro/registered-module-keys)
+    out))
+
+(defun pro/export-registered-keys-to-org (&optional out-file)
+  "Export registered module key suggestions to OUT-FILE as an Org table.
+If OUT-FILE is nil, print the generated content to *Messages* buffer. This
+function does not apply the keys; it only writes suggestions for review." 
+  (interactive)
+  (let ((file (or out-file (expand-file-name "emacs-keys.suggestions.org" temporary-file-directory))))
+    (with-temp-file file
+      (insert (format "# Generated suggestions at %s\n\n" (current-time-string)))
+      (insert "| Section | Key | Command | Note |\n")
+      (insert "|--------+-----+---------+------|\n")
+      (maphash
+       (lambda (mod keys)
+         (insert (format "# PRO-MODULE: %s\n" mod))
+         (dolist (pair keys)
+           (let ((k (car pair)) (cmd (cdr pair)))
+             (insert (format "| %s | %s | %s | suggested from %s |\n" "Suggested" k cmd mod)))))
+       pro/registered-module-keys))
+    (message "pro: exported registered keys to %s" file)
+    file))

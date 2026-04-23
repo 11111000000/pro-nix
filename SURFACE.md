@@ -23,6 +23,18 @@
 10. Глобальные биндинги Emacs находятся в `emacs-keys.org`; локальные переопределения — в `~/.emacs.d/keys.org`.
 11. Репозиторий предлагает простые команды для установки: NixOS, portable Emacs и plain `~/.emacs.d`.
 
+## Surface Items
+
+- Name: Healthcheck
+  Stability: [FROZEN]
+  Spec: The repository exposes a headless Emacs verification script that completes successfully on the host: `./scripts/emacs-headless-test.sh`.
+  Proof: tests/contract/test_surface_health.spec
+
+- Name: InstallMethods
+  Stability: [FLUID]
+  Spec: Installation can be performed via `bootstrap/install.sh`, `bootstrap/install-pro.sh`, or NixOS activation.
+  Proof: -
+
 ## Emacs Lisp Style
 
 1. Keep functions small and named by role, not by mechanism.

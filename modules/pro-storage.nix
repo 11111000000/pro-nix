@@ -10,20 +10,22 @@ in
   # interface). Disable by default here to keep `nixos-rebuild switch`
   # reliable. Hosts that need Samba should enable it in their local
   # per-host config (eg. local.nix) or remove this override.
-  services.samba.enable = false;
-  services.samba.openFirewall = false;
+  # Enable Samba by default; allow hosts to override. Open firewall via NixOS option.
+  services.samba.enable = lib.mkDefault true;
+  services.samba.openFirewall = lib.mkDefault true;
   # Avahi can fail early during boot if /run/avahi-daemon is missing; ensure
   # tmpfiles create expected runtime directories. Do not change avahi.enable
   # behavior here — keep the service enabled as originally configured.
   services.avahi.enable = true;
   services.avahi.publish.enable = true;
   # Configure Samba to be reachable on the local network only and advertise via mDNS
-  # Use the structured settings API for newer NixOS releases
-  services.samba.settings.global = lib.mkForce {
+  # Use the declarative settings sections: "global" + per-share sections
+  services.samba.settings."global" = lib.mkForce {
     workgroup = "WORKGROUP";
     "server string" = "NixOS Samba Server";
-    # Avoid mapping unknown users to guest; explicit users only.
-    "map to guest" = "Never";
+    # Map неизвестного пользователя в гостя, чтобы анонимный доступ к public
+    # реально работал (вместе с "guest ok = yes" на секции шары).
+    "map to guest" = "Bad User";
     # usershare convenience: keep allowed but it's safer to restrict shares
     "usershare allow guests" = "No";
 
@@ -31,14 +33,12 @@ in
     "server min protocol" = "SMB2";
     "client min protocol" = "SMB2";
 
-    # Require signing to mitigate MITM and relay attacks on local networks.
-    # This may break very old clients; adjust to "required" or "desired"
-    # depending on your environment. We choose "required" for safety.
-    "server signing" = "required";
-    "client signing" = "required";
+    # Prefer signing for compatibility with Android clients; allow stronger
+    # clients to use signing while not blocking those without it.
+    "server signing" = "desired";
+    "client signing" = "desired";
 
-    # Prefer encryption when supported. "required" forces SMB3 encryption
-    # and may break legacy clients; leaving as "desired" is friendlier.
+    # Prefer encryption when supported.
     "smb encrypt" = "desired";
 
     # Restrict anonymous access and disable NTLMv1.
@@ -48,11 +48,14 @@ in
     # Do not hardbind interfaces here; allow binding to available interfaces
     # so the service starts reliably on dynamic Wi‑Fi networks.
     "bind interfaces only" = "No";
+
+    # Limit access to RFC1918 addresses at the Samba layer (defense in depth),
+    # independent from firewall backend.
+    "hosts allow" = "127.0.0.1 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16";
+    "hosts deny" = "0.0.0.0/0";
   };
-  # Define Samba shares via the structured `services.samba.settings.shares`
-  # mapping to avoid deprecated `services.samba.shares` usage.
-  services.samba.settings.shares = {
-    "${hostName}" = {
+  # Define Samba shares as sections under services.samba.settings
+  services.samba.settings."${hostName}" = {
       path = "/srv/samba/${hostName}";
       browseable = "yes";
       "read only" = "no";
@@ -60,10 +63,10 @@ in
       "force group" = "pro";
       "create mask" = "0775";
       "directory mask" = "2775";
-      "valid users" = "az zo la bo";
-    };
+      "valid users" = "az za la bo";
+  };
 
-    public = {
+  services.samba.settings.public = {
       path = "/srv/samba/public";
       browseable = "yes";
       "read only" = "no";
@@ -72,7 +75,6 @@ in
       "force user" = "az";
       "create mask" = "0775";
       "directory mask" = "2775";
-    };
   };
 
   systemd.tmpfiles.rules = [
@@ -91,25 +93,22 @@ in
   # фильтров между машинами; оставляем настройку локальной ответственности.
 
   networking.firewall = {
-    # Keep application ports open (exposed generally). We remove SMB ports
-    # from the global "allowedTCPPorts" list and instead add explicit
-    # firewall rules below to restrict access to RFC1918 private nets.
+    # Keep application ports open (exposed generally). SMB ports are opened by
+    # services.samba.openFirewall; keep other app ports here.
     allowedTCPPorts = [ 22000 8384 ];
     allowedUDPPorts = [ 21027 137 138 ];
   };
 
-  # Use firewall.extraCommands to install idempotent iptables rules that allow
-  # SMB only from RFC1918 networks. Some NixOS releases may not expose the
-  # "networking.nftables" option; using extraCommands keeps compatibility.
-  networking.firewall.extraCommands = ''
-    # Allow SMB from 10/8 if not already present
-    iptables -C INPUT -p tcp -m multiport --dports 139,445 -s 10.0.0.0/8 -j ACCEPT 2>/dev/null || iptables -I INPUT -p tcp -m multiport --dports 139,445 -s 10.0.0.0/8 -j ACCEPT || true
-    # Allow SMB from 172.16/12
-    iptables -C INPUT -p tcp -m multiport --dports 139,445 -s 172.16.0.0/12 -j ACCEPT 2>/dev/null || iptables -I INPUT -p tcp -m multiport --dports 139,445 -s 172.16.0.0/12 -j ACCEPT || true
-    # Allow SMB from 192.168/16
-    iptables -C INPUT -p tcp -m multiport --dports 139,445 -s 192.168.0.0/16 -j ACCEPT 2>/dev/null || iptables -I INPUT -p tcp -m multiport --dports 139,445 -s 192.168.0.0/16 -j ACCEPT || true
-    # Drop SMB from elsewhere if not already present
-    iptables -C INPUT -p tcp -m multiport --dports 139,445 -j DROP 2>/dev/null || iptables -A INPUT -p tcp -m multiport --dports 139,445 -j DROP || true
+  # Publish Samba via mDNS for Android discovery.
+  environment.etc."avahi/services/samba.service".text = ''
+    <?xml version="1.0" standalone='no'?>
+    <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+    <service-group>
+      <service>
+        <type>_smb._tcp</type>
+        <port>445</port>
+      </service>
+    </service-group>
   '';
 
   # Avahi is enabled above; Samba is configured to bind to the local LAN subnet

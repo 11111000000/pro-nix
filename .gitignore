@@ -3,6 +3,10 @@
 .context
 logs/
 result
+.tao/
+analyse/
+result-cf19/
+logs/
 local.nix
 local-nix
 bootstrap/local.nix

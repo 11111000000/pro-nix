@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Simple vertical scenario test for pro-nix: verify headless Emacs starts and exits
+set -euo pipefail
+root="$(cd "$(dirname "$0")/../.." && pwd)"
+
+if [ ! -f "$root/scripts/emacs-headless-test.sh" ]; then
+  echo "skip: emacs-headless-test.sh not present" >&2
+  exit 0
+fi
+
+echo "Running minimal vertical scenario: headless Emacs smoke"
+bash "$root/scripts/emacs-headless-test.sh" || { echo "scenario failed" >&2; exit 2; }
+echo "scenario: OK"

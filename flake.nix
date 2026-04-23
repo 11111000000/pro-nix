@@ -125,5 +125,33 @@ EOF
           };
         };
       };
+
+      devShells.${system}.default = pkgs.mkShell {
+        name = "pro-nix-dev";
+        buildInputs = [ emacsPkg pkgs.ripgrep pkgs.fd pkgs.findutils ];
+        shellHook = let
+          flags = lib.concatStringsSep " " (map (p: "-L " + p + "/share/emacs/site-lisp") [
+            pkgs.emacsPackages.vertico pkgs.emacsPackages.consult pkgs.emacsPackages.orderless
+            pkgs.emacsPackages.marginalia pkgs.emacsPackages.gptel pkgs.emacsPackages.consult-dash
+            pkgs.emacsPackages.consult-eglot pkgs.emacsPackages.consult-yasnippet pkgs.emacsPackages.corfu
+            pkgs.emacsPackages.cape pkgs.emacsPackages.kind-icon pkgs.emacsPackages.avy
+            pkgs.emacsPackages.expand-region pkgs.emacsPackages.yasnippet pkgs.emacsPackages.projectile
+            pkgs.emacsPackages.treemacs pkgs.emacsPackages.vterm pkgs.emacsPackages.ace-window pkgs.emacsPackages.embark
+          ]);
+        in ''
+          echo "Entering pro-nix devshell with Emacs available"
+          WRAP_DIR="${toString ./.}/.pro-emacs-wrapper"
+          mkdir -p "$WRAP_DIR"
+          EMACS_BIN="${toString emacsPkg}/bin/emacs"
+          cat > "$WRAP_DIR/emacs-pro" <<SH
+#!/bin/sh
+EMACS_BIN="${toString emacsPkg}/bin/emacs"
+exec "$EMACS_BIN" -Q ${flags} "$@"
+SH
+          chmod +x "$WRAP_DIR/emacs-pro"
+          export PATH="$WRAP_DIR:$PATH"
+          echo "Created emacs wrapper at $WRAP_DIR/emacs-pro"
+        '';
+      };
     };
 }

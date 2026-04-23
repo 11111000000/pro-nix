@@ -25,7 +25,7 @@ if [[ -f modules/pro-users.nix ]]; then
     nix-instantiate --eval --strict --json \
         -I nixpkgs=channel:nixos-unstable \
         -E 'with import <nixpkgs> {}; (import <nixpkgs/nixos> { configuration = { imports = [ (./. + "/modules/pro-users.nix") ]; }; }).config.users.users' \
-        | jq -r 'keys[]' | grep -E '^(az|zo|la|bo)$' | wc -l | grep -q 4 || {
+        | jq -r 'keys[]' | grep -E '^(az|za|la|bo)$' | wc -l | grep -q 4 || {
         echo "❌ Не все четыре пользователя найдены в pro-users.nix"
         exit 1
     }

@@ -19,3 +19,14 @@
   (pro-emacs-base-start))
 
 (provide 'pro-init)
+
+;; After core init: load optional completion keys and external org key loader
+(when (require 'completion-keys nil t)
+  ;; completion-keys binds useful C-c o <letter> keys for CAPE and consult-yasnippet
+  )
+
+;; External references to other personal repositories (like ~/pro) are
+;; intentionally disallowed in pro-nix. Global keys must come from
+;; emacs-keys.org (system) and ~/.config/emacs/keys.org (user).
+;; If you need to import keys, port them into the repository or into
+;; your per-user ~/.config/emacs/keys.org; do not reference ~/pro here.

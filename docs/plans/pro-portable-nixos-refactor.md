@@ -5,7 +5,7 @@
 Turn the current machine-specific NixOS setup into a portable `pro` configuration that:
 - installs from a downloaded repository plus a bootstrap script
 - supports machine-specific overrides when needed
-- treats `az`, `zo`, `la`, and `bo` as equal users
+- treats `az`, `za`, `la`, and `bo` as equal users
 - keeps system settings shared and editable only through config files
 - keeps Emacs Lisp in normal `.el` files, never inline in Nix
 - provides a base Emacs layer that works by default and can be overridden naturally
@@ -95,7 +95,7 @@ Each machine-specific layer provides only:
 
 The four users must be equal in policy and structure:
 - `az`
-- `zo`
+- `za`
 - `la`
 - `bo`
 
@@ -173,7 +173,7 @@ This makes installation feel like a guided setup while keeping the result declar
 Extract shared settings from the monolithic config into common modules and machine stubs.
 
 ### Phase 2: Normalize users
-Define `az`, `zo`, `la`, and `bo` as equivalent accounts using one shared user template.
+Define `az`, `za`, `la`, and `bo` as equivalent accounts using one shared user template.
 
 ### Phase 3: Separate Emacs base from Lisp
 Move Emacs behavior into ordinary `.el` files and keep Nix responsible only for installation and launching.
@@ -200,7 +200,7 @@ Document file locations, precedence rules, and profile selection in `docs/analys
 - The repo can be installed from a fresh download.
 - The installer can apply machine-specific overrides when needed.
 - Rebuilds stay on one shared core.
-- `az`, `zo`, `la`, and `bo` behave the same from the system perspective.
+- `az`, `za`, `la`, and `bo` behave the same from the system perspective.
 - Emacs Lisp lives in normal `.el` files only.
 - The base Emacs works by default and is easy to override or disable.
 - The config remains understandable and portable.

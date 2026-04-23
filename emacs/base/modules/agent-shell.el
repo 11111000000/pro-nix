@@ -42,8 +42,52 @@
              (format-time-string "%F-%H-%M-%S.md")
              (agent-shell--dot-subdir "transcripts"))))
     
-    ;; Prefer the bundled agent config if available; avoid hard dependency on opencode.
-    (setq agent-shell-preferred-agent-config 'gptel)
+    ;; Prefer the opencode agent config by default (OpenCode CLI).
+    ;; This makes the agent-shell "OpenCode" option the primary choice.
+    ;; If your environment should prefer the reproducible Nix store binary
+    ;; rather than a user-local cached binary or the wrapper's bootstrap,
+    ;; set `pro-agent-shell-opencode-use-store' to non-nil so Emacs exports
+    ;; OPENCODE_USE_STORE=1 before starting processes.
+    (defcustom pro-agent-shell-opencode-use-store nil
+      "If non-nil, export OPENCODE_USE_STORE=1 in Emacs so the opencode
+wrapper prefers the Nix store binary when launched from Emacs.
+This can help avoid wrapper behavior that runs the binary under
+systemd-run/steam-run which sometimes interferes with agent-shell IO." 
+      :type 'boolean
+      :group 'pro-ai)
+
+    (when pro-agent-shell-opencode-use-store
+      (setenv "OPENCODE_USE_STORE" "1")
+      (message "[pro-agent-shell] OPENCODE_USE_STORE=1 exported for opencode-launches"))
+
+    ;; Prefer the opencode agent config and try to use the Nix store
+    ;; binary directly when available. The system wrapper `opencode` in
+    ;; this repo may exec the real binary under `systemd-run` or
+    ;; `steam-run`, which breaks ACP (it detaches stdio). To avoid that,
+    ;; prefer a direct Nix store path if present.
+    (defun pro-agent-shell--nix-store-opencode-path ()
+      "Return a probable Nix store opencode binary path or nil.
+
+Search order:
+- OPENCODE_STORE_PATH env var (if set)
+- first candidate under /nix/store/*opencode*/bin/opencode
+"
+      (or (when (getenv "OPENCODE_STORE_PATH")
+            (let ((p (expand-file-name "bin/opencode" (getenv "OPENCODE_STORE_PATH"))))
+              (and (file-executable-p p) p)))
+          (let ((cands (cl-remove-if-not
+                        #'file-executable-p
+                        (mapcar (lambda (p) (expand-file-name "bin/opencode" p))
+                                (ignore-errors (directory-files "/nix/store" t "opencode"))))))
+            (car cands))))
+
+    (when (boundp 'agent-shell-opencode-acp-command)
+      (let ((store-bin (pro-agent-shell--nix-store-opencode-path)))
+        (when store-bin
+          (setq agent-shell-opencode-acp-command (list store-bin "acp"))
+          (message "[pro-agent-shell] using opencode from Nix store: %s" store-bin))))
+
+    (setq agent-shell-preferred-agent-config 'opencode)
     (setq agent-shell-session-strategy 'prompt)))
 
 ;; Инициализация настроек
