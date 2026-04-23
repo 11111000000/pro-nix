@@ -20,6 +20,8 @@ let
     pkgs.emacsPackages.projectile
     pkgs.emacsPackages.treemacs
     pkgs.emacsPackages.vterm
+    pkgs.emacsPackages.ace-window
+    pkgs.emacsPackages.winner
   ];
   names = builtins.concatStringsSep " " (map (p: builtins.substring 0 100 (toString p)) emacsPackages);
 in
