@@ -36,8 +36,8 @@
 | AI        | C-c a   | pro-ai-open-entry       | Вход в AI                        |
 | AI        | C-c A   | pro-agent-open          | agent-shell                      |
 | Tabs      | C-c t n | pro-tabs-open-new-tab   | Открыть новую вкладку            |
-| Tabs      | C-c t x | pro-tabs-close-tab-and-buffer | Закрыть вкладку и буфер  |
-| Tabs      | C-c t o | tab-bar-switch-to-tab   | Переключиться на вкладку         |
+| Tabs      | C-c t k | pro-tabs-close-tab-and-buffer | Закрыть вкладку и буфер  |
+| Tabs      | C-c t s | tab-bar-switch-to-tab   | Переключиться на вкладку         |
 | Package   | C-c P p | pro-packages-menu       | Список пакетов                   |
 | Package   | C-c P i | pro-packages-install    | Установить пакет из ELPA         |
 | Package   | C-c P v | pro-packages-install-vc | Установить пакет из VC           |
@@ -49,3 +49,8 @@
 | Git       | C-c g   | pro-git-dispatch        | Magit dispatch                   |
 | Org       | C-c o   | org-agenda              | Повестка                         |
 | Ключи     | C-c k   | pro-keys-reload         | Перезагрузить клавиши            |
+
+# AUTO-MERGED: Thu Apr 23 23:59:36 2026
+| Suggested | C-c v y | pro/vterm-yank | suggested from terminals |
+| Suggested | C-c v i | pro/vterm-interrupt | suggested from terminals |
+| Suggested | C-c v c | vterm-copy-mode | suggested from terminals |
