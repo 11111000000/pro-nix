@@ -6,6 +6,12 @@ let
   defaultModulesText = lib.concatStringsSep " " defaultModules;
   hmPackages = with pkgs; [ fd ripgrep home-manager fnm git ];
   guiPackages = with pkgs; [ xclip rxvt-unicode obexd ];
+
+  # Учебный обзор модулей Emacs
+  # - core, ui, packages: фундаментальные компоненты для загрузки окружения.
+  # - lisp, python, haskell: языковые интеграции и среды разработки.
+  # - ai, agent, chat: модули, интегрирующие агентов и LLM через внешние сервисы
+  #   или локальные двоичные файлы (см. ollama в system-packages.nix).
   portableFiles = {
     home.file.".config/emacs/early-init.el".source = ../emacs/base/early-init.el;
     home.file.".config/emacs/init.el".source = ../emacs/base/init.el;

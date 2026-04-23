@@ -87,4 +87,54 @@ Rollback
   1) пример systemd.user automount template (опционально), привязываемый в hosts/* при необходимости;
   2) поддержку зашифрованных creds (/etc/samba/creds.d/*.gpg) с аналогичным pro-peer-sync-keys.sh flow для развёртывания секретов.
 
+Новая цель и требования
+- IP могут меняться: поэтому решение должно опираться на устойчивую службу обнаружения имён и на overlay tunnel (mesh) для связности за пределами LAN.
+- Хосты должны видеть друг друга в локалке под правильными именами (hostname.local). mDNS + nss-mdns обеспечивает это в подавляющем большинстве LAN‑сценариев; если мрежа блокирует mDNS, резервом выступает mesh VPN (WireGuard/Yggdrasil/Headscale) с собственной именой/сервисами и DNS.
+- Шары должны быть доступны между хостами: Samba на каждом хосте (modules/pro-storage.nix) публикует _smb._tcp и шарu. Для доступа используем либо guest, либо per-host creds в /etc/samba/creds.d (или зашифрованные creds).
+
+Диалектический анализ (тезис/антитезис/синтез) применён к новым требованиям
+
+Тезис
+- mDNS + Samba + systemd automount — простой и привычный пользовательский путь. Имя host.local — читабельно, работает в GUI, совместимо с Android/Windows при корректных настройках.
+
+Антитезис
+- mDNS зависит от multicast; многие сетевые окружения (гостевые Wi‑Fi, корпоративные VLAN, плохие роутеры) блокируют multicast/DNS‑SD. IP адреса динамичны, DNS централизованный может быть недоступен или недоверен. Автоматический automount требует неконтролируемых persistent credentials, что рискованно.
+
+Синтез (практическая архитектура)
+- Слой 1 (LAN): Avahi + nss-mdns + Samba для локального обнаружения и доступа. Это покрывает локальные сценарии удобной работы.
+- Слой 2 (Mesh overlay): добавляем Mesh VPN (WireGuard with headscale or Yggdrasil) как fallback/primary для обеспечения связности и стабильных адресов/имен при глобальной сетевой блокировке. Mesh даёт один из вариантов:
+  - внутренний DNS через headscale/consul для стабильно разрешаемых имён; или
+  - использовать peer-to-peer routable addresses (Yggdrasil gives stable IPv6 overlay addresses) + mDNS over mesh if needed.
+- Credentials: никогда не хранить в репо. Решение: per-host creds в /etc/samba/creds.d (при automount) или зашифрованные creds на стороне оператора с pro-peer style distribution (GPG/age). Документируем явный шаг "один раз сохранить creds" до включения automount.
+
+Конкретные предложения по mesh
+- Headscale + WireGuard: operator управляет headscale server; хосты регистрируются и получают WireGuard конфиги. Плюсы: современно, простая управляемость, стабильные адреса. Минусы: требует хост c public endpoint для headscale/coordination.
+- Yggdrasil: полностью p2p overlay без центрального сервера (может быть удобным при отсутствии reachability), даёт стабильные IPv6 адреса; минусы — необходимость собирать conf и возможная несовместимость с некоторыми сетами.
+- ZeroTier/SoftEther: альтернативы; ZeroTier проще, но требует доверия к центра и внешней инфраструктуре.
+
+Интеграция с pro-nix repository
+- Не коммитим креды и ключи. (Добавил правило в AGENTS.md). Скрипты, которые управляют creds, должны работать с зашифрованными артефактами и operator workflows (pro-peer-sync-keys.sh — шаблон).
+- В репо должны быть только шаблоны unit/инструкции и скрипты мастера, которые принимают подготовленные, зашифрованные файлы и безопасно их раскладывают (аналогично pro-peer-master.sh и pro-peer-sync-keys.sh).
+
+Документация оператора (после deploy)
+- Перечень действий, которые оператор должен выполнить на каждой машине (или централизованно master script):
+  1) Применить NixOS конфиг: sudo nixos-rebuild switch
+  2) Один раз выполнить: sudo ./scripts/mount-smb.sh mount <host> и сохранить creds
+  3) Если требуется automount: sudo systemctl enable --now smb-mount@<host>.automount
+  4) Регистрация в mesh: run pro-peer wg/headscale registration script / follow operator instructions
+  5) Проверка: avahi-browse, ping host.local, ping overlay IP (wireguard/yggdrasil), smbclient -L //host.local
+
+Мастер-скрипт (оператор)
+- В репо можно хранить мастер-скрипт, который:
+  - принимает зашифрованный bundle с creds/keypairs (GPG/age),
+  - копирует их на целевые машины по SSH и запускает systemd unit для их установки (аналог pro-peer-master.sh),
+  - проверяет доступность share и перезапускает smb/avahi.
+- Такой скрипт НЕ хранит приватные ключи в открытом виде и требует, чтобы оператор загрузил зашифрованный bundle вручную.
+
+Вывод (работающая краткая схема)
+- Локально: avahi + nss-mdns + Samba + mount-smb.sh (interactive save creds) + optional automount per-host. Это даёт простую UX для пользователей и администраторов.
+- На сетевом уровне: добавить Mesh overlay (WireGuard/headscale или Yggdrasil) как fallback, чтобы хосты pro-nix находили друг друга даже в заблокированном/фрагментированном интернете.
+- В репозитории: только шаблоны, инструкции и зашифрованные artefacts (не секреты). Оператор отвечает за развёртывание ключей/creds через проверенные secure workflows.
+
+
 Автор: OpenCode (внес изменения в репо: system-packages.nix, configuration.nix, scripts/mount-smb.sh, nix/modules/pro-smb-mount.nix)
