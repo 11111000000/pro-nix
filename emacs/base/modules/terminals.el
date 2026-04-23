@@ -51,10 +51,12 @@ This does not control installation of packages; ensure vterm is available in Nix
                ;; Optional consult integration: provide a yank-pop that works in vterm
                (when (and (fboundp 'consult-yank-pop) (fboundp 'vterm-send-string))
                  (defun pro/vterm-consult-yank-pop ()
-                   "Yank from consult history into vterm." (interactive)
+                   "Yank from consult history into vterm. Returns the chosen string for testing."
+                   (interactive)
                    (when (derived-mode-p 'vterm-mode)
                      (let ((s (consult-yank-pop)))
-                       (when s (vterm-send-string s))))))
+                       (when s (vterm-send-string s))
+                       s))))
                ;; Install local keymap for vterm helpers if keys module present
                (when (and (boundp 'pro/registered-module-keys)
                           (fboundp 'pro/register-module-keys))
