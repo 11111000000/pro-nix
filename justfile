@@ -24,6 +24,9 @@ build HOST:
 
 switch HOST='':
 	@HOST="{{HOST}}"; \
+	# If just was invoked as `just switch HOST=foo` some shells may pass the
+	# literal `HOST=foo` into the recipe. Strip a leading `HOST=` if present.
+	HOST="${HOST#HOST=}"; \
 	if [ -z "$HOST" ]; then \
 		HOST="$(cat /etc/hostname 2>/dev/null || hostname -s 2>/dev/null || true)"; \
 	fi; \
