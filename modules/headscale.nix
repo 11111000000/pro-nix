@@ -18,14 +18,28 @@ in
   };
 
   config = lib.mkIf config.headscale.enable {
-    environment.systemPackages = lib.mkForce (config.environment.systemPackages or []) ++ with pkgs; [ docker ];
+    # Prefer native headscale package over docker by default.
+    environment.systemPackages = lib.mkForce (config.environment.systemPackages or []) ++ with pkgs; [ headscale ];
+
+    # Minimal native systemd service. Operator should override config.yaml in host overlay.
     systemd.services.headscale = {
       description = "Headscale (WireGuard control plane)";
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
-        ExecStart = "${pkgs.docker}/bin/docker run --rm -p ${config.headscale.listenAddress} -v /var/lib/headscale:/data headscale/headscale";
+        ExecStart = "${pkgs.headscale}/bin/headscale serve --config /etc/headscale/config.yaml";
         Restart = "on-failure";
+        PrivateTmp = "true";
       };
     };
+
+    environment.etc."headscale/config.yaml".text = ''
+    # Minimal headscale config. Operator: override in host overlay at /etc/headscale/config.yaml
+    server_url: "http://0.0.0.0:8080"
+    listen: "0.0.0.0:8080"
+    db_type: "sqlite3"
+    db_path: "/var/lib/headscale/headscale.db"
+    '';
+
+    systemd.tmpfiles.rules = [ "d /var/lib/headscale 0755 root root -" ];
   };
 }
