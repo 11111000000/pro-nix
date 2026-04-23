@@ -1,0 +1,33 @@
+;;; decisions.el.example --- example decisions for pro-packages -*- lexical-binding: t; -*-
+
+;; Place a copy of this file at ~/.config/emacs/decisions.el to record package
+;; ownership decisions for the pro Emacs profile. pro-packages.el will load this
+;; file when present and consult `pro-packages-decisions` to decide whether to
+;; auto-install missing packages or respect user choices.
+
+;; Format: alist of (PACKAGE-SYMBOL . DECISION)
+;; DECISION := always | never
+;;  - always: if the package is missing and allowed, install from MELPA/ELPA
+;;  - never: never attempt to install this package from archives
+
+;; Examples:
+;;  - User wants MELPA-managed gptel even if Nix provides it:
+;;      (gptel . always)
+;;  - User explicitly refuses automatic install of somepkg:
+;;      (somepkg . never)
+
+;; Minimal template:
+(setq pro-packages-decisions
+      '(
+        ;; package provided by Nix but user prefers MELPA version
+        (gptel . always)
+
+        ;; package user wants to forbid auto-installs for
+        ;; (somepkg . never)
+        ))
+
+;; Save this file as ~/.config/emacs/decisions.el and it will be picked up by
+;; the pro-packages prompt-and-install flow. To change CI/Dev auto-install
+;; behaviour globally, export PRO_PACKAGES_AUTO_INSTALL=0/1 in your environment.
+
+;;; decisions.el.example ends here

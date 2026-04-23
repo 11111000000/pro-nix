@@ -33,7 +33,28 @@ This does not control installation of packages; ensure vterm is available in Nix
               (when (fboundp 'tab-line-mode) (tab-line-mode 1))
               ;; prefer sane history and copy mode
                (when (fboundp 'vterm-copy-mode)
-                 (vterm-copy-mode 0))
+                  (vterm-copy-mode 0))
+               ;; Additional small helpers ported from ~/pro if available
+               (when (fboundp 'vterm-copy-mode)
+                 ;; Escape from copy mode back to prompt
+                 (define-key vterm-copy-mode-map (kbd "C-g")
+                   (lambda () (interactive) (when (bound-and-true-p vterm-copy-mode) (vterm-copy-mode -1) (when (and (boundp 'vterm--process-marker) vterm--process-marker) (goto-char vterm--process-marker))))))
+               ;; Move up in line-mode or enter copy-mode then move
+               (define-key vterm-mode-map (kbd "C-p")
+                 (lambda () (interactive)
+                   (unless (bound-and-true-p vterm-copy-mode)
+                     (vterm-copy-mode 1))
+                   (when (bound-and-true-p vterm-copy-mode)
+                     (let ((cmd (or (lookup-key vterm-copy-mode-map (kbd "<up>") )
+                                    (lookup-key vterm-copy-mode-map (kbd "p")))))
+                       (when cmd (call-interactively cmd))))))
+               ;; Optional consult integration: provide a yank-pop that works in vterm
+               (when (and (fboundp 'consult-yank-pop) (fboundp 'vterm-send-string))
+                 (defun pro/vterm-consult-yank-pop ()
+                   "Yank from consult history into vterm." (interactive)
+                   (when (derived-mode-p 'vterm-mode)
+                     (let ((s (consult-yank-pop)))
+                       (when s (vterm-send-string s))))))
                ;; Install local keymap for vterm helpers if keys module present
                (when (and (boundp 'pro/registered-module-keys)
                           (fboundp 'pro/register-module-keys))
