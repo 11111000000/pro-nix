@@ -2,8 +2,10 @@
 { pkgs, emacsPkg }:
 
 let
-  # Отдельный интерпретатор Python, в котором гарантированно есть `requests`,
-  # чтобы org-babel не зависел от того, какой `python` попал в PATH (например, из ~/.nix-profile).
+  # Объяснение:
+  # Для воспроизводимости работы Emacs (org-babel и другие скрипты) требуется
+  # предсказуемый интерпретатор Python с набором пакетов. Здесь создаётся
+  # окружение с `requests`, чтобы вызовы из Emacs использовали известный контур.
   pyWithRequests = pkgs.python3.withPackages (ps: [ ps.requests ]);
   pyForBabel = "${pyWithRequests}/bin/python3";
 in

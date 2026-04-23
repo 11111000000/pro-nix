@@ -1,0 +1,37 @@
+{ lib, ... }:
+
+{
+  # Install system-level systemd unit templates for SMB automounting.
+  # They mount to /mnt/hosts/<host> and call the helper script added in the repo.
+  environment.etc."systemd/system/smb-mount@.service".text = ''
+  [Unit]
+  Description=Mount SMB share for %i
+  After=network-online.target
+  Wants=network-online.target
+
+  [Service]
+  Type=oneshot
+  RemainAfterExit=no
+  ExecStart=/run/current-system/sw/bin/bash -c '/usr/local/bin/mount-smb-wrapper mount %i'
+  ExecStop=/run/current-system/sw/bin/umount /mnt/hosts/%i
+  '';
+
+  environment.etc."systemd/system/smb-mount@.automount".text = ''
+  [Unit]
+  Description=Automount SMB share for %i
+
+  [Automount]
+  Where=/mnt/hosts/%i
+  TimeoutIdleSec=120
+
+  [Install]
+  WantedBy=multi-user.target
+  '';
+
+  # Install a small wrapper into /usr/local/bin that invokes the repo script.
+  environment.etc."usr/local/bin/mount-smb-wrapper".text = ''
+  #!/usr/bin/env bash
+  exec "${./scripts/mount-smb.sh}" "$@"
+  '';
+  environment.etc."usr/local/bin/mount-smb-wrapper".mode = "0755";
+}
