@@ -47,7 +47,9 @@
   (when (fboundp 'marginalia-mode)
     (marginalia-mode 1)))
 
-;; Defer consult-specific remaps and integration until consult is actually loaded
+;; Defer consult-specific integration until consult is actually loaded.
+;; ВАЖНО: Глобальные клавиши не назначаем здесь — они живут в emacs-keys.org
+;; и применяются модулем keys.el. Здесь только настройки поведения/интеграции.
 (with-eval-after-load 'consult
   ;; consult-xref handlers
   (when (require 'consult-xref nil t)
@@ -55,36 +57,14 @@
       (setq xref-show-definitions-function #'consult-xref
             xref-show-xrefs-function #'consult-xref)))
 
-  ;; Remap common commands to consult variants for a consistent UX
-  (when (fboundp 'consult-find)
-    (define-key global-map [remap find-file] #'pro/consult-find))
-  (when (fboundp 'consult-buffer)
-    (define-key global-map [remap switch-to-buffer] #'consult-buffer))
-  (when (fboundp 'consult-goto-line)
-    (define-key global-map [remap goto-line] #'consult-goto-line))
-  (when (fboundp 'consult-imenu)
-    (define-key global-map [remap imenu] #'consult-imenu))
-  (when (fboundp 'consult-bookmark)
-    (define-key global-map [remap bookmark-jump] #'consult-bookmark))
-  (when (fboundp 'consult-yank-pop)
-    (define-key global-map [remap yank-pop] #'consult-yank-pop))
-  (when (fboundp 'consult-complex-command)
-    (define-key global-map [remap repeat-complex-command] #'consult-complex-command))
-
   ;; Helpful consult defaults
   (when (fboundp 'consult-line)
     (setq consult-preview-key "M-.")
     (setq consult-line-start-from-top t))
 
-  ;; Embark integration and recommended bindings
+  ;; Embark integration (без глобальных клавиш; бинды — через emacs-keys.org)
   (when (require 'embark nil t)
-    (when (fboundp 'embark-act)
-      ;; register suggested global keys rather than binding them directly
-      (when (fboundp 'pro/register-module-keys)
-        (pro/register-module-keys
-         'embark
-         '( ("C-." . embark-act)
-            ("C-;" . embark-dwim))))))
+    (ignore (fboundp 'embark-act)))
 
   ;; Load and enable embark-consult integration if present
   (when (require 'embark-consult nil t)
@@ -112,11 +92,8 @@
   (when (and (boundp 'consult-buffer-sources) (fboundp 'cl-remove))
     (setq consult-buffer-sources
           (cl-remove 'consult--source-project-buffer consult-buffer-sources :test #'eq)))
-  ;; Provide helper functions (small and defensive); load only if consult is present
-  (when (require 'consult-helpers nil t)
-    ;; remap consult-buffer to our helper which augments behavior for EXWM/tab-bar
-    (when (fboundp 'pro/consult-buffer)
-      (define-key global-map [remap switch-to-buffer] #'pro/consult-buffer)))
+  ;; Provide helper functions (small and defensive); no global remaps here.
+  (require 'consult-helpers nil t)
   )
 
 (defun pro-nav-search-project ()
