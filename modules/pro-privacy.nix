@@ -55,7 +55,7 @@
   };
 
   # Ensure awk is available during activation scripts (used by activate).
-  environment.systemPackages = lib.mkForce (config.environment.systemPackages or []) ++ with pkgs; [ gawk ];
+  environment.systemPackages = lib.mkForce ((config.environment.systemPackages or []) ++ (with pkgs; [ gawk ]));
 
   # Открытые порты для служб приватности — доступны локально/для роутинга.
   networking.firewall = {
