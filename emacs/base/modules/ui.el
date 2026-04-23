@@ -163,6 +163,11 @@
       (setq kind-icon-default-face 'corfu-default) ;; integrate with corfu theme
       (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
+    ;; Gentle corfu face polish for better contrast in common themes.
+    (when (fboundp 'set-face-attribute)
+      (set-face-attribute 'corfu-default nil :background "#1c1f26" :foreground "#dcdfe4")
+      (set-face-attribute 'corfu-current nil :background "#2a2f36" :foreground "#ffffff" :weight 'bold)))
+
     ;; Vertico keybindings: make C-n/C-p behave like minibuffer navigation
     (when (and (boundp 'vertico-map) (keymapp vertico-map))
       (define-key vertico-map (kbd "C-n") #'vertico-next)
