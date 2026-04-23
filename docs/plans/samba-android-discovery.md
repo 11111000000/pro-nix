@@ -1,5 +1,8 @@
 Title: Samba Discovery on Android — Secure-by-Default Plan
 
+Note
+- This monolithic plan is now split into two parallel tracks: see plan01.md (Discovery & Compatibility) and plan02.md (Security & Control). This file remains as historical context.
+
 Intent
 - Ensure Samba shares are reliably discoverable from Android while keeping LAN exposure safe by default.
 
