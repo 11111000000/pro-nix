@@ -123,9 +123,9 @@
     XCURSOR_SIZE = "24";
   };
 
-  # Обеспечить доступность awk во время активации (некоторые скрипты активации используют awk).
+  # Ensure awk is available during activation (some activation scripts use awk).
   environment.systemPackages = lib.mkForce ((config.environment.systemPackages or []) ++ (with pkgs; [ gawk
-    # Install a system-wide xsessions entry so GDM shows EXWM for all users.
+    ;; Install a system-wide xsessions entry so GDM shows EXWM for all users.
     (runCommand "pro-exwm-xsession" {} ''
       mkdir -p $out/share/xsessions
       cat > $out/share/xsessions/exwm.desktop <<'EOF'
@@ -142,7 +142,7 @@ X-GNOME-Bugzilla-Component=window-manager
 EOF
       chmod -R a+rX $out
     '')
-  ];
+  ]));
 
   # Firefox включён как системный браузер.
   programs.firefox.enable = true;
