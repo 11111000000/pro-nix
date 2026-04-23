@@ -2,7 +2,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  users = [ "az" "zo" "la" "bo" ];
+  users = [ "az" "za" "la" "bo" ];
 in
 {
   home-manager = {

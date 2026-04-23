@@ -63,7 +63,7 @@ in
       "force group" = "pro";
       "create mask" = "0775";
       "directory mask" = "2775";
-      "valid users" = "az zo la bo";
+      "valid users" = "az za la bo";
   };
 
   services.samba.settings.public = {

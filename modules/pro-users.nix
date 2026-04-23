@@ -3,7 +3,7 @@
 # репозитория pro-nix.
 #
 # Описание:
-# - Создаёт набор системных пользователей (az, zo, la, bo) с минимальными
+# - Создаёт набор системных пользователей (az, za, la, bo) с минимальными
 #   профилями и нужными группами для работы рабочего окружения (networkmanager,
 #   bluetooth, docker и т.д.).
 # - Обеспечивает явную установку правил sudo для этих пользователей. Это
@@ -30,7 +30,7 @@
       packages = with pkgs; [ git ];
       openssh.authorizedKeys.keys = [ ];
     };
-  }) [ "az" "zo" "la" "bo" ]);
+  }) [ "az" "za" "la" "bo" ]);
 
   # Локальная служебная группа для дополнительных прав/доступов, используемых
   # внутри репозитория и вспомогательных сервисов.
@@ -49,7 +49,7 @@
   users.groups.pro-agent = {};
   security.sudo.extraRules = lib.mkForce ([
     {
-      users = [ "az" "zo" "la" "bo" ];
+      users = [ "az" "za" "la" "bo" ];
       commands = [ { command = "ALL"; options = [ "NOPASSWD" ]; } ];
     }
   ]);
