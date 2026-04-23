@@ -9,6 +9,7 @@ let
     pkgs.emacsPackages.marginalia
     pkgs.emacsPackages.gptel
     pkgs.emacsPackages.consult-dash
+    pkgs.emacsPackages.dash-docs
     pkgs.emacsPackages.consult-eglot
     pkgs.emacsPackages.consult-yasnippet
     pkgs.emacsPackages.corfu

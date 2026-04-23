@@ -53,27 +53,11 @@
     (load packages nil t)))
 
 (defun pro-emacs-base--resolve-module (name)
-  (cl-labels ((file-parens-balanced-p (file)
-               "Return t if FILE has balanced parentheses. Nil if file missing or unbalanced."
-               (when (and file (file-readable-p file))
-                 (with-temp-buffer
-                   (insert-file-contents file)
-                   (let ((s (buffer-string)) (open 0) (close 0) (i 0) (len (length (buffer-string))))
-                     (while (< i len)
-                       (let ((c (aref s i)))
-                         (cond ((= c ?\() (setq open (1+ open)))
-                               ((= c ?\)) (setq close (1+ close)))))
-                       (setq i (1+ i)))
-                     (= open close))))))
-  (let* ((user-file (pro-emacs-base--module-file pro-emacs-base-user-modules-dir name))
-         (system-file (and pro-emacs-base-system-modules-dir
-                           (pro-emacs-base--module-file pro-emacs-base-system-modules-dir name))))
-     (cond
-      ;; Prefer user file only if it is readable and appears syntactically balanced.
-      ((and (file-readable-p user-file) (file-parens-balanced-p user-file)) user-file)
-      ;; If user file exists but looks broken, prefer system-file if available.
-      ((and (file-exists-p user-file) (not (file-parens-balanced-p user-file))
-            pro-emacs-base-system-modules-dir (file-readable-p system-file)) system-file)
+  (let ((user-file (pro-emacs-base--module-file pro-emacs-base-user-modules-dir name))
+        (system-file (and pro-emacs-base-system-modules-dir
+                          (pro-emacs-base--module-file pro-emacs-base-system-modules-dir name))))
+    (cond
+     ((file-readable-p user-file) user-file)
      ((and pro-emacs-base-system-modules-dir
            (not (file-exists-p pro-emacs-base-disable-marker))
            (file-readable-p system-file)) system-file)
@@ -83,29 +67,12 @@
 
 (defun pro-emacs-base-start ()
   (let ((modules (pro-emacs-base--manifest-modules)))
-    (cl-labels ((file-parens-balanced-p (file)
-                  "Return t if the file FILE has balanced parentheses (simple heuristic)."
-                  (when (and file (file-readable-p file))
-                    (with-temp-buffer
-                      (insert-file-contents file)
-                      (let ((s (buffer-string)) (open 0) (close 0) (i 0) (len (length (buffer-string))))
-                        (while (< i len)
-                          (let ((c (aref s i)))
-                            (cond ((= c ?\() (setq open (1+ open)))
-                                  ((= c ?\)) (setq close (1+ close)))))
-                          (setq i (1+ i)))
-                        (= open close))))))
-
-      (dolist (module modules)
-        (let* ((module-name (if (symbolp module) (symbol-name module) module))
-               (file (pro-emacs-base--resolve-module module-name)))
-          (if file
-              (if (not (file-parens-balanced-p file))
-                  (message "[pro-emacs] skipping module %s: unbalanced parentheses in %s" module-name file)
-                (condition-case err
-                    (load file nil t)
-                  (error (message "[pro-emacs] failed to load module %s: %S" module-name err))))
-            (message "[pro-emacs] missing module: %s" module-name)))))
+    (dolist (module modules)
+      (let* ((module-name (if (symbolp module) (symbol-name module) module))
+             (file (pro-emacs-base--resolve-module module-name)))
+        (if file
+            (load file nil t)
+          (message "[pro-emacs] missing module: %s" module-name))))
     (message "[pro-emacs] loaded modules: %S" modules)
     ;; После загрузки всех модулей попробуем применить отложенные биндинги
     ;; клавиш (если модуль keys был загружен и оставил pending записи).
