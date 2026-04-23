@@ -78,7 +78,7 @@ If ARG is a string, call `find-file' with ARG (behaviour compatible with
    ((and arg (stringp arg))
     (find-file arg))
    (t
-  (let ((start (or (and (fboundp 'pro-project-root) (pro-project-root)) default-directory)))
+    (let ((start (or (and (fboundp 'pro-project-root) (pro-project-root)) default-directory)))
       (if (and (require 'consult nil t) (fboundp 'consult-find))
           ;; Prefer consult-find but fall back to consult-ripgrep when the
           ;; configured backend (fd/find) is not available or returns
@@ -87,5 +87,5 @@ If ARG is a string, call `find-file' with ARG (behaviour compatible with
           (if (or (executable-find "fd") (executable-find "find"))
               (consult-find start)
             (when (fboundp 'consult-ripgrep)
-              (consult-ripgrep start))))
-        (call-interactively #'find-file))))))
+              (consult-ripgrep start)))
+        (call-interactively #'find-file)))))
