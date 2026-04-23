@@ -1,6 +1,6 @@
 ;;; consult-helpers.el --- Small consult helpers and optional features -*- lexical-binding: t; -*-
-;; Helper module extracted from ~/pro to provide pro/consult-buffer and related
-;; utilities. Loaded lazily by nav.el when consult is available.
+;; Small consult helpers and optional features implemented for pro-nix.
+;; Loaded lazily by nav.el when consult is available.
 
 (require 'cl-lib)
 

@@ -19,11 +19,8 @@
   ;; completion-keys binds useful C-c o <letter> keys for CAPE and consult-yasnippet
   )
 
-;; Try to load external keybindings loader from ~/pro if present
-(let ((keys-loader (expand-file-name "~/pro/организация/про-клавиши-из-org.el")))
-  (when (file-exists-p keys-loader)
-    (condition-case _err
-        (load-file keys-loader)
-      (error (message "pro: failed to load keys loader: %s" keys-loader)))
-    (when (fboundp 'pro/клавиши-из-org)
-      (pro/клавиши-из-org (expand-file-name "~/pro/про-клавиши.org")))))
+;; External references to other personal repositories (like ~/pro) are
+;; intentionally disallowed in pro-nix. Global keys must come from
+;; emacs-keys.org (system) and ~/.config/emacs/keys.org (user).
+;; If you need to import keys, port them into the repository or into
+;; your per-user ~/.config/emacs/keys.org; do not reference ~/pro here.

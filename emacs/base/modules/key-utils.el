@@ -1,5 +1,6 @@
 ;;; key-utils.el --- Small utilities for writing keybindings and saving them to keys.el -*- lexical-binding: t; -*-
-;; A minimal, defensive adaptation of ~/pro/инструменты/про-малую-механизацию.el
+;; A minimal, defensive utility for key suggestions. This is an independent
+;; implementation — pro-nix must not reference external `~/pro` repositories.
 
 (defvar pro/keys-file (expand-file-name "~/.config/emacs/keys.el")
   "File where user-added keybindings are stored.")

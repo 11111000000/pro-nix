@@ -1,4 +1,4 @@
-;;; exwm-sim.el --- EXWM input simulation helpers (extracted from ~/pro) -*- lexical-binding: t; -*-
+;;; exwm-sim.el --- EXWM input simulation helpers (pro-nix implementation) -*- lexical-binding: t; -*-
 ;; Safe, defensive helpers for installing EXWM simulation keys and macros.
 
 (require 'cl-lib)

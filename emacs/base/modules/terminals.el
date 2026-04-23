@@ -1,6 +1,6 @@
 ;;; terminals.el --- Terminal integration (vterm, eshell helpers) -*- lexical-binding: t; -*-
-;; Minimal, opt-in terminal helpers derived from ~/pro. No global keybindings here;
-;; suggested keys go to emacs-keys.org.
+;; Minimal, opt-in terminal helpers. Independent implementation for pro-nix;
+;; No global keybindings here; suggested keys go to emacs-keys.org.
 
 (require 'subr-x)
 
