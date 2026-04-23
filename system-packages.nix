@@ -135,20 +135,30 @@ let
       fi
       mkdir -p "$TMPBASE" 2>/dev/null || true
 
-      tmpdir=""
-      # Prefer explicit template in TMPBASE
-      if tmpdir=$(mktemp -d "${TMPBASE}/opencode.XXXXXX" 2>/dev/null); then
+      # Create tmpdir using our repository helper if available, otherwise
+      # fall back to a portable sequence similar to above.
+      if [ -x "${pkgs.writeShellScriptBin:-}" ]; then
         :
-      elif tmpdir=$(mktemp -d -t "opencode.XXXXXX" 2>/dev/null); then
-        :
-      elif tmpdir=$(mktemp -d 2>/dev/null); then
-        :
-      else
-        # Last-resort: create a directory under the user's cache and use it.
-        TMPBASE="$HOME/.cache/tmp"
-        mkdir -p "$TMPBASE"
-        tmpdir="$TMPBASE/opencode.$(date +%s).$$"
-        mkdir -p "$tmpdir" || true
+      fi
+      if [ -x "${toString ./scripts/safe-mktemp}" ]; then
+        tmpdir=$(("${toString ./scripts/safe-mktemp}" -d opencode.XXXXXX) 2>/dev/null || true)
+      fi
+      if [ -z "${tmpdir:-}" ]; then
+        tmpdir=""
+        # Prefer explicit template in TMPBASE
+        if tmpdir=$(mktemp -d "${TMPBASE}/opencode.XXXXXX" 2>/dev/null); then
+          :
+        elif tmpdir=$(mktemp -d -t "opencode.XXXXXX" 2>/dev/null); then
+          :
+        elif tmpdir=$(mktemp -d 2>/dev/null); then
+          :
+        else
+          # Last-resort: create a directory under the user's cache and use it.
+          TMPBASE="$HOME/.cache/tmp"
+          mkdir -p "$TMPBASE"
+          tmpdir="$TMPBASE/opencode.$(date +%s).$$"
+          mkdir -p "$tmpdir" || true
+        fi
       fi
 
       tmpball="$tmpdir/opencode.tar.gz"
