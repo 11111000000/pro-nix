@@ -42,13 +42,58 @@ mount_host() {
     return 0
   fi
   echo "Guest mount failed; please provide credentials via /etc/samba/creds.d/$host" >&2
+  # If credentials exist, use them
   if [ -f "/etc/samba/creds.d/$host" ]; then
     sudo $MOUNT_CIFS "//$hostfqdn/$share" "$mountpoint" -o credentials=/etc/samba/creds.d/$host,vers=3.0
     echo "Mounted //$hostfqdn/$share -> $mountpoint (credentials)"
     return 0
   fi
-  echo "No credentials found; mount failed." >&2
-  return 2
+
+  # Interactive fallback: ask user for credentials and optionally save them
+  echo "No credentials found for $host. You can enter them now (saved to /etc/samba/creds.d/$host with root:root, mode 600), or cancel." >&2
+  read -p "Username (leave empty to cancel): " username
+  if [ -z "$username" ]; then
+    echo "Cancelled by user." >&2
+    return 2
+  fi
+  # read -s hides password input
+  read -s -p "Password: " password
+  echo
+  read -p "Save credentials to /etc/samba/creds.d/$host? [Y/n]: " saveans
+  saveans=${saveans:-Y}
+  if [[ "$saveans" =~ ^[Yy] ]]; then
+    tmpf=$(mktemp)
+    trap 'rm -f "$tmpf"' EXIT
+    echo "username=$username" > "$tmpf"
+    echo "password=$password" >> "$tmpf"
+    # ask for domain optionally
+    read -p "Domain/Workgroup (default WORKGROUP): " domain
+    domain=${domain:-WORKGROUP}
+    echo "domain=$domain" >> "$tmpf"
+    echo "Saving credentials to /etc/samba/creds.d/$host (root:root, 600)"
+    sudo mkdir -p /etc/samba/creds.d
+    sudo mv "$tmpf" "/etc/samba/creds.d/$host"
+    sudo chown root:root "/etc/samba/creds.d/$host"
+    sudo chmod 600 "/etc/samba/creds.d/$host"
+    trap - EXIT
+  else
+    # use a temporary credentials file for this mount attempt (no disk persistence)
+    tmpf=$(mktemp)
+    trap 'rm -f "$tmpf"' EXIT
+    echo "username=$username" > "$tmpf"
+    echo "password=$password" >> "$tmpf"
+    echo "domain=${domain:-WORKGROUP}" >> "$tmpf"
+  fi
+
+  if sudo $MOUNT_CIFS "//$hostfqdn/$share" "$mountpoint" -o credentials="$tmpf",vers=3.0; then
+    echo "Mounted //$hostfqdn/$share -> $mountpoint (interactive credentials)"
+    trap - EXIT
+    return 0
+  else
+    echo "Mount with provided credentials failed." >&2
+    trap - EXIT
+    return 3
+  fi
 }
 
 umount_path() {
