@@ -125,7 +125,32 @@ let
       # the user can install manually via the project's instructions.
       mkdir -p "$(dirname "$CACHED")"
       echo "[opencode] bootstrap: downloading official release to $CACHED"
-      tmpdir=$(mktemp -d "$${TMPDIR:-/tmp}/opencode.XXXX")
+      # Create a robust temporary directory. Some systems (or restricted
+      # users) may have TMPDIR unset, pointing to a non-existent path, or
+      # mktemp implementations that differ (busybox vs GNU). Try several
+      # strategies and fall back to a user-local cache directory.
+      TMPBASE="${TMPDIR:-/tmp}"
+      if [ ! -d "$TMPBASE" ]; then
+        mkdir -p "$TMPBASE" 2>/dev/null || TMPBASE="$HOME/.cache/tmp"
+      fi
+      mkdir -p "$TMPBASE" 2>/dev/null || true
+
+      tmpdir=""
+      # Prefer explicit template in TMPBASE
+      if tmpdir=$(mktemp -d "${TMPBASE}/opencode.XXXXXX" 2>/dev/null); then
+        :
+      elif tmpdir=$(mktemp -d -t "opencode.XXXXXX" 2>/dev/null); then
+        :
+      elif tmpdir=$(mktemp -d 2>/dev/null); then
+        :
+      else
+        # Last-resort: create a directory under the user's cache and use it.
+        TMPBASE="$HOME/.cache/tmp"
+        mkdir -p "$TMPBASE"
+        tmpdir="$TMPBASE/opencode.$(date +%s).$$"
+        mkdir -p "$tmpdir" || true
+      fi
+
       tmpball="$tmpdir/opencode.tar.gz"
       # ensure we remove the temporary dir on exit
       trap 'rm -rf "$tmpdir"' EXIT
