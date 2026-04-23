@@ -61,8 +61,8 @@ This does not control installation of packages; ensure vterm is available in Nix
                (when (and (boundp 'pro/registered-module-keys)
                           (fboundp 'pro/register-module-keys))
                  ;; register suggested keys for vterm helpers (non-binding)
-                 (pro/register-module-keys 'terminals
-                                           '(("C-c v y" . pro/vterm-yank)
-                                             ("C-c v i" . pro/vterm-interrupt)))))))
+                  (pro/register-module-keys 'terminals
+                                            '(("C-c v y" . pro/vterm-yank)
+                                              ("C-c v i" . pro/vterm-interrupt)))))))
 
 (provide 'terminals)

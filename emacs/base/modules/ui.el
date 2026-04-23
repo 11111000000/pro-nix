@@ -74,15 +74,31 @@
 (defun pro-ui-apply-icons ()
   "Подключить полезные иконки без обязательной зависимости."
   (when (and pro-ui-enable-icons (display-graphic-p))
-    (when (pro-ui--try-require 'all-the-icons)
-      (setq all-the-icons-scale-factor 1.0))
+    ;; Try preferred icon libraries in order of quality/availability.
+    ;; all-the-icons: classic emacs icon set; nerd-icons / nerd-icons-ibuffer if available;
+    ;; kind-icon used for completion margins.
+    (cond
+     ((pro-ui--try-require 'nerd-icons)
+      (when (pro-ui--try-require 'nerd-icons-ibuffer)
+        (add-hook 'ibuffer-mode-hook #'nerd-icons-ibuffer-mode))
+      (when (pro-ui--try-require 'all-the-icons)
+        (setq all-the-icons-scale-factor 1.0)))
+     ((pro-ui--try-require 'all-the-icons)
+      (setq all-the-icons-scale-factor 1.0)))
+
+    ;; Completion margin icons (non-fatal)
     (when (pro-ui--try-require 'kind-icon)
       (when (boundp 'corfu-margin-formatters)
         (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)))
-    (when (pro-ui--try-require 'nerd-icons-ibuffer)
-      (add-hook 'ibuffer-mode-hook #'nerd-icons-ibuffer-mode))
+
+    ;; Dired icons via treemacs integration when available
     (when (pro-ui--try-require 'treemacs-icons-dired)
-      (add-hook 'dired-mode-hook #'treemacs-icons-dired-enable-once))))
+      (add-hook 'dired-mode-hook #'treemacs-icons-dired-enable-once))
+
+    ;; If running in a low-color or headless environment, avoid heavy icon setup
+    (when (or (not (display-graphic-p)) (not (display-graphic-p)))
+      ;; no-op: already guarded above but keep explicit fallback for clarity
+      nil)))
 
 (defun pro-ui-apply-tabs ()
   "Подключить pro-tabs, если пакет доступен."

@@ -35,6 +35,9 @@
 | Дерево    | s-d     | treemacs                | Открыть дерево                   |
 | AI        | C-c a   | pro-ai-open-entry       | Вход в AI                        |
 | AI        | C-c A   | pro-agent-open          | agent-shell                      |
+| Tabs      | C-c t n | pro-tabs-open-new-tab   | Открыть новую вкладку            |
+| Tabs      | C-c t x | pro-tabs-close-tab-and-buffer | Закрыть вкладку и буфер  |
+| Tabs      | C-c t o | tab-bar-switch-to-tab   | Переключиться на вкладку         |
 | Package   | C-c P p | pro-packages-menu       | Список пакетов                   |
 | Package   | C-c P i | pro-packages-install    | Установить пакет из ELPA         |
 | Package   | C-c P v | pro-packages-install-vc | Установить пакет из VC           |
