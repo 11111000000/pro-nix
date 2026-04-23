@@ -295,3 +295,54 @@ Rollback and safety
   нужные комбинации уже есть в emacs-keys.org.
 - В key-utils — не писать Emacs Lisp в файл, а при необходимости открывать keys.org
   пользователю; основной путь — руками править Org и вызывать M-x pro-keys-reload.
+
+Гармоничный, минималистичный план (финальная версия)
+=====================================================
+Цель: сделать конфигурацию pro-nix простой, предсказуемой и приятной — сосредоточиться
+на важном: воспроизводимости (Nix), управлении глобальными клавишами (Org), и
+опциональных удобствах (terminals, tabs, windows). Каждый шаг — малый, атомарный и
+обратимый.
+
+Фаза 0 — Политика и документация (сделано)
+- Зафиксировать правило: глобальные клавиши — только в emacs-keys.org / ~/.config/emacs/keys.org.
+- Добавить docs/keys-workflow.md (как применять, перезагружать, диагностировать).
+
+Фаза 1 — Ядро и Nix (сделано частично, завершить)
+- Убедиться, что Nix предоставляет ключевые пакеты: consult, vertico, corfu, cape, yasnippet,
+  consult-dash, consult-eglot, vterm (+ libvterm), avy, expand-region, projectile, treemacs,
+  ace-window, winner, ripgrep, fd, findutils.
+- Обновить modules/pro-users-nixos.nix и nix/provided-packages.nix (приведены изменения).
+
+Фаза 2 — Централизация клавиш (сделано)
+- emacs-keys.org — авторитетный источник для глобальных клавиш; user keys в ~/.config/emacs/keys.org.
+- keys.el — loader, применяющий system → user; pro-keys-reload и pro-keys-report-pending доступны.
+- Добавлен scripts/lint-keys.sh, запрещающий global-set-key в модулях; workflow для CI добавлен.
+
+Фаза 3 — Опциональные модули (сделано: opt-in)
+- terminals.el — минимальные helpers для vterm (pro/vterm-yank, pro/vterm-interrupt). Включается через defcustom pro-terminals-enable.
+- pro-tabs.el — thin wrapper над tab-bar/pro-tabs, opt-in (pro-pro-tabs-enable).
+- windows.el — winner, golden-ratio, buf-move, ace-window helpers, opt-in (pro-windows-enable).
+
+Фаза 4 — Упрощённый импорт/работа с ключами
+- Убирать сложный machinery: не добавляем registry/import UI/provenance файлов.
+- Пользователь редактирует emacs-keys.org или ~/.config/emacs/keys.org и вызывает M-x pro-keys-reload.
+- Для автоматизации: key-utils предоставляет помощь открытия и записи предложения; но не автоматически пишет код.
+
+Фаза 5 — Тесты и CI (сделано частично)
+- scripts/emacs-e2e-assertions.el расширён: проверяет presence of vertico, consult, corfu, cape, vterm, winner, ace-window.
+- GitHub Actions workflow добавлен: lint-keys + emacs headless assertions.
+
+Фаза 6 — Документация и onboarding
+- docs/keys-workflow.md — как менять глобальные клавиши.
+- docs/pro-modules.md (предложение): как писать модуль, как работать с defcustom, как предлагать рекомендации (например, через комментарии в emacs-keys.org).
+
+Критерии готовности
+- Все ключевые пакеты доступны через Nix или четко документированы, как установить.
+- emacs-keys.org содержит полный набор необходимых глобальных биндов; loader применяет их.
+- Opt-in модули включаются простым переключателем (defcustom) и не задают глобальные бинды сами.
+- CI проходит: lint-keys и e2e assertions.
+
+Минимализм как мерило красоты
+- Делайте мало, но делайте правильно: всего несколько ясных точек входа (Nix packages, keys.org, per-module opt-ins), и конфигурация станет прочной и приятной.
+
+Следующий шаг — реализация оставшихся мелких тестов и финальная документация (README snippet). Я готов начать и выполню маленькие коммиты, чтобы завершить plan.
