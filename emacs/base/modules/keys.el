@@ -40,6 +40,7 @@
   "Привязать KEY к COMMAND, если KEY не пустой."
   (when (and key command (not (string-empty-p key)))
     (if (and (symbolp command) (fboundp command))
+        ;; Apply now when possible
         (global-set-key (kbd key) command)
       ;; Запомним в отложенных привязках — попробуем применить позже.
       (push (list :global key command) pro-keys-pending-bindings))))
@@ -129,6 +130,24 @@
                (binding (and (pro-keys--table-line-p line)
                              (pro-keys--parse-org-table-line line))))
           (when binding
+            (let ((section (nth 0 binding))
+                  (key (nth 1 binding))
+                  (cmd (nth 2 binding)))
+              ;; If the line contains a provenance marker for a module, record it
+              ;; for potential rollback. We treat lines preceding the table row
+              ;; that match "# PRO-MODULE: <name>" as ownership markers.
+              (save-excursion
+                (let ((owner nil)
+                      (pos (line-beginning-position)))
+                  (when (> pos 1)
+                    (goto-char (1- pos))
+                    (when (re-search-backward "^# PRO-MODULE: \(.*\)$" (point-min) t)
+                      (setq owner (match-string 1))))
+                  (when owner
+                    ;; Record mapping key -> owner in a simple alist
+                    (unless (boundp 'pro-keys-provenance)
+                      (defvar pro-keys-provenance nil "Alist of (KEY . MODULE) provenance."))
+                    (push (cons key owner) pro-keys-provenance))))
             (pro-keys--apply-row (nth 0 binding) (nth 1 binding) (nth 2 binding))))
         (forward-line 1)))))
 
@@ -151,10 +170,10 @@
     (let ((remaining nil))
       (dolist (entry (nreverse pro-keys-pending-bindings))
         (pcase entry
-          (`(:global ,key ,cmd)
-           (if (and (symbolp cmd) (fboundp cmd))
-               (global-set-key (kbd key) cmd)
-             (push entry remaining)))
+           (`(:global ,key ,cmd)
+            (if (and (symbolp cmd) (fboundp cmd))
+                (global-set-key (kbd key) cmd)
+              (push entry remaining)))
           (`(:exwm ,key ,cmd)
            (if (and (symbolp cmd) (fboundp cmd))
                (push (cons (kbd key) cmd) pro-keys-exwm-global-keys)
