@@ -85,6 +85,10 @@
   pro-peer.enable = true;
   pro-peer.enableKeySync = true;
 
+  # Ensure nss-mdns is available so Avahi mDNS names (hostname.local) resolve
+  # system-wide. Widespread diagnostics showed warnings recommending nss-mdns.
+  environment.systemPackages = with pkgs; [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }) ++ [ pkgs.nss-mdns ];
+
   # Старую беспроводную схему не используем: сеть должна управляться одной понятной системой, а не несколькими конкурирующими.
   # networking.wireless.enable = true;
 
