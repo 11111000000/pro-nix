@@ -88,3 +88,70 @@
 - `scripts/emacs-verify.sh` wraps the headless Emacs verification entrypoint.
 - `.gitignore` excludes generated `*.elc`/`*.eln` and other transient files.
 - `emacs-keys.org` is the shared global keybinding surface; `~/.emacs.d/keys.org` is the user override surface.
+
+## Soft Reload (Modules) Surface
+
+- Name: Soft Reload (Modules)
+  Stability: [FLUID]
+  Spec: Reload individual pro-nix Emacs modules at runtime without restarting Emacs. Modules must be idempotent and expose migrate/reset hooks for complex state. Public API: `pro/reload-module`, `pro/reload-all-modules`.
+  Proof: ERT + manual: `(pro/reload-module 'terminals)`, `(pro/reload-all-modules)`
+
+## Keybindings Surface
+
+- Name: Keybindings Surface
+  Stability: [FLUID]
+  Spec: Centralized global keybinding surface stored in `emacs-keys.org`. Modules publish suggested keys via `pro/register-module-keys`. Suggestions can be auto-merged into `emacs-keys.org` for review. Loader applies system → user overrides and handles pending bindings for late-defined commands.
+  Proof: commands: `scripts/generate-key-suggestions.py`, `scripts/apply-key-suggestions.py`, `pro/keys-reload` (`M-x pro/keys-reload`)
+
+## Package Update (MELPA) Surface
+
+- Name: Package Update (MELPA)
+  Stability: [FLUID]
+  Spec: Background batch updater for ELPA/MELPA that refreshes archives and installs/updates packages without blocking interactive Emacs. Public API: `pro/update-melpa-in-background` (starts background batch process running `scripts/melpa-update.el`).
+  Proof: run `M-x pro/update-melpa-in-background` and inspect buffer `*pro-melpa-update*`; `scripts/melpa-update.el`
+
+## Nix Site-Lisp Path Surface
+
+- Name: Nix Site-Lisp Path Surface
+  Stability: [FLUID]
+  Spec: Generator (`scripts/nix-update-emacs-paths.sh`) discovers `/nix/store/*/share/emacs/site-lisp` and writes `emacs/base/nix-emacs-paths.el`. Emacs API `pro/nix-generate-and-refresh-paths` loads paths and refreshes `load-path` at runtime. Note: native C extensions still require restart.
+  Proof: `./scripts/nix-update-emacs-paths.sh`; `M-x pro/nix-generate-and-refresh-paths`
+
+## Session Save / Soft Restart Surface
+
+- Name: Session Save / Soft Restart
+  Stability: [FLUID]
+  Spec: Save minimal session state (open files, points, window-state) and restore after restart. API: `pro/session-save`, `pro/session-restore`, `pro/session-save-and-restart-emacs`. Designed to support smooth restart when native libs changed.
+  Proof: `M-x pro/session-save` RET; `M-x pro/session-restore` RET; `M-x pro/session-save-and-restart-emacs`
+
+Notes:
+- All surfaces are conservative: GUI-only features are guarded by `display-graphic-p` and Nix/native upgrades that touch C-extensions must be followed by a restart (session helper provided).
+- For any surface marked [FROZEN/FLUID] see HOLO.md for Change Gate and proof commands.
+
+## Pro‑peer: Discovery & Key Sync
+
+- Name: Pro-peer (Discovery & Key Sync)
+  Stability: [FLUID]
+  Spec: Peer discovery and authorized-keys distribution service used to deploy per-host encrypted artifacts and synchronize authorized_keys. Managed via `modules/pro-peer.nix` and runtime scripts. Supports Yggdrasil/WireGuard helpers and optional Tor hidden-service for SSH.
+  Proof: smoke scripts: `scripts/pro-peer-sync-keys.sh --help` and `scripts/pro-peer-master.sh --help`; module presence `modules/pro-peer.nix`.
+
+## Samba Automount & Creds Distribution
+
+- Name: Samba Automount / Creds Distribution
+  Stability: [FLUID]
+  Spec: Automount and discovery helpers for Samba mounts with an operator-managed secure credentials distribution pattern (encrypted creds deployed via pro-peer workflow). Public scripts: `scripts/mount-smb.sh` and templates/system units in `modules/`.
+  Proof: docs and smoke scripts: `docs/plans/smb-discovery-and-mount.md`, `scripts/mount-smb.sh --help`.
+
+## proctl CLI / TUI
+
+- Name: proctl CLI / TUI
+  Stability: [FLUID]
+  Spec: Command-line/TUI control surface for repository operations described by `tui/proctl/spec.md`. Exposes armable operator commands (push, sync, diagnostics).
+  Proof: `tui/proctl/spec.md`, `scripts/test-opencode-launch.sh`.
+
+## Provided Emacs Packages / Decisions
+
+- Name: Provided Emacs Packages
+  Stability: [FLUID]
+  Spec: The repository provides a curated set of Emacs packages via Nix (provisioned packages) and documents decisions about package ownership (Nix vs MELPA) in `docs/decisions/emacs-packages-decisions.md`.
+  Proof: generation script `scripts/generate-provided-packages.el` and decision doc `docs/decisions/emacs-packages-decisions.md`.
