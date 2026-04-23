@@ -260,3 +260,26 @@ function does not apply the keys; it only writes suggestions for review."
        pro/registered-module-keys))
     (message "pro: exported registered keys to %s" file)
     file))
+
+(defun pro/keys-import-suggestions (&optional out-file)
+  "Merge registered module suggestions into the central emacs-keys.org or OUT-FILE.
+This writes an Org table fragment annotated with # PRO-MODULE headers for review.
+It does not overwrite existing system/user files; it writes to OUT-FILE for manual review.
+If OUT-FILE is nil, default to `emacs-keys.suggestions.org` in temp dir.
+Return the path of the generated file.
+" 
+  (interactive)
+  (let ((file (or out-file (expand-file-name "emacs-keys.suggestions.org" temporary-file-directory))))
+    (with-temp-file file
+      (insert (format "# Generated suggestions at %s\n\n" (current-time-string)))
+      (insert "| Section | Key | Command | Note |\n")
+      (insert "|--------+-----+---------+------|\n")
+      (maphash
+       (lambda (mod keys)
+         (insert (format "# PRO-MODULE: %s\n" mod))
+         (dolist (pair keys)
+           (let ((k (car pair)) (cmd (cdr pair)))
+             (insert (format "| Suggested | %s | %s | suggested from %s |\n" k cmd mod)))))
+       pro/registered-module-keys))
+    (message "pro: wrote suggestions to %s" file)
+    file))

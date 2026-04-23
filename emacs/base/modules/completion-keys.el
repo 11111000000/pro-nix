@@ -17,6 +17,10 @@
 (when (fboundp 'pro/register-module-keys)
   (pro/register-module-keys 'completion pro/completion-suggested-keys))
 
+(when (fboundp 'pro/export-registered-keys-to-org)
+  ;; Export suggested keys to an org fragment for review on demand
+  (pro/export-registered-keys-to-org))
+
 (provide 'completion-keys)
 
 ;;; completion-keys.el ends here
