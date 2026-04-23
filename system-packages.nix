@@ -87,21 +87,24 @@ let
         STORE_BIN=""
       fi
     fi
-    # By default, do not prefer the Nix store binary because some upstream
-    # prebuilt releases contain ELF metadata (verdef) that our runtime
-    # cannot handle. To use the store binary explicitly set
-    # OPENCODE_USE_STORE=1 in the environment. When enabled, perform a
-    # quick sanity check before selecting it.
-    if [ "$${OPENCODE_USE_STORE:-0}" = "1" ] && [ -x "$STORE_BIN" ]; then
+    # Prefer a Nix store binary automatically when available and functional.
+    # Some upstream prebuilt releases may be incompatible; perform a quick
+    # sanity check and skip the store binary if it fails.
+    if [ -x "$STORE_BIN" ]; then
       if command -v timeout >/dev/null 2>&1; then
         if timeout 2s "$STORE_BIN" --version >/dev/null 2>&1; then
           BIN="$STORE_BIN"
         else
-          echo "[opencode] store binary failed quick check, skipping" >&2
+          echo "[opencode] store binary present but failed quick check, skipping" >&2
           BIN=""
         fi
       else
-        BIN="$STORE_BIN"
+        # No timeout utility; attempt a simple invocation and trust it on success
+        if "$STORE_BIN" --version >/dev/null 2>&1; then
+          BIN="$STORE_BIN"
+        else
+          BIN=""
+        fi
       fi
     else
       choose_exec() {
@@ -125,44 +128,31 @@ let
       # the user can install manually via the project's instructions.
       mkdir -p "$(dirname "$CACHED")"
       echo "[opencode] bootstrap: downloading official release to $CACHED"
-      # Create a robust temporary directory. Some systems (or restricted
-      # users) may have TMPDIR unset, pointing to a non-existent path, or
-      # mktemp implementations that differ (busybox vs GNU). Try several
-      # strategies and fall back to a user-local cache directory.
+
+      # Quick guard: only attempt bootstrap for supported architecture.
+      arch=$(uname -m)
+      if [ "$arch" != "x86_64" ]; then
+        echo "[opencode] no prebuilt release available for architecture: $arch" >&2
+        echo "Please install opencode via Nix (system package) or ask the administrator to provide a compatible binary." >&2
+        exit 1
+      fi
+
+      # Minimal robust temp creation: prefer TMPDIR, fall back to /tmp or $HOME/.cache/tmp
       TMPBASE="${TMPDIR:-/tmp}"
       if [ ! -d "$TMPBASE" ]; then
-        mkdir -p "$TMPBASE" 2>/dev/null || TMPBASE="$HOME/.cache/tmp"
+        TMPBASE="$HOME/.cache/tmp"
       fi
       mkdir -p "$TMPBASE" 2>/dev/null || true
 
-      # Create tmpdir using our repository helper if available, otherwise
-      # fall back to a portable sequence similar to above.
-      if [ -x "${pkgs.writeShellScriptBin:-}" ]; then
-        :
-      fi
-      if [ -x "${toString ./scripts/safe-mktemp}" ]; then
-        tmpdir=$(("${toString ./scripts/safe-mktemp}" -d opencode.XXXXXX) 2>/dev/null || true)
-      fi
-      if [ -z "${tmpdir:-}" ]; then
-        tmpdir=""
-        # Prefer explicit template in TMPBASE
-        if tmpdir=$(mktemp -d "${TMPBASE}/opencode.XXXXXX" 2>/dev/null); then
-          :
-        elif tmpdir=$(mktemp -d -t "opencode.XXXXXX" 2>/dev/null); then
-          :
-        elif tmpdir=$(mktemp -d 2>/dev/null); then
-          :
-        else
-          # Last-resort: create a directory under the user's cache and use it.
-          TMPBASE="$HOME/.cache/tmp"
-          mkdir -p "$TMPBASE"
-          tmpdir="$TMPBASE/opencode.$(date +%s).$$"
-          mkdir -p "$tmpdir" || true
-        fi
+      tmpdir=$(mktemp -d "${TMPBASE}/opencode.XXXXXX" 2>/dev/null || mktemp -d 2>/dev/null || printf "%s" "${TMPBASE}/opencode.$(date +%s).$$")
+      mkdir -p "$tmpdir" 2>/dev/null || true
+      if [ ! -d "$tmpdir" ]; then
+        echo "[opencode] cannot create temporary directory (TMPBASE=$TMPBASE)" >&2
+        ls -ld "$TMPBASE" || true
+        exit 1
       fi
 
       tmpball="$tmpdir/opencode.tar.gz"
-      # ensure we remove the temporary dir on exit
       trap 'rm -rf "$tmpdir"' EXIT
 
       if command -v curl >/dev/null 2>&1; then
