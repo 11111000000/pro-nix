@@ -129,18 +129,16 @@ EOF
       devShells.${system}.default = pkgs.mkShell {
         name = "pro-nix-dev";
         buildInputs = [ emacsPkg pkgs.ripgrep pkgs.fd pkgs.findutils ];
-        # Build a list of -L flags for Emacs to load package site-lisp dirs.
-        # Define via a let-binding to ensure visibility inside shellHook.
-        emacs_L_flags = lib.concatStringsSep " " (map (p: "-L " + p + "/share/emacs/site-lisp") [
-          pkgs.emacsPackages.vertico pkgs.emacsPackages.consult pkgs.emacsPackages.orderless
-          pkgs.emacsPackages.marginalia pkgs.emacsPackages.gptel pkgs.emacsPackages.consult-dash
-          pkgs.emacsPackages.consult-eglot pkgs.emacsPackages.consult-yasnippet pkgs.emacsPackages.corfu
-          pkgs.emacsPackages.cape pkgs.emacsPackages.kind-icon pkgs.emacsPackages.avy
-          pkgs.emacsPackages.expand-region pkgs.emacsPackages.yasnippet pkgs.emacsPackages.projectile
-          pkgs.emacsPackages.treemacs pkgs.emacsPackages.vterm pkgs.emacsPackages.ace-window pkgs.emacsPackages.embark
-        ]);
-
-        shellHook = let flags = emacs_L_flags; in ''
+        shellHook = let
+          flags = lib.concatStringsSep " " (map (p: "-L " + p + "/share/emacs/site-lisp") [
+            pkgs.emacsPackages.vertico pkgs.emacsPackages.consult pkgs.emacsPackages.orderless
+            pkgs.emacsPackages.marginalia pkgs.emacsPackages.gptel pkgs.emacsPackages.consult-dash
+            pkgs.emacsPackages.consult-eglot pkgs.emacsPackages.consult-yasnippet pkgs.emacsPackages.corfu
+            pkgs.emacsPackages.cape pkgs.emacsPackages.kind-icon pkgs.emacsPackages.avy
+            pkgs.emacsPackages.expand-region pkgs.emacsPackages.yasnippet pkgs.emacsPackages.projectile
+            pkgs.emacsPackages.treemacs pkgs.emacsPackages.vterm pkgs.emacsPackages.ace-window pkgs.emacsPackages.embark
+          ]);
+        in ''
           echo "Entering pro-nix devshell with Emacs available"
           WRAP_DIR="${toString ./.}/.pro-emacs-wrapper"
           mkdir -p "$WRAP_DIR"
