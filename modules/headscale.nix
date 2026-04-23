@@ -18,7 +18,7 @@ in
   };
 
   config = lib.mkIf config.headscale.enable {
-    environment.systemPackages = with pkgs; [ docker ];
+    environment.systemPackages = lib.mkForce (config.environment.systemPackages or []) ++ with pkgs; [ docker ];
     systemd.services.headscale = {
       description = "Headscale (WireGuard control plane)";
       wantedBy = [ "multi-user.target" ];

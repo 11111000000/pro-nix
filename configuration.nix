@@ -25,7 +25,7 @@
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 1: Импортируемые модули и включение дополнительной логики
 #
-# Сначала собирается контур слоёв: железо, пользовательская база и локальные исключения. Здесь решается, какие различия допускаются, а какие должны жить отдельно.
+# Сначала собирается контур слоёв: железо, пользовательская база и локальные исключения. Здесь определяется, какие различия допускаются, а какие должны жить отдельно.
 
   {
   environment.etc."pro/emacs-keys.org".source = ./emacs-keys.org;
@@ -35,7 +35,7 @@
      # ./hardware-configuration.nix
 
 
-    # Общие смысловые модули формируют shared policy и не должны знать о личных привычках больше, чем требуется.
+    # Общие модули формируют общую политику и не зависят от пользовательских настроек.
     ./modules/pro-users.nix
     ./modules/pro-services.nix
     ./modules/pro-storage.nix
@@ -46,11 +46,11 @@
     ./modules/nix-cuda-compat.nix
     ./nixos/modules/opencode-config.nix
 
-    # Локальные переопределения конкретного хоста оставлены там, где они действительно принадлежат машине, а не профилю.
+    # Локальные переопределения конкретного хоста остаются в файле local.nix.
   ] ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ] ++ [
 
-    # Home Manager подключается как слой пользовательской формы, чтобы личная среда не растворялась в системных файлах.
-    # Вспомогательный модуль для переназначения клавиш подключён только как потенциальный рабочий инструмент, а не как обязательная часть ядра.
+    # Home Manager подключается как слой пользовательской конфигурации.
+    # Вспомогательный модуль для переназначения клавиш доступен как опция.
     # <nixos-unstable/nixos/modules/services/misc/xremap.nix>
   ];
 
@@ -68,38 +68,38 @@
   boot.loader.grub.useOSProber = false;               # Явная загрузка без автоматического поиска чужих систем.
 
   boot.plymouth.enable = true;                        # Plymouth смягчает переход от firmware к рабочему миру.
-  boot.plymouth.theme = "spinner";                     # Спиннер выбран как спокойная форма ожидания без декоративного шума.
+  boot.plymouth.theme = "spinner";                     # Тема загрузчика: spinner.
 
   boot.kernelPackages = pkgs.linuxPackages_6_6;        # LTS-ядро здесь поддерживает устойчивость сна и пробуждения на этом поколении железа.
-  boot.kernel.sysctl."kernel.sysrq" = 1;               # SysRq оставлен как аварийный выход, когда система перестаёт отвечать как среда, а не как инструмент.
+  boot.kernel.sysctl."kernel.sysrq" = 1;               # Включить SysRq для аварийного доступа.
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 3: Сетевая конфигурация и имя машины
 #
 # Здесь определяется имя машины и тот сетевой менеджер, который будет держать связь с внешним миром без ручной пляски вокруг Wi-Fi.
 
-  networking.hostName = lib.mkDefault hostName;  # Базовое имя задаётся только как запасной вариант, а машина может переопределить его на своём уровне.
+  networking.hostName = lib.mkDefault hostName;  # Базовое имя машины (может быть переопределено локально).
 
   # Enable pro-peer discovery and key sync by default so hosts in the same
   # LAN advertise via mDNS and can receive centrally-managed authorized_keys.
   pro-peer.enable = true;
   pro-peer.enableKeySync = true;
 
-  # Ensure nss-mdns is available so Avahi mDNS names (hostname.local) resolve
-  # system-wide. Widespread diagnostics showed warnings recommending nss-mdns.
-  environment.systemPackages = with pkgs; [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }) ++ [ pkgs.nss-mdns ];
+  # NOTE: environment.systemPackages is set later in this file to allow
+  # modules to contribute packages in a single consolidated place. Do not
+  # redefine it here; see the later definition near the end of this file.
 
-  # Старую беспроводную схему не используем: сеть должна управляться одной понятной системой, а не несколькими конкурирующими.
+  # Старая схема беспроводной сети не используется.
   # networking.wireless.enable = true;
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 4: Часовой пояс и языковая локализация
 #
-# Локализация здесь задаёт не просто язык, а бытовую меру времени, адресов и типографики рабочего поля.
+# Локализация задаёт язык, формат времени, адресов и типографику системы.
 
-  time.timeZone = "Asia/Irkutsk";           # Часовой пояс выбран как точка совпадения с реальным ритмом работы.
+  time.timeZone = "Asia/Irkutsk";           # Часовой пояс системы.
 
-  # Основная локаль системы задаёт русский Unicode как естественный язык рабочего поля.
+  # Основная локаль системы задаёт русский Unicode.
   i18n.defaultLocale = "ru_RU.UTF-8";
 
   # Дополнительные LC-параметры удерживают приложения в одном культурном и числовом режиме.
@@ -245,7 +245,7 @@
 
   # By default optional heavy packages are disabled. To enable them set
   # `enableOptional = true` when importing `system-packages.nix`.
-  environment.systemPackages = with pkgs; [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; });
+  environment.systemPackages = lib.mkForce (config.environment.systemPackages or []) ++ with pkgs; [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; });
 
   fonts.packages = with pkgs; [
     terminus_font

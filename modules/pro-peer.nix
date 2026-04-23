@@ -83,7 +83,7 @@ in
       # было проверяемым. Не указываем sshd модулю путь на runtime-файл — это
       # может быть недоступно на стадии вычисления конфигурации. Вместо этого
       # добавляем правила tmpfiles, которые создадут необходимые пути при старте.
-      # Правила tmpfiles добавляются как дополнение, а не заменяют глобальные
+      # Правила tmpfiles добавляются как дополнение и не заменяют глобальные
       # правила, чтобы другие модули могли дописывать свои записи.
       systemd.tmpfiles.rules = [
         "d /var/lib/pro-peer 0700 root root -"
@@ -98,7 +98,7 @@ in
       # друга в LAN через Avahi. Список портов объединяется с существующим,
       # чтобы не перезаписывать настройки других модулей.
       networking.firewall = lib.mkIf true {
-        # Добавляем 5353 в allowedUDPPorts как низкоприоритетный дефолт через
+        # Добавляем 5353 в allowedUDPPorts в качестве низкоприоритетного дефолта.
         # lib.mkDefault. Это позволяет другим модулям или хостовым конфигам
         # переопределять значение и предотвращает рекурсию при оценке config.*.
         allowedUDPPorts = lib.mkDefault (lib.concatLists [ (config.networking.firewall.allowedUDPPorts or []) [ 5353 ] ]);
@@ -123,7 +123,7 @@ in
     })
 
     (lib.mkIf config.pro-peer.enableKeySync {
-      environment.systemPackages = with pkgs; [ gnupg ];
+      environment.systemPackages = lib.mkForce (config.environment.systemPackages or []) ++ with pkgs; [ gnupg ];
       environment.etc."pro-peer-sync-keys.sh".source = ../scripts/pro-peer-sync-keys.sh;
       environment.etc."pro-peer-sync-keys.sh".mode = "0755";
 
@@ -148,7 +148,7 @@ in
       })
 
     (lib.mkIf (config.pro-peer.allowTorHiddenService && (config.pro-peer.torBackupRecipient != null)) {
-      environment.systemPackages = with pkgs; [ gnupg tar ];
+      environment.systemPackages = lib.mkForce (config.environment.systemPackages or []) ++ with pkgs; [ gnupg tar ];
       environment.etc."pro-peer-backup-hiddenservice.sh".source = ../scripts/backup-hiddenservice.sh;
       environment.etc."pro-peer-backup-hiddenservice.sh".mode = "0755";
 
@@ -166,7 +166,7 @@ in
     })
 
     (lib.mkIf config.pro-peer.enableYggdrasil {
-      environment.systemPackages = with pkgs; [ yggdrasil ];
+      environment.systemPackages = lib.mkForce (config.environment.systemPackages or []) ++ with pkgs; [ yggdrasil ];
       systemd.services.yggdrasil = {
         description = "Yggdrasil mesh daemon (pro-peer)";
         wantedBy = [ "multi-user.target" ];
@@ -184,7 +184,7 @@ in
     })
 
     (lib.mkIf config.pro-peer.enableWireguardHelper {
-      environment.systemPackages = with pkgs; [ wireguard-tools ];
+      environment.systemPackages = lib.mkForce (config.environment.systemPackages or []) ++ with pkgs; [ wireguard-tools ];
       # Устанавливаем небольшой оболочный wrapper для нормализации поведения
       # wg-quick; это позволяет systemd‑юниту оставаться простым и не
       # включать сложную shell‑логику.

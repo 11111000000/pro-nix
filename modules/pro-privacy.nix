@@ -31,7 +31,7 @@
     };
   };
 
-  # I2P: ещё один стек приватной сети, включается как опция.
+  # I2P — дополнительный стек приватной сети (опция).
   services.i2p.enable = true;
 
   # Install example/template of bridges into /etc so operator can copy/edit it.
@@ -51,7 +51,7 @@
   };
 
   # Ensure awk is available during activation scripts (used by activate).
-  environment.systemPackages = with pkgs; [ gawk ];
+  environment.systemPackages = lib.mkForce (config.environment.systemPackages or []) ++ with pkgs; [ gawk ];
 
   # Открытые порты для служб приватности — доступны локально/для роутинга.
   networking.firewall = {
