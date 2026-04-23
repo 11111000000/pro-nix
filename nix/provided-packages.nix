@@ -19,6 +19,7 @@ let
     pkgs.emacsPackages.yasnippet
     pkgs.emacsPackages.projectile
     pkgs.emacsPackages.treemacs
+    pkgs.emacsPackages.vterm
   ];
   names = builtins.concatStringsSep " " (map (p: builtins.substring 0 100 (toString p)) emacsPackages);
 in
