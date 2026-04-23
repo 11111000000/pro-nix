@@ -151,8 +151,10 @@ let
       # Надёжное создание временной директории: предпочтение TMPDIR, затем /tmp,
       # затем $HOME/.cache/tmp.
       # Prefer TMPDIR if set, otherwise fall back to /tmp. Use plain $VAR
-      # expansions (avoid the literal sequence "${...}" inside this Nix multiline
-      # string because it triggers Nix interpolation).
+      # expansions. Avoid embedding the four-character sequence that looks like
+      # a Nix interpolation token; write it in parts ("$" "{" "..." "}") if
+      # you need to document it, because including "${...}" verbatim inside
+      # this multiline string would make Nix try to interpolate it.
       TMPBASE="$TMPDIR"
       if [ -z "$TMPBASE" ]; then
         TMPBASE="/tmp"
