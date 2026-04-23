@@ -16,11 +16,8 @@ install-plain:
 	./scripts/emacs-sync.sh
 
 
-build HOST:
-	sudo nixos-rebuild build --flake .#{{HOST}}
-
-
-
+	build HOST:
+		sudo nixos-rebuild build --flake .#{{HOST}}
 
 	switch HOST='':
 		scripts/switch.sh "{{HOST}}"
