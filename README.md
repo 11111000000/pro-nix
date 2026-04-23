@@ -36,7 +36,7 @@ docs/. Некоторые части (TUI, экспериментальные а
 
    nix run .#pro-nix
 
-3) Применение конфигурации на NixOS‑хосте (пример для `cf19`):
+  3) Применение конфигурации на NixOS‑хосте (пример для `cf19`):
 
    sudo nixos-rebuild switch --flake .#cf19
 
@@ -47,7 +47,20 @@ docs/. Некоторые части (TUI, экспериментальные а
 
    - Локальная проверка (на хосте):
 
-     ./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el
+    ./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el
+
+Opencode system-wide installation
+---------------------------------
+Если вы хотите, чтобы `opencode` был доступен для всех пользователей без
+per-user bootstrap, включите системную установку в конфигурацию NixOS. В
+flake.nix доступна опция модуля `provisioning.opencode.enable` для хоста.
+
+Пример (в hosts/<your-host>/configuration.nix):
+
+  provisioning.opencode.enable = true;
+
+После `nixos-rebuild switch` binary `opencode` будет устанавливлен из
+deterministic derivation и доступен всем пользователям.
 
    - Генерация списка пакетов, если вы изменяли `nix/provided-packages.nix`:
 
