@@ -79,8 +79,12 @@
   ;; Embark integration and recommended bindings
   (when (require 'embark nil t)
     (when (fboundp 'embark-act)
-      (global-set-key (kbd "C-.") #'embark-act)
-      (global-set-key (kbd "C-;") #'embark-dwim)))
+      ;; register suggested global keys rather than binding them directly
+      (when (fboundp 'pro/register-module-keys)
+        (pro/register-module-keys
+         'embark
+         '( ("C-." . embark-act)
+            ("C-;" . embark-dwim))))))
 
   ;; Load and enable embark-consult integration if present
   (when (require 'embark-consult nil t)

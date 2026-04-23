@@ -11,15 +11,18 @@ This is intentionally minimal and safe: it will append the binding and not overw
 KEY is a string accepted by `kbd`, FN-SYMBOL is a symbol or string name of function." 
   (interactive "sKey (kbd): \nSFunction symbol: ")
   (let* ((fn (if (symbolp fn-symbol) fn-symbol (intern fn-symbol)))
-         (entry (format "(global-set-key (kbd \"%s\") '%s)\n" key fn)))
+         (org-entry (format "| %s | %s | %s | added-by key-utils |\n" "User" key fn)))
+    ;; Append an Org table row to the user's keys.org file and reload keys.
     (with-temp-buffer
-      (when (file-exists-p pro/keys-file)
-        (insert-file-contents pro/keys-file))
+      (if (file-exists-p pro/keys-file)
+          (insert-file-contents pro/keys-file))
+      ;; Ensure table header exists; naive approach: append table row
       (goto-char (point-max))
-      (insert entry)
+      (insert org-entry)
       (write-region (point-min) (point-max) pro/keys-file))
-    (global-set-key (kbd key) fn)
-    (message "Added key %s -> %s to %s" key fn pro/keys-file)))
+    (when (fboundp 'pro-keys-reload)
+      (pro-keys-reload))
+    (message "Added key suggestion %s -> %s to %s (reload attempted)" key fn pro/keys-file)))
 
 (provide 'key-utils)
 

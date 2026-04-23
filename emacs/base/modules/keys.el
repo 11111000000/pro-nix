@@ -197,3 +197,47 @@
 
 (provide 'keys)
 
+;; Registry for module-suggested keys (module -> alist of ("KEY" . SYMBOL))
+(defvar pro/registered-module-keys (make-hash-table :test 'eq)
+  "Hash table mapping module symbol to its suggested keys alist.")
+
+(defun pro/register-module-keys (module keys-alist)
+  "Register KEYS-ALIST suggested by MODULE.
+KEYS-ALIST is an alist of ("KEY" . command-symbol).
+This records suggestions only; it does not apply global bindings.
+Use `pro/export-registered-keys-to-org' or `pro/keys-import-suggestions' to
+persist or apply suggestions." 
+  (when (and module keys-alist)
+    (puthash module keys-alist pro/registered-module-keys)
+    (message "pro: registered %d suggested keys from %s" (length keys-alist) module)))
+
+(defun pro/unregister-module-keys (module)
+  "Unregister keys suggested by MODULE." 
+  (remhash module pro/registered-module-keys)
+  (message "pro: unregistered keys for %s" module))
+
+(defun pro/list-registered-module-keys ()
+  "Return an alist of registered modules and their suggested keys." 
+  (let (out)
+    (maphash (lambda (k v) (push (cons k v) out)) pro/registered-module-keys)
+    out))
+
+(defun pro/export-registered-keys-to-org (&optional out-file)
+  "Export registered module key suggestions to OUT-FILE as an Org table.
+If OUT-FILE is nil, print the generated content to *Messages* buffer. This
+function does not apply the keys; it only writes suggestions for review." 
+  (interactive)
+  (let ((file (or out-file (expand-file-name "emacs-keys.suggestions.org" temporary-file-directory))))
+    (with-temp-file file
+      (insert (format "# Generated suggestions at %s\n\n" (current-time-string)))
+      (insert "| Section | Key | Command | Note |\n")
+      (insert "|--------+-----+---------+------|\n")
+      (maphash
+       (lambda (mod keys)
+         (insert (format "# PRO-MODULE: %s\n" mod))
+         (dolist (pair keys)
+           (let ((k (car pair)) (cmd (cdr pair)))
+             (insert (format "| %s | %s | %s | suggested from %s |\n" "Suggested" k cmd mod)))))
+       pro/registered-module-keys))
+    (message "pro: exported registered keys to %s" file)
+    file)
