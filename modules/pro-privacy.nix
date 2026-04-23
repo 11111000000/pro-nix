@@ -1,4 +1,3 @@
-# Файл: автосгенерированная шапка — комментарии рефакторятся
 { config, pkgs, lib, ... }:
 
 {
@@ -55,7 +54,7 @@
   };
 
   # Ensure awk is available during activation scripts (used by activate).
-  environment.systemPackages = lib.mkForce ((config.environment.systemPackages or []) ++ (with pkgs; [ gawk ]));
+  environment.systemPackages = lib.mkDefault (with pkgs; [ gawk ]);
 
   # Открытые порты для служб приватности — доступны локально/для роутинга.
   networking.firewall = {

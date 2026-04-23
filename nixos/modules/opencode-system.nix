@@ -16,6 +16,6 @@ in {
     # so every user gets the same binary without per-user bootstrap. Prefer
     # the opencode_from_release provided by the flake; if not available, do
     # not add a package (to avoid referencing undefined derivations).
-    environment.systemPackages = lib.mkForce (config.environment.systemPackages or []) ++ (if opencode_from_release != null then [ opencode_from_release ] else []);
+    environment.systemPackages = lib.mkDefault (if opencode_from_release != null then [ opencode_from_release ] else []);
   };
 }
