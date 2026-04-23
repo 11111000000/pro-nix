@@ -124,7 +124,7 @@
   };
 
   # Обеспечить доступность awk во время активации (некоторые скрипты активации используют awk).
-  environment.systemPackages = lib.mkForce (config.environment.systemPackages or []) ++ with pkgs; [ gawk
+  environment.systemPackages = lib.mkForce ((config.environment.systemPackages or []) ++ (with pkgs; [ gawk
     # Install a system-wide xsessions entry so GDM shows EXWM for all users.
     (runCommand "pro-exwm-xsession" {} ''
       mkdir -p $out/share/xsessions

@@ -19,7 +19,7 @@ in
 
   config = lib.mkIf config.headscale.enable {
     # Prefer native headscale package over docker by default.
-    environment.systemPackages = lib.mkForce (config.environment.systemPackages or []) ++ with pkgs; [ headscale ];
+    environment.systemPackages = lib.mkForce ((config.environment.systemPackages or []) ++ (with pkgs; [ headscale ]));
 
     # Minimal native systemd service. Operator should override config.yaml in host overlay.
     systemd.services.headscale = {
