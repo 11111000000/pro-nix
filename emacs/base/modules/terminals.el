@@ -30,6 +30,9 @@ This does not control installation of packages; ensure vterm is available in Nix
             (lambda ()
               (setq-local scroll-margin 0)
               ;; enable tab-line in vterm for quick buffer switching
-              (when (fboundp 'tab-line-mode) (tab-line-mode 1)))))
+              (when (fboundp 'tab-line-mode) (tab-line-mode 1))
+              ;; prefer sane history and copy mode
+              (when (fboundp 'vterm-copy-mode)
+                (vterm-copy-mode 0))))))
 
 (provide 'terminals)
