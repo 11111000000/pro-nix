@@ -153,8 +153,9 @@ let
       # Prefer TMPDIR if set, otherwise fall back to /tmp. Use plain $VAR
       # expansions. Avoid embedding the four-character sequence that looks like
       # a Nix interpolation token; write it in parts ("$" "{" "..." "}") if
-      # you need to document it, because including "${...}" verbatim inside
-      # this multiline string would make Nix try to interpolate it.
+      # you need to document it, because including the four-character sequence
+      # made of dollar, left-brace, dots, right-brace verbatim inside this
+      # multiline string would make Nix try to interpolate it.
       TMPBASE="$TMPDIR"
       if [ -z "$TMPBASE" ]; then
         TMPBASE="/tmp"
