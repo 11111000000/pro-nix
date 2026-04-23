@@ -150,18 +150,22 @@ let
 
       # Надёжное создание временной директории: предпочтение TMPDIR, затем /tmp,
       # затем $HOME/.cache/tmp.
-      # Escape Nix interpolation (produce literal ${TMPDIR} in the shell script).
-      TMPBASE="$${TMPDIR:-/tmp}"
+      # Prefer TMPDIR if set, otherwise fall back to /tmp. Use plain $VAR
+      # expansions (not ${...}) to avoid Nix interpolation during evaluation.
+      TMPBASE="$TMPDIR"
+      if [ -z "$TMPBASE" ]; then
+        TMPBASE="/tmp"
+      fi
       if [ ! -d "$TMPBASE" ]; then
         TMPBASE="$HOME/.cache/tmp"
       fi
       mkdir -p "$TMPBASE" 2>/dev/null || true
 
-      tmpdir=$(mktemp -d "$${TMPBASE}/opencode.XXXXXX" 2>/dev/null || mktemp -d 2>/dev/null || printf "%s" "$${TMPBASE}/opencode.$(date +%s).$$")
+      tmpdir=$(mktemp -d "$TMPBASE/opencode.XXXXXX" 2>/dev/null || mktemp -d 2>/dev/null || printf "%s" "$TMPBASE/opencode.$(date +%s).$$")
       mkdir -p "$tmpdir" 2>/dev/null || true
       if [ ! -d "$tmpdir" ]; then
-        echo "[opencode] cannot create temporary directory (TMPBASE=$${TMPBASE})" >&2
-        ls -ld "$${TMPBASE}" || true
+        echo "[opencode] cannot create temporary directory (TMPBASE=$TMPBASE)" >&2
+        ls -ld "$TMPBASE" || true
         exit 1
       fi
 
