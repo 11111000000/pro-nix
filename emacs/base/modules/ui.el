@@ -182,6 +182,6 @@
 
     ;; Optional cosmetics: candidate icons in the margin.
     (when (and (pro-ui--try-require 'kind-icon) (boundp 'corfu-margin-formatters))
-      (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))))
+      (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)))
 
 (provide 'ui)
