@@ -98,6 +98,7 @@
   # 'sansSerif', 'serif', 'monospace' — здесь задаём удобный набор по умолчанию.
   fonts.fontconfig.defaultFonts = {
     sansSerif = [ "Aporetic Sans" "DejaVu Sans" ];
+    serif = [ "Aporetic Sans Serif" ];
     monospace = [ "Aporetic Sans Mono" "Terminus" ];
   };
 
@@ -124,7 +125,7 @@
   };
 
   # Ensure awk is available during activation (some activation scripts use awk).
-  environment.systemPackages = lib.mkForce ((config.environment.systemPackages or []) ++ (with pkgs; [ gawk
+  environment.systemPackages = lib.mkDefault (with pkgs; [ gawk
     # Install a system-wide xsessions entry so GDM shows EXWM for all users.
     (runCommand "pro-exwm-xsession" {} ''
       mkdir -p $out/share/xsessions
@@ -142,7 +143,7 @@ X-GNOME-Bugzilla-Component=window-manager
 EOF
       chmod -R a+rX $out
     '')
-  ]));
+  ]);
 
   # Firefox включён как системный браузер.
   programs.firefox.enable = true;

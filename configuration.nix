@@ -281,7 +281,10 @@
 
   # By default optional heavy packages are disabled. To enable them set
   # `enableOptional = true` when importing `system-packages.nix`.
-  environment.systemPackages = lib.mkForce (config.environment.systemPackages or []) ++ (with pkgs; [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }));
+  # Build the final package list and force it as the definitive value. Modules
+  # should use lib.mkDefault when adding packages so the top-level override
+  # here wins without causing recursion.
+  environment.systemPackages = lib.mkForce (with pkgs; [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }));
 
   # Учебное замечание о порядке формирования systemPackages:
   # - Опции модулей могут дополнять environment.systemPackages до момента, когда
