@@ -65,4 +65,17 @@ then loads that file and calls pro/nix-load-path-refresh."
           (pro/nix-load-path-refresh pro/nix-site-lisp-paths)
           (message "pro: nix paths generated and applied")))) )
 
+(defun pro/session-save-and-restart-emacs (&optional save-file)
+  "Save session to SAVE-FILE and restart Emacs, restoring session afterwards.
+This attempts a smooth restart: it saves open files and window-state, then
+spawns a new Emacs process which will load the session on start.
+" 
+  (interactive)
+  (let* ((save (or save-file (pro/session-save)))
+         (emacs-bin (or (executable-find "emacs") "emacs"))
+         (cmd (list emacs-bin "--eval" (format "(progn (load \"%s\") (pro/session-restore))" save))))
+    (message "pro: spawning new Emacs to restore session and exiting current Emacs")
+    (apply #'start-process "pro-restart" "*pro-restart*" cmd)
+    (kill-emacs)))
+
 (provide 'reload)
