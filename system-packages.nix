@@ -150,7 +150,7 @@ let
 
       # Надёжное создание временной директории: предпочтение TMPDIR, затем /tmp,
       # затем $HOME/.cache/tmp.
-      # Use $${...} to avoid Nix interpolating ${...} inside the indented string.
+      # Escape Nix interpolation (produce literal ${TMPDIR} in the shell script).
       TMPBASE="$${TMPDIR:-/tmp}"
       if [ ! -d "$TMPBASE" ]; then
         TMPBASE="$HOME/.cache/tmp"
