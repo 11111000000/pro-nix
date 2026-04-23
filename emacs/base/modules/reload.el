@@ -41,10 +41,28 @@ interactive Emacs remains responsive. The background process will refresh
 archives and install packages listed in `emacs/base/provided-packages.el' or
 `package-selected-packages' as available." 
   (interactive)
+    (let* ((repo (file-name-directory (or load-file-name buffer-file-name)))
+           (script (expand-file-name "scripts/melpa-update.el" (file-name-directory repo)))
+           (cmd (list (or (executable-find "emacs") "emacs") "--batch" "-Q" "-l" script)))
+      (message "Starting background MELPA update (see *Messages* for progress)")
+      (apply #'start-process "pro-melpa-update" "*pro-melpa-update*" cmd)))
+
+(defun pro/nix-generate-and-refresh-paths ()
+  "Run scripts/nix-update-emacs-paths.sh and refresh load-path with results.
+This calls the generator script which writes emacs/base/nix-emacs-paths.el and
+then loads that file and calls pro/nix-load-path-refresh." 
+  (interactive)
   (let* ((repo (file-name-directory (or load-file-name buffer-file-name)))
-         (script (expand-file-name "scripts/melpa-update.el" (file-name-directory repo)))
-         (cmd (list (or (executable-find "emacs") "emacs") "--batch" "-Q" "-l" script)))
-    (message "Starting background MELPA update (see *Messages* for progress)")
-    (apply #'start-process "pro-melpa-update" "*pro-melpa-update*" cmd)))
+         (script (expand-file-name "scripts/nix-update-emacs-paths.sh" (file-name-directory repo)))
+         (paths-el (expand-file-name "emacs/base/nix-emacs-paths.el" (file-name-directory repo))))
+    (when (file-executable-p script)
+      (call-process script nil nil nil)
+      (when (file-readable-p paths-el)
+        (load-file paths-el)
+        (when (boundp 'pro/nix-site-lisp-paths)
+          (setq pro/nix-site-lisp-paths pro/nix-site-lisp-paths)
+          (require 'nix-refresh nil t)
+          (pro/nix-load-path-refresh pro/nix-site-lisp-paths)
+          (message "pro: nix paths generated and applied")))) )
 
 (provide 'reload)
