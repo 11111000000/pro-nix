@@ -283,10 +283,12 @@
   # и добавляем локальные утилиты. Важное изменение: убираем принудительное
   # наложение (lib.mkForce) и используем lib.mkDefault — это позволяет модулю
   # добавлять пакеты через lib.mkDefault и не терять их при финальной сборке.
+  # Собираем вклад модулей (они используют lib.mkDefault) и добавляем локальные
+  # утилиты. Не импортируем модуль packages-runtime вручную здесь — он уже
+  # присутствует в списке imports выше и его вклад доступен через
+  # config.environment.systemPackages.
   environment.systemPackages = lib.mkDefault (with pkgs;
-    (config.environment.systemPackages or []) ++
-    (import ./modules/packages-runtime.nix { inherit pkgs; }).environment.systemPackages ++
-    [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; })
+    (config.environment.systemPackages or []) ++ [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; })
   );
 
   # Учебное замечание о порядке формирования systemPackages:
