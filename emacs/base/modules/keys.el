@@ -245,6 +245,11 @@ persist or apply suggestions."
   ;; inputs.
   (condition-case err
       (when (and module keys-alist)
+        ;; Debug: write a small log to /tmp for early startup diagnostics
+        (ignore-errors
+         (with-temp-file "/tmp/pro-register.log"
+           (goto-char (point-max))
+           (insert (format "CALL: module=%S type=%S\n" module (type-of keys-alist)))))
         (message "pro/register-module-keys: module=%S keys-alist-type=%S" module (type-of keys-alist))
         ;; Normalize to a list if necessary and validate elements.
         (let* ((raw (if (listp keys-alist) keys-alist (list keys-alist)))
