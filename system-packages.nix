@@ -222,6 +222,26 @@ let
       fi
     fi
 
+    # Если бинарник — ELF (предположительно динамически связанный), попробуем
+    # запустить его через подходящий glibc loader из Nix store. Это часто
+    # решает проблему "stub-ld" без необходимости использования steam-run
+    # (bubblewrap). Только если запуск через loader не сработает — используем
+    # steam-run или systemd-run в зависимости от возможностей хоста.
+    is_elf=0
+    if [ -x "$BIN" ] && head -c4 "$BIN" 2>/dev/null | od -An -t x1 | tr -d ' \n' | grep -iq '^7f454c46'; then
+      is_elf=1
+    fi
+
+    if [ "$is_elf" = "1" ]; then
+      LOADER=$(ls -d /nix/store/*glibc*/lib/ld-linux-x86-64.so.2 2>/dev/null | head -n1 || true)
+      if [ -n "$LOADER" ]; then
+        # Попытка запустить напрямую через Nix glibc loader — если она
+        # сработает, то исполняемый файл запустится в локальном окружении
+        # без bwrap/steam-run.
+        exec "$LOADER" "$BIN" -- "$@" || true
+      fi
+    fi
+
     if command -v steam-run >/dev/null 2>&1 && { [ "$can_use_userns" = "1" ] || [ "${OPENCODE_FORCE_STEAM:-0}" = "1" ]; }; then
       STEAM_RUN_CMD=$(command -v steam-run)
       # Передача аргументов через steam-run без изменений; используем '--'
