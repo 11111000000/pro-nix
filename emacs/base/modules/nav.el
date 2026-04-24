@@ -31,6 +31,15 @@
       ;; Accept candidate with RET but keep original behavior in certain contexts
       (define-key vertico-map (kbd "RET") #'vertico-exit))))
 
+;; Prefer consult's M-x if available for a richer M-x UX. Fall back to the
+;; built-in `execute-extended-command' when consult is not present. We avoid
+;; requiring consult eagerly; `pro--package-provided-p' and
+;; `pro-packages--maybe-install' are used to attempt to make consult
+;; available when the environment permits.
+(when (or (pro--package-provided-p 'consult) (pro-packages--maybe-install 'consult t) (require 'consult nil t))
+  (when (fboundp 'consult-M-x)
+    (global-set-key (kbd "M-x") #'consult-M-x)))
+
 
 ;; Universal minibuffer TAB behaviour: cycle candidates where appropriate.
 (defun pro/minibuffer-tab ()

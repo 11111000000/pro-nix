@@ -259,7 +259,10 @@ by providers and prints a short status message."
   "Вернуть имя текущего AI-провайдера."
   (symbol-name (pro-ai--backend-choice)))
 
-(pro-ai--ensure-backends)
+;; Note: do not eagerly register backends here. Backends are registered when
+;; `gptel' is loaded (see the `with-eval-after-load' block below) or on-demand
+;; when the user opens the AI entry via `pro-ai-open-entry'. Eager registration
+;; at load time can fail if gptel is not yet available on `load-path'.
 
 ;; Agent-shell integration
 (with-eval-after-load 'agent-shell

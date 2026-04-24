@@ -24,24 +24,29 @@ in
     (lib.mkIf config.services.zramSlice.enable {
       # Create a small script in /etc that performs the zram setup with chosen size
       # use a plain string here; lib.mkString isn't available in all nixpkgs
-      environment.etc."enable-zram.sh".text = ''
+      environment.etc."enable-zram.sh" = {
+        text = ''
 #!/bin/sh
 set -e
 # compute size in MB
 if [ "${cfg.size}" = "auto" ]; then
-  mem_kb=$(awk "/MemTotal/ {print \$2}" /proc/meminfo)
+  # use absolute path for awk to avoid minimal PATH in systemd ExecStart
+  mem_kb=$(/run/current-system/sw/bin/awk '/MemTotal/ {print $2}' /proc/meminfo)
   size_mb=$(( mem_kb/1024/2 ))
   if [ $size_mb -gt 16384 ]; then size_mb=16384; fi
 else
   size_mb=${cfg.size}
 fi
 echo "Configuring zram with $size_mb M"
-modprobe zram max_comp_streams=4 || true
+# use absolute paths for commands invoked from unit
+/run/current-system/sw/sbin/modprobe zram max_comp_streams=4 || true
 echo $((size_mb * 1024 * 1024)) > /sys/block/zram0/disksize
-mkswap /dev/zram0 || true
-swapon -p 5 /dev/zram0 || true
+/run/current-system/sw/sbin/mkswap /dev/zram0 || true
+/run/current-system/sw/sbin/swapon -p 5 /dev/zram0 || true
 exit 0
 '';
+        mode = "0755";
+      };
 
       systemd.services."enable-zram" = {
         description = "Enable zram swap at boot";
