@@ -105,6 +105,17 @@
           (when (fboundp 'all-the-icons-completion-mode)
             (all-the-icons-completion-mode 1))))))
 
+    ;; Provide a small minibuffer hint about navigation and actions to help
+    ;; discoverability. This message is non-intrusive and displays in the echo
+    ;; area when minibuffer is entered for the first time in a session.
+    (defvar pro--minibuffer-hint-shown nil "Whether the minibuffer hint was shown this session.")
+    (defun pro--show-minibuffer-hint-once ()
+      "Show a short help line for minibuffer navigation the first time only."
+      (unless pro--minibuffer-hint-shown
+        (message "TAB/C-i: next • S-TAB: prev • C-n/C-p/C-j/C-k: navigate • C-.: actions • M-.: preview")
+        (setq pro--minibuffer-hint-shown t)))
+    (add-hook 'minibuffer-setup-hook #'pro--show-minibuffer-hint-once)))
+
     ;; Dired icons via treemacs integration when available
     (when (pro-ui--try-require 'treemacs-icons-dired)
       (add-hook 'dired-mode-hook #'treemacs-icons-dired-enable-once))

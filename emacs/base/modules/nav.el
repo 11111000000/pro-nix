@@ -110,7 +110,10 @@
     (let ((m (symbol-value (intern (symbol-name map)))))
       (when (keymapp m)
         (define-key m (kbd "C-n") #'pro/minibuffer-next)
-        (define-key m (kbd "C-p") #'pro/minibuffer-previous)))))
+        (define-key m (kbd "C-p") #'pro/minibuffer-previous)
+        ;; Also accept C-j/C-k as navigation aliases (common preference)
+        (define-key m (kbd "C-j") #'pro/minibuffer-next)
+        (define-key m (kbd "C-k") #'pro/minibuffer-previous)))))
 
 ;; Configure Orderless for fuzzy matching only after the style is registered.
 ;; Setting `completion-styles' to include a style name that is not registered
