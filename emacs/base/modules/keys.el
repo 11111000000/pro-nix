@@ -226,9 +226,16 @@ KEYS-ALIST is an alist of ("KEY" . command-symbol).
 This records suggestions only; it does not apply global bindings.
 Use `pro/export-registered-keys-to-org' or `pro/keys-import-suggestions' to
 persist or apply suggestions." 
-  (when (and module keys-alist)
-    (puthash module keys-alist pro/registered-module-keys)
-    (message "pro: registered %d suggested keys from %s" (length keys-alist) module)))
+  ;; Be defensive: callers may accidentally pass non-lists or expressions that
+  ;; evaluate to an unbound symbol which would abort Emacs startup. Wrap in
+  ;; condition-case and avoid calling `length' on non-list values.
+  (condition-case err
+      (when (and module keys-alist)
+        (puthash module keys-alist pro/registered-module-keys)
+        (let ((n (if (listp keys-alist) (length keys-alist) -1)))
+          (message "pro: registered %s suggested keys from %s" (if (>= n 0) (format "%d" n) "(unknown count)") module))))
+    (error
+     (message "pro: failed to register module keys for %s: %S" module err)))
 
 (defun pro/unregister-module-keys (module)
   "Unregister keys suggested by MODULE." 

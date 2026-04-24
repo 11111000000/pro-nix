@@ -32,7 +32,16 @@ Higher numbers win when the same package exists in several archives."
   (package-initialize)
   ;; Make sure use-package is available (it may be provided by Nix or ELPA)
   (unless (require 'use-package nil t)
-    (unless package-archive-contents (package-refresh-contents))
+    ;; Only refresh archives if we don't already have metadata or a refresh
+    ;; has not been performed earlier in this Emacs session. pro-packages.el
+    ;; may have already refreshed archives and set `pro-packages--refreshed`.
+    (unless (or package-archive-contents
+                (and (boundp 'pro-packages--refreshed) pro-packages--refreshed))
+      (condition-case _e
+          (progn (package-refresh-contents)
+                 (when (boundp 'pro-packages--refreshed)
+                   (setq pro-packages--refreshed t)))
+        (error (message "[pro-packages] failed to refresh package archives during setup"))))
     (package-install 'use-package)
     (require 'use-package))
   (require 'package-vc)
