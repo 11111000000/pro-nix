@@ -204,8 +204,16 @@ let
     #   ресурсов.
     # - Для интерактивных команд (acp, acp-shell) и если OPENCODE_DIRECT_RUN=1,
     #   нужно сохранить stdin/stdout — тогда выполняем бинарник напрямую.
-    if [ "''${OPENCODE_DIRECT_RUN:-0}" = "1" ] || [ "''${1:-}" = "acp" ] || [ "''${1:-}" = "acp-shell" ]; then
-      # Прямой exec: передаём все аргументы без изменений.
+    # Always forward CLI arguments to the underlying binary. Some upstream
+    # scripts (notably the acp server scripts) rely on receiving the same
+    # argv sequence that was passed to the wrapper. The previous logic only
+    # forwarded arguments for interactive subcommands which made these
+    # scripts lose parameters when launched indirectly.
+    #
+    # Preserve the OPENCODE_DIRECT_RUN escape hatch: if it's explicitly set
+    # to 1 we still execute the binary directly (this branch is equivalent
+    # to the original behaviour but we don't special-case subcommand names).
+    if [ "''${OPENCODE_DIRECT_RUN:-0}" = "1" ]; then
       exec "$BIN" "$@"
     fi
 

@@ -1,5 +1,5 @@
 ;; Русский: комментарии и пояснения оформлены в стиле учебника
-;;; org.el --- орг-работа и таблицы -*- lexical-binding: t; -*-
+;;; pro-org.el --- орг-работа и таблицы -*- lexical-binding: t; -*-
 
 ;; Этот модуль делает Org удобным для заметок, таблиц, задач и ТЗ.
 
@@ -55,4 +55,6 @@
 
 (add-hook 'org-mode-hook #'pro-org-setup)
 
-(provide 'org)
+(provide 'pro-org)
+
+;;; pro-org.el ends here

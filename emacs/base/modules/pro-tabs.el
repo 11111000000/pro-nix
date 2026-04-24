@@ -37,7 +37,7 @@ If `pro-tabs' package is present, delegate to it; otherwise use `tab-bar-new-tab
 ;; Register suggested keys after `keys' is loaded. Use `puthash' directly
 ;; when the registry is present to avoid surprising evaluation-time issues
 ;; with reader macros in some environments.
-(with-eval-after-load 'keys
+(with-eval-after-load 'pro-keys
   ;; Guard registration so that errors in the registry (for example due to
   ;; evaluation-time ordering bugs or malformed payloads) do not abort
   ;; Emacs startup. Log the error for later inspection.

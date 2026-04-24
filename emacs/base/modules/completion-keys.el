@@ -1,4 +1,4 @@
-;;; completion-keys.el --- Keybindings for cape/corfu/consult helpers -*- lexical-binding: t; -*-
+;;; pro-completion-keys.el --- Keybindings for cape/corfu/consult helpers -*- lexical-binding: t; -*-
 ;; Safe, lazy keybinding file: binds C-c o <letter> to cape backends
 
 ;; Instead of binding global keys directly, publish suggested keys for
@@ -14,7 +14,7 @@
      ("C-c y y" . consult-yasnippet) )
   "Suggested global keys for completion (CAPE/consult-yasnippet).")
 
-(with-eval-after-load 'keys
+(with-eval-after-load 'pro-keys
   (when (fboundp 'pro/register-module-keys)
     (condition-case err
         (pro/register-module-keys 'completion pro/completion-suggested-keys)
@@ -24,6 +24,6 @@
     ;; Export suggested keys to an org fragment for review on demand
     (pro/export-registered-keys-to-org)))
 
-(provide 'completion-keys)
+(provide 'pro-completion-keys)
 
-;;; completion-keys.el ends here
+;;; pro-completion-keys.el ends here

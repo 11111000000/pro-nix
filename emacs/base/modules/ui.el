@@ -1,4 +1,4 @@
-;;; ui.el --- визуальная среда -*- lexical-binding: t; -*-
+;;; pro-ui.el --- визуальная среда -*- lexical-binding: t; -*-
 
 ;; Этот модуль собирает внешний вид так, чтобы он был тихим, читаемым и полезным.
 
@@ -262,7 +262,9 @@ is set accordingly."
     (when (and (pro-ui--try-require 'kind-icon) (boundp 'corfu-margin-formatters) (fboundp 'kind-icon-margin-formatter))
       (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)))
 
-(provide 'ui)
+(provide 'pro-ui)
+
+;;; pro-ui.el ends here
 
 ;; Helper: check icon fonts availability and print install guidance
 (defun pro-ui-check-icon-fonts ()

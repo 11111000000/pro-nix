@@ -1,4 +1,4 @@
-;;; nav.el --- поиск и навигация -*- lexical-binding: t; -*-
+;;; pro-nav.el --- поиск и навигация -*- lexical-binding: t; -*-
 
 ;; Модуль: nav.el — поиск и навигация.
 ;;
@@ -208,4 +208,6 @@
     (pro-compat--notify-once "consult" "consult missing — pro-nav-open-line fallback to isearch")
     (call-interactively #'isearch-forward)))
 
-(provide 'nav)
+(provide 'pro-nav)
+
+;;; pro-nav.el ends here

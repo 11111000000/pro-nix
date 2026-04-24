@@ -1,5 +1,5 @@
 ;; Русский: комментарии и пояснения оформлены в стиле учебника
-;;; core.el --- ядро Emacs -*- lexical-binding: t; -*-
+;;; pro-core.el --- ядро Emacs -*- lexical-binding: t; -*-
 
 ;; Этот модуль держит самые общие и тихие правила среды.
 
@@ -44,4 +44,6 @@
 (setq vc-follow-symlinks t)
 (setq require-final-newline t)
 
-(provide 'core)
+(provide 'pro-core)
+
+;;; pro-core.el ends here

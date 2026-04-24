@@ -1,5 +1,5 @@
 ;; Русский: комментарии и пояснения оформлены в стиле учебника
-;;; ai.el --- AI policy and entrypoint -*- lexical-binding: t; -*-
+;;; pro-ai.el --- AI policy and entrypoint -*- lexical-binding: t; -*-
 
 (require 'json)
 (require 'seq)
@@ -319,4 +319,6 @@ by providers and prints a short status message."
     (message "[pro-ai] default backend: %s"
              (pro-ai--backend-display-name backend))))
 
-(provide 'ai)
+(provide 'pro-ai)
+
+;;; pro-ai.el ends here
