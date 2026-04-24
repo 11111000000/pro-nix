@@ -1,0 +1,12 @@
+# Example content for /etc/systemd/system/opencode.slice
+# Save as /etc/systemd/system/opencode.slice (requires root). This file limits memory/CPU/IO for the slice.
+[Slice]
+# Limit memory to 28G (adjust to your RAM)
+MemoryMax=28G
+# CPUQuota — percent of total CPU time (80% here)
+CPUQuota=80%
+# IOWeight 1..1000 (higher = more IO priority)
+IOWeight=200
+
+# Usage: sudo systemctl daemon-reload; sudo systemctl start opencode.slice
+# Run a command in this slice: sudo systemd-run --slice=opencode.slice --scope <command>

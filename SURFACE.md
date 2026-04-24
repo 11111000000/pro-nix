@@ -133,6 +133,27 @@ Notes:
 - All surfaces are conservative: GUI-only features are guarded by `display-graphic-p` and Nix/native upgrades that touch C-extensions must be followed by a restart (session helper provided).
 - For any surface marked [FROZEN/FLUID] see HOLO.md for Change Gate and proof commands.
 
+## Emacs GUI UX Layer
+
+- Name: Emacs GUI UX Layer
+  Stability: [FLUID]
+  Spec: Collection of GUI-only enhancements provided by `emacs/base/modules/*` (themes, modeline, icons, child-frame/posframe completion, modeline, fringes). All features guarded by `display-graphic-p`. Native extensions (compiled elisp, posframe child-frames, font provisioning) may require a restart after Nix package upgrades. UX should degrade gracefully in TTY.
+  Proof: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el` (gui-smoke; see docs/plans).
+
+## Fonts & Icon Availability
+
+- Name: FontsAndIcons
+  Stability: [FLUID]
+  Spec: pro-nix optionally uses patched icon fonts (Nerd Fonts / all-the-icons). The system must provide font packages or Emacs must fall back to textual alternatives. Nix packaging will attempt to provide fonts where `pro.emacs.gui.enable-icons = true`.
+  Proof: `rg "ICON-FONTS.md" -n || true` and CI GUI smoke tests (font availability checks). See docs/ICON-FONTS.md.
+
+## Onboarding Wizard
+
+- Name: OnboardingWizard
+  Stability: [FLUID]
+  Spec: An opt-in interactive first-run wizard that explains keybindings, module discovery, and how to opt-out of auto-install. The wizard is invoked on first activation and can be re-run via `pro-emacs-onboarding-run`.
+  Proof: Manual acceptance flow documented in docs/plans/onboarding-wizard.md; headless proof is optional and must be noninteractive-friendly.
+
 ## Pro‑peer: Discovery & Key Sync
 
 - Name: Pro-peer (Discovery & Key Sync)

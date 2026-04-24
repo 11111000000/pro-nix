@@ -201,6 +201,7 @@
   (interactive)
   (if (or (pro--package-provided-p 'gptel) (require 'gptel nil t))
       (progn
+        ;; Ensure backends are registered when gptel is available.
         (pro-ai--ensure-backends)
         (pro-ai--activate-backend (pro-ai--backend-choice))
         (setq gptel-use-curl t
@@ -208,7 +209,17 @@
         (message "[pro-ai] active: backend=%s model=%s"
                  (pro-ai--backend-display-name (and (boundp 'gptel-backend) gptel-backend))
                  (pro-ai--model-display-name (and (boundp 'gptel-model) gptel-model)))
-        (call-interactively #'gptel))
+        ;; Be defensive when invoking gptel: it may be provided as an
+        ;; interactive command or only as a callable function in some
+        ;; deployments. Try the interactive path first, fall back to a
+        ;; function call, otherwise warn once.
+        (cond
+         ((and (fboundp 'gptel) (commandp (symbol-function 'gptel)))
+          (call-interactively #'gptel))
+         ((fboundp 'gptel)
+          (funcall (symbol-function 'gptel)))
+         (t
+          (pro-compat--notify-once "gptel" "gptel present but not callable"))))
     (pro-compat--notify-once "gptel" "gptel missing — AI entry unavailable")))
 
 (defun pro-ai-load-keys ()

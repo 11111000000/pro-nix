@@ -338,6 +338,10 @@ github-cli
   xfce.thunar
   ffmpegthumbnailer      # Видео-миниатюры для tumbler
   lm_sensors            # Мониторинг датчиков (температура/вентиляторы).
+  stress-ng             # CPU/memory stress testing tool
+  fio                   # Flexible I/O tester for disks
+  time                  # GNU time for precise timing measurements
+  powertop              # Power consumption and CPU frequency diagnostics
   #python3Full           # python3 и python (совместимость с shebang и stubs).
   nodejs_20
   esbuild

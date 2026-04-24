@@ -14,6 +14,16 @@ Invariants:
 Decisions:
 - [Draft] Emacs profile: provide a default portable Emacs + EXWM profile. Exit: provide a migration plan and Proof (headless tests) before freezing.
 - [FROZEN] Soft Reload: provide safe, opt-in mechanisms to update UI, keybindings, modules and packages without requiring a full Emacs restart; provide tooling to refresh Nix-provided site-lisp paths and to perform a controlled restart with session restore when native extensions change. Exit: Soft Reload surfaces implemented and verified via headless ERT tests. Proof: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el` + manual test commands listed in SURFACE.md.
+  
+  Migration:
+    Impact: Soft Reload touches Emacs session state and may require restart when native C-extensions or compiled elisp change; scope: Emacs GUI UX Layer, modelines, icon fonts, completion backends (posframe), and site-lisp paths.
+    Strategy: additive_v2 — provide an explicit runtime "pro-emacs-reload" command that attempts a best-effort reload of site-lisp and module state; when native extensions are detected changed (native-compile or binary modules), surface a controlled restart prompt that preserves session state to disk and restores where possible.
+    Window/Version: v1 (initial rollout) — opt-in behind `pro.emacs.softReload.enable = true` and feature gate; full default rollout deferred until Proof passes.
+    Data/Backfill: store session serialization in `~/.local/state/pro-emacs/session-<timestamp>.el` (or `~/.emacs.d/.local/session/`) and provide tooling to inspect and selectively restore buffers, frames and window-configs.
+    Rollback: disable `pro.emacs.softReload.enable` and restart Emacs; session files preserved for manual restore.
+    Tests:
+      - Keep: existing headless ERT tests and UI smoke tests.
+      - Add: `tests/contract/test-soft-reload.el` (simulate refresh and assert site-lisp path update + session restore), `tests/contract/test-gui-smoke.el` (Xvfb-based smoke), `tests/contract/test-theme-contrast.el` (face contrast checks).
 
 - [Draft] Pro-peer: Discovery & Key Sync
   Pressure: Ops

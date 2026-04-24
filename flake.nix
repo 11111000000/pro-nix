@@ -103,10 +103,14 @@ EOF
         # Add a reproducible opencode package entry that fetches the official
         # release tarball and exposes it as an app for testing/CI. This gives a
         # deterministic path for environments where npx can't reach the registry.
-        opencode-release = (pkgs.writeShellScriptBin "opencode-release" ''
+        opencode-release = {
+          type = "app";
+          program = toString (pkgs.writeShellScriptBin "opencode-release" ''
             set -eu
             exec ${toString opencode_from_release}/bin/opencode --version
           '');
+          meta.description = "Reproducible opencode binary (release)";
+        };
 
         # (opencode-store removed — using system-packages.nix opencodeBin instead)
         # Утилита: добавляем удобное приложение для запуска TUI (Textual pro-nix manager)
@@ -126,9 +130,9 @@ EOF
         };
       };
 
-      devShells.${system}.default = pkgs.mkShell {
+        devShells.${system}.default = pkgs.mkShell {
         name = "pro-nix-dev";
-        buildInputs = [ emacsPkg pkgs.ripgrep pkgs.fd pkgs.findutils ];
+        buildInputs = [ emacsPkg pkgs.ripgrep pkgs.fd pkgs.findutils pkgs.stress-ng pkgs.fio pkgs.powertop pkgs.iotop pkgs.lm_sensors pkgs.time ];
         shellHook = let
           flags = lib.concatStringsSep " " (map (p: "-L " + p + "/share/emacs/site-lisp") [
             pkgs.emacsPackages.vertico pkgs.emacsPackages.consult pkgs.emacsPackages.orderless

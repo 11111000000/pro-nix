@@ -6,6 +6,16 @@
 (setq frame-inhibit-implied-resize t)
 (setq inhibit-splash-screen t)
 
+;; Ensure local pro modules directory is on `load-path' as early as possible.
+;; This prevents the bootstrap installer from attempting to install helper
+;; modules that are shipped with the repo (for example pro-fix-corfu).
+;; We compute the path relative to this file so the code works when the
+;; repository is used directly as the Emacs site-lisp source.
+(let* ((this-dir (file-name-directory (or load-file-name buffer-file-name)))
+       (pro-modules-dir (expand-file-name "modules" this-dir)))
+  (when (file-directory-p pro-modules-dir)
+    (add-to-list 'load-path pro-modules-dir)))
+
 ;; Enable noninteractive auto-install of missing pro packages by default.
 ;; This environment variable is checked by pro-packages--maybe-install and
 ;; used to auto-install packages from MELPA when appropriate.
