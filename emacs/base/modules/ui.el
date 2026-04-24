@@ -142,6 +142,12 @@
     (when (pro-ui--try-require 'which-key)
       (global-set-key (kbd "C-.") #'embark-act))))
 
+;; Embark-Consult: configure default actions and mappings for common types
+(when (pro-ui--try-require 'embark-consult)
+  (with-eval-after-load 'embark-consult
+    ;; Ensure embark-consult registers useful collectors
+    (add-to-list 'embark-consult-sources 'consult--source-project-buffer)))
+
     ;; Dired icons via treemacs integration when available
     (when (pro-ui--try-require 'treemacs-icons-dired)
       (add-hook 'dired-mode-hook #'treemacs-icons-dired-enable-once))
