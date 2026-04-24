@@ -32,7 +32,7 @@ fi
 # Prefer performing a real switch with sudo. In container environments where
 # sudo cannot gain privileges (eg. "no new privileges" flag), fall back to a
 # non-root build of the toplevel derivation for verification purposes.
-if sudo -n true 2>/dev/null; then
+if sudo -n true 2>/dev/null && sudo systemd-run --quiet --wait --collect --pipe --service-type=exec --unit=nixos-switch-preflight /bin/true >/dev/null 2>&1; then
   echo "[just] performing nixos-rebuild switch for host: $HOST_ARG"
   exec sudo nixos-rebuild switch --flake ".#$HOST_ARG"
 else

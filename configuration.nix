@@ -284,7 +284,7 @@
   # Build the final package list and force it as the definitive value. Modules
   # should use lib.mkDefault when adding packages so the top-level override
   # here wins without causing recursion.
-  environment.systemPackages = lib.mkForce (with pkgs; [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }));
+  environment.systemPackages = lib.mkForce (with pkgs; [ bashInteractive openssh just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }));
 
   # Учебное замечание о порядке формирования systemPackages:
   # - Опции модулей могут дополнять environment.systemPackages до момента, когда
@@ -350,19 +350,17 @@
     CPUWeight = "200";
   };
 
-  # Make systemd enable CPU accounting and set a default weight for slices.
-  # This helps ensure user processes (user.slice) are subject to accounting and
-  # will respect per-unit limits when applied.
-  # Use structured systemd settings (replacement for deprecated extraConfig).
-  systemd.settings = {
-    Manager = {
-      DefaultCPUAccounting = "yes";
-      DefaultCPUWeight = "100";
-      DefaultTasksMax = "8192";
-      DefaultCPUQuotaPerSecUSec = "100000";
+  # Ensure polkit does not attempt to restart before the system bus is ready.
+  # This mitigates a race during live activation where dbus is reloaded and
+  # polkit restarts too early, causing D-Bus access to be rejected.
+  systemd.services.polkit = lib.mkMerge [ (config.systemd.services.polkit or {}) {
+    serviceConfig = (config.systemd.services.polkit.serviceConfig or {}) // {
+      After = "dbus.service";
+      Wants = "dbus.service";
+      RestartSec = "3s";
     };
-  };
-  
+  } ];
+
   environment.variables = {
     LANG = "ru_RU.UTF-8";
     LC_CTYPE = "ru_RU.UTF-8";

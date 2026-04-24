@@ -34,6 +34,11 @@
   Spec: Installation can be performed via `bootstrap/install.sh`, `bootstrap/install-pro.sh`, or NixOS activation.
   Proof: -
 
+- Name: SystemRuntimePaths
+  Stability: [FLUID]
+  Spec: The default system profile exposes core interactive tools on the runtime PATH, including `bash` and `ssh` under `/run/current-system/sw/bin/`.
+  Proof: tests/contract/test_system_runtime_paths.spec
+
 ## Emacs Lisp Style
 
 1. Keep functions small and named by role, not by mechanism.
