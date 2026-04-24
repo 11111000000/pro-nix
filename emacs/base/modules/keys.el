@@ -245,11 +245,14 @@ persist or apply suggestions."
   ;; inputs.
   (condition-case err
       (when (and module keys-alist)
-        ;; Debug: write a small log to /tmp for early startup diagnostics
+        ;; Debug: write a detailed log to /tmp for early startup diagnostics.
         (ignore-errors
-         (with-temp-file "/tmp/pro-register.log"
-           (goto-char (point-max))
-           (insert (format "CALL: module=%S type=%S\n" module (type-of keys-alist)))))
+         (let ((file (format "/tmp/pro-register-%s.log" (symbol-name module))))
+           (with-temp-file file
+             (insert (format "CALL: time=%s module=%S type=%S\n" (current-time-string) module (type-of keys-alist)))
+             (insert "raw keys-alist representation:\n")
+             (prin1 keys-alist (current-buffer))
+             (insert "\n---\n")))))
         (message "pro/register-module-keys: module=%S keys-alist-type=%S" module (type-of keys-alist))
         ;; Normalize to a list if necessary and validate elements.
         (let* ((raw (if (listp keys-alist) keys-alist (list keys-alist)))
@@ -268,7 +271,7 @@ persist or apply suggestions."
           (let ((n (if (listp safe-keys) (length safe-keys) -1)))
             (message "pro: registered %s suggested keys from %s" (if (>= n 0) (format "%d" n) "(unknown count)") module)))))
     (error
-     (message "pro: failed to register module keys for %s: %S" module err))))
+     (message "pro: failed to register module keys for %s: %S" module err)))
 
 (defun pro/unregister-module-keys (module)
   "Unregister keys suggested by MODULE." 
