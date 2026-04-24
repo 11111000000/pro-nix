@@ -33,3 +33,11 @@ jobs:
           emacs --batch -l scripts/generate-provided-packages.el --eval '(generate-provided-packages "nix/provided-packages.nix" "emacs/base/provided-packages.el")'
           PRO_PACKAGES_AUTO_INSTALL=0 nix-shell -p emacsPackages.vertico emacsPackages.consult emacsPackages.orderless emacsPackages.marginalia \
             emacsPackages.corfu emacsPackages.cape emacsPackages.vterm emacsPackages.ace-window emacsPackages.embark --run "./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el"
+
+      - name: Run HDS verification tools
+        run: |
+          set -euo pipefail
+          chmod +x ./tools/holo-verify.sh ./tools/surface-lint.sh ./tools/docs-link-check.sh || true
+          ./tools/holo-verify.sh || ( echo "holo-verify failed"; exit 1 )
+          ./tools/surface-lint.sh || ( echo "surface-lint failed"; exit 1 )
+          ./tools/docs-link-check.sh || ( echo "docs-link-check failed"; exit 1 )
