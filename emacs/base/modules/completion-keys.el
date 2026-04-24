@@ -18,7 +18,7 @@
   (when (fboundp 'pro/register-module-keys)
     (condition-case err
         (pro/register-module-keys 'completion pro/completion-suggested-keys)
-      (error (message "pro: failed to register completion suggested keys: %S" err)))))
+      (error (message "pro: failed to register completion suggested keys: %S" err))))
 
   (when (fboundp 'pro/export-registered-keys-to-org)
     ;; Export suggested keys to an org fragment for review on demand
