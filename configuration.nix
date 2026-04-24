@@ -34,28 +34,23 @@
   environment.etc."pro/emacs-keys.org".source = ./emacs-keys.org;
 
    imports = [
-     # Аппаратные параметры задаются на уровне профиля хоста: hardware-configuration.nix больше не используется
-     # ./hardware-configuration.nix
+     ./modules/system-boot.nix
+     ./modules/packages-runtime.nix
+     ./modules/systemd-policy.nix
 
+     # Общие модули формируют общую политику и не зависят от пользовательских настроек.
+     ./modules/pro-users.nix
+     ./modules/pro-services.nix
+     ./modules/pro-storage.nix
+     ./modules/pro-privacy.nix
+     ./modules/pro-peer.nix
+     ./modules/headscale.nix
+     ./modules/pro-desktop.nix
+     ./modules/nix-cuda-compat.nix
+     ./nixos/modules/opencode-config.nix
 
-    # Общие модули формируют общую политику и не зависят от пользовательских настроек.
-    ./modules/pro-users.nix
-    ./modules/pro-services.nix
-    ./modules/pro-storage.nix
-    ./modules/pro-privacy.nix
-    ./modules/pro-peer.nix
-    ./modules/headscale.nix
-    ./modules/pro-desktop.nix
-    ./modules/nix-cuda-compat.nix
-    ./nixos/modules/opencode-config.nix
-
-    # Локальные переопределения конкретного хоста остаются в файле local.nix.
-  ] ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ] ++ [
-
-    # Home Manager подключается как слой пользовательской конфигурации.
-    # Вспомогательный модуль для переназначения клавиш доступен как опция.
-    # <nixos-unstable/nixos/modules/services/misc/xremap.nix>
-  ];
+     # Локальные переопределения конкретного хоста остаются в файле local.nix.
+   ] ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ];
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -284,7 +279,7 @@
   # Build the final package list and force it as the definitive value. Modules
   # should use lib.mkDefault when adding packages so the top-level override
   # here wins without causing recursion.
-  environment.systemPackages = lib.mkForce (with pkgs; [ bashInteractive openssh just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }));
+  environment.systemPackages = lib.mkForce (with pkgs; (import ./modules/packages-runtime.nix { inherit pkgs; }).environment.systemPackages ++ [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }));
 
   # Учебное замечание о порядке формирования systemPackages:
   # - Опции модулей могут дополнять environment.systemPackages до момента, когда
