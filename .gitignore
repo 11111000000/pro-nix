@@ -26,3 +26,9 @@ auto-save-list/
 .direnv/
 tmp/
 temp/
+backup
+missing
+running
+/emacs/home/
+/home/
+result-devshell
