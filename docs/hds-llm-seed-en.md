@@ -1,3 +1,4 @@
+<!-- Copied from /home/az/Code/HDS/docs/hds-llm-seed-en.md -->
 # HDS LLM Seed v1.4 (EN) — portable kernel for any LLM/agent
 
 ## Rules
@@ -197,7 +198,5 @@ Preferred order (if present):
 - ./tools/surface-lint.sh
 - ./tools/docs-link-check.sh
 - tests (contract + scenario)
-
-If tools are absent: propose a minimal reproducible verify set and add it as scripts/tests.
 
 End of Seed

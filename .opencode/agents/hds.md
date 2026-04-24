@@ -18,6 +18,24 @@ Behaviors:
 - Prefer minimal, reversible patches; keep migrations/additive strategies when touching [FROZEN] surface items.
 - When verification tools exist (tools/holo-verify.sh, tools/surface-lint.sh, tools/docs-link-check.sh), run them as part of the Verify step and fail fast on violations of axioms (Surface First, Frozen Requires Proof, Single-Intent, Pressure for Frozen).
 
+Verify commands (recommended)
+- Primary flake verification:
+  - `nix flake check` — run the flake checks (CI-like). Use `--show-trace` for Nix errors.
+- HDS verification (repository-local):
+  - `./tools/holo-verify.sh` — verifies HOLO.md/SURFACE.md invariants and Proof artifacts.
+  - `./tools/surface-lint.sh` — check SURFACE.md format (if present).
+  - `./tools/docs-link-check.sh` — validate documentation links.
+- Contract & scenario tests:
+  - `bash tests/contract/*.sh` — run contract proof scripts.
+  - `bash tests/scenario/*.test` — run vertical scenario tests (headless/emulation).
+- Emacs E2E (headless):
+  - `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el`
+
+Agent behavior (practical)
+- When the agent is asked to apply changes that touch SURFACE.md or files marked [FROZEN], it should require a Change Gate (Intent, Pressure, Surface impact, Proof) and refuse to proceed until the Gate is present.
+- Before committing or proposing code, the agent should run the Verify commands above and present failures as actionable diagnostics.
+- For local development, the agent may run the subset: `nix flake check`, `./tools/holo-verify.sh`, `bash tests/contract/test_surface_health.spec` and the Emacs E2E smoke test.
+
 Verification helpers (invoked by the agent or developer):
 - ./tools/holo-verify.sh — checks HOLO.md invariants, SURFACE.md [FROZEN] proofs, and scenario tests.
 - ./tools/surface-lint.sh — lints SURFACE.md format.
