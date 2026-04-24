@@ -61,16 +61,33 @@ Disable if you observe frame jitter on your setup."
 
 ;; Optional candidate icons in Corfu margin
 (when (and (or (pro--package-provided-p 'kind-icon) (pro-packages--maybe-install 'kind-icon t) (require 'kind-icon nil t))
-           (boundp 'corfu-margin-formatters))
+           (boundp 'corfu-margin-formatters)
+           (fboundp 'kind-icon-margin-formatter))
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
 ;; Minibuffer: enable Corfu only when Vertico/MCT aren't active
-(defun pro-completion--maybe-enable-corfu-in-minibuffer ()
-  "Enable `corfu-mode' in minibuffer unless Vertico/MCT is active." 
+  (defun pro-completion--maybe-enable-corfu-in-minibuffer ()
+  "Configure Corfu in minibuffer unless Vertico/MCT is active.
+
+We intentionally do NOT enable `corfu-mode' in the minibuffer here — the
+minibuffer UX is better served by Vertico/Consult. We only disable automatic
+popup behaviour (corfu-auto) when Corfu is present, to avoid accidental
+in-buffer style popups during minibuffer commands when Vertico isn't active.
+" 
   (unless (or (bound-and-true-p vertico--input) (bound-and-true-p mct--active))
-    (setq-local corfu-auto nil)
-    (when (fboundp 'corfu-mode) (corfu-mode 1))))
+    (when (boundp 'corfu-auto)
+      (setq-local corfu-auto nil))
+    ;; Ensure Corfu does not activate inside the minibuffer. Disabling the
+    ;; buffer-local `corfu-mode' here is safe even when `global-corfu-mode' is
+    ;; enabled because it only affects the minibuffer buffer.
+    (when (fboundp 'corfu-mode)
+      (corfu-mode -1))))
 (add-hook 'minibuffer-setup-hook #'pro-completion--maybe-enable-corfu-in-minibuffer)
+
+;; Recommend completion-style overrides for reliable file/command matching.
+(when (boundp 'completion-category-overrides)
+  (setq completion-category-overrides '((file (styles partial-completion basic))
+                                         (command (styles orderless basic)))))
 
 (provide 'pro-completion)
 

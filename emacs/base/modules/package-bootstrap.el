@@ -48,7 +48,7 @@ prompt the user where appropriate.
                      (progn (package-install pkg-sym) (message "[pro-package-bootstrap] installed %S" pkg-sym))
                    (error (message "[pro-package-bootstrap] failed %S: %s" pkg-sym (error-message-string err)))))
                 (t
-                 (message "[pro-package-bootstrap] missing %S (skipped)" pkg-sym)))))))))
+                 (message "[pro-package-bootstrap] missing %S (skipped)" pkg-sym))))))))
 
 (provide 'package-bootstrap)
 

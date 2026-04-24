@@ -59,10 +59,14 @@
 (defun pro-keys--parse-command (text)
   "Преобразовать TEXT в символ команды."
   (let ((name (pro-keys--normalize-command-name text)))
+    ;; Accept a wider set of characters that commonly appear in command
+    ;; symbols (slashes for category prefixes like `pro/…', dots, colons, etc).
+    ;; Previously the regexp rejected names such as "pro/consult-buffer",
+    ;; which left many table rows unparsable and resulted in pending bindings.
     (when (and name
                (not (string-empty-p name))
                (not (string-prefix-p "-" name))
-               (string-match-p "^[A-Za-z][A-Za-z0-9_-]*$" name))
+               (string-match-p "^[A-Za-z][A-Za-z0-9_:/.-]*$" name))
       (intern name))))
 
 (defun pro-keys--meaningful-cell-p (text)
@@ -211,18 +215,16 @@
 (pro-keys-load-org-file pro-keys-system-file)
 (pro-keys-load-org-file pro-keys-user-file)
 
-  (with-eval-after-load 'exwm
-    (setq exwm-input-global-keys pro-keys-exwm-global-keys))
+(with-eval-after-load 'exwm
+  (setq exwm-input-global-keys pro-keys-exwm-global-keys))
+
+;; Ensure pending bindings are retried when common lazy packages load.
+(dolist (feat '(projectile project consult vertico))
+  (with-eval-after-load feat
+    (pro-keys-apply-pending)))
 
 ;; Provide feature at the end so other modules can `with-eval-after-load` on
 ;; "keys" and safely call registry functions such as `pro/register-module-keys`.
-(provide 'keys)
-
-;; Provide this feature after the public API (registry functions) is
-;; defined. Placing `provide' earlier could cause `with-eval-after-load'
-;; callbacks in other modules to run before the registry functions exist,
-;; leading to void-variable / void-function errors during startup.
-
 ;; Registry for module-suggested keys (module -> alist of ("KEY" . SYMBOL))
 (defvar pro/registered-module-keys (make-hash-table :test 'eq)
   "Hash table mapping module symbol to its suggested keys alist.")
@@ -297,3 +299,9 @@ Return the path of the generated file.
        pro/registered-module-keys))
     (message "pro: wrote suggestions to %s" file)
     file))
+
+;; Provide this feature after the public API (registry functions) is
+;; defined. Placing `provide' earlier could cause `with-eval-after-load'
+;; callbacks in other modules to run before the registry functions exist,
+;; leading to void-variable / void-function errors during startup.
+ (provide 'keys)

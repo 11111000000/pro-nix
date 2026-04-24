@@ -34,12 +34,27 @@ If `pro-tabs' package is present, delegate to it; otherwise use `tab-bar-new-tab
 
 ;; Register suggested keys only after keys module has loaded to avoid
 ;; evaluation-time ordering issues when modules are loaded in different contexts.
+;; Register suggested keys after `keys' is loaded. Use `puthash' directly
+;; when the registry is present to avoid surprising evaluation-time issues
+;; with reader macros in some environments.
 (with-eval-after-load 'keys
-  (when (fboundp 'pro/register-module-keys)
-    (pro/register-module-keys 'tabs
-                              '( ("C-c t n" . pro-tabs-open-new-tab)
-                                 ("C-c t k" . pro-tabs-close-tab-and-buffer)
-                                 ("C-c t s" . tab-bar-switch-to-tab)))))
+  ;; Guard registration so that errors in the registry (for example due to
+  ;; evaluation-time ordering bugs or malformed payloads) do not abort
+  ;; Emacs startup. Log the error for later inspection.
+  (condition-case err
+      (cond
+       ((and (fboundp 'pro/register-module-keys))
+        (pro/register-module-keys 'tabs
+                                  '(("C-c t n" . pro-tabs-open-new-tab)
+                                    ("C-c t k" . pro-tabs-close-tab-and-buffer)
+                                    ("C-c t s" . tab-bar-switch-to-tab))))
+       ((and (boundp 'pro/registered-module-keys) (hash-table-p pro/registered-module-keys))
+        (puthash 'tabs
+                 '(("C-c t n" . pro-tabs-open-new-tab)
+                   ("C-c t k" . pro-tabs-close-tab-and-buffer)
+                   ("C-c t s" . tab-bar-switch-to-tab))
+                 pro/registered-module-keys)))
+    (error (message "[pro-tabs] failed to register suggested keys: %S" err))))
 
 (defun pro-tabs-close-tab-and-buffer ()
   "Close current tab and kill its buffer (wrapper)." 

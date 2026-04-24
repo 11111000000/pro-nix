@@ -31,6 +31,87 @@
       ;; Accept candidate with RET but keep original behavior in certain contexts
       (define-key vertico-map (kbd "RET") #'vertico-exit))))
 
+
+;; Universal minibuffer TAB behaviour: cycle candidates where appropriate.
+(defun pro/minibuffer-tab ()
+  "TAB behaviour in minibuffer: cycle Vertico/MCT candidates if active, else fallback to minibuffer-complete." 
+  (interactive)
+  (cond
+   ;; Vertico active: go to next candidate
+   ((and (boundp 'vertico--input) vertico--input (fboundp 'vertico-next))
+    (vertico-next))
+   ;; MCT (minibuffer completion at point) support if present
+   ((and (boundp 'mct--active) mct--active (fboundp 'mct-next))
+    (mct-next))
+   ;; Fallback: normal minibuffer completion
+   (t
+    (minibuffer-complete))))
+
+(defun pro/minibuffer-backtab ()
+  "Shift-TAB behaviour in minibuffer: previous candidate or minibuffer-complete-backward." 
+  (interactive)
+  (cond
+   ((and (boundp 'vertico--input) vertico--input (fboundp 'vertico-previous))
+    (vertico-previous))
+   ((and (boundp 'mct--active) mct--active (fboundp 'mct-previous))
+    (mct-previous))
+   (t
+    (when (fboundp 'minibuffer-complete-backward)
+      (minibuffer-complete-backward)))))
+
+;; Install TAB/C-i/<backtab> into common minibuffer maps so the behavior is
+;; uniform across C-x C-f, M-x and other minibuffer-driven commands.
+(dolist (map '(minibuffer-local-map
+               minibuffer-local-ns-map
+               minibuffer-local-completion-map
+               minibuffer-local-must-match-map))
+  (when (boundp (intern (symbol-name map)))
+    (let ((m (symbol-value (intern (symbol-name map)))))
+      (when (keymapp m)
+        (define-key m (kbd "TAB") #'pro/minibuffer-tab)
+        (define-key m (kbd "C-i") #'pro/minibuffer-tab)
+        (define-key m (kbd "<backtab>") #'pro/minibuffer-backtab)))))
+
+;; Navigation bindings in minibuffer: C-n / C-p should move between candidates
+(defun pro/minibuffer-next ()
+  "Move to next candidate in minibuffer completion UIs (Vertico/MCT/other)."
+  (interactive)
+  (cond
+   ((and (boundp 'vertico--input) vertico--input (fboundp 'vertico-next))
+    (vertico-next))
+   ((and (boundp 'mct--active) mct--active (fboundp 'mct-next))
+    (mct-next))
+   ;; In some modes completion-list-mode may be used; use next-line there.
+   ((and (derived-mode-p 'completion-list-mode) (fboundp 'next-line))
+    (next-line 1))
+   (t
+    ;; fallback: try minibuffer-complete which might update candidates
+    (minibuffer-complete))))
+
+(defun pro/minibuffer-previous ()
+  "Move to previous candidate in minibuffer completion UIs (Vertico/MCT/other)."
+  (interactive)
+  (cond
+   ((and (boundp 'vertico--input) vertico--input (fboundp 'vertico-previous))
+    (vertico-previous))
+   ((and (boundp 'mct--active) mct--active (fboundp 'mct-previous))
+    (mct-previous))
+   ((and (derived-mode-p 'completion-list-mode) (fboundp 'previous-line))
+    (previous-line 1))
+   (t
+    (when (fboundp 'minibuffer-complete-backward)
+      (minibuffer-complete-backward)))))
+
+(dolist (map '(minibuffer-local-map
+               minibuffer-local-ns-map
+               minibuffer-local-completion-map
+               minibuffer-local-must-match-map))
+  (when (boundp (intern (symbol-name map)))
+    (let ((m (symbol-value (intern (symbol-name map)))))
+      (when (keymapp m)
+        (define-key m (kbd "C-n") #'pro/minibuffer-next)
+        (define-key m (kbd "C-p") #'pro/minibuffer-previous)))))
+
 ;; Configure Orderless for fuzzy matching only after the style is registered.
 ;; Setting `completion-styles' to include a style name that is not registered
 ;; triggers errors (see "Invalid completion style orderless"). Therefore we

@@ -90,9 +90,29 @@
       (when (boundp 'corfu-margin-formatters)
         (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)))
 
+    ;; Try to enable icons inside minibuffer completion lists (consult/vertico)
+    ;; Prefer `nerd-icons' integration on NixOS where available; fallback to
+    ;; `all-the-icons' if present. Load these integrations lazily when consult
+    ;; or vertico is loaded to avoid startup cost.
+    (with-eval-after-load 'consult
+      (cond
+       ((pro-ui--try-require 'nerd-icons)
+        (when (pro-ui--try-require 'nerd-icons-completion)
+          (when (fboundp 'nerd-icons-completion-mode)
+            (nerd-icons-completion-mode 1))))
+       ((pro-ui--try-require 'all-the-icons)
+        (when (pro-ui--try-require 'all-the-icons-completion)
+          (when (fboundp 'all-the-icons-completion-mode)
+            (all-the-icons-completion-mode 1))))))
+
     ;; Dired icons via treemacs integration when available
     (when (pro-ui--try-require 'treemacs-icons-dired)
       (add-hook 'dired-mode-hook #'treemacs-icons-dired-enable-once))
+
+    ;; Also try to enable icons in dired via all-the-icons-dired when available.
+    (with-eval-after-load 'dired
+      (when (pro-ui--try-require 'all-the-icons-dired)
+        (add-hook 'dired-mode-hook #'all-the-icons-dired-mode)))
 
     ;; Soft guards: if system reports limited color support, reduce icon work
     (when (and (display-graphic-p)
@@ -157,8 +177,12 @@
         (when (fboundp 'corfu-mode) (corfu-mode 1))))
     (add-hook 'minibuffer-setup-hook #'pro-ui--maybe-enable-corfu-in-minibuffer)
 
-    ;; Improve corfu margin formatting experience if kind-icon present
-    (when (and (pro-ui--try-require 'kind-icon) (boundp 'corfu-margin-formatters))
+    ;; Improve corfu margin formatting experience if kind-icon present.
+    ;; Guard with `fboundp' in case the package is partially loaded and the
+    ;; formatter symbol is not yet defined.
+    (when (and (pro-ui--try-require 'kind-icon)
+               (boundp 'corfu-margin-formatters)
+               (fboundp 'kind-icon-margin-formatter))
       (setq kind-icon-default-face 'corfu-default) ;; integrate with corfu theme
       (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
@@ -180,7 +204,7 @@
         (when (fboundp 'corfu-terminal-mode) (corfu-terminal-mode 1))))
 
     ;; Optional cosmetics: candidate icons in the margin.
-    (when (and (pro-ui--try-require 'kind-icon) (boundp 'corfu-margin-formatters))
+    (when (and (pro-ui--try-require 'kind-icon) (boundp 'corfu-margin-formatters) (fboundp 'kind-icon-margin-formatter))
       (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)))
 
 (provide 'ui)

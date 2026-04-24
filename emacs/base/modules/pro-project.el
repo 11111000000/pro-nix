@@ -17,29 +17,58 @@
   "Команды проекта в стиле PRO.")
 
 (defun pro-project-root ()
-  "Вернуть корень текущего проекта или nil."
-  (when (fboundp 'project-current)
+  "Return project root.
+
+Prefer projectile when available (projectile-project-root), otherwise use
+the built-in project.el's project-current/project-root. Return nil when no
+project can be determined. This makes the project layer adaptive to either
+backend." 
+  (cond
+   ;; Projectile preferred for its richer UX when installed
+   ((and (fboundp 'projectile-project-root)
+         (projectile-project-root))
+    (projectile-project-root))
+   ;; Fallback to project.el
+   ((and (fboundp 'project-current))
     (when-let ((project (project-current)))
-      (project-root project))))
+      (project-root project)))
+   (t nil)))
 
 (defun pro-project-ripgrep ()
   "Искать в текущем проекте через Consult."
   (interactive)
-  (if (and (or (pro--package-provided-p 'consult) (require 'consult nil t))
-           (fboundp 'consult-ripgrep))
-      (consult-ripgrep (or (pro-project-root) default-directory))
-    (pro-compat--notify-once "consult" "consult-ripgrep missing — fallback to grep")
-    (let ((default-directory (or (pro-project-root) default-directory)))
-      (call-interactively #'grep))))
+  (let ((root (or (pro-project-root) default-directory)))
+    (cond
+     ;; If projectile is present prefer consult-projectile or projectile's helpers
+     ((and (fboundp 'projectile-project-root) (fboundp 'consult-ripgrep) (fboundp 'projectile-project-root))
+      (consult-ripgrep root))
+     ;; Standard consult-ripgrep
+     ((and (or (pro--package-provided-p 'consult) (require 'consult nil t)) (fboundp 'consult-ripgrep))
+      (consult-ripgrep root))
+     (t
+      (pro-compat--notify-once "consult" "consult-ripgrep missing — fallback to grep")
+      (let ((default-directory root))
+        (call-interactively #'grep))))))
 
 (defun pro-project-find-file ()
   "Открыть файл внутри текущего проекта."
   (interactive)
-  (if (or (pro--package-provided-p 'consult) (require 'consult nil t))
-      (consult-find (or (pro-project-root) default-directory))
-    (pro-compat--notify-once "consult" "consult-find missing — fallback to find-file")
-    (let ((default-directory (or (pro-project-root) default-directory)))
-      (call-interactively #'find-file))))
+  (let ((root (or (pro-project-root) default-directory)))
+    ;; Prefer consult-find when available; when fd is missing but rg is present,
+    ;; prefer consult-ripgrep as a fallback for fast file listing.
+    (cond
+     ((and (fboundp 'projectile-project-root) (fboundp 'projectile-find-file))
+      ;; If projectile is present delegate to it — it may use caching/indexing.
+      (let ((default-directory root))
+        (call-interactively #'projectile-find-file)))
+     ((and (or (pro--package-provided-p 'consult) (require 'consult nil t)) (fboundp 'consult-find))
+      (consult-find root))
+     ((and (fboundp 'consult-ripgrep) (executable-find "rg"))
+      (consult-ripgrep root))
+     (t
+      (pro-compat--notify-once "consult" "consult-find missing — fallback to find-file")
+      (let ((default-directory root))
+        (call-interactively #'find-file))))))
 
 (defun pro-project-switch-buffer ()
   "Переключить буфер внутри проекта."
@@ -56,5 +85,12 @@
 
 (with-eval-after-load 'project
   (setq project-switch-commands pro-project-switch-commands))
+
+;; If projectile is loaded, ensure our pending bindings and integrations are
+;; aware and prefer projectile UI where appropriate.
+(with-eval-after-load 'projectile
+  ;; prefer projectile's completion helpers if available
+  (when (fboundp 'projectile-mode)
+    (projectile-mode 1)))
 
 (provide 'pro-project)
