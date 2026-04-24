@@ -16,6 +16,9 @@
       emacsPkg = pkgs.emacs30 or pkgs.emacs;
       pythonWithTextual = pkgs.python3.withPackages (ps: with ps; [ textual psutil ]);
 
+      # Global modules to apply to all hosts
+      globalModules = [ ./nixos/modules/adb-udev.nix ];
+
       mkHost = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit emacsPkg opencode_from_release; };
@@ -25,7 +28,7 @@
         ./nixos/modules/opencode-config.nix
         # user-templates is imported directly from configuration.nix to avoid
         # circular evaluation dependencies
-        ] ++ (globalModules or []) ++ extraModules;
+        ] ++ globalModules ++ extraModules;
       };
 
       # Deterministic opencode derivation used by apps and made available
@@ -84,8 +87,6 @@ EOF
         cf19 = mkHost [ ./hosts/cf19/configuration.nix ];
         huawei = mkHost [ ./hosts/huawei/configuration.nix ];
       };
-      # Global modules to apply to all hosts
-      globalModules = [ ./nixos/modules/adb-udev.nix ];
     in {
       nixosConfigurations = hosts;
 
