@@ -245,3 +245,21 @@
       (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)))
 
 (provide 'ui)
+
+;; Helper: check icon fonts availability and print install guidance
+(defun pro-ui-check-icon-fonts ()
+  "Check for common icon fonts (Nerd Fonts / all-the-icons) and print guidance.
+
+This function checks for a few popular patched font families used by
+`nerd-icons`/`all-the-icons`. If none are found, it prints a short help
+message with recommendations (manual and Home-Manager snippets).
+"
+  (interactive)
+  (let ((candidates '("FiraCode Nerd Font" "Hack Nerd Font" "DejaVu Sans Mono Nerd Font" "Nerd Font" "Aller"))
+        found)
+    (dolist (f candidates)
+      (when (pro-ui--font-available-p f)
+        (push f found)))
+    (if found
+        (message "Icon fonts available: %s" (string-join (nreverse found) ", "))
+      (message "No Nerd / icon fonts found. See docs/ICON-FONTS.md for installation instructions."))))
