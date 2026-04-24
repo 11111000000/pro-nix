@@ -21,15 +21,24 @@ in
   };
 
   config = lib.mkIf config.services.zramSlice.enable {
-    environment.etc."systemd/enable-zram.service".text = lib.mkString (''
-[Unit]
-Description=Enable zram swap
-After=local-fs.target
-
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-ExecStart=/bin/sh -c 'set -e; \n+  # compute size in bytes: if cfg.size == auto -> 50% of MemTotal capped to 16G; else use provided MB value\n+  if [ "${cfg.size}" = "auto" ]; then\n+    mem_kb=$(awk "/MemTotal/ {print \$2}" /proc/meminfo);\n+    size_mb=$(( mem_kb/1024/2 ));\n+    if [ $size_mb -gt 16384 ]; then size_mb=16384; fi;\n+  else\n+    size_mb=${cfg.size};\n+  fi;\n+  echo "Configuring zram with ${size_mb}M";\n+  modprobe zram max_comp_streams=4 || true;\n+  echo $((size_mb * 1024 * 1024)) > /sys/block/zram0/disksize;\n+  mkswap /dev/zram0 || true;\n+  swapon -p 5 /dev/zram0 || true;\n+  exit 0'
+    # Create a small script in /etc that performs the zram setup with chosen size
+    environment.etc."enable-zram.sh".text = lib.mkString (''
+#!/bin/sh
+set -e
+# compute size in MB
+if [ "${cfg.size}" = "auto" ]; then
+  mem_kb=$(awk "/MemTotal/ {print \$2}" /proc/meminfo)
+  size_mb=$(( mem_kb/1024/2 ))
+  if [ $size_mb -gt 16384 ]; then size_mb=16384; fi
+else
+  size_mb=${cfg.size}
+fi
+echo "Configuring zram with ${size_mb}M"
+modprobe zram max_comp_streams=4 || true
+echo $((size_mb * 1024 * 1024)) > /sys/block/zram0/disksize
+mkswap /dev/zram0 || true
+swapon -p 5 /dev/zram0 || true
+exit 0
 '' );
 
     systemd.services."enable-zram" = {
@@ -38,15 +47,12 @@ ExecStart=/bin/sh -c 'set -e; \n+  # compute size in bytes: if cfg.size == auto 
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = "yes";
-        ExecStart = "/bin/sh -c 'systemd-cat -t enable-zram sh -c \"(sleep 1; /bin/true)\"'";
+        ExecStart = "/etc/enable-zram.sh";
       };
-      # We will not use serviceConfig ExecStart; instead use the file created above as a unit drop-in
-      # Activate the drop-in by enabling the unit
       enable = true;
     };
   };
 
-  # opencode.slice unit
   config = lib.mkIf config.services.opencodeSlice.enable {
     environment.etc."systemd/opencode.slice".text = lib.mkString (''
 [Slice]
@@ -57,7 +63,6 @@ IOWeight=${toString config.services.opencodeSlice.ioWeight}
 '' );
   };
 
-  # Ensure systemd reload after activation so units are recognized
   systemd.postReload = lib.mkIf (config.services.zramSlice.enable || config.services.opencodeSlice.enable) true;
 
 }
