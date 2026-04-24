@@ -246,13 +246,19 @@ persist or apply suggestions."
   (condition-case err
       (when (and module keys-alist)
         (message "pro/register-module-keys: module=%S keys-alist-type=%S" module (type-of keys-alist))
-        ;; Normalize to a list if necessary
-        (let ((safe-keys (if (listp keys-alist) keys-alist (list keys-alist))))
-          ;; Log a concise preview (don't eval deep structures)
-          (message "pro/register-module-keys: preview=%S" (mapcar (lambda (e)
-                                                                      (cond
-                                                                       ((consp e) (cons (car e) (cdr e)))
-                                                                       (t e))) safe-keys))
+        ;; Normalize to a list if necessary and validate elements.
+        (let* ((raw (if (listp keys-alist) keys-alist (list keys-alist)))
+               (safe-keys '())
+               (preview '()))
+          (dolist (e raw)
+            (condition-case _
+                (when (and (consp e) (stringp (car e)))
+                  (push e safe-keys)
+                  (push (cons (car e) (if (and (consp e) (symbolp (cdr e))) (cdr e) (format "%S" (cdr e)))) preview))
+              (error (push (format "<invalid:%S>" e) preview))))
+          (setq safe-keys (nreverse safe-keys))
+          (setq preview (nreverse preview))
+          (message "pro/register-module-keys: preview=%S" preview)
           (puthash module safe-keys pro/registered-module-keys)
           (let ((n (if (listp safe-keys) (length safe-keys) -1)))
             (message "pro: registered %s suggested keys from %s" (if (>= n 0) (format "%d" n) "(unknown count)") module)))))
