@@ -12,11 +12,17 @@
     (+ (* 0.2126 r) (* 0.7152 g) (* 0.0722 b))))
 
 (defun pro--contrast-ratio (fg bg)
-  "Return approximate contrast ratio between FG and BG color names."
-  (let ((l1 (pro--rgb-luminance fg))
-        (l2 (pro--rgb-luminance bg)))
-    (let ((bright (max l1 l2)) (dark (min l1 l2)))
-      (/ (+ bright 0.05) (+ dark 0.05)))))
+  "Return approximate contrast ratio between FG and BG color names.
+If FG or BG is unspecified in this session, fall back to sensible defaults." 
+  (let* ((fg (if (and (stringp fg) (string-match-p "unspecified" fg)) nil fg))
+         (bg (if (and (stringp bg) (string-match-p "unspecified" bg)) nil bg))
+         ;; fallback to default-frame-alist or hardcoded colors
+         (fg (or fg (and (boundp 'default-frame-alist) (cdr (assq 'foreground-color default-frame-alist))) "black"))
+         (bg (or bg (and (boundp 'default-frame-alist) (cdr (assq 'background-color default-frame-alist))) "white")))
+    (let ((l1 (pro--rgb-luminance fg))
+          (l2 (pro--rgb-luminance bg)))
+      (let ((bright (max l1 l2)) (dark (min l1 l2)))
+        (/ (+ bright 0.05) (+ dark 0.05))))))
 
 (ert-deftest pro/theme-default-contrast ()
   "Ensure `default` face foreground/background have acceptable contrast." 
