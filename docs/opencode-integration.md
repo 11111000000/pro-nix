@@ -28,6 +28,8 @@ provisioning.opencode.userTemplate = /path/to/your/template.json; # optional
 
 See `docs/opencode-operation.md` for full operational notes, and `docs/opencode-default-config.json` for the shipped template. The module and its options are documented with Russian comments directly in `nixos/modules/opencode.nix`.
 
+<!-- key shim removed -->
+
 Notes:
 - This is a best-effort bootstrap: if your environment restricts network access or the release asset is missing, install the official binary manually or place it in `~/.local/bin`.
 - Do not store API keys in Nix files. Use `auth-source` or shell environment variables.

@@ -8,6 +8,7 @@
   },
   "settings": {
     "autoUpdatePlugins": false,
-    "telemetry": false
+    "telemetry": false,
+    
   }
 }

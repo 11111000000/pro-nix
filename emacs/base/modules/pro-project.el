@@ -91,7 +91,7 @@ backend."
 (with-eval-after-load 'projectile
   ;; prefer projectile's completion helpers if available
   (when (fboundp 'projectile-mode)
-    (projectile-mode 1)
+    (projectile-mode 1))
   ;; If consult-projectile is available, ensure it's loaded for better UX
   (when (pro--package-provided-p 'consult-projectile)
     (ignore (require 'consult-projectile nil t))))

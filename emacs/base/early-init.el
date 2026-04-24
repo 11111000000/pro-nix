@@ -12,3 +12,24 @@
 (setenv "PRO_PACKAGES_AUTO_INSTALL" "1")
 
 (provide 'pro-early-init)
+
+;; Early GUI hygiene: hide distracting GUI chrome as soon as possible.
+;; Guarded to avoid errors in TTY. This is intentionally minimal and
+;; safe to call from early-init (before packages are loaded).
+(when (display-graphic-p)
+  (when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+  (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
+  (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+  ;; Thin window divider to give subtle separation between windows.
+  (when (fboundp 'window-divider-mode)
+    (setq window-divider-default-bottom-width 1
+          window-divider-default-places 'bottom-only)
+    (window-divider-mode 1)))
+
+;; Attempt to load the default theme early if configured by ui-theme.
+;; This reduces a white/black flash when Emacs starts in GUI. Loading is
+;; safe and guarded inside ui-theme module.
+(ignore-errors
+  (when (require 'ui-theme nil t)
+    (when (fboundp 'pro-ui-load-default-theme-if-set)
+      (pro-ui-load-default-theme-if-set))))

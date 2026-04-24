@@ -29,6 +29,19 @@
   :type 'boolean
   :group 'pro-ui)
 
+(defcustom pro-ui-default-theme 'tao-yang
+  "Default theme to attempt to load early. Set to nil to disable.
+By default pro-nix will attempt to load tao-yang theme if available." 
+  :type '(choice (const :tag "none" nil) symbol)
+  :group 'pro-ui)
+
+(defcustom pro-ui-modeline-style 'shaoline
+  "Modeline style: 'minimal, 'shaoline or 'doom. Defaults to 'shaoline.
+Modeline packages are only enabled if available and if this value
+is set accordingly." 
+  :type '(choice (const minimal) (const shaoline) (const doom))
+  :group 'pro-ui)
+
 (defun pro-ui--font-available-p (family)
   "Проверить, доступен ли шрифт FAMILY."
   (find-font (font-spec :family family)))
@@ -114,7 +127,25 @@
       (unless pro--minibuffer-hint-shown
         (message "TAB/C-i: next • S-TAB: prev • C-n/C-p/C-j/C-k: navigate • C-.: actions • M-.: preview")
         (setq pro--minibuffer-hint-shown t)))
-    (add-hook 'minibuffer-setup-hook #'pro--show-minibuffer-hint-once))
+(add-hook 'minibuffer-setup-hook #'pro--show-minibuffer-hint-once))
+
+)
+
+;; Wire ui subsystems implemented in separate files (pro-nix style).
+(when (file-readable-p (expand-file-name "ui-fonts.el" (file-name-directory (or load-file-name buffer-file-name))))
+  (ignore-errors (load (expand-file-name "ui-fonts.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
+(when (file-readable-p (expand-file-name "ui-completion.el" (file-name-directory (or load-file-name buffer-file-name))))
+  (ignore-errors (load (expand-file-name "ui-completion.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
+(when (file-readable-p (expand-file-name "ui-icons.el" (file-name-directory (or load-file-name buffer-file-name))))
+  (ignore-errors (load (expand-file-name "ui-icons.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
+(when (file-readable-p (expand-file-name "ui-modeline.el" (file-name-directory (or load-file-name buffer-file-name))))
+  (ignore-errors (load (expand-file-name "ui-modeline.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
+(when (file-readable-p (expand-file-name "ui-theme.el" (file-name-directory (or load-file-name buffer-file-name))))
+  (ignore-errors (load (expand-file-name "ui-theme.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
+(when (file-readable-p (expand-file-name "ui-fringes.el" (file-name-directory (or load-file-name buffer-file-name))))
+  (ignore-errors (load (expand-file-name "ui-fringes.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
+(when (file-readable-p (expand-file-name "ui-tty.el" (file-name-directory (or load-file-name buffer-file-name))))
+  (ignore-errors (load (expand-file-name "ui-tty.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
 
   ;; Embark: enable if available to provide quick-actions for candidates
   (when (pro-ui--try-require 'embark)
@@ -132,7 +163,8 @@
     ;; Register embark-consult integration when available
     (when (pro-ui--try-require 'embark-consult)
       (with-eval-after-load 'embark-consult
-        (embark-consult-export)))
+        (when (fboundp 'embark-consult-export)
+          (ignore-errors (embark-consult-export)))))
 
   ;; Ensure a convenient binding for embark-act is available in minibuffer
   (when (pro-ui--try-require 'embark)
@@ -148,27 +180,7 @@
     ;; Ensure embark-consult registers useful collectors
     (add-to-list 'embark-consult-sources 'consult--source-project-buffer)))
 
-    ;; Dired icons via treemacs integration when available
-    (when (pro-ui--try-require 'treemacs-icons-dired)
-      (add-hook 'dired-mode-hook #'treemacs-icons-dired-enable-once))
-
-    ;; Also try to enable icons in dired via all-the-icons-dired when available.
-    (with-eval-after-load 'dired
-      (when (pro-ui--try-require 'all-the-icons-dired)
-        (add-hook 'dired-mode-hook #'all-the-icons-dired-mode)))
-
-    ;; Soft guards: if system reports limited color support, reduce icon work
-    (when (and (display-graphic-p)
-               (or (not (display-color-p)) (< (display-color-cells) 256)))
-      (message "[pro-ui] limited color support detected; disabling heavy icon features")
-      ;; remove heavy hooks if any
-      (when (fboundp 'treemacs-icons-dired-enable-once)
-        (remove-hook 'dired-mode-hook #'treemacs-icons-dired-enable-once)))
-
-    ;; If running in a low-color or headless environment, avoid heavy icon setup
-    (when (or (not (display-graphic-p)) (not (display-graphic-p)))
-      ;; no-op: already guarded above but keep explicit fallback for clarity
-      nil)))
+    
 
 (defun pro-ui-apply-tabs ()
   "Подключить pro-tabs, если пакет доступен."

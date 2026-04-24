@@ -1,26 +1,24 @@
-Installing icon fonts for pro-nix Emacs
-=====================================
+Icon fonts
+==========
 
-This project uses icon fonts (Nerd Fonts / all-the-icons) to render icons in
-the minibuffer, dired and completion UIs. On NixOS / Home-Manager you should
-install fonts declaratively via your Home-Manager configuration.
+pro-nix UI optionally uses patched icon fonts (Nerd Fonts / all-the-icons)
+to display icons in completion lists, dired and ibuffer. If icons are not
+installed the UI falls back to text. This document gives short guidance.
 
-Home-Manager (example):
+Recommended families (install one of these):
 
-  fonts.fonts = with pkgs; [
-    (pkgs.fetchFromGitHub {
-      owner = "ryanoasis";
-      repo = "nerd-fonts";
-      rev = "v2.1.0"; # example
-      sha256 = "000..."; # fill appropriately or use builtins.fetchTarball
-    })
-  ];
+- FiraCode Nerd Font
+- Hack Nerd Font
+- DejaVu Sans Mono Nerd Font
 
-Alternatively, install `nerd-fonts` or specific patched fonts (FiraCode Nerd
-Font, Hack Nerd Font) via your system packages or by placing them in
-~/.local/share/fonts and running `fc-cache -f`.
+Linux (manual):
 
-If you prefer `all-the-icons`, run `M-x all-the-icons-install-fonts` once and
-follow the prompts (requires font installation with root/GUI access).
+1. Download patched TTF from https://www.nerdfonts.com/
+2. Install to ~/.local/share/fonts/ or system fonts directory.
+3. fc-cache -f -v
 
-After installing fonts, run M-x pro-ui-check-icon-fonts to validate.
+Home‑Manager snippet (example):
+
+fonts.fonts = with pkgs; [ (pkgs.fetchurl { url = "<nerd-font-tarball-url>"; ... }) ]
+
+If icons are missing, run `M-x pro-ui-check-icon-fonts` for guidance.
