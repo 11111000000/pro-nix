@@ -12,21 +12,25 @@
     enable = true;
     client.enable = true;
     torsocks.enable = true;
+    # Provide sane defaults but allow hosts to override in their host config.
     settings = {
       SOCKSPort = [ 9050 ];
       ControlPort = [ 9051 ];
       CookieAuthentication = true;
-      # Default to no bridges so Tor can start. To enable bridges, set
-      # services.tor.settings.Bridge in your Nix configuration or provide
-      # Bridge lines in the template conf/tor-bridges.conf and re-run rebuild.
-      UseBridges = 0;
-      # Enable common pluggable transports. `lyrebird` is the obfs4 binary
-      # shipped in nixpkgs (replacement for obfs4proxy). meek and snowflake
-      # clients are provided by their packages below.
+      # Default to no bridges so Tor can bootstrap in unconstrained networks.
+      # To enable bridges on a host, set `services.tor.settings.UseBridges = 1` and
+      # populate /etc/tor/bridges.conf (the module deploys a template example).
+      UseBridges = lib.mkDefault 0;
+      # Include a local bridges file if present. This lets operators maintain
+      # /etc/tor/bridges.conf manually (or via the provided template) without
+      # relying on the deprecated `services.tor.extraConfig` option.
+      Include = "/etc/tor/bridges.conf";
+      # Enable common pluggable transports. Use the runtime paths from the
+      # active system profile so activation resolves to /run/current-system/sw.
       ClientTransportPlugin = lib.mkForce [
-        "obfs4 exec ${pkgs.obfs4}/bin/lyrebird"
-        "meek exec ${pkgs.meek}/bin/meek-client"
-        "snowflake exec ${pkgs.snowflake}/bin/snowflake-client"
+        "obfs4 exec /run/current-system/sw/bin/obfs4proxy"
+        "meek exec /run/current-system/sw/bin/meek-client"
+        "snowflake exec /run/current-system/sw/bin/snowflake-client"
       ];
       DNSPort = [ 9053 ];
       AutomapHostsOnResolve = true;

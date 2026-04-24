@@ -114,7 +114,25 @@
       (unless pro--minibuffer-hint-shown
         (message "TAB/C-i: next • S-TAB: prev • C-n/C-p/C-j/C-k: navigate • C-.: actions • M-.: preview")
         (setq pro--minibuffer-hint-shown t)))
-    (add-hook 'minibuffer-setup-hook #'pro--show-minibuffer-hint-once)))
+    (add-hook 'minibuffer-setup-hook #'pro--show-minibuffer-hint-once))
+
+  ;; Embark: enable if available to provide quick-actions for candidates
+  (when (pro-ui--try-require 'embark)
+    (with-eval-after-load 'embark
+      ;; Provide a concise keymap for common actions to be discoverable.
+      (let ((map (make-sparse-keymap)))
+        (define-key map (kbd "o") #'embark-act) ;; open/default
+        (define-key map (kbd "d") #'embark-dwim) ;; reveal / dired / default
+        (define-key map (kbd "y") #'embark-copy) ;; copy
+        (define-key map (kbd "g") #'embark-collect) ;; collect for further ops
+        ;; Attach this map as a summary for which-key if available
+        (when (pro-ui--try-require 'which-key)
+          (with-eval-after-load 'which-key
+            (which-key-add-key-based-replacements "C-." "Embark actions")))))
+    ;; Register embark-consult integration when available
+    (when (pro-ui--try-require 'embark-consult)
+      (with-eval-after-load 'embark-consult
+        (embark-consult-export))))
 
     ;; Dired icons via treemacs integration when available
     (when (pro-ui--try-require 'treemacs-icons-dired)

@@ -223,6 +223,11 @@
   (with-eval-after-load feat
     (pro-keys-apply-pending)))
 
+;; If which-key is available, ensure it's enabled for discoverability
+(when (fboundp 'which-key-mode)
+  (with-eval-after-load 'which-key
+    (which-key-mode 1)))
+
 ;; Provide feature at the end so other modules can `with-eval-after-load` on
 ;; "keys" and safely call registry functions such as `pro/register-module-keys`.
 ;; Registry for module-suggested keys (module -> alist of ("KEY" . SYMBOL))
