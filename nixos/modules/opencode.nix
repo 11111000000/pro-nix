@@ -52,8 +52,9 @@ in
     # версией (flake может предоставить готовую сборку opencode).
     environment.systemPackages = lib.mkDefault (if opencode_from_release != null then [ opencode_from_release ] else []);
 
-    # Устанавливаем шаблон в /etc/skel/pro-templates, не перезаписывая
-    # существующие пользовательские конфиги при активации.
-    environment.etc."skel/pro-templates/.opencode/config.json".source = config.provisioning.opencode.userTemplate;
+    # Устанавливаем шаблон в /etc/skel/pro-templates. Помечаем как mkDefault,
+    # чтобы локальные хостовые переопределения (например hosts/*) могли задать
+    # свой шаблон без конфликта опций.
+    environment.etc."skel/pro-templates/.opencode/config.json".source = lib.mkDefault config.provisioning.opencode.userTemplate;
   };
 }
