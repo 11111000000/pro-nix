@@ -101,22 +101,19 @@
 
   networking.hostName = lib.mkDefault hostName;  # Базовое имя машины (может быть переопределено локально).
 
-  # Global Tor defaults for all hosts: enable the client+torsocks and point to
-  # the shared bridges file. Use lib.mkDefault so host-specific configs can
-  # override these values if a host needs different behavior.
+  # Global Tor defaults for all hosts: enable the client+torsocks. Bridge
+  # management is delegated to modules/pro-privacy.nix which renders Bridge
+  # lines (avoiding the `Include` directive that some tor builds reject
+  # during `--verify-config`). Use lib.mkDefault so host-specific configs
+  # can override these values if a host needs different behavior.
   services.tor = lib.mkDefault {
     enable = true;
     client.enable = true;
     torsocks.enable = true;
     settings = {
-      Include = "/etc/tor/bridges.conf";
-      # Keep UseBridges as a host-configurable option; operators may enable it
-      # per-host by setting services.tor.settings.UseBridges = 1 in the host
-      # configuration if bridges are required for that network.
-      # For this deployment we require the same behaviour on all hosts: use
-      # bridges by default so Tor can reach the network in censored
-      # environments. Hosts may still override if necessary.
-      UseBridges = lib.mkDefault 1;
+      # Do not emit `Include /etc/tor/bridges.conf` globally here — the
+      # pro-privacy module handles bridges declaratively to avoid
+      # verify-config incompatibilities.
     };
   };
 

@@ -65,10 +65,23 @@
   systemd.services."tor-ensure-bridges" = {
     description = "Ensure /etc/tor/bridges.conf exists (create from template)";
     wantedBy = [ "multi-user.target" ];
+    # Ensure this runs before tor.service so the bridges file exists when Tor starts
+    before = [ "tor.service" ];
     serviceConfig = {
       Type = "oneshot";
       ExecStart = ''/bin/sh -c 'mkdir -p /etc/tor && if [ ! -e /etc/tor/bridges.conf ]; then cp /etc/tor/bridges.conf.example /etc/tor/bridges.conf && chown root:root /etc/tor/bridges.conf && chmod 0640 /etc/tor/bridges.conf; fi'"'';
     };
+  };
+
+  # Ensure /var/lib/tor exists with correct ownership/modes before tor.service
+  systemd.services."tor-ensure-perms" = {
+    description = "Ensure /var/lib/tor ownership and modes for Tor";
+    before = [ "tor.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = ''/bin/sh -c 'mkdir -p /var/lib/tor && chown -R tor:tor /var/lib/tor || true; chmod 700 /var/lib/tor || true; [ -d /var/lib/tor/ssh_hidden_service ] && chmod 700 /var/lib/tor/ssh_hidden_service || true'"'';
+    };
+    wantedBy = [ "multi-user.target" ];
   };
 
   # Ensure awk is available during activation scripts (used by activate).
