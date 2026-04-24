@@ -209,10 +209,24 @@ let
       exec "$BIN" "$@"
     fi
 
-    if command -v steam-run >/dev/null 2>&1; then
+    # Предпочитаем запуск через steam-run (FHS) когда это возможно — многие
+    # предсобранные бинарники ожидают стандартную FHS-иерархию и работают
+    # корректно только внутри steam-run. Однако steam-run использует bubblewrap
+    # и может не работать в ограниченных окружениях (containers / ограничение
+    # number of user namespaces). Проверяем возможность создания unprivileged
+    # user namespaces перед использованием steam-run.
+    can_use_userns=0
+    if [ -r /proc/sys/kernel/unprivileged_userns_clone ]; then
+      if [ "$(cat /proc/sys/kernel/unprivileged_userns_clone)" = "1" ]; then
+        can_use_userns=1
+      fi
+    fi
+
+    if command -v steam-run >/dev/null 2>&1 && { [ "$can_use_userns" = "1" ] || [ "${OPENCODE_FORCE_STEAM:-0}" = "1" ]; }; then
       STEAM_RUN_CMD=$(command -v steam-run)
-      # Передача аргументов через steam-run без изменений.
-      exec "$STEAM_RUN_CMD" "$BIN" "$@"
+      # Передача аргументов через steam-run без изменений; используем '--'
+      # чтобы отделить аргументы steam-run от аргументов исполняемого файла.
+      exec "$STEAM_RUN_CMD" "$BIN" -- "$@"
     else
       # Для systemd-run требуется разделитель `--' перед командой, чтобы
       # отделить опции systemd-run от аргументов запускаемого процесса.
