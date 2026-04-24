@@ -16,9 +16,16 @@
 
 (with-eval-after-load 'pro-keys
   (when (fboundp 'pro/register-module-keys)
-    (condition-case err
+    ;; Write a small diagnostic file before attempting registration so the
+    ;; error handler can remain simple and avoid referencing the handler
+    ;; variable which in some early startup contexts can be unbound.
+    (ignore-errors
+      (with-temp-file "/tmp/pro-register-completion.log"
+        (insert (format "CALL: time=%s module=completion\n" (current-time-string)))
+        (prin1 pro/completion-suggested-keys (current-buffer)))))
+    (condition-case _err
         (pro/register-module-keys 'completion pro/completion-suggested-keys)
-      (error (message "pro: failed to register completion suggested keys: %S" err))))
+      (error (message "pro: failed to register completion suggested keys (see /tmp/pro-register-completion.log)")))))
 
   (when (fboundp 'pro/export-registered-keys-to-org)
     ;; Export suggested keys to an org fragment for review on demand

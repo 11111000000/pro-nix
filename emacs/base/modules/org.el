@@ -55,6 +55,10 @@
 
 (add-hook 'org-mode-hook #'pro-org-setup)
 
+;; Provide both pro-prefixed and the traditional `org' feature so external
+;; packages (consult/embark etc.) that `require` 'org' still work when the
+;; repository's local org module is loaded during tests or containerized runs.
 (provide 'pro-org)
+(provide 'org)
 
 ;;; pro-org.el ends here

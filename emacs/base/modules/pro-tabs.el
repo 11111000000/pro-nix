@@ -54,7 +54,16 @@ If `pro-tabs' package is present, delegate to it; otherwise use `tab-bar-new-tab
                    ("C-c t k" . pro-tabs-close-tab-and-buffer)
                    ("C-c t s" . tab-bar-switch-to-tab))
                  pro/registered-module-keys)))
-    (error (message "[pro-tabs] failed to register suggested keys: %S" err))))
+    ;; Avoid referencing `err` in the message to prevent void-variable
+    ;; issues in certain early startup contexts. Detailed diagnostics are
+    ;; written to /tmp/pro-register-tabs.log above so operators can inspect
+    ;; the raw payload.
+    (error
+     (ignore-errors
+       (with-temp-file "/tmp/pro-register-tabs.log"
+         (insert (format "CALL: time=%s module=tabs\n" (current-time-string)))
+         (insert "suggested: ((\"C-c t n\" . pro-tabs-open-new-tab) ...)\n"))))
+    (message "[pro-tabs] failed to register suggested keys (see /tmp/pro-register-tabs.log)")))
 
 (defun pro-tabs-close-tab-and-buffer ()
   "Close current tab and kill its buffer (wrapper)." 

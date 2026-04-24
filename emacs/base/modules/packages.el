@@ -107,5 +107,6 @@ Higher numbers win when the same package exists in several archives."
 (pro-packages-setup)
 
 (provide 'pro-packages)
+(provide 'packages)
 
 ;;; pro-packages.el ends here

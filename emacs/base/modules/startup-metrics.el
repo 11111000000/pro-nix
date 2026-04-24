@@ -1,7 +1,10 @@
 ;;; startup-metrics.el --- Startup timing helpers for pro-emacs -*- lexical-binding: t; -*-
 
+;; Храним метрики запуска в глобальной переменной. Записи должны быть
+;; небольшими и добавляться с помощью `pro--record-metric'. Формат — alist
+;; (("name" . ms) ...), где ms — время в миллисекундах.
 (defvar pro--startup-metrics '()
-  "Alist of startup metrics recorded during Emacs initialization.")
+  "Alist метрик запуска, записанных во время инициализации Emacs.")
 
 (defun pro--record-metric (name ms)
   "Record metric NAME with value MS (milliseconds)."

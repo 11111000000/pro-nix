@@ -1,15 +1,27 @@
-;;; terminals.el --- Terminal integration (vterm, eshell helpers) -*- lexical-binding: t; -*-
-;; Minimal, opt-in terminal helpers. Independent implementation for pro-nix;
-;; No global keybindings here; suggested keys go to emacs-keys.org.
+;;; pro-terminals.el --- Интеграция терминалов (vterm, eshell) -*- lexical-binding: t; -*-
+;;
+;; Этот модуль предоставляет небольшие, безопасные вспомогательные функции
+;; для работы с терминалами внутри Emacs. Он не навязывает глобальных
+;; сочетаний клавиш — рекомендации по биндингам регистрируются через API
+;; `pro/register-module-keys' и могут быть экспортированы в виде Org-таблиц.
+;;
+;; Стиль документации: подробные комментарии и докстринги на русском языке
+;; чтобы код служил одновременно реализацией и учебным материалом.
 
 (require 'subr-x)
 
 (defcustom pro-terminals-enable t
-  "Enable pro terminal helpers (vterm/eshell).
-Set to nil to disable.
-This does not control installation of packages; ensure vterm is available in Nix." 
-  :type 'boolean :group 'pro)
+  "Включить вспомогательные функции работы с терминалами (vterm/eshell).
 
+Если установить в nil, модуль не будет подключать нигде дополнительных
+хэлперов. Этот флаг не управляет установкой пакетов: убедитесь, что
+vterm доступен в вашей системе (Nix/Home-Manager или ELPA).
+"
+  :type 'boolean :group 'pro-ui)
+
+;; Основной код модуля выполняется только когда включён флаг и пакет
+;; vterm доступен. Все функции тщательно ограничены по контексту
+;; (проверяют режимы) чтобы избежать побочных эффектов в других буферах.
 (when (and pro-terminals-enable (require 'vterm nil t))
   ;; Example helper: yank into vterm with proper escaping
   (defun pro/vterm-yank ()

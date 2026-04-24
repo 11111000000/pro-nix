@@ -209,5 +209,6 @@
     (call-interactively #'isearch-forward)))
 
 (provide 'pro-nav)
+(provide 'nav)
 
 ;;; pro-nav.el ends here

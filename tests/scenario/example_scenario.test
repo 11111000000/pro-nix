@@ -10,4 +10,13 @@ fi
 
 echo "Running minimal vertical scenario: headless Emacs smoke"
 bash "$root/scripts/emacs-headless-test.sh" || { echo "scenario failed" >&2; exit 2; }
+
+if [ -f "$root/tests/contract/test_agent_secrets.sh" ]; then
+  bash "$root/tests/contract/test_agent_secrets.sh" || { echo "agent-secrets contract failed" >&2; exit 2; }
+fi
+
+if [ -f "$root/tests/contract/test_agent_observability.sh" ]; then
+  bash "$root/tests/contract/test_agent_observability.sh" || { echo "agent-observability contract failed" >&2; exit 2; }
+fi
+
 echo "scenario: OK"

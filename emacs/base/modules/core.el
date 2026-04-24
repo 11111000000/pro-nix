@@ -45,5 +45,6 @@
 (setq require-final-newline t)
 
 (provide 'pro-core)
+(provide 'core)
 
 ;;; pro-core.el ends here

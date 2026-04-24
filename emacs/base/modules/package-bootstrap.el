@@ -1,21 +1,29 @@
 ;; Русский: комментарии и пояснения оформлены в стиле учебника
-;;; package-bootstrap.el --- package bootstrap helpers -*- lexical-binding: t; -*-
+;;; pro-package-bootstrap.el --- Установщик пакетов по умолчанию -*- lexical-binding: t; -*-
 
 (require 'package)
 
- (defconst pro-package-bootstrap-targets
-  '(gptel agent-shell magit consult vertico orderless marginalia corfu which-key rainbow-delimiters embark embark-consult
-    nerd-icons nerd-icons-completion nerd-icons-ibuffer all-the-icons all-the-icons-completion all-the-icons-dired consult-projectile which-key pro-fix-corfu)
-  "Packages that should be present in a fresh Emacs user layer.")
+(defconst pro-package-bootstrap-targets
+  '(gptel agent-shell magit consult vertico orderless marginalia corfu which-key
+    rainbow-delimiters embark embark-consult nerd-icons nerd-icons-completion
+    nerd-icons-ibuffer all-the-icons all-the-icons-completion all-the-icons-dired
+    consult-projectile pro-fix-corfu)
+  "Список пакетов, которые желательно установить в свежей конфигурации.
 
-(defun pro-package-bootstrap-install-targets ()
-   "Install the default package set if it is missing.
+Этот список служит ориентиром для быстрой установки базового набора
+функциональности. Он может быть расширен пользователем в локальном
+manifest'е или управляемой политике Nix. Здесь перечислены символы
+пакетов (символы Emacs Lisp), а не имена файлов." )
 
-This runner honors the pro-packages prompt-and-install policy: it will
-attempt to install missing packages noninteractively only when
-`PRO_PACKAGES_AUTO_INSTALL` environment variable is set to "1". In
-interactive sessions it delegates to `pro-packages--maybe-install` to
-prompt the user where appropriate.
+ (defun pro-package-bootstrap-install-targets ()
+   "Установить пакеты из `pro-package-bootstrap-targets', если их нет.
+
+Поведение:
+- В noninteractive сеансах (например контейнер/CI) действует переменная
+  среды PRO_PACKAGES_AUTO_INSTALL (по умолчанию включена) — пакеты
+  будут устанавливаться автоматически.
+- В интерактивной сессии делегируется `pro-packages--maybe-install' если
+  она доступна, чтобы уважать интерактивные политики пользователя.
 "
    (interactive)
       ;; Default to auto-install enabled when the environment variable is

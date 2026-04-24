@@ -1,5 +1,5 @@
 ;; Русский: комментарии и пояснения оформлены в стиле учебника
-;;; pro-keys.el --- пользовательские клавиши -*- lexical-binding: t; -*-
+;;; pro-keys.el --- Пользовательские клавиши и система предложений -*- lexical-binding: t; -*-
 
 ;; Модуль: keys.el — декларативный интерфейс горячих клавиш.
 ;;
@@ -12,7 +12,12 @@
 (require 'subr-x)
 
 (defgroup pro nil
-  "Базовая группа настроек PRO."
+  "Базовая группа настроек PRO.
+
+Эта группа используется для общих `defcustom' переменных, которые не
+попадают в узкоспециализированные подгруппы. При проектировании
+интерфейса модуля мы предпочитаем явное именование групп, однако для
+совместимости оставляем простой корневой `pro'."
   :group 'applications)
 
 (defconst pro-keys-user-file
@@ -22,8 +27,11 @@
 (defconst pro-keys-system-file
   (or (let ((etc-file "/etc/pro/emacs-keys.org"))
         (and (file-readable-p etc-file) etc-file))
-      (expand-file-name "../pro/emacs-keys.org" user-emacs-directory))
-  "Путь к системному файлу клавиш PRO.")
+      ;; В режиме разработки мы ожидаем, что системный файл может
+      ;; располагаться в репозитории рядом с инициализатором.
+      (expand-file-name "pro/emacs-keys.org" (expand-file-name ".." (file-name-directory (or load-file-name buffer-file-name)))))
+  "Путь к системному файлу клавиш PRO. По умолчанию ищем /etc/..., затем
+файл в репозитории. Пользовательский файл по-прежнему в ~/.config/emacs/keys.org.")
 
 (defvar pro-keys-exwm-global-keys nil
   "Список глобальных клавиш EXWM, собранный из Org-таблиц.")
@@ -245,15 +253,20 @@ persist or apply suggestions."
   ;; inputs.
   (condition-case err
       (when (and module keys-alist)
-        ;; Debug: write a detailed log to /tmp for early startup diagnostics.
-        (ignore-errors
-         (let ((file (format "/tmp/pro-register-%s.log" (symbol-name module))))
-           (with-temp-file file
-             (insert (format "CALL: time=%s module=%S type=%S\n" (current-time-string) module (type-of keys-alist)))
-             (insert "raw keys-alist representation:\n")
-             (prin1 keys-alist (current-buffer))
-             (insert "\n---\n")))))
-        (message "pro/register-module-keys: module=%S keys-alist-type=%S" module (type-of keys-alist))
+        ;; Compute a safe string representation of MODULE early so we do not
+        ;; accidentally reference an unbound lexical variable in error handlers
+        ;; or during early startup. Use this textual id for diagnostics only;
+        ;; the original MODULE object (symbol) is still used as the hash key.
+        (let ((module-id (if (symbolp module) (symbol-name module) (format "%S" module))))
+          ;; Debug: write a detailed log to /tmp for early startup diagnostics.
+          (ignore-errors
+           (let ((file (format "/tmp/pro-register-%s.log" module-id)))
+             (with-temp-file file
+               (insert (format "CALL: time=%s module=%s type=%S\n" (current-time-string) module-id (type-of keys-alist)))
+               (insert "raw keys-alist representation:\n")
+               (prin1 keys-alist (current-buffer))
+               (insert "\n---\n")))))
+          (message "pro/register-module-keys: module=%s keys-alist-type=%S" module-id (type-of keys-alist)))
         ;; Normalize to a list if necessary and validate elements.
         (let* ((raw (if (listp keys-alist) keys-alist (list keys-alist)))
                (safe-keys '())
@@ -269,9 +282,14 @@ persist or apply suggestions."
           (message "pro/register-module-keys: preview=%S" preview)
           (puthash module safe-keys pro/registered-module-keys)
           (let ((n (if (listp safe-keys) (length safe-keys) -1)))
-            (message "pro: registered %s suggested keys from %s" (if (>= n 0) (format "%d" n) "(unknown count)") module)))))
+            (message "pro: registered %s suggested keys from %s" (if (>= n 0) (format "%d" n) "(unknown count)") module-id)))))
     (error
-     (message "pro: failed to register module keys for %s: %S" module err)))
+     ;; Avoid referencing the handler variable `err` here. In some early
+     ;; startup/byte-compiled contexts the dynamic binding may not be
+     ;; accessible which causes a secondary `void-variable` error. We already
+     ;; write detailed diagnostics to /tmp/pro-register-<module>.log above,
+     ;; so keep the handler simple and robust.
+     (message "pro: failed to register module keys for %s (see /tmp/pro-register-*.log)" (or (and (boundp 'module-id) module-id) "<module?>"))))
 
 (defun pro/unregister-module-keys (module)
   "Unregister keys suggested by MODULE." 
@@ -332,3 +350,4 @@ Return the path of the generated file.
 ;; callbacks in other modules to run before the registry functions exist,
 ;; leading to void-variable / void-function errors during startup.
   (provide 'pro-keys)
+  (provide 'keys)

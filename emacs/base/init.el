@@ -14,9 +14,9 @@
     (load (expand-file-name "pro-compat.el" pro-emacs-base-system-modules-dir) nil t))
   (when (file-readable-p (expand-file-name "pro-packages.el" pro-emacs-base-system-modules-dir))
     (load (expand-file-name "pro-packages.el" pro-emacs-base-system-modules-dir) nil t))
-  ;; Also ensure the pro modules dir is on `load-path' so local helper
-  ;; packages (like pro-fix-corfu) are discoverable by `locate-library'
-  ;; and by package availability checks performed during bootstrap.
+  ;; Обязательно добавляем каталог модулей в `load-path' — это делает
+  ;; локальные вспомогательные пакеты (pro-*) доступными для `require' и
+  ;; `locate-library' в ранней стадии загрузки.
   (when (file-directory-p pro-emacs-base-system-modules-dir)
     (add-to-list 'load-path pro-emacs-base-system-modules-dir))
   ;; Now load site-init which will load configured modules

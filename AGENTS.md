@@ -21,6 +21,21 @@ IMPORTANT: Never commit credentials, private keys, passwords, or other secrets i
      - Если найдёте дубли, сверьте их и объедините списки, используя `lib.mkForce` или припишите опцию в одном месте.
   5. Если Nix-шаг сообщает про "dirty git tree" — это означает, что flake смотрит на рабочую директорию. Очистите её (commit/stash) перед запуском.
 
+Testing Emacs configs before switch
+
+- Always validate Emacs init loads cleanly from the repository before running `just switch` or copying files to the system init dir. Use the repository's init entrypoint to test (this verifies the code you will deploy):
+  - `emacs --batch -l emacs/base/init.el --eval '(message "emacs: init loaded OK")'`
+  - To exercise the user-load path as the system will, run: `emacs --batch --eval "(let ((user-emacs-directory \"~/.config/emacs/\")) (load \"/home/az/pro-nix/emacs/base/init.el\" nil t) (message \"emacs: repo init loaded OK\"))"`
+  - To run module tests: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el`
+
+- Policy for fixing Emacs startup errors
+
+- If Emacs fails to start when using the repository init (errors, backtraces, void-variable, etc), fix the issue in this repository (pro-nix). Do not patch `~/.config/emacs` directly to "work around" a bug. The only allowed exceptions are local user overrides that intentionally diverge and are documented.
+
+- Deployment note
+
+- The actual system activation (e.g. `just switch` performed by an operator with sudo) is the step that copies/deploys tested repository files to the runtime location (`~/.config/emacs/` or the system-managed equivalent). Ensure repository tests pass locally before asking the operator to run `just switch`.
+
 Примеры исправления частых ошибок
 
 - "Git tree is dirty":
