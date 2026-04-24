@@ -3,6 +3,8 @@
 
 {
   imports = [ ../../modules/pro-users.nix ];
+  # Import global pro-nix modules
+  imports = imports ++ [ ../../nixos/modules/adb-udev.nix ];
 
   networking.hostName = "huawei";
   system.stateVersion = "25.11";
@@ -73,4 +75,17 @@ AllowTcpForwarding no
 
   # Enable opencode default config installation for users
   opencode.enable = true;
+
+  # Enable automatic zram setup and opencode slice with conservative defaults
+  services.zramSlice = {
+    enable = true;
+    size = "auto"; # auto = 50% RAM, capped
+  };
+
+  services.opencodeSlice = {
+    enable = true;
+    memoryMax = "4G"; # limit heavy agents to ~4G by default on this laptop
+    cpuQuota = "80%";
+    ioWeight = 200;
+  };
 }

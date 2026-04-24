@@ -84,6 +84,8 @@ EOF
         cf19 = mkHost [ ./hosts/cf19/configuration.nix ];
         huawei = mkHost [ ./hosts/huawei/configuration.nix ];
       };
+      # Global modules to apply to all hosts
+      globalModules = [ ./nixos/modules/adb-udev.nix ];
     in {
       nixosConfigurations = hosts;
 
