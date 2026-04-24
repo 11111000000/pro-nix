@@ -288,7 +288,7 @@
   # присутствует в списке imports выше и его вклад доступен через
   # config.environment.systemPackages.
   environment.systemPackages = lib.mkDefault (with pkgs;
-    (config.environment.systemPackages or []) ++ [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; })
+    (config.environment.systemPackages or []) ++ [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }) ++ [ opencodeCmd opencodeBin ]
   );
 
   # Порядок формирования systemPackages:
