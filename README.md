@@ -1,140 +1,159 @@
-# pro-nix — модульные Nix-конфигурации: рабочая станция, кластер, VPN и Emacs
+# pro-nix — мысль в конфигурации
 
 Кратко
 -----
-pro-nix — набор взаимосвязанных Nix-модулей, flake-сборок и вспомогательных
-скриптов для воспроизводимой конфигурации рабочих станций и серверов. Emacs и
-Home Manager — важная, но не единственная часть проекта: здесь собраны
-политики, модули и пакеты для рабочего поля, приватных сетей и кластерных
-сценариев.
+pro-nix — это не просто набор Nix-модулей и скриптов. Это оформленная инженерная позиция:
+воспроизводимость как политическая и техническая договорённость, модульность как способ
+упорядочить сложность, и открытость как операционная ценность. Emacs и Home Manager
+являются важной частью рабочего контура, но проект охватывает системные политики,
+модули для приватных сетей, инструменты для кластеров и набор контрактов для безопасных
+изменений.
 
-Badges
-------
-[![flake check](https://img.shields.io/badge/flake-check-blue.svg)](https://github.com/11111000000/pro-nix/actions)
-[![build status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/11111000000/pro-nix/actions)
-[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+Этот README сочетает практическую справку и краткую философию — зачем проект устроен
+именно так и какие инварианты он старается сохранить.
 
-Prerequisites
--------------
-- Современный Nix с поддержкой flakes (flake-enabled). Если вы не уверены — обновите Nix и включите flakes.
-- Доступ в сеть для substitute/cache при сборке (cache.nixos.org и зеркала).
-- root/sudo при применении `nixos-rebuild` / `just switch` на целевой машине.
+Philosophy — принципы проекта
+-----------------------------
+- Воспроизводимость превыше оптимизаций: конфигурация должна давать тот же результат
+  на двух машинах с одинаковой аппаратной базой.
+- Один файл — одна ответственность: модули и файлы имеют чёткие контракты и минимальную
+  скрытую связность.
+- Surface First: публичные интерфейсы и обещания (SURFACE) документируются ДО кода,
+  и изменения сопровождаются Proof (тестами/проверками).
+- Change Gate: любая правка имеет Intent + Pressure + Proof + SurfaceImpact (HDS).
 
-Quickstart — локальная проверка
-------------------------------
-1. Клонировать репозиторий
+Архитектура и инварианты
+-------------------------
+- flake.nix — единый вход: хосты (`nixosConfigurations`), devshells, CI-checks и утилиты.
+- configuration.nix — кросс-хостовая политика: загрузчик, kernel, i18n, базовые сервисы.
+- modules/ — модульная поверхность: pro-users, pro-services, pro-privacy, pro-peer, headscale,
+  pro-desktop и т.д. Каждый модуль оформлен как NixOS-модуль с опциями и docstring.
+- system-packages.nix — единая точка для больших списков пакетов; параметр `enableOptional`
+  контролирует тяжёлые GUI/игровые пакеты.
+
+Инварианты, которые проект старается не нарушать
+ - Core/Periphery: ядро политики (безопасность, загрузка, сеть) — стабильное; UX и heavy GUI
+   — периферийные, включаемые по явному флагу.
+ - Determinism: flake outputs и детерминированные бинарники используются там, где важна
+   воспроизводимость (см. opencode derivation).
+ - Traceability: изменения сопровождаются PR с Change Gate блоком (см. Contributing).
+
+Quickstart — коротко
+--------------------
+1) Клонировать и перейти в каталог
 
    git clone git@github.com:11111000000/pro-nix.git
    cd pro-nix
 
-2. Прогнать flake checks
+2) Локальные проверки flake
 
    nix flake check
 
-   Если проверка падает — добавьте `--show-trace` для подробной трассировки.
+   Если падает — попробуйте `nix flake check --show-trace` и проверьте `git status`.
 
-3. Построить конфигурацию хоста (пример)
+3) Собрать конфигурацию хоста
 
-   # Собрать артефакт для локального просмотра
    nix build .#nixosConfigurations.cf19.config.system.build.toplevel
 
-   # Полный пример: собрать и переключиться на конфигурацию (на целевой машине)
+   На целевой машине применяют конфигурацию напрямую:
+
    sudo nixos-rebuild switch --flake .#huawei
 
-   Примечание: flake предоставляет `nixosConfigurations.<host>` — в большинстве сценариев
-   `nixos-rebuild --flake .#<host>` является наиболее удобным способом применить конфигурацию на соответствующем хосте.
-
-4. Открыть devshell для разработки
+4) Devshell для разработки
 
    nix develop .#devShells.x86_64-linux.default
 
-   После входа devshell автоматически создаёт небольшой wrapper для запускa Emacs с нужными флагами
-   (файл создаётся в `./.pro-emacs-wrapper/emacs-pro`), см. flake.nix: devShells.shellHook.
+   Devshell создаёт небольшой wrapper `./.pro-emacs-wrapper/emacs-pro` — удобный путь
+   запускать Emacs с правильными путями.
 
-5. Запустить Emacs с локальной конфигурацией (тест)
+5) Emacs: быстрый тест
 
    emacs -Q -l emacs/base/init.el
-   # или (обёртка с окружением / путями, рекомендуемый способ для интеграции с Nix)
+   # или рекомендуемый путь (обёртка)
    ./scripts/emacs-pro-wrapper.sh
 
-6. Запустить headless Emacs E2E тесты
+6) Emacs headless E2E тесты
 
    ./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el
 
-Организация репозитория (основные точки входа)
----------------------------------------------
-- flake.nix — flake outputs: `nixosConfigurations` (hosts), `apps`, `devShells`, `checks`.
-- configuration.nix — общая cross-host политика, импортирует `modules/`.
-- system-packages.nix — централизованный список пакетов (принимает `enableOptional` — смотрите комментарии в файле).
-- modules/ — набор NixOS-модулей (pro-users, pro-services, pro-privacy, pro-peer, headscale и др.).
-- nix/modules/ — вспомогательные Nix-модули (samba, automount и др.).
-- nixos/modules/ — модули для opencode и связанных компонентов.
-- hosts/ — host-specific конфиги (cf19, huawei).
-- scripts/ — вспомогательные утилиты и тесты.
-- docs/specs/ — формальные спецификации публичных контрактов (join-secret, proctl-spec).
-
-Как тестировать
----------------
-- Flake static checks: `nix flake check`.
-- Собрать образ/конфигурацию хоста: `nix build .#nixosConfigurations.<host>.config.system.build.toplevel`.
-- Devshell: `nix develop .#devShells.x86_64-linux.default`.
-- Emacs E2E: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el`.
-
-Полезные альтернативы
-- Быстрая сборка всех хостов (см. flake apps): `nix run .#check-all` или `nix run .#apps.x86_64-linux.check-all`.
-
-Как включить optional-пакеты
----------------------------
-`system-packages.nix` содержит группу тяжёлых / опциональных пакетов, контролируемых параметром `enableOptional`.
-По умолчанию в `configuration.nix` он импортируется с `enableOptional = false`.
-Чтобы включить опциональные пакеты на уровне хоста, добавьте в `hosts/<your-host>/configuration.nix` переопределение:
-
-```nix
-environment.systemPackages = lib.mkDefault (with pkgs;
-  (config.environment.systemPackages or []) ++ (import ../system-packages.nix { inherit pkgs emacsPkg; enableOptional = true; })
-);
-```
-
-Это позволит включать большие GUI/игровые пакеты только на тех хостах, где это нужно.
-
-Troubleshooting (частые ошибки)
-------------------------------
-- Git tree is dirty: flake может смотреть рабочее дерево. Если видите ошибку — закоммитьте/stash изменения.
-  `git status --short` / `git add -A && git commit -m "wip"` или `git stash`.
-- Дублирование `environment.systemPackages`: используйте `rg "environment.systemPackages" -n` чтобы найти повторные определения — устраните конфликты или используйте `lib.mkForce`/`lib.mkDefault` аккуратно.
-- Если `nix` выдаёт непонятную ошибку — повторите с `--show-trace`.
-
-Contributing (короткий чек-лист)
---------------------------------
-1. Создайте ветку: `git checkout -b feat/<short-desc>`.
-2. Следуйте Change Gate (см. AGENTS.md). В PR укажите:
-   - Intent: <кратко>
-   - Pressure: Bug | Feature | Debt | Ops
-   - Surface impact: (none) | touches: <SURFACE item(s)> [FROZEN/FLUID]
-   - Proof: tests/commands, инструкции для проверки
-3. Локально прогоните `nix flake check` и соответствующие тесты (Emacs E2E, сборка хоста).
-4. Откройте PR с инструкцией по проверке.
-
-Change Gate (шаблон для PR)
----------------------------
-Intent: <одно предложение>
-
-Pressure: Bug | Feature | Debt | Ops
-
-Surface impact: (none) | touches: <SURFACE item(s)> [FROZEN/FLUID]
-
-Proof: tests: <команда(ы) для воспроизведения>
-
-Где смотреть дальше
+Почему flake-first?
 -------------------
-- AGENTS.md — политика изменений, HDS workflow.
-- docs/ — исследования, операционные инструкции и HOLO/SURFACE (если имеются).
-- scripts/ — вспомогательные утилиты и тесты.
+Flake даёт предсказуемый интерфейс между сборками и CI: одна точка входа, явные outputs,
+и возможность доставить devshell/приложения/конфигурации из одного файла. В pro-nix
+flake используется как контракта для хостов и для вспомогательных приложений (pro-nix TUI,
+opencode-release).
 
-License
--------
-Добавьте файл LICENSE в корень репозитория, если нужно. Если лицензия уже есть — укажите её здесь.
+Emacs в контуре
+---------------
+- Emacs здесь — не только редактор. Это платформа (LSP, REPL, EXWM, агенты/LLM).
+- emacs/home-manager.nix и emacs/base/* формируют переносимый профиль. system-packages
+  поставляет emacsRuntime, a flake devShell упрощает запуск с нужным `load-path`.
 
-Contacts / Issues
------------------
-Открывайте issues/PR в данном репозитории. Для оперативных/ops вопросов см. `docs/ops/README.md`.
+Сборка пакетов и optional-блок
+------------------------------
+system-packages.nix хранит базовый список пакетов и `optionalPackages` — тяжёлые GUI,
+игровые платформы и крупные сервисы. По умолчанию `enableOptional = false` — это
+позволяет держать серверы минимальными, а рабочие станции — полноценными.
+
+Безопасность, приватность и сеть
+-------------------------------
+- pro-peer / headscale модули реализуют защищённую модель peer-discovery и синхронизацию ключей.
+- Tor / obfs / yggdrasil и прочие приватные транспортные слои включены как опции —
+  проект предоставляет инструменты, но не навязывает модель операций.
+- Вся чувствительная информация не должна храниться в репозитории (см. AGENTS.md). Файлы
+  вроде `local.nix` и `hosts/*` — места для хост-специфичных секретов (шифрование/ops).
+
+Change Gate и HDS
+------------------
+pro-nix следует HDS-подходу: любые изменения, которые влияют на публичные контрактные
+элементы (SURFACE, [FROZEN]) требуют оформленного Change Gate в PR:
+
+  Intent: <одно предложение>
+  Pressure: Bug | Feature | Debt | Ops
+  Surface impact: (none) | touches: <SURFACE item(s)> [FROZEN/FLUID]
+  Proof: tests: <команда(ы) для воспроизведения>
+
+Если вы затрагиваете элементы с пометкой [FROZEN] — добавьте Migration план.
+
+Testing & CI
+------------
+- `nix flake check` — статические и flake-based проверки.
+- Emacs E2E/headless — в `scripts/`.
+- flake предоставляет `apps.check-all`, который строит все хосты (`nix run .#check-all`).
+
+Contribution — практический чек-лист
+----------------------------------
+1. Сформируйте ветку `feat/<short-desc>`.
+2. Добавьте минимальный Change Gate в PR описание.
+3. Запустите `nix flake check` и релевантные тесты локально.
+4. Для изменений влияющих на `environment.systemPackages` — проверьте `rg "environment.systemPackages" -n`.
+5. Откройте PR и укажите шаги для верификации.
+
+Troubleshooting — распространённые проблемы
+------------------------------------------
+- "Git tree is dirty" при сборке flake: закоммитьте или stash изменения.
+- Дублирование опции `environment.systemPackages`: найдите все объявления `rg "environment.systemPackages" -n`
+  и объедините через `lib.mkForce` или `lib.mkDefault` аккуратно.
+- Nix ошибки: повторите с `--show-trace`.
+
+Как расширить систему: добавить хост
+-----------------------------------
+1. Создайте `hosts/<your-host>/configuration.nix`, импортируя `./configuration.nix`.
+2. Укажите `networking.hostName`, `fileSystems`, `boot.loader` и другие host-specific параметры.
+3. Прогоните локально `nix build .#nixosConfigurations.<your-host>.config.system.build.toplevel`.
+
+Глоссарий (коротко)
+--------------------
+- Surface — публичная, наблюдаемая гарантия/интерфейс конфигурации.
+- HOLO / AGENTS / HDS — политика изменений, workflow и проверяемые контракты (см. AGENTS.md).
+- FROZEN — пометка для контрактов, которые требуют миграций/Proof при изменении.
+
+Следующие шаги и предложения
+-----------------------------
+- Добавить LICENSE (если вы хотите явную лицензию — укажите какой).
+- Автоматизировать CI-бейджи: привязать GitHub Actions workflows к flake checks и вставить реальные URL бейджей.
+- Вынести длинный Troubleshooting и HOLO / SURFACE в `docs/` как проверяемую спецификацию.
+
+Контакты
+--------
+Открывайте issues/PR. Для оперативных/ops вопросов — смотрите `docs/ops/README.md`.
