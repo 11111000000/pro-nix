@@ -14,6 +14,7 @@ else
 fi
 
 for t in $pattern; do
+  [ -e "$t" ] || continue
   case "$t" in
     *.sh)
       echo "== Running contract script: $(basename "$t")"

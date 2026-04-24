@@ -12,22 +12,45 @@
 (defvar pro-emacs-base-disable-marker (expand-file-name "~/.config/emacs/.disable-nixos-base"))
 
 (defun pro-emacs-base--canonical-name (name)
-  "Каноническое имя модуля NAME.
+  "Каноническое имя модуля NAME как строка.
 
-Если пользователь в manifest указал имя без префикса `pro-`, добавляем
-префикс. Если имя уже содержит префикс, возвращаем как есть. NAME может
-быть символом или строкой — возвращается строка.
+Если пользователь указал имя без префикса `pro-`, возвращается строка с
+префиксом. Если имя уже содержит префикс, возвращается как есть. NAME может
+быть символом или строкой.
 "
   (let ((s (if (symbolp name) (symbol-name name) (format "%s" name))))
     (if (string-prefix-p "pro-" s) s (concat "pro-" s))))
 
 (defun pro-emacs-base--module-file (dir name)
-  "Построить путь к файлу модуля DIR и NAME (NAME канонизируется).
-Если файл не найден — возвращается путь, который будет проверён вызовом
-`file-readable-p` у вызывающего кода.
+  "Найти файл модуля в DIR по NAME.
+
+Функция пытается найти сначала файл с именем pro-<name>.el, затем <name>.el.
+Возвращается путь к первому найденному файлу. Если ничего не найдено,
+возвращается путь pro-<name>.el как потенциальный приемлемый результат для
+логирования/диагностики.
 "
-  (let ((canonical (pro-emacs-base--canonical-name name)))
-    (expand-file-name (format "%s.el" canonical) dir)))
+  (let* ((s (if (symbolp name) (symbol-name name) (format "%s" name)))
+         (pro (format "%s.el" (pro-emacs-base--canonical-name s)))
+         (plain (format "%s.el" s))
+         (p-pro (expand-file-name pro dir))
+         (p-plain (expand-file-name plain dir)))
+    (cond
+     ((file-readable-p p-pro) p-pro)
+     ((file-readable-p p-plain) p-plain)
+     (t p-pro))))
+
+(defun pro-emacs-base--feature-provided-p (feature-name)
+  "Проверить, предоставлена ли фича FEATURE-NAME.
+
+Если FEATURE-NAME это строка вида "pro-foo", проверяем наличие провайда
+и для варианта без префикса ("foo"), чтобы быть терпимыми к legacy
+файлам, которые ещё не переименованы.
+"
+  (let* ((s (if (symbolp feature-name) (symbol-name feature-name) (format "%s" feature-name)))
+         (sym (intern s))
+         (alt (and (string-prefix-p "pro-" s) (intern (substring s 4)))))
+    (or (condition-case nil (require sym nil t) (error nil))
+        (and alt (condition-case nil (require alt nil t) (error nil))))))
 
 (defun pro-emacs-base--manifest-modules ()
   (if (file-exists-p pro-emacs-base-user-manifest)

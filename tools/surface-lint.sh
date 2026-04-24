@@ -12,7 +12,8 @@ fi
 echo "SURFACE.md found"
 
 # Quick check: ensure HOLO.md proof commands exist in scripts or tests
-grep -Eo "\btests/contract/[^[:space:]']+" "$root/HOLO.md" | sort -u | while read -r f; do
+grep -Eo "tests/contract/[^[:space:]'\`]+" "$root/HOLO.md" | sort -u | while read -r f; do
+  f="$(printf '%s' "$f" | tr -d '\`"')"
   if [ ! -f "$root/$f" ]; then
     echo "Referenced proof missing: $f" >&2
     exit 3

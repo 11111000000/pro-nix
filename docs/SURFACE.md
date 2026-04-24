@@ -59,6 +59,11 @@ Scope: this document is a scoped sub-spec for the agent-orchestration track. The
   Spec: The repo documents a human operator path for starting, inspecting, and stopping agent services.
   Proof: docs + a manual smoke path
 
+- Name: GUI Smoke Proof
+  Stability: [FLUID]
+  Spec: The root manifest keeps a GUI smoke proof for the Emacs layer so regressions in graphical behavior remain visible.
+  Proof: `tests/contract/test-gui-smoke.el`
+
 ## Notes
 
 - `devenv` is the strongest candidate for the environment layer when the project needs shell, processes, tests, secrets, and container outputs in one place.

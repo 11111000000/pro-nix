@@ -19,4 +19,4 @@ Decisions:
 - [Draft] Introduce a separate control-plane component for queueing, retries, cancellation, and readiness. Exit: the control plane is independently testable from agent logic.
 - [FROZEN] Agent Secrets: credentials must be injected at runtime from an operator-managed secret source and never committed. Exit: secret-loading path exists and `tests/contract/test_agent_secrets.sh` passes.
 - [Draft] Agent Observability: expose structured logs and a readiness signal for each agent service. Exit: `tests/contract/test_agent_observability.sh` passes and the signal is documented.
-- [Draft] GUI smoke proof: keep a GUI smoke contract file referenced by the root manifest. Exit: `tests/contract/test-gui-smoke.el` exists and root `HOLO.md` references it.
+- [Draft] GUI smoke proof: keep a GUI smoke contract file referenced by the root manifest. Exit: `tests/contract/test-gui-smoke.el` exists and the root HOLO references it.

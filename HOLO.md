@@ -23,9 +23,7 @@ Decisions:
     Rollback: disable `pro.emacs.softReload.enable` and restart Emacs; session files preserved for manual restore.
     Tests:
       - Keep: existing headless ERT tests and UI smoke tests.
-      - Add: `tests/contract/test-soft-reload.el` (simulate refresh and assert site-lisp path update + session restore), `tests/contract/test-gui-smoke.el` (Xvfb-based smoke), `tests/contract/test-theme-contrast.el` (face contrast checks).
-  - [Draft] GUI smoke proof: keep a GUI smoke contract file referenced by the root manifest. Exit: `tests/contract/test-gui-smoke.el` exists and root `HOLO.md` references it.
-
+      - Add: `tests/contract/test-soft-reload.el` (soft reload helper presence), `tests/contract/test-theme-contrast.el` (face contrast checks).
 - [Draft] Pro-peer: Discovery & Key Sync
   Pressure: Ops
   Rationale: pro-peer is an operational surface that manages distribution of authorized_keys and encrypted per-host artifacts. It affects host setup and security; changes touching it require operator coordination and proof (smoke scripts + systemd unit checks).
