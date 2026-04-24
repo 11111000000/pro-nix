@@ -1,5 +1,5 @@
 # Русский: комментарии и пояснения оформлены в стиле учебника
-{ lib, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   imports = [ ../../modules/pro-users.nix ];
@@ -54,7 +54,6 @@ AllowTcpForwarding no
   networking.firewall.enable = true;
   # Preserve and extend global defaults rather than overwrite them so Tor
   # ports (9050/9051/9053) added globally remain available on all hosts.
-  networking.firewall.allowedTCPPorts = (config.networking.firewall.allowedTCPPorts or []) ++ [ 22 ];
   networking.firewall.extraCommands = lib.mkAfter ''
     # allow SSH from RFC1918 ranges and loopback
     iptables -I INPUT -p tcp -s 10.0.0.0/8 --dport 22 -j ACCEPT || true

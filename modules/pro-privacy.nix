@@ -21,12 +21,26 @@
       # To enable bridges on a host, set `services.tor.settings.UseBridges = 1` and
       # populate /etc/tor/bridges.conf (the module deploys a template example).
       UseBridges = lib.mkDefault 0;
-      # Include a local bridges file if present. This lets operators maintain
-      # /etc/tor/bridges.conf manually (or via the provided template) without
-      # relying on the deprecated `services.tor.extraConfig` option.
-      Include = "/etc/tor/bridges.conf";
+  # Operators maintain /etc/tor/bridges.conf manually (or via the provided
+  # template). We avoid emitting an `Include` directive into torrc because
+  # some tor builds do not accept that directive during `--verify-config`.
+  # The systemd service `tor-ensure-bridges` will create a default
+  # /etc/tor/bridges.conf if it does not exist.
+  #
+  # To support hosts that want bridges managed declaratively, we expose a
+  # configuration option `services.tor.bridges` (list of strings). When set,
+  # the module will render the contents of this list into the generated torrc
+  # as Bridge lines. This avoids relying on `Include` while still allowing
+  # declarative bridge management.
+
+  # Default: no bridges declared in Nix; operators may set services.tor.bridges
+  # in host configuration to inject Bridge lines.
+  bridges = lib.mkDefault [];
       # Enable common pluggable transports. Use the runtime paths from the
       # active system profile so activation resolves to /run/current-system/sw.
+      # Render Bridge lines from services.tor.bridges (if any) to avoid using
+      # the `Include` directive which may not be accepted by tor --verify-config.
+      Bridge = lib.mkDefault (config.services.tor.bridges or []);
       ClientTransportPlugin = lib.mkForce [
         "obfs4 exec /run/current-system/sw/bin/obfs4proxy"
         "meek exec /run/current-system/sw/bin/meek-client"
