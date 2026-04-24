@@ -211,10 +211,17 @@
 (pro-keys-load-org-file pro-keys-system-file)
 (pro-keys-load-org-file pro-keys-user-file)
 
-(with-eval-after-load 'exwm
-  (setq exwm-input-global-keys pro-keys-exwm-global-keys))
+  (with-eval-after-load 'exwm
+    (setq exwm-input-global-keys pro-keys-exwm-global-keys))
 
+;; Provide feature at the end so other modules can `with-eval-after-load` on
+;; "keys" and safely call registry functions such as `pro/register-module-keys`.
 (provide 'keys)
+
+;; Provide this feature after the public API (registry functions) is
+;; defined. Placing `provide' earlier could cause `with-eval-after-load'
+;; callbacks in other modules to run before the registry functions exist,
+;; leading to void-variable / void-function errors during startup.
 
 ;; Registry for module-suggested keys (module -> alist of ("KEY" . SYMBOL))
 (defvar pro/registered-module-keys (make-hash-table :test 'eq)

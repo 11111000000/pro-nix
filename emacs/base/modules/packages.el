@@ -30,20 +30,32 @@ Higher numbers win when the same package exists in several archives."
         package-archive-priorities pro-packages-archive-priorities
         package-install-upgrade-built-in nil)
   (package-initialize)
-  ;; Make sure use-package is available (it may be provided by Nix or ELPA)
+  ;; Make sure use-package is available (it may be provided by Nix or ELPA).
+  ;; Avoid refreshing package archives on every startup — refresh only when
+  ;; we actually need to install use-package (or another missing package).
   (unless (require 'use-package nil t)
-    ;; Only refresh archives if we don't already have metadata or a refresh
-    ;; has not been performed earlier in this Emacs session. pro-packages.el
-    ;; may have already refreshed archives and set `pro-packages--refreshed`.
-    (unless (or package-archive-contents
-                (and (boundp 'pro-packages--refreshed) pro-packages--refreshed))
-      (condition-case _e
-          (progn (package-refresh-contents)
-                 (when (boundp 'pro-packages--refreshed)
-                   (setq pro-packages--refreshed t)))
-        (error (message "[pro-packages] failed to refresh package archives during setup"))))
-    (package-install 'use-package)
-    (require 'use-package))
+    ;; First check if use-package is available via load-path or Nix-provided list
+    (let ((available (or (package-installed-p 'use-package)
+                         (locate-library "use-package")
+                         (and (boundp 'pro-packages-provided-by-nix)
+                              (memq 'use-package pro-packages-provided-by-nix)))))
+      (unless available
+        ;; Only refresh archives when we truly need to fetch packages from ELPA/MELPA.
+        (when (or noninteractive (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "0") "1"))
+          (condition-case _e
+              (progn (package-refresh-contents)
+                     (when (boundp 'pro-packages--refreshed)
+                       (setq pro-packages--refreshed t)))
+            (error (message "[pro-packages] failed to refresh package archives during setup")))))
+      ;; Try to install use-package if it's still not available and archives were
+      ;; refreshed (or we are noninteractive/auto-install). If installation fails
+      ;; we continue without aborting startup.
+      (when (and (not (require 'use-package nil t))
+                 (or (boundp 'pro-packages--refreshed) noninteractive))
+        (condition-case _e
+            (package-install 'use-package)
+          (error (message "[pro-packages] failed to install use-package during setup")))
+      (require 'use-package nil t))))
   (require 'package-vc)
   (message "[pro-packages] archives=%d priority=%S"
            (length package-archives)

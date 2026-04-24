@@ -20,23 +20,35 @@ prompt the user where appropriate.
       ;; Default to auto-install enabled when the environment variable is
       ;; not present. This makes fresh profiles bootstrap missing packages
       ;; automatically.
-      (let ((auto (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "1") "1")))
-        (unless pro-packages--refreshed
-          (condition-case _ (package-refresh-contents) (error nil))
-          (setq pro-packages--refreshed t))
-     (dolist (pkg pro-package-bootstrap-targets)
-       (let ((pkg-sym (if (symbolp pkg) pkg (intern pkg))))
-         (cond
-          ((package-installed-p pkg-sym)
-           (message "[pro-package-bootstrap] already installed %S" pkg-sym))
-          ((and (not noninteractive) (fboundp 'pro-packages--maybe-install))
-           (pro-packages--maybe-install pkg-sym t))
-          (auto
-           (condition-case err
-               (progn (package-install pkg-sym) (message "[pro-package-bootstrap] installed %S" pkg-sym))
-             (error (message "[pro-package-bootstrap] failed %S: %s" pkg-sym (error-message-string err)))))
-          (t
-           (message "[pro-package-bootstrap] missing %S (skipped)" pkg-sym)))))))
+       (let ((auto (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "1") "1"))
+             (missing nil))
+         ;; Compute which packages are actually missing before refreshing.
+         (dolist (pkg pro-package-bootstrap-targets)
+           (let ((pkg-sym (if (symbolp pkg) pkg (intern pkg))))
+             (unless (or (package-installed-p pkg-sym)
+                         (locate-library (symbol-name pkg-sym))
+                         (and (boundp 'pro-packages-provided-by-nix)
+                              (memq pkg-sym pro-packages-provided-by-nix)))
+               (push pkg-sym missing))))
+
+         (when missing
+           ;; Refresh archives once per session only when there is work to do.
+           (unless pro-packages--refreshed
+             (condition-case _ (package-refresh-contents) (error nil))
+             (setq pro-packages--refreshed t))
+
+           (dolist (pkg-sym (nreverse missing))
+             (if (package-installed-p pkg-sym)
+                 (message "[pro-package-bootstrap] already installed %S" pkg-sym)
+               (cond
+                ((and (not noninteractive) (fboundp 'pro-packages--maybe-install))
+                 (pro-packages--maybe-install pkg-sym t))
+                (auto
+                 (condition-case err
+                     (progn (package-install pkg-sym) (message "[pro-package-bootstrap] installed %S" pkg-sym))
+                   (error (message "[pro-package-bootstrap] failed %S: %s" pkg-sym (error-message-string err)))))
+                (t
+                 (message "[pro-package-bootstrap] missing %S (skipped)" pkg-sym)))))))))
 
 (provide 'package-bootstrap)
 
