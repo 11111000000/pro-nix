@@ -3,8 +3,20 @@ name: GUI Smoke
 on:
   pull_request:
     branches: [ main ]
+    paths:
+      - 'emacs/**'
+      - 'tests/gui/**'
+      - 'tests/contract/**'
+      - 'docs/**'
+      - '.github/workflows/gui-smoke.yml'
   push:
     branches: [ main ]
+    paths:
+      - 'emacs/**'
+      - 'tests/gui/**'
+      - 'tests/contract/**'
+      - 'docs/**'
+      - '.github/workflows/gui-smoke.yml'
 
 jobs:
   gui-smoke:
