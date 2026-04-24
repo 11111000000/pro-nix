@@ -313,8 +313,8 @@
   # утилиты. Не импортируем модуль packages-runtime вручную здесь — он уже
   # присутствует в списке imports выше и его вклад доступен через
   # config.environment.systemPackages.
-  environment.systemPackages = lib.mkDefault (with pkgs;
-    (config.environment.systemPackages or []) ++ [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }) ++ [ opencodeCmd opencodeBin ]
+    environment.systemPackages = lib.mkDefault (with pkgs;
+    (config.environment.systemPackages or []) ++ [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = true; }) ++ [ opencodeCmd opencodeBin ]
   );
 
   # Порядок формирования systemPackages:
