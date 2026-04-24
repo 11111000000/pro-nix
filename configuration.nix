@@ -291,12 +291,10 @@
     (config.environment.systemPackages or []) ++ [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; })
   );
 
-  # Учебное замечание о порядке формирования systemPackages:
-  # - Опции модулей могут дополнять environment.systemPackages до момента, когда
-  #   этот файл явно фиксирует итоговый список. Здесь мы объединяем вклад модулей
-  #   с локальным набором пакетов (just, jq) и импортируем детальный список из
-  #   system-packages.nix. Это показывает паттерн: модули могут предложить наборы
-  #   пакетов, а централизованная точка фиксирует консолидацию перед активацией.
+  # Порядок формирования systemPackages:
+  # - Модули дополняют environment.systemPackages (lib.mkDefault).
+  # - Здесь собираем вклад модулей, добавляем локальные утилиты и импортируем
+  #   system-packages.nix. Центральная точка консолидирует список перед активацией.
 
   fonts.packages = with pkgs; [
     terminus_font

@@ -7,7 +7,7 @@ let
   hmPackages = with pkgs; [ fd ripgrep home-manager fnm git ];
   guiPackages = with pkgs; [ xclip rxvt-unicode obexd ];
 
-  # Учебный обзор модулей Emacs
+  # Обзор модулей Emacs
   # - core, ui, packages: фундаментальные компоненты для загрузки окружения.
   # - lisp, python, haskell: языковые интеграции и среды разработки.
   # - ai, agent, chat: модули, интегрирующие агентов и LLM через внешние сервисы
