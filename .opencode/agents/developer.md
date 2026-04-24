@@ -1,6 +1,6 @@
 ---
 description: Developer agent instructions — flake, Nix, Emacs tests and dev cycle
-mode: helper
+mode: subagent
 ---
 
 Цель
