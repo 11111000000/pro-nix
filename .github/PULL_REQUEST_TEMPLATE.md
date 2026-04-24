@@ -6,6 +6,21 @@ Pressure: [Bug | Feature | Debt | Ops]
 
 Surface impact: (none) | touches: <SURFACE item(s)> [FROZEN/FLUID]
 
+## Summary
+
+This PR groups the first tranche of Emacs UI/UX improvements and infrastructure:
+
+- docs: add detailed UX priorities & plan (docs/system-reminder.md)
+- tests: add ERT `test-theme-contrast.el` and GUI smoke skeleton
+- emacs helpers: startup metrics and font availability checker
+
+Surface impact: touches: Emacs GUI UX Layer [FLUID], FontsAndIcons [FLUID], OnboardingWizard [FLUID]
+
+## Verifications / Proof
+
+- ERT: `emacs --batch -l emacs/base/init.el -f ert-run-tests-batch` (includes test-theme-contrast)
+- GUI smoke (requires Xvfb): `./.pro-emacs-wrapper/emacs-pro -Q -l tests/gui/gui-smoke.el`
+
 Proof: tests: <commands/files that validate this change>
 
 If touching [FROZEN], include Migration block below.
