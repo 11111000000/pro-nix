@@ -1,21 +1,22 @@
-{ config, pkgs, lib, ... }:
+{ config, lib, pkgs, ... }:
 
 {
-  # Use dbus-broker for more robust brokered system bus behavior
-  services.dbus.implementation = "broker";
-
-  # Ensure polkit starts/restarts after the system bus is ready to avoid a
-  # transient window where D-Bus rejects method calls during activation.
-  systemd.services.polkit.after = lib.mkForce [ "dbus.service" "sysinit-reactivation.target" ];
-  systemd.services.polkit.wants = lib.mkForce [ "dbus.service" ];
-  # Small restart delay to give dbus time to settle after reloads/reexecs.
-  systemd.services.polkit.serviceConfig = (config.systemd.services.polkit.serviceConfig or {}) // {
-    RestartSec = "3s";
+  # Use dbus-broker which tends to be faster to re-acquire the bus name and
+  # reduces the window where clients see a missing system bus during reloads.
+  services.dbus = lib.mkIf true {
+    enable = true;
+    implementation = "broker";
   };
 
-  # Limit the nix-daemon so it doesn't saturate CPU on desktop machines.
-  systemd.services."nix-daemon".serviceConfig = (config.systemd.services."nix-daemon".serviceConfig or {}) // {
-    CPUQuota = "75%";
-    CPUWeight = "200";
-  };
+  # Ensure polkit has explicit Unit ordering so it does not restart before
+  # dbus is available during a live switch / activation.
+  systemd.services.polkit = lib.mkMerge [ (config.systemd.services.polkit or {}) {
+    after = [ "dbus.service" "sysinit-reactivation.target" ];
+    wants = [ "dbus.service" ];
+    # Keep a short restart delay to allow dbus to stabilize on reload.
+    serviceConfig = (config.systemd.services.polkit.serviceConfig or {}) // {
+      RestartSec = "3s";
+    };
+  } ];
+
 }

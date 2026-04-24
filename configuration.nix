@@ -279,7 +279,15 @@
   # Build the final package list and force it as the definitive value. Modules
   # should use lib.mkDefault when adding packages so the top-level override
   # here wins without causing recursion.
-  environment.systemPackages = lib.mkForce (with pkgs; (import ./modules/packages-runtime.nix { inherit pkgs; }).environment.systemPackages ++ [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }));
+  # Консолидация вкладов пакетов: собираем пакеты, предложенные модулями,
+  # и добавляем локальные утилиты. Важное изменение: убираем принудительное
+  # наложение (lib.mkForce) и используем lib.mkDefault — это позволяет модулю
+  # добавлять пакеты через lib.mkDefault и не терять их при финальной сборке.
+  environment.systemPackages = lib.mkDefault (with pkgs;
+    (config.environment.systemPackages or []) ++
+    (import ./modules/packages-runtime.nix { inherit pkgs; }).environment.systemPackages ++
+    [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; })
+  );
 
   # Учебное замечание о порядке формирования systemPackages:
   # - Опции модулей могут дополнять environment.systemPackages до момента, когда
@@ -345,16 +353,7 @@
     CPUWeight = "200";
   };
 
-  # Ensure polkit does not attempt to restart before the system bus is ready.
-  # This mitigates a race during live activation where dbus is reloaded and
-  # polkit restarts too early, causing D-Bus access to be rejected.
-  systemd.services.polkit = lib.mkMerge [ (config.systemd.services.polkit or {}) {
-    serviceConfig = (config.systemd.services.polkit.serviceConfig or {}) // {
-      After = "dbus.service";
-      Wants = "dbus.service";
-      RestartSec = "3s";
-    };
-  } ];
+  # polkit/unit ordering handled in modules/systemd-policy.nix
 
   environment.variables = {
     LANG = "ru_RU.UTF-8";
