@@ -22,8 +22,6 @@ in {
   # module installs repo templates into /etc/skel/pro-templates and user
   # home-manager copies them into user homes if missing.
   config = lib.mkIf config.opencode.enable {
-    # Keep the option so hosts can override the shipped template path.
-    opencode = config.opencode or {};
     # Ensure opencode.slice exists and is usable via systemd-run wrappers
     systemd.services."opencode-slice-setup" = {
       description = "Ensure opencode.slice exists (no-op when slice present)";

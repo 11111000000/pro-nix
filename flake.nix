@@ -17,7 +17,8 @@
       pythonWithTextual = pkgs.python3.withPackages (ps: with ps; [ textual psutil ]);
 
       # Global modules to apply to all hosts
-      globalModules = [ ./nixos/modules/adb-udev.nix ];
+      # Temporarily disable adb-udev global module to avoid etc.drv build permission issues.
+      globalModules = [  ];
 
       mkHost = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;

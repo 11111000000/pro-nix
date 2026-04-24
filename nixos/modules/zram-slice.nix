@@ -23,7 +23,8 @@ in
   config = lib.mkMerge [
     (lib.mkIf config.services.zramSlice.enable {
       # Create a small script in /etc that performs the zram setup with chosen size
-      environment.etc."enable-zram.sh".text = lib.mkString (''
+      # use a plain string here; lib.mkString isn't available in all nixpkgs
+      environment.etc."enable-zram.sh".text = ''
 #!/bin/sh
 set -e
 # compute size in MB
@@ -40,7 +41,7 @@ echo $((size_mb * 1024 * 1024)) > /sys/block/zram0/disksize
 mkswap /dev/zram0 || true
 swapon -p 5 /dev/zram0 || true
 exit 0
-'' );
+'';
 
       systemd.services."enable-zram" = {
         description = "Enable zram swap at boot";
@@ -55,13 +56,13 @@ exit 0
     })
 
     (lib.mkIf config.services.opencodeSlice.enable {
-      environment.etc."systemd/opencode.slice".text = lib.mkString (''
+      environment.etc."systemd/opencode.slice".text = ''
 [Slice]
 Description=Slice for opencode and heavy agent processes
 MemoryMax=${config.services.opencodeSlice.memoryMax}
 CPUQuota=${config.services.opencodeSlice.cpuQuota}
 IOWeight=${toString config.services.opencodeSlice.ioWeight}
-'' );
+'' ;
     })
 
     {}
