@@ -1,0 +1,26 @@
+name: GUI Smoke
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  gui-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb emacs fonts-dejavu-core fonts-dejavu-extra
+
+      - name: Run GUI smoke test (Xvfb)
+        run: |
+          set -euo pipefail
+          xvfb-run --auto-servernum --server-args='-screen 0 1280x1024x24' \
+            emacs -Q -l tests/gui/gui-smoke.el --batch
