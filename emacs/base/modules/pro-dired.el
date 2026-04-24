@@ -1,4 +1,4 @@
-;;; dired.el --- Dired helpers for pro-nix -*- lexical-binding: t; -*-
+;;; pro-dired.el --- Dired helpers for pro-nix -*- lexical-binding: t; -*-
 ;; Minimal, well-tested dired configuration ported from ~/pro with guards
 
 (require 'subr-x)
@@ -10,6 +10,7 @@ Set to nil to disable."
 
 (when pro-dired-enable
   (when (require 'dired nil t)
+    
     ;; basic keybindings and hooks
     (with-eval-after-load 'dired
       (let ((map (current-global-map)))
@@ -38,7 +39,6 @@ Set to nil to disable."
     (setq dired-auto-revert-buffer t)
     (setq global-auto-revert-non-file-buffers t)
     (setq dired-hide-details-hide-symlink-targets nil)
-
     ;; wdired: enable quick editing
     (when (require 'wdired nil t)
       (with-eval-after-load 'dired
@@ -48,12 +48,10 @@ Set to nil to disable."
           (define-key wdired-mode-map (kbd "C-c r") #'replace-regexp)
           (define-key wdired-mode-map (kbd "C-g C-g") #'wdired-exit)
           (define-key wdired-mode-map (kbd "ESC") #'wdired-exit))))
-
     ;; Optional: treemacs icons in dired when available via ui layer
     (when (and (fboundp 'pro-ui--try-require)
                (pro-ui--try-require 'treemacs-icons-dired))
-      (add-hook 'dired-mode-hook #'treemacs-icons-dired-enable-once))
-
+      (add-hook 'dired-mode-hook #'treemacs-icons-dired-enable-once))    
     ;; helper: reload elisp files in marked directory if pro-lisp helper present
     (defun pro/dired-reload-elisp-here ()
       "Reload all .el files in current dired directory if helper present."
@@ -62,7 +60,8 @@ Set to nil to disable."
         (when (fboundp 'pro/reload-all-elisp-in-dired-directory)
           (pro/reload-all-elisp-in-dired-directory))))
     )
+  )
 
-(provide 'dired-pro)
+(provide 'pro-dired)
 
-;;; dired.el ends here
+;;; pro-dired.el ends here

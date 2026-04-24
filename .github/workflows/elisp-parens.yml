@@ -1,0 +1,17 @@
+name: Emacs Lisp Paren Check
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+jobs:
+  paren-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run paren check
+        run: |
+          chmod +x ./scripts/check-elisp-parens.el
+          ./scripts/check-elisp-parens.el --dir=emacs
+        shell: bash

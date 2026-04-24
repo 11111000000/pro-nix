@@ -1,4 +1,4 @@
-;;; consult-helpers.el --- Small consult helpers and optional features -*- lexical-binding: t; -*-
+;;; pro-consult-helpers.el --- Small consult helpers and optional features -*- lexical-binding: t; -*-
 ;; Small consult helpers and optional features implemented for pro-nix.
 ;; Loaded lazily by nav.el when consult is available.
 
@@ -52,9 +52,9 @@ of windows to reduce cognitive friction when opening many buffers."
     (select-window target-window)
     (call-interactively #'consult-buffer)))
 
-(provide 'consult-helpers)
+(provide 'pro-consult-helpers)
 
-;;; consult-helpers.el ends here
+;;; pro-consult-helpers.el ends here
 
 ;; A small wrapper around consult-find to set a sensible starting directory.
 ;; The problem reported: C-x C-f runs consult-find but finds no files — often
@@ -88,4 +88,4 @@ If ARG is a string, call `find-file' with ARG (behaviour compatible with
               (consult-find start)
             (when (fboundp 'consult-ripgrep)
               (consult-ripgrep start)))
-        (call-interactively #'find-file)))))
+        (call-interactively #'find-file))))))

@@ -1,5 +1,5 @@
 ;; Русский: комментарии и пояснения оформлены в стиле учебника
-;;; keys.el --- пользовательские клавиши -*- lexical-binding: t; -*-
+;;; pro-keys.el --- пользовательские клавиши -*- lexical-binding: t; -*-
 
 ;; Модуль: keys.el — декларативный интерфейс горячих клавиш.
 ;;
@@ -331,4 +331,4 @@ Return the path of the generated file.
 ;; defined. Placing `provide' earlier could cause `with-eval-after-load'
 ;; callbacks in other modules to run before the registry functions exist,
 ;; leading to void-variable / void-function errors during startup.
- (provide 'keys)
+  (provide 'pro-keys)

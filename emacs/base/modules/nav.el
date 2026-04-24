@@ -186,7 +186,7 @@
     (setq consult-buffer-sources
           (cl-remove 'consult--source-project-buffer consult-buffer-sources :test #'eq)))
   ;; Provide helper functions (small and defensive); no global remaps here.
-  (require 'consult-helpers nil t)
+    (require 'pro-consult-helpers nil t)
   )
 
 (defun pro-nav-search-project ()
