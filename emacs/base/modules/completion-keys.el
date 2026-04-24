@@ -14,12 +14,13 @@
      ("C-c y y" . consult-yasnippet) )
   "Suggested global keys for completion (CAPE/consult-yasnippet).")
 
-(when (fboundp 'pro/register-module-keys)
-  (pro/register-module-keys 'completion pro/completion-suggested-keys))
+(with-eval-after-load 'keys
+  (when (fboundp 'pro/register-module-keys)
+    (pro/register-module-keys 'completion pro/completion-suggested-keys))
 
-(when (fboundp 'pro/export-registered-keys-to-org)
-  ;; Export suggested keys to an org fragment for review on demand
-  (pro/export-registered-keys-to-org))
+  (when (fboundp 'pro/export-registered-keys-to-org)
+    ;; Export suggested keys to an org fragment for review on demand
+    (pro/export-registered-keys-to-org)))
 
 (provide 'completion-keys)
 
