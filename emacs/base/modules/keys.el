@@ -240,16 +240,24 @@ KEYS-ALIST is an alist of ("KEY" . command-symbol).
 This records suggestions only; it does not apply global bindings.
 Use `pro/export-registered-keys-to-org' or `pro/keys-import-suggestions' to
 persist or apply suggestions." 
-  ;; Be defensive: callers may accidentally pass non-lists or expressions that
-  ;; evaluate to an unbound symbol which would abort Emacs startup. Wrap in
-  ;; condition-case and avoid calling `length' on non-list values.
+  ;; Be defensive: callers may accidentally pass malformed values which would
+  ;; abort Emacs startup. Log a safe representation and tolerate non-list
+  ;; inputs.
   (condition-case err
       (when (and module keys-alist)
-        (puthash module keys-alist pro/registered-module-keys)
-        (let ((n (if (listp keys-alist) (length keys-alist) -1)))
-          (message "pro: registered %s suggested keys from %s" (if (>= n 0) (format "%d" n) "(unknown count)") module))))
+        (message "pro/register-module-keys: module=%S keys-alist-type=%S" module (type-of keys-alist))
+        ;; Normalize to a list if necessary
+        (let ((safe-keys (if (listp keys-alist) keys-alist (list keys-alist))))
+          ;; Log a concise preview (don't eval deep structures)
+          (message "pro/register-module-keys: preview=%S" (mapcar (lambda (e)
+                                                                      (cond
+                                                                       ((consp e) (cons (car e) (cdr e)))
+                                                                       (t e))) safe-keys))
+          (puthash module safe-keys pro/registered-module-keys)
+          (let ((n (if (listp safe-keys) (length safe-keys) -1)))
+            (message "pro: registered %s suggested keys from %s" (if (>= n 0) (format "%d" n) "(unknown count)") module)))))
     (error
-     (message "pro: failed to register module keys for %s: %S" module err)))
+     (message "pro: failed to register module keys for %s: %S" module err))))
 
 (defun pro/unregister-module-keys (module)
   "Unregister keys suggested by MODULE." 
