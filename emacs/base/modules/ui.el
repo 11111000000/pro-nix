@@ -132,7 +132,15 @@
     ;; Register embark-consult integration when available
     (when (pro-ui--try-require 'embark-consult)
       (with-eval-after-load 'embark-consult
-        (embark-consult-export))))
+        (embark-consult-export)))
+
+  ;; Ensure a convenient binding for embark-act is available in minibuffer
+  (when (pro-ui--try-require 'embark)
+    (define-key minibuffer-local-map (kbd "C-.") #'embark-act)
+    (define-key minibuffer-local-completion-map (kbd "C-.") #'embark-act)
+    ;; Provide a global convenience binding when which-key is present
+    (when (pro-ui--try-require 'which-key)
+      (global-set-key (kbd "C-.") #'embark-act))))
 
     ;; Dired icons via treemacs integration when available
     (when (pro-ui--try-require 'treemacs-icons-dired)
