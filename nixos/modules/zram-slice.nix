@@ -63,15 +63,8 @@ CPUQuota=${config.services.opencodeSlice.cpuQuota}
 IOWeight=${toString config.services.opencodeSlice.ioWeight}
 '' );
     })
-  ];
 
-  # Put systemd.postReload under the module 'config' attribute so the module
-  # doesn't introduce top-level systemd attribute which is rejected by the
-  # module loader.
-  config = lib.mkMerge [
-    {
-      systemd.postReload = lib.mkIf (config.services.zramSlice.enable || config.services.opencodeSlice.enable) true;
-    }
+    {}
   ];
 
 }
