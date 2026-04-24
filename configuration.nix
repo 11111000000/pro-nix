@@ -69,18 +69,18 @@
 # - Настройки kernel.sysctl влияют на поведение отладки и аварийного доступа;
 #   включение SysRq делает возможным выполнение аварийных команд при зависании.
 
-  boot.loader.grub.enable = true;                     # GRUB остаётся безопасной общей точкой входа для разных машин.
+  boot.loader.grub.enable = lib.mkDefault true;                     # GRUB остаётся безопасной общей точкой входа для разных машин.
   boot.loader.grub.device = lib.mkDefault "nodev";   # Для EFI-сценария загрузчик живёт без привязки к конкретному диску.
   boot.loader.efi.canTouchEfiVariables = lib.mkDefault true;        # EFI-переменные можно менять из этой установки.
   boot.loader.efi.efiSysMountPoint = lib.mkDefault "/boot";         # Точка ESP фиксируется явно, чтобы путь к загрузчику не расплывался.
-  boot.loader.timeout = 5;                            # Короткая пауза оставляет выбор, но не превращает старт в ожидание.
-  boot.loader.grub.useOSProber = false;               # Явная загрузка без автоматического поиска чужих систем.
+  boot.loader.timeout = lib.mkDefault 5;                            # Короткая пауза оставляет выбор, но не превращает старт в ожидание.
+  boot.loader.grub.useOSProber = lib.mkDefault false;               # Явная загрузка без автоматического поиска чужих систем.
 
-  boot.plymouth.enable = true;                        # Plymouth смягчает переход от firmware к рабочему миру.
-  boot.plymouth.theme = "spinner";                     # Тема загрузчика: spinner.
+   boot.plymouth.enable = lib.mkDefault true;                        # Plymouth смягчает переход от firmware к рабочему миру.
+   boot.plymouth.theme = lib.mkDefault "spinner";                     # Тема загрузчика: spinner.
 
-  boot.kernelPackages = pkgs.linuxPackages_6_6;        # LTS-ядро здесь поддерживает устойчивость сна и пробуждения на этом поколении железа.
-  boot.kernel.sysctl."kernel.sysrq" = 1;               # Включить SysRq для аварийного доступа.
+   boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_6_6;        # LTS-ядро здесь поддерживает устойчивость сна и пробуждения на этом поколении железа.
+   boot.kernel.sysctl."kernel.sysrq" = lib.mkDefault 1;               # Включить SysRq для аварийного доступа.
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 3: Сетевая конфигурация и имя машины — учебный блок
