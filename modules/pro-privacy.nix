@@ -14,7 +14,6 @@
     torsocks.enable = true;
     # Provide sane defaults but allow hosts to override in their host config.
     settings = {
-      SOCKSPort = [ 9050 ];
       ControlPort = [ 9051 ];
       CookieAuthentication = true;
       # Default to no bridges so Tor can bootstrap in unconstrained networks.
