@@ -27,5 +27,13 @@ Proofs / Verification Commands (add to Change Gate):
 - Pro-peer smoke: `bash scripts/pro-peer-sync-keys.sh --help` (or run systemd unit in dry-run)
 - Samba automount smoke: `bash scripts/mount-smb.sh --help`
 
+- HDS seed (local): `docs/hds-llm-seed-en.md` — repository-local copy of the HDS LLM seed used by agents and verification steps.
+- Repository-local verify tools:
+  - `./tools/holo-verify.sh`
+  - `./tools/surface-lint.sh`
+  - `./tools/docs-link-check.sh`
+- Testing guide: `docs/TESTING.md`
+- PR template (Change Gate): `.github/PULL_REQUEST_TEMPLATE.md`
+
 Notes:
 - Add or freeze decisions only when Exit criteria and Proof are present. Use the Change Gate format in PR descriptions.
