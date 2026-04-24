@@ -21,4 +21,9 @@ if [ ! -f "$root/docs/SURFACE.md" ] || [ ! -f "$root/docs/HOLO.md" ]; then
   exit 2
 fi
 
+if [ ! -f "$root/docs/plans/agent-orchestration.md" ]; then
+  echo "agent-orchestration plan missing" >&2
+  exit 2
+fi
+
 echo "agent secrets contract: OK"

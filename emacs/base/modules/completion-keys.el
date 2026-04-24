@@ -22,13 +22,13 @@
     (ignore-errors
       (with-temp-file "/tmp/pro-register-completion.log"
         (insert (format "CALL: time=%s module=completion\n" (current-time-string)))
-        (prin1 pro/completion-suggested-keys (current-buffer)))))
+        (prin1 pro/completion-suggested-keys (current-buffer))))
     (condition-case _err
         (pro/register-module-keys 'completion pro/completion-suggested-keys)
-      (error (message "pro: failed to register completion suggested keys (see /tmp/pro-register-completion.log)")))))
+      (error (message "pro: failed to register completion suggested keys (see /tmp/pro-register-completion.log)"))))
 
   (when (fboundp 'pro/export-registered-keys-to-org)
-    ;; Export suggested keys to an org fragment for review on demand
+    ;; Export suggested keys to an org fragment for review on demand.
     (pro/export-registered-keys-to-org)))
 
 (provide 'pro-completion-keys)

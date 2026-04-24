@@ -1,0 +1,20 @@
+name: Change Gate Validator (non-blocking initially)
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read PR body
+        id: pr
+        run: echo "PR_BODY<<EOF" >> $GITHUB_ENV && gh pr view ${{ github.event.pull_request.number }} --json body --jq .body >> $GITHUB_ENV && echo "EOF" >> $GITHUB_ENV
+      - name: Run Change Gate checker
+        run: ./.github/actions/check-change-gate/action.sh < <(echo "$PR_BODY") || true
+      - name: Comment guidance if missing
+        if: failure()
+        run: |
+          echo "Automated check: Change Gate missing. Please include Intent/Pressure/Surface/Proof in PR body." 

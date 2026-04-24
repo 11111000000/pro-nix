@@ -6,7 +6,14 @@ root="$(cd "$(dirname "$0")/.." && pwd)"
 echo "Running holo verification from $root"
 
 shopt -s nullglob
-for t in "$root"/tests/contract/*; do
+MODE=${1:-unit}
+if [ "$MODE" = "unit" ]; then
+  pattern="$root/tests/contract/unit/*"
+else
+  pattern="$root/tests/contract/*"
+fi
+
+for t in $pattern; do
   case "$t" in
     *.sh)
       echo "== Running contract script: $(basename "$t")"

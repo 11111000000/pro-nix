@@ -24,6 +24,7 @@ Decisions:
     Tests:
       - Keep: existing headless ERT tests and UI smoke tests.
       - Add: `tests/contract/test-soft-reload.el` (simulate refresh and assert site-lisp path update + session restore), `tests/contract/test-gui-smoke.el` (Xvfb-based smoke), `tests/contract/test-theme-contrast.el` (face contrast checks).
+  - [Draft] GUI smoke proof: keep a GUI smoke contract file referenced by the root manifest. Exit: `tests/contract/test-gui-smoke.el` exists and root `HOLO.md` references it.
 
 - [Draft] Pro-peer: Discovery & Key Sync
   Pressure: Ops

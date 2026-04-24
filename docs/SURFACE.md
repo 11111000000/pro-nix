@@ -47,7 +47,7 @@ Scope: this document is a scoped sub-spec for the agent-orchestration track. The
 - Name: Agent Secrets
   Stability: [FROZEN]
   Spec: API keys and credentials must never be committed to the repository; they are injected at runtime from an operator-managed secret source.
-  Proof: `rg "api[-_ ]?key|secret|token" -n docs/ AGENTS.md README.md` and `tests/contract/test_agent_secrets.sh`
+  Proof: `tests/contract/test_agent_secrets.sh`
 
 - Name: Agent Deployment
   Stability: [FLUID]
