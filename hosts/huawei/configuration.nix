@@ -2,9 +2,11 @@
 { config, lib, pkgs, ... }:
 
 {
-  imports = [ ../../modules/pro-users.nix ];
-  # Import global pro-nix modules
-  imports = imports ++ [ ../../nixos/modules/adb-udev.nix ];
+  # Import modules for this host
+  imports = [
+    ../../modules/pro-users.nix
+    ../../nixos/modules/adb-udev.nix
+  ];
 
   networking.hostName = "huawei";
   system.stateVersion = "25.11";

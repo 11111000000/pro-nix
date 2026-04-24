@@ -39,16 +39,17 @@
      ./modules/systemd-policy.nix
 
      # Общие модули формируют общую политику и не зависят от пользовательских настроек.
-     ./modules/pro-users.nix
-     ./modules/pro-services.nix
-     ./modules/pro-storage.nix
-     ./modules/pro-privacy.nix
-     ./modules/pro-peer.nix
-     ./modules/headscale.nix
-     ./modules/pro-desktop.nix
-     ./modules/nix-cuda-compat.nix
-      ./nixos/modules/opencode-config.nix
-      ./nixos/modules/opencode.nix
+      ./modules/pro-users.nix
+      ./modules/pro-services.nix
+      ./modules/pro-storage.nix
+      ./modules/pro-privacy.nix
+      ./modules/pro-peer.nix
+      ./modules/headscale.nix
+      ./modules/pro-desktop.nix
+      ./modules/nix-cuda-compat.nix
+       ./nixos/modules/opencode-config.nix
+       ./nixos/modules/opencode.nix
+       ./nixos/modules/zram-slice.nix
 
      # Локальные переопределения конкретного хоста остаются в файле local.nix.
    ] ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ];

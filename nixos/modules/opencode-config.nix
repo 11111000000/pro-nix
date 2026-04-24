@@ -31,7 +31,7 @@ in {
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = "/bin/sh -c 'if [ ! -f /etc/systemd/system/opencode.slice ]; then echo "opencode.slice not found"; fi; exit 0'";
+        ExecStart = "/bin/sh -c 'if [ ! -f /etc/systemd/system/opencode.slice ]; then echo \"opencode.slice not found\"; fi; exit 0'";
       };
       enable = true;
     };

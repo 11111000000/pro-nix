@@ -25,7 +25,7 @@
         ./nixos/modules/opencode-config.nix
         # user-templates is imported directly from configuration.nix to avoid
         # circular evaluation dependencies
-        ] ++ extraModules;
+        ] ++ (globalModules or []) ++ extraModules;
       };
 
       # Deterministic opencode derivation used by apps and made available
