@@ -14,9 +14,9 @@ Badges
 
 Prerequisites
 -------------
-- Nix с поддержкой flakes (рекомендуется современная версия, flake-enabled).
-- network access для substitute/cache при сборке.
-- root/sudo при применении `nixos-rebuild`/`just switch` на целевой машине.
+- Современный Nix с поддержкой flakes (flake-enabled). Если вы не уверены — обновите Nix и включите flakes.
+- Доступ в сеть для substitute/cache при сборке (cache.nixos.org и зеркала).
+- root/sudo при применении `nixos-rebuild` / `just switch` на целевой машине.
 
 Quickstart — локальная проверка
 ------------------------------
@@ -29,19 +29,30 @@ Quickstart — локальная проверка
 
    nix flake check
 
+   Если проверка падает — добавьте `--show-trace` для подробной трассировки.
+
 3. Построить конфигурацию хоста (пример)
 
+   # Собрать артефакт для локального просмотра
    nix build .#nixosConfigurations.cf19.config.system.build.toplevel
-   nix build .#nixosConfigurations.huawei.config.system.build.toplevel
+
+   # Полный пример: собрать и переключиться на конфигурацию (на целевой машине)
+   sudo nixos-rebuild switch --flake .#huawei
+
+   Примечание: flake предоставляет `nixosConfigurations.<host>` — в большинстве сценариев
+   `nixos-rebuild --flake .#<host>` является наиболее удобным способом применить конфигурацию на соответствующем хосте.
 
 4. Открыть devshell для разработки
 
    nix develop .#devShells.x86_64-linux.default
 
+   После входа devshell автоматически создаёт небольшой wrapper для запускa Emacs с нужными флагами
+   (файл создаётся в `./.pro-emacs-wrapper/emacs-pro`), см. flake.nix: devShells.shellHook.
+
 5. Запустить Emacs с локальной конфигурацией (тест)
 
    emacs -Q -l emacs/base/init.el
-   # или
+   # или (обёртка с окружением / путями, рекомендуемый способ для интеграции с Nix)
    ./scripts/emacs-pro-wrapper.sh
 
 6. Запустить headless Emacs E2E тесты
@@ -52,7 +63,7 @@ Quickstart — локальная проверка
 ---------------------------------------------
 - flake.nix — flake outputs: `nixosConfigurations` (hosts), `apps`, `devShells`, `checks`.
 - configuration.nix — общая cross-host политика, импортирует `modules/`.
-- system-packages.nix — централизованный список пакетов (с флагом enableOptional).
+- system-packages.nix — централизованный список пакетов (принимает `enableOptional` — смотрите комментарии в файле).
 - modules/ — набор NixOS-модулей (pro-users, pro-services, pro-privacy, pro-peer, headscale и др.).
 - nix/modules/ — вспомогательные Nix-модули (samba, automount и др.).
 - nixos/modules/ — модули для opencode и связанных компонентов.
@@ -66,6 +77,30 @@ Quickstart — локальная проверка
 - Собрать образ/конфигурацию хоста: `nix build .#nixosConfigurations.<host>.config.system.build.toplevel`.
 - Devshell: `nix develop .#devShells.x86_64-linux.default`.
 - Emacs E2E: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el`.
+
+Полезные альтернативы
+- Быстрая сборка всех хостов (см. flake apps): `nix run .#check-all` или `nix run .#apps.x86_64-linux.check-all`.
+
+Как включить optional-пакеты
+---------------------------
+`system-packages.nix` содержит группу тяжёлых / опциональных пакетов, контролируемых параметром `enableOptional`.
+По умолчанию в `configuration.nix` он импортируется с `enableOptional = false`.
+Чтобы включить опциональные пакеты на уровне хоста, добавьте в `hosts/<your-host>/configuration.nix` переопределение:
+
+```nix
+environment.systemPackages = lib.mkDefault (with pkgs;
+  (config.environment.systemPackages or []) ++ (import ../system-packages.nix { inherit pkgs emacsPkg; enableOptional = true; })
+);
+```
+
+Это позволит включать большие GUI/игровые пакеты только на тех хостах, где это нужно.
+
+Troubleshooting (частые ошибки)
+------------------------------
+- Git tree is dirty: flake может смотреть рабочее дерево. Если видите ошибку — закоммитьте/stash изменения.
+  `git status --short` / `git add -A && git commit -m "wip"` или `git stash`.
+- Дублирование `environment.systemPackages`: используйте `rg "environment.systemPackages" -n` чтобы найти повторные определения — устраните конфликты или используйте `lib.mkForce`/`lib.mkDefault` аккуратно.
+- Если `nix` выдаёт непонятную ошибку — повторите с `--show-trace`.
 
 Contributing (короткий чек-лист)
 --------------------------------
