@@ -8,15 +8,16 @@
     implementation = "broker";
   };
 
-  # Ensure polkit has explicit Unit ordering so it does not restart before
-  # dbus is available during a live switch / activation.
-  systemd.services.polkit = lib.mkMerge [ (config.systemd.services.polkit or {}) {
+  # Обеспечиваем явный порядок для polkit, не читая текущую config.*-структуру
+  # чтобы избежать рекурсивных зависимостей при оценке модулей. Другие модули
+  # могут дополнять поля systemd.services.polkit через стандартные механизмы
+  # слияния модулей; здесь мы лишь задаём минимальные необходимые поля.
+  systemd.services.polkit = {
     after = [ "dbus.service" "sysinit-reactivation.target" ];
     wants = [ "dbus.service" ];
-    # Keep a short restart delay to allow dbus to stabilize on reload.
-    serviceConfig = (config.systemd.services.polkit.serviceConfig or {}) // {
+    serviceConfig = {
       RestartSec = "3s";
     };
-  } ];
+  };
 
 }
