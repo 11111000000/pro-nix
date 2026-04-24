@@ -47,7 +47,8 @@
      ./modules/headscale.nix
      ./modules/pro-desktop.nix
      ./modules/nix-cuda-compat.nix
-     ./nixos/modules/opencode-config.nix
+      ./nixos/modules/opencode-config.nix
+      ./nixos/modules/opencode.nix
 
      # Локальные переопределения конкретного хоста остаются в файле local.nix.
    ] ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ];
