@@ -30,16 +30,40 @@ if [ ! -f "./hosts/$HOST_ARG/configuration.nix" ]; then
   exit 1
 fi
 
-# Предпочитаем выполнять реальный switch с помощью sudo. В контейнерах,
-# где sudo не может получить привилегии (например, флаг "no new privileges"),
-# выполняем non-root сборку toplevel-деривации для проверки.
+# If already running as root (sudo invoked this script), run nixos-rebuild directly
+if [ "$(id -u)" -eq 0 ]; then
+  echo "[just] running as root; performing nixos-rebuild switch for host: $HOST_ARG"
+  tmpf=$(mktemp)
+  if nixos-rebuild switch --flake ".#$HOST_ARG" 2>&1 | tee "$tmpf"; then
+    rm -f "$tmpf"
+    exec true
+  else
+    if rg -q "Rejected send message" "$tmpf" 2>/dev/null; then
+      cat >&2 <<'MSG'
+Живая активация не удалась из-за временной гонки D-Bus / polkit ("Rejected send message").
+Рекомендуемые действия оператора:
+  1) Просмотреть сохранённый вывод: cat "${tmpf}" (или journalctl -b).
+  2) Если приемлемо, выполнить: nixos-rebuild boot --flake ".#${HOST_ARG}" && reboot
+Если в окружении установлено AUTO_REBOOT_ON_ACTIVATION_RACE=1, скрипт
+выполнит fallback (boot+reboot) автоматически.
+MSG
+    else
+      cat >&2 <<'MSG'
+nixos-rebuild switch завершился с ошибкой. См. вывод выше для деталей. Чтобы
+попробовать безопасную активацию при загрузке, выполните:
+  nixos-rebuild boot --flake ".#${HOST_ARG}" && reboot
+MSG
+    fi
+    rm -f "$tmpf"
+    exit 1
+  fi
+fi
+
+# Prefer to run real switch via sudo when not already root. In some environments
+# sudo may not be able to gain privileges (eg containers with no_new_privs). Use
+# systemd-run preflight to verify we can run privileged units.
 if sudo -n true 2>/dev/null && sudo systemd-run --quiet --wait --collect --pipe --service-type=exec --unit=nixos-switch-preflight /bin/true >/dev/null 2>&1; then
   echo "[just] performing nixos-rebuild switch for host: $HOST_ARG"
-  # Запускаем switch и сохраняем вывод для последующего анализа, избегая
-  # автоматического перезапуска. Если активация падает из-за известной гонки
-  # D-Bus/polkit, печатаем понятную подсказку оператору. Автоматический
-  # fallback (boot+reboot) выполняется только при установленной переменной
-  # окружения AUTO_REBOOT_ON_ACTIVATION_RACE=1.
   tmpf=$(mktemp)
   if sudo nixos-rebuild switch --flake ".#$HOST_ARG" 2>&1 | tee "$tmpf"; then
     rm -f "$tmpf"
