@@ -31,5 +31,10 @@ with pkgs;
     coreutils
     procps
     dbus
+    # Privacy transports: include transport clients so Tor transports are
+    # available when services.tor.client is enabled by default in pro-privacy.
+    obfs4proxy
+    meek-client
+    snowflake-client
   ]);
 }
