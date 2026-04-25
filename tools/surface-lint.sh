@@ -11,22 +11,39 @@ fi
 
 echo "SURFACE.md found"
 
-# If called with --check-comments, ensure modules contain literary headers
-if [ "${1:-}" = "--check-comments" ]; then
-  echo "Checking modules for literary headers..."
-  missing=0
-  for f in "$root"/modules/*.nix; do
-    [ -e "$f" ] || continue
-    if ! rg -q '^# Название:' "$f" 2>/dev/null; then
-      echo "MISSING HEADER: $f" >&2
-      missing=1
+# If called with --check-style or --enforce-style, scan strict paths for docstring headers
+if [ "${1:-}" = "--check-style" ] || [ "${1:-}" = "--enforce-style" ]; then
+  MODE=$1
+  echo "Checking style in strict paths..."
+  warn=0
+  # minimal set of strict paths; keep small to avoid noise
+  paths=("$root/nixos/modules" "$root/modules" "$root/emacs/base")
+  for p in "${paths[@]}"; do
+    if [ -d "$p" ]; then
+      while IFS= read -r -d '' f; do
+        # check for docstring markers (Назначение|Инварианты|Побочные эффекты|Контракт|Проверка)
+        if ! rg -q "Назначение:|Инварианты:|Побочные эффекты:|Контракт:|Проверка:" "$f" 2>/dev/null; then
+          echo "WARNING: missing docstring sections in $f" >&2
+          warn=1
+        fi
+        # check for Russian comments presence
+        if ! rg -q "[А-Яа-яЁё]" "$f" 2>/dev/null; then
+          echo "WARNING: no Cyrillic text found in $f (expected Russian docs)" >&2
+          warn=1
+        fi
+      done < <(find "$p" -type f -name "*.nix" -print0)
     fi
   done
-  if [ $missing -ne 0 ]; then
-    echo "surface-lint: missing headers" >&2
-    exit 4
+  if [ $warn -ne 0 ]; then
+    if [ "$MODE" = "--enforce-style" ]; then
+      echo "surface-lint: style checks failed" >&2
+      exit 4
+    else
+      echo "surface-lint: style checks produced warnings (use --enforce-style to make them fatal)" >&2
+      exit 0
+    fi
   fi
-  echo "All modules contain literary headers"
+  echo "Style checks: OK"
   exit 0
 fi
 

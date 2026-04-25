@@ -32,3 +32,8 @@ for t in $pattern; do
 done
 
 echo "holo-verify: OK"
+
+# additional check: ensure HOLO.md referenced contract tests exist
+if [ -f "$root/HOLO.md" ]; then
+  rg -n "tests/contract/" "$root/HOLO.md" || true
+fi

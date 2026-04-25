@@ -1,21 +1,28 @@
-SURFACE — Public contract registry
-================================
+SURFACE — реестр публичных контрактов
+=====================================
 
-Entries:
+Запись описывает наблюдаемое поведение репозитория и команду(ы) — Proof, которые
+это поведение проверяют.
 
-- Name: Healthcheck
-  Stability: [FROZEN]
-  Spec: repository exposes a reproducible verification entrypoints: `just` or `scripts/emacs-sync.sh`. Proof: `tests/contract/test_surface_health.spec`
+- Имя: Healthcheck
+  Стабильность: [FROZEN]
+  Спецификация: репозиторий предоставляет воспроизводимую точку проверки работоспособности.
+  Proof: `tests/contract/test_surface_health.spec`
 
-- Name: Soft Reload (Emacs)<BR>
-  Stability: [FROZEN]
-  Spec: provide `pro.emacs.softReload.enable` option and headless ERT that exercises reload. Proof: headless ERT runner (see HOLO.md)
+- Имя: Soft Reload (Emacs)
+  Стабильность: [FROZEN]
+  Спецификация: опция `pro.emacs.softReload.enable` позволяет безопасно обновлять UI,
+  настройки и модули без полного перезапуска Emacs; наличие headless ERT, проверяющего
+  корректность перезагрузки.
+  Proof: headless ERT runner (см. HOLO.md)
 
-- Name: Pro-peer Key Sync
-  Stability: [FLUID]
-  Spec: `pro-peer.enableKeySync` controls a systemd service `pro-peer-sync-keys` and a template script `scripts/pro-peer-sync-keys.sh`. Proof: `scripts/pro-peer-sync-keys.sh` and systemd timer unit behaviour.
+- Имя: Pro-peer Key Sync
+  Стабильность: [FLUID]
+  Спецификация: опция `pro-peer.enableKeySync` управляет systemd-сервисом
+  `pro-peer-sync-keys` и скриптом `scripts/pro-peer-sync-keys.sh` для синхронизации ключей.
+  Proof: `scripts/pro-peer-sync-keys.sh` (smoke) и соответствующие unit-файлы systemd.
 
-- Name: LLM Research Surface
-  Stability: [FLUID]
-  Spec: repository exposes a reproducible `llm-lab` entrypoint for notebook-based LLM research and evaluation.
+- Имя: LLM Research Surface
+  Стабильность: [FLUID]
+  Спецификация: воспроизводимый entrypoint `llm-lab` для экспериментов и тестов с LLM.
   Proof: `tests/contract/unit/03-llm-tools.sh`

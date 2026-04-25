@@ -25,6 +25,7 @@ let
     pkgs.emacsPackages.eglot
     pkgs.emacsPackages.rainbow-delimiters
     pkgs.emacsPackages.nix-mode
+    pkgs.emacsPackages.mmm-mode
     pkgs.emacsPackages.org
     pkgs.emacsPackages.vterm
     pkgs.emacsPackages.ace-window
@@ -35,7 +36,7 @@ in
   # This file is a helper placeholder. To materialize an Emacs Lisp list of
   # packages provided by Nix, you can run the helper script:
   #
-  # emacs --batch -l scripts/generate-provided-packages.el \
+  # emacs --batch -l scripts/regenerate-provided-packages.el \
   #       --eval '(generate-provided-packages "nix/provided-packages.nix" "~/.config/emacs/provided-packages.el")'
   #
   # The script will write `~/.config/emacs/provided-packages.el` which sets
