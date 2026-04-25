@@ -25,10 +25,27 @@ in
           # list minimal and reproducible to avoid network installs on
           # user machines. Users may extend via `extraPackages` in their
           # host config; this list is authoritative for the portable profile.
-          providedPackages = [ "consult" "magit" "vertico" "orderless" "marginalia" "corfu" "gptel" "consult-dash" "consult-eglot" "consult-yasnippet" "cape" "kind-icon" "avy" "expand-region" "yasnippet" "projectile" "treemacs" ];
-          # Ensure the corresponding Nix packages are actually installed into
-          # the user's profile so Emacs finds them on the load-path at runtime.
-          extraPackages = [ pkgs.emacsPackages.consult pkgs.emacsPackages.magit pkgs.emacsPackages.vertico pkgs.emacsPackages.orderless pkgs.emacsPackages.marginalia pkgs.emacsPackages.corfu pkgs.emacsPackages.gptel pkgs.emacsPackages.consult-dash pkgs.emacsPackages.consult-eglot pkgs.emacsPackages.consult-yasnippet pkgs.emacsPackages.cape pkgs.emacsPackages.kind-icon pkgs.emacsPackages.avy pkgs.emacsPackages.expand-region pkgs.emacsPackages.yasnippet pkgs.emacsPackages.projectile pkgs.emacsPackages.treemacs pkgs.emacsPackages.vterm pkgs.emacsPackages.ace-window ];
+          # Packages that Nix will provide to Emacs at runtime. We enumerate
+          # the full set derived from nix/provided-packages.nix so Home Manager
+          # installs the corresponding emacsPackages into the user's profile.
+          providedPackages = [
+            "ace-window" "avy" "cape" "consult" "consult-dash" "consult-eglot" "consult-projectile" "consult-yasnippet"
+            "corfu" "corfu-posframe" "corfu-terminal" "dash-docs" "eglot" "elfeed" "expand-region" "gptel"
+            "kind-icon" "magit" "marginalia" "nix-mode" "orderless" "org" "projectile" "rainbow-delimiters"
+            "treemacs" "vertico" "vterm" "yasnippet"
+          ];
+
+          # Ensure the corresponding Nix emacsPackages are installed into the
+          # user's profile so Emacs finds them on the load-path at runtime.
+          extraPackages = [
+            pkgs.emacsPackages.ace-window pkgs.emacsPackages.avy pkgs.emacsPackages.cape pkgs.emacsPackages.consult
+            pkgs.emacsPackages.consult-dash pkgs.emacsPackages.consult-eglot pkgs.emacsPackages.consult-projectile pkgs.emacsPackages.consult-yasnippet
+            pkgs.emacsPackages.corfu pkgs.emacsPackages.corfu-posframe pkgs.emacsPackages.corfu-terminal pkgs.emacsPackages.dash-docs
+            pkgs.emacsPackages.eglot pkgs.emacsPackages.elfeed pkgs.emacsPackages.expand-region pkgs.emacsPackages.gptel
+            pkgs.emacsPackages.kind-icon pkgs.emacsPackages.magit pkgs.emacsPackages.marginalia pkgs.emacsPackages.nix-mode
+            pkgs.emacsPackages.orderless pkgs.emacsPackages.org pkgs.emacsPackages.projectile pkgs.emacsPackages.rainbow-delimiters
+            pkgs.emacsPackages.treemacs pkgs.emacsPackages.vertico pkgs.emacsPackages.vterm pkgs.emacsPackages.yasnippet
+          ];
         };
     };
   }) users);
