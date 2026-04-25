@@ -13,6 +13,8 @@ let
     pkgs.emacsPackages.consult-eglot
     pkgs.emacsPackages.consult-yasnippet
     pkgs.emacsPackages.corfu
+    pkgs.emacsPackages.corfu-posframe
+    pkgs.emacsPackages.corfu-terminal
     pkgs.emacsPackages.cape
     pkgs.emacsPackages.kind-icon
     pkgs.emacsPackages.avy
@@ -20,6 +22,12 @@ let
     pkgs.emacsPackages.yasnippet
     pkgs.emacsPackages.projectile
     pkgs.emacsPackages.treemacs
+    pkgs.emacsPackages.consult-projectile
+    pkgs.emacsPackages.elfeed
+    pkgs.emacsPackages.eglot
+    pkgs.emacsPackages.rainbow-delimiters
+    pkgs.emacsPackages.nix-mode
+    pkgs.emacsPackages.org
     pkgs.emacsPackages.vterm
     pkgs.emacsPackages.ace-window
   ];
