@@ -165,8 +165,14 @@
     )
 
   ;; Useful consult extensions and tweaks (lazy, non-fatal requires)
-  ;; consult-dash: initialize with symbol at point for convenience
-  (when (require 'consult-dash nil t)
+  ;; consult-dash: initialize with symbol at point for convenience.
+  ;; consult-dash depends on dash-docs which may be unavailable in some
+  ;; environments (minimal CI images). Guard against that situation to avoid
+  ;; hard failures during `require'. Prefer the presence of the underlying
+  ;; dash-docs library before loading consult-dash.
+  (when (and (or (pro--package-provided-p 'dash-docs) (locate-library "dash-docs")
+                 (and (fboundp 'pro-packages--maybe-install) (pro-packages--maybe-install 'dash-docs t)))
+             (require 'consult-dash nil t))
     (when (fboundp 'consult-customize)
       (consult-customize consult-dash :initial (thing-at-point 'symbol))))
 
