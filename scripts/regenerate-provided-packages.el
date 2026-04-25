@@ -12,7 +12,10 @@
     (insert-file-contents nix-file)
     (goto-char (point-min))
     (let ((pkg-list '()))
-      (while (re-search-forward "pkgs\.emacsPackages\.\([A-Za-z0-9_-]+\)" nil t)
+      ;; Use a regexp that matches `pkgs.emacsPackages.NAME` and capture NAME.
+      ;; In an Emacs Lisp string backslashes must be escaped, so we use
+      ;; "pkgs\\.emacsPackages\\.\\([A-Za-z0-9_-]+\\)".
+      (while (re-search-forward "pkgs\\.emacsPackages\\.\\([A-Za-z0-9_-]+\\)" nil t)
         (push (match-string 1) pkg-list))
       (setq pkg-list (nreverse (delete-dups pkg-list)))
       (with-temp-file out-file
@@ -22,5 +25,5 @@
         (dolist (p pkg-list)
           (insert (format "%s " p)))
         (insert "))\n\n")
-        (insert "(provide 'provided-packages)\n"))
-      (message "wrote %s with %d packages" out-file (length pkg-list)))))
+      (insert "(provide 'provided-packages)\n"))
+    (message "wrote %s with %d packages" out-file (length pkg-list)))))
