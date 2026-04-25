@@ -52,3 +52,5 @@ This will visit files and attempt to restore window state. Returns t on success.
     t)
 
 (provide 'pro-session)
+
+;;; pro-session.el ends here
