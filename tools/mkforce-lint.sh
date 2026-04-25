@@ -1,3 +1,16 @@
+# Название: tools/mkforce-lint.sh — Проверка опасных использований lib.mkForce
+# Summary (EN): Lint for dangerous lib.mkForce and systemPackages usage
+# Цель:
+#   Сканировать репозиторий и выявлять потенциально опасные использования
+#   lib.mkForce и множественные определения environment.systemPackages.
+# Контракт:
+#   Опции: нет (скрипт принимает аргументы)
+#   Побочные эффекты: выводит предупреждения в stderr.
+# Предпосылки:
+#   Требуется ripgrep (rg).
+# Как проверить (Proof):
+#   `./tools/mkforce-lint.sh`
+# Last reviewed: 2026-04-25
 #!/usr/bin/env bash
 set -euo pipefail
 

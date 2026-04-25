@@ -1,3 +1,16 @@
+# Название: modules/pro-users-nixos.nix — Home Manager для NixOS
+# Summary (EN): Home Manager configuration for NixOS users
+# Цель:
+#   Определить NixOS-специфичную часть Home Manager: настройки Emacs,
+#   пользовательские профили и пакеты из provided.
+# Контракт:
+#   Опции: home-manager.users, home-manager.users.*.pro.emacs.*
+#   Побочные эффекты: настраивает Emacs-профиль через Home Manager для каждого пользователя.
+# Предпосылки:
+#   Требуется Home Manager и NixOS; список пакетов берётся из provided/.
+# Как проверить (Proof):
+#   `systemctl status home-manager-az` (если активирован)
+# Last reviewed: 2026-04-25
 # Файл: автосгенерированная шапка — комментарии рефакторятся
 { config, lib, pkgs, ... }:
 

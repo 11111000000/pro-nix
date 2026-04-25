@@ -1,3 +1,16 @@
+# Название: modules/fbterm-tty.nix — Fbterm на выбранной TTY
+# Summary (EN): Fbterm service on selected TTY for better font rendering
+# Цель:
+#   Запустить fbterm на выбранной консоли (по умолчанию tty2) с
+#   TrueType-шрифтами и улучшенным рендерингом.
+# Контракт:
+#   Опции: systemd.services.fbterm-tty2 (включается на уровне хоста)
+#   Побочные эффекты: запускает fbterm на tty2.
+# Предпосылки:
+#   Требуется пакет fbterm; рекомендуется протестировать перед включением.
+# Как проверить (Proof):
+#   После активации: переключиться на tty2 (Ctrl+Alt+F2) — увидеть fbterm.
+# Last reviewed: 2026-04-25
 { pkgs, lib, ... }:
 
 {

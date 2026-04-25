@@ -1,3 +1,15 @@
+# Название: tools/generate-options-md.sh — Генерация документа опций в Markdown
+# Summary (EN): Generate options registry as Markdown from modules
+# Цель:
+#   Собрать все опции из ключевых модулей и сгенерировать docs/analyse/options.md.
+# Контракт:
+#   Опции: нет
+#   Побочные эффекты: создаёт docs/analyse/options.md.
+# Предпосылки:
+#   Требуется nix и доступ к модулям.
+# Как проверить (Proof):
+#   `./tools/generate-options-md.sh && head -20 docs/analyse/options.md`
+# Last reviewed: 2026-04-25
 #!/usr/bin/env bash
 set -euo pipefail
 

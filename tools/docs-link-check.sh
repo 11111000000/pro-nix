@@ -1,3 +1,16 @@
+# Название: tools/docs-link-check.sh — Проверка ссылок в Markdown-файлах
+# Summary (EN): Verify internal links exist in Markdown documentation
+# Цель:
+#   Сканировать docs/ и проверять, что все внутренние ссылки ([text](path))
+#   ведут к существующим файлам.
+# Контракт:
+#   Опции: нет
+#   Побочные эффекты: выводит предупреждения о битых ссылках.
+# Предпосылки:
+#   Требуется bash и наличие docs/.
+# Как проверить (Proof):
+#   `./tools/docs-link-check.sh`
+# Last reviewed: 2026-04-25
 #!/usr/bin/env bash
 set -euo pipefail
 

@@ -22,6 +22,7 @@ in {
     # Минимальная совместимость: если flake предоставляет opencode_from_release,
     # добавляем его в systemPackages через lib.mkDefault. Основной модуль
     # уже делает подобное и должен быть предпочтительным.
+    # Add opencode deterministically as a low-priority contribution.
     environment.systemPackages = lib.mkDefault (if opencode_from_release != null then [ opencode_from_release ] else []);
   };
 }

@@ -50,6 +50,6 @@ writable, otherwise fall back to the repository file emacs/base/provided-package
             (dolist (p pkg-list)
               (insert (format "%s " p)))
             (insert "))\n"))
-          (message "wrote %s with %d packages" outfile (length pkg-list))))))
+          (message "wrote %s with %d packages" outfile (length pkg-list)))))))
 
 (provide 'generate-provided-packages)

@@ -22,7 +22,8 @@ in
   # without a non-loopback IPv4 interface available (nmbd waits for an
   # interface). Disable by default here to keep `nixos-rebuild switch`
   # reliable. Hosts that need Samba should enable it in their local
-  # per-host config (eg. local.nix) or remove this override.
+  # Почему lib.mkDefault: хосты могут отключить; отключение после включения —
+  # ошибка запуска nmbd на машинах без non-loopback IPv4. Хосты переопределят в local.nix.
   # Enable Samba by default; allow hosts to override. Open firewall via NixOS option.
   services.samba.enable = lib.mkDefault true;
   services.samba.openFirewall = lib.mkDefault true;
@@ -33,15 +34,19 @@ in
   services.avahi.publish.enable = true;
   # Configure Samba to be reachable on the local network only and advertise via mDNS
   # Use the declarative settings sections: "global" + per-share sections
+  # Почему lib.mkForce: глобальные параметры безопасности должны быть применены всегда.
+  # Используем декларативный подход вместо генерации smb.conf шаблонами.
   services.samba.settings."global" = lib.mkForce {
     workgroup = "WORKGROUP";
     "server string" = "NixOS Samba Server";
-    # Map неизвестного пользователя в гостя, чтобы анонимный доступ к public
-    # реально работал (вместе с "guest ok = yes" на секции шары).
+    # Почему "Bad User": анонимный гость маппится на реального пользователя,
+    # позволяет "guest ok = yes" работать без создания guest-учётки.
     "map to guest" = "Bad User";
     # usershare convenience: keep allowed but it's safer to restrict shares
     "usershare allow guests" = "No";
 
+    # Почему SMB2 minimum: отключаем SMB1 (уязвимый), требуем SMB2+.
+    # Как проверить: `smbstatus -L` покажет версию протокола.
     # Protocol hardening: disable SMB1, require SMB2+.
     "server min protocol" = "SMB2";
     "client min protocol" = "SMB2";

@@ -31,7 +31,8 @@ in
   };
 
   config = lib.mkIf config.headscale.enable {
-    # Prefer native headscale package over docker by default.
+    # Prefer native headscale package over docker by default. Add as a low-
+    # priority contribution so top-level aggregation decides final list.
     environment.systemPackages = lib.mkDefault (with pkgs; [ headscale ]);
 
     # Minimal native systemd service. Operator should override config.yaml in host overlay.

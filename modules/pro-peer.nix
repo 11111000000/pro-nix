@@ -99,13 +99,10 @@ in
          };
        };
 
-      # Обеспечиваем существование директории для runtime‑файла authorized_keys
-      # с безопасными правами и положением-заглушкой на диске, чтобы состояние
-      # было проверяемым. Не указываем sshd модулю путь на runtime-файл — это
-      # может быть недоступно на стадии вычисления конфигурации. Вместо этого
-      # добавляем правила tmpfiles, которые создадут необходимые пути при старте.
-      # Правила tmpfiles добавляются как дополнение и не заменяют глобальные
-      # правила, чтобы другие модули могли дописывать свои записи.
+      # Почему tmpfiles: tmpfiles — декларативный способ, применяется systemd при загрузке,
+      # idempотентен и не требует запуска oneshot-скриптов при каждом обновлении.
+      # Почему не указываем путь в sshd module: sshd eval происходит до рантайма,
+      # файл может быть недоступен — tmpfiles создаёт директорию к моменту старта sshd.
       systemd.tmpfiles.rules = [
         "d /var/lib/pro-peer 0700 root root -"
         "f /var/lib/pro-peer/authorized_keys 0600 root root -"
@@ -119,9 +116,10 @@ in
       # друга в LAN через Avahi. Список портов объединяется с существующим,
       # чтобы не перезаписывать настройки других модулей.
       networking.firewall = lib.mkIf true {
-        # Добавляем 5353 в allowedUDPPorts в качестве низкоприоритетного дефолта.
-        # lib.mkDefault. Это позволяет другим модулям или хостовым конфигам
-        # переопределять значение и предотвращает рекурсию при оценке config.*.
+        # Почему lib.mkDefault: позволяет хостам переопределять порты без насильственного
+        # перезаписывания; lib.mkForce бы сломал переопределения в других модулях.
+        # Как проверить: добавить в хост `networking.firewall.allowedUDPPorts = []` — порт исчезнет.
+        # Почему lib.concatLists:合并ваем с已有的, не теряя порты из других модулей.
         allowedUDPPorts = lib.mkDefault (lib.concatLists [ (config.networking.firewall.allowedUDPPorts or []) [ 5353 ] ]);
         # Дополнительно добавляем idempotent правила через extraCommands, чтобы
         # разрешить IPv4 и IPv6 multicast (224.0.0.251 и ff02::fb), используемые
@@ -156,8 +154,9 @@ in
       systemd.services."pro-peer-sync-keys" = {
         description = "Pro‑peer: sync authorized_keys from encrypted file";
         wantedBy = [ "multi-user.target" ];
-        # Ограничиваем использование CPU для одноразовой задачи синхронизации
-        # ключей, чтобы не блокировать интерактивные сессии в момент её работы.
+        # Ограничиваем CPU: oneshot-задача не должна блокировать интерактивные сессии.
+        # Как проверить: `systemctl show pro-peer-sync-keys | grep CPUQuota`
+        # CPUAccounting и CPUQuota — защитная мера, не функциональная зависимость.
         serviceConfig = {
           Type = "oneshot";
           ExecStart = builtins.concatStringsSep " " [ "/etc/pro-peer-sync-keys.sh" "--input" config.pro-peer.keysGpgPath "--out" "/var/lib/pro-peer/authorized_keys" ];
@@ -244,12 +243,9 @@ in
         };
       };
 
-      # Для Tor hidden service гарантируем существование каталога с корректными
-      # правами через systemd‑tmpfiles — декларативный способ, применяемый при
-      # загрузке, что предпочтительнее запуска oneshot‑скриптов с shell‑логикой.
-      # If Tor hidden service is enabled, add a tmpfiles rule to ensure the
-      # directory exists with correct ownership. Again, append to the global
-      # rules list rather than forcing it.
+      # Почему tmpfiles вместо oneshot: tmpfiles применяется при загрузке, декларативный
+      # способ, более надёжен; oneshot может не сработать при перезагрузке.
+      # Как проверить: `ls -la /var/lib/tor/ssh_hidden_service` после перезагрузки.
       systemd.tmpfiles.rules = lib.mkIf config.pro-peer.allowTorHiddenService [
         # Ensure Tor runtime dir and the SSH hidden-service dir exist with
         # the `tor` user ownership. Previously this used `debian-tor`, which

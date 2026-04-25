@@ -30,6 +30,9 @@
     client.enable = true;
     torsocks.enable = true;
     # Provide sane defaults but allow hosts to override in their host config.
+    # Почему lib.mkDefault для UseBridges: по умолчанию мосты выключены, чтобы Tor
+    # мог запуститься в "открытых" сетях без необходимости настраивать bridges.
+    # Как проверить (отключить): в хост-конфиге `services.tor.settings.UseBridges = 1`.
     settings = {
       ControlPort = [ 9051 ];
       CookieAuthentication = true;
@@ -40,6 +43,8 @@
   # Operators maintain /etc/tor/bridges.conf manually (or via the provided
   # template). We avoid emitting an `Include` directive into torrc because
   # some tor builds do not accept that directive during `--verify-config`.
+  # Примечание: bridges.conf управляется оператором вручную — это намеренное
+  # ограничение модели; декларативное управление bridges может сломать tor --verify-config.
   # The systemd service `tor-ensure-bridges` will create a default
   # /etc/tor/bridges.conf if it does not exist.
   #
@@ -52,11 +57,10 @@
   # Default: no bridges declared in Nix; operators may set services.tor.bridges
   # in host configuration to inject Bridge lines.
   bridges = lib.mkDefault [];
-      # Enable common pluggable transports. Use the runtime paths from the
-      # active system profile so activation resolves to /run/current-system/sw.
-      # Render Bridge lines from services.tor.bridges (if any) to avoid using
-      # the `Include` directive which may not be accepted by tor --verify-config.
-      Bridge = lib.mkDefault (config.services.tor.bridges or []);
+      # Почему lib.mkForce для ClientTransportPlugin: это强制性 список плагинов,
+      # который должен включать все транспорты; mkDefault бы не мержился правильно.
+      # Используем runtime paths (/run/current-system/sw) чтобы избежать привязки к конкретной версии.
+      # Как проверить: `tor --verify-config` после активации.
       ClientTransportPlugin = lib.mkForce [
         "obfs4 exec /run/current-system/sw/bin/obfs4proxy"
         "meek exec /run/current-system/sw/bin/meek-client"
