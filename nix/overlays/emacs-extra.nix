@@ -1,5 +1,7 @@
-self: super: {
-  emacsPackages = super.emacsPackages // {
+self: super:
+let
+  haveRepoFunc = builtins.hasAttr "emacsPackageFromRepository" super;
+  extras = if haveRepoFunc then {
     # Provide missing packages via fetchFromGitHub or melpa-style recipes.
     # Each entry uses a minimal recipe; adjust versions/hashes if needed.
     embark = super.emacsPackageFromRepository {
@@ -43,5 +45,7 @@ self: super: {
       repository = "roman/golden-ratio.el";
       revision = "v0.8";
     };
-  };
+  } else {};
+in {
+  emacsPackages = super.emacsPackages // extras;
 }
