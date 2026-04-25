@@ -1,0 +1,35 @@
+name: Emacs CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Emacs
+        uses: ericdallo/setup-emacs@v2
+        with:
+          emacs-version: '30.2'
+
+      - name: Install dependencies (minimal)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
+
+      - name: Run smoke loader (isolated modules)
+        run: |
+          chmod +x scripts/smoke-load-modules.sh
+          ./scripts/smoke-load-modules.sh
+
+      - name: Run ERT smoke test
+        env:
+          PRO_PACKAGES_AUTO_INSTALL: 0
+        run: |
+          emacs --batch -l emacs/base/init.el -l emacs/base/tests/test-smoke-pro-modules.el -f ert-run-tests-batch-and-exit
