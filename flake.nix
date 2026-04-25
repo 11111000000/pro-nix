@@ -114,9 +114,11 @@ EOF
         # deterministic path for environments where npx can't reach the registry.
         opencode-release = {
           type = "app";
+          # Forward all CLI arguments to the bundled opencode binary so callers
+          # can use the flake app as a transparent proxy (eg. `nix run .#opencode-release -- <args>`).
           program = toString (pkgs.writeShellScriptBin "opencode-release" ''
             set -eu
-            exec ${toString opencode_from_release}/bin/opencode --version
+            exec ${toString opencode_from_release}/bin/opencode "$@"
           '');
           meta.description = "Reproducible opencode binary (release)";
         };
@@ -167,7 +169,7 @@ EOF
 
         devShells.${system}.default = pkgs.mkShell {
         name = "pro-nix-dev";
-        buildInputs = [ emacsPkg pkgs.ripgrep pkgs.fd pkgs.findutils pkgs.stress-ng pkgs.fio pkgs.powertop pkgs.iotop pkgs.lm_sensors pkgs.time ];
+        buildInputs = [ emacsPkg pkgs.ripgrep pkgs.fd pkgs.findutils pkgs.stress-ng pkgs.fio pkgs.powertop pkgs.iotop pkgs.lm_sensors pkgs.time pkgs.shellcheck pkgs.direnv pkgs.gh ];
         shellHook = let
           flags = lib.concatStringsSep " " (map (p: "-L " + p + "/share/emacs/site-lisp") [
             pkgs.emacsPackages.vertico pkgs.emacsPackages.consult pkgs.emacsPackages.orderless
