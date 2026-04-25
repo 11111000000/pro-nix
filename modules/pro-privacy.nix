@@ -57,10 +57,10 @@
   # Default: no bridges declared in Nix; operators may set services.tor.bridges
   # in host configuration to inject Bridge lines.
   bridges = lib.mkDefault [];
-      # Почему lib.mkForce для ClientTransportPlugin: это强制性 список плагинов,
-      # который должен включать все транспорты; mkDefault бы не мержился правильно.
-      # Используем runtime paths (/run/current-system/sw) чтобы избежать привязки к конкретной версии.
-      # Как проверить: `tor --verify-config` после активации.
+      # ClientTransportPlugin lists executables that must exist at runtime.
+      # Keep this as a forced list because Tor expects the directive lines to be
+      # present exactly as specified; we point at /run/current-system/sw to use
+      # whatever versions the system provides.
       ClientTransportPlugin = lib.mkForce [
         "obfs4 exec /run/current-system/sw/bin/obfs4proxy"
         "meek exec /run/current-system/sw/bin/meek-client"
@@ -105,7 +105,10 @@
   };
 
   # Ensure awk is available during activation scripts (used by activate).
-  environment.systemPackages = lib.mkDefault (with pkgs; [ gawk ]);
+  # Add privacy transport packages as low-priority contributions; modules should
+  # not force the final package list — the top-level configuration controls
+  # the final authoritative set.
+  environment.systemPackages = lib.mkDefault (with pkgs; [ gawk obfs4proxy meek-client snowflake-client ]);
 
   # Открытые порты для служб приватности — доступны локально/для роутинга.
   networking.firewall = {

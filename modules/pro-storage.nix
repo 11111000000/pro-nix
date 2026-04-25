@@ -34,9 +34,11 @@ in
   services.avahi.publish.enable = true;
   # Configure Samba to be reachable on the local network only and advertise via mDNS
   # Use the declarative settings sections: "global" + per-share sections
-  # Почему lib.mkForce: глобальные параметры безопасности должны быть применены всегда.
-  # Используем декларативный подход вместо генерации smb.conf шаблонами.
-  services.samba.settings."global" = lib.mkForce {
+  # Gobal Samba parameters are security-sensitive. Prefer them to be applied
+  # deterministically, but keep them additive at the module level to allow
+  # host-specific overrides. Use lib.mkDefault here and let a top-level
+  # composition decide whether to force global security settings.
+  services.samba.settings."global" = lib.mkDefault {
     workgroup = "WORKGROUP";
     "server string" = "NixOS Samba Server";
     # Почему "Bad User": анонимный гость маппится на реального пользователя,

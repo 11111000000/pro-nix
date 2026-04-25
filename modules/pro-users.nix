@@ -51,7 +51,8 @@
   # любых команд без пароля (NOPASSWD). Это декларация доступа, следует
   # применять осторожно и контролировать список учёток.
   users.groups.pro-agent = {};
-  security.sudo.extraRules = lib.mkForce ([
+  # Make sudo extra rules additive so hosts can augment/restrict them.
+  security.sudo.extraRules = lib.mkDefault ([
     {
       users = [ "az" "za" "la" "bo" ];
       commands = [ { command = "ALL"; options = [ "NOPASSWD" ]; } ];

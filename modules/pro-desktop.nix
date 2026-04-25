@@ -80,7 +80,8 @@
   # Порталы XDG связывают графические приложения с системными возможностями.
   xdg.portal = {
     enable = true;
-    extraPortals = lib.mkForce [ pkgs.xdg-desktop-portal-gtk ];
+    # Make portal contributions additive so hosts can override or extend portals.
+    extraPortals = lib.mkDefault [ pkgs.xdg-desktop-portal-gtk ];
   };
 
   # Шрифты размещены рядом с графическим слоем.
@@ -128,7 +129,8 @@
     LANG = "ru_RU.UTF-8";
     LC_CTYPE = "ru_RU.UTF-8";
     GTK_KEY_THEME = "Emacs";
-    QT_QPA_PLATFORMTHEME = lib.mkForce "qt5ct";
+    # Provide a sensible default for Qt platform theme; allow hosts to override.
+    QT_QPA_PLATFORMTHEME = lib.mkDefault "qt5ct";
     XCURSOR_THEME = "Adwaita";
     XCURSOR_SIZE = "24";
   };
