@@ -15,6 +15,10 @@
       pkgs = import nixpkgs { inherit system; };
       emacsPkg = pkgs.emacs30 or pkgs.emacs;
       pythonWithTextual = pkgs.python3.withPackages (ps: with ps; [ textual psutil ]);
+      # Python environment for agent apps (coordinator/worker)
+      pythonAgentEnv = pkgs.python3.withPackages (ps: with ps; [ flask requests ]);
+      # Python environment for model-client (FastAPI + uvicorn)
+      pythonModelEnv = pkgs.python3.withPackages (ps: with ps; [ fastapi uvicorn requests ]);
 
       # Global modules to apply to all hosts
       # Temporarily disable adb-udev global module to avoid etc.drv build permission issues.
@@ -131,6 +135,32 @@ EOF
           meta = {
             description = "Запустить текстовый TUI менеджер pro-nix (Textual)";
           };
+        };
+        coordinator = {
+          type = "app";
+          program = toString (pkgs.writeShellScript "coordinator" ''
+            #!${pythonAgentEnv}/bin/python3
+            exec ${pythonAgentEnv}/bin/python3 ${toString ./apps/coordinator/coordinator.py} "$@"
+          '');
+          meta.description = "Запустить reference coordinator (dev)";
+        };
+
+        worker = {
+          type = "app";
+          program = toString (pkgs.writeShellScript "worker" ''
+            #!${pythonAgentEnv}/bin/python3
+            exec ${pythonAgentEnv}/bin/python3 ${toString ./apps/worker/worker.py} "$@"
+          '');
+          meta.description = "Запустить reference worker (dev)";
+        };
+
+        model-client = {
+          type = "app";
+          program = toString (pkgs.writeShellScript "model-client" ''
+            #!${pythonModelEnv}/bin/python3
+            exec ${pythonModelEnv}/bin/python3 ${toString ./apps/model-client/app.py} "$@"
+          '');
+          meta.description = "Запустить local model-client proxy (dev)";
         };
       };
 
