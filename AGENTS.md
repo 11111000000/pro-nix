@@ -1,67 +1,77 @@
-<!-- Русский: комментарии и пояснения оформлены в стиле учебника -->
-### HDS — правила оформления
+# Политика агентов pro-nix
 
-- Читайте `AGENTS.md`, затем `SURFACE.md`, затем `README.md` перед внесением изменения в репозиторий.
-- Текст — проверяемый контракт: важные правила фиксируйте в коде/документации.
+## Роль репозитория
+- pro-nix — воспроизводимая NixOS- и Emacs-конфигурация с публичными контрактами, фиксируемыми в `SURFACE.md`, и решениями, фиксируемыми в `HOLO.md`.
+- Главная цель изменений: сохранять воспроизводимость, композиционность модулей и проверяемость поведения.
+- Агенты должны понимать проект как систему политик и контрактов, а не как набор разрозненных файлов.
 
-IMPORTANT: Never commit credentials, private keys, passwords, or other secrets into the repository. This includes files under /etc, any .gpg/.key/plaintext credentials, and any generated tokens. Treat such files as sensitive: keep them encrypted outside the repo and distribute via operator-managed encrypted artifacts (pro-peer style). Additions to the repo that would expose secrets must be rejected.
-- Один файл — одна ответственность; модули должны иметь явные контракты.
-- Предпочитайте явный порядок загрузки над скрытой связностью модулей.
-- Вводите новые абстракции только если они действительно уменьшают сложность.
+## Канонический порядок работы
+1. Прочитать `AGENTS.md`, затем `SURFACE.md`, затем `HOLO.md`, затем `README.md`.
+2. Определить Intent: одна доминирующая цель на одно изменение.
+3. Определить, меняется ли публичное поведение.
+4. Если меняется публичное поведение, обновить Surface до кода и добавить Proof.
+5. Реализовать минимальный код.
+6. Запустить Verify.
 
-### Операционный ритуал: всегда тестировать перед `just switch`
+## Change Gate
+Любое изменение оформляется через Change Gate.
 
-- Перед выполнением `just switch` (или любого обновления NixOS через flake) ОБЯЗАТЕЛЬНО выполнить локальные проверки и тесты. Это предотвращает ошибки во время сборки/оценки конфигурации и минимизирует простой.
-- Рекомендуемый краткий чек-лист перед `just switch`:
-  1. Убедитесь, что рабочее дерево чисто: `git status --short`. Если есть незакоммиченные изменения — закоммитьте или закешируйте (`git stash`).
-  2. Запустите локальные E2E/ERT тесты репозитория: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el` или `emacs --batch -l emacs/base/init.el -f ert-run-tests-batch`.
-  3. Проверка Nix-конфигурации (flake): `nix flake check` или `nix build .#nixosConfigurations.<host>.config.system.build.nixos-rebuild --no-link --show-trace` (используйте --show-trace для подробной трассы ошибок).
-  4. Найдите дубликаты опций, которые часто вызывают ошибки Nix (например, `environment.systemPackages`):
-     - `rg "environment.systemPackages" -n || true`
-     - Если найдёте дубли, сверьте их и объедините списки, используя `lib.mkForce` или припишите опцию в одном месте.
-  5. Если Nix-шаг сообщает про "dirty git tree" — это означает, что flake смотрит на рабочую директорию. Очистите её (commit/stash) перед запуском.
+- Intent: одна строка о цели изменения.
+- Pressure: `Bug`, `Feature`, `Debt` или `Ops`.
+- Surface impact: какие элементы `SURFACE.md` затронуты и какова их стабильность.
+- Proof: какие команды, тесты или CI-job подтверждают изменение.
+- Migration: обязательна, если затронут `FROZEN`-контракт.
 
-Testing Emacs configs before switch
+Правило отказа:
+- Если изменение касается `SURFACE.md` с пометкой `[FROZEN]`, а Change Gate или Proof отсутствуют, агент должен остановиться и запросить недостающие данные.
 
-- Always validate Emacs init loads cleanly from the repository before running `just switch` or copying files to the system init dir. Use the repository's init entrypoint to test (this verifies the code you will deploy):
-  - `emacs --batch -l emacs/base/init.el --eval '(message "emacs: init loaded OK")'`
-  - To exercise the user-load path as the system will, run: `emacs --batch --eval "(let ((user-emacs-directory \"~/.config/emacs/\")) (load \"/home/az/pro-nix/emacs/base/init.el\" nil t) (message \"emacs: repo init loaded OK\"))"`
-  - To run module tests: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el`
+## Правила письма
+- Все комментарии, пояснения, docstring и документация в этом репозитории пишутся на русском языке.
+- Стиль: точный, сжатый, учебный, как в хорошем учебнике по computer science.
+- Пишите не «пожелания», а контракты: цель, инварианты, ограничения, эффекты, проверки.
+- Избегайте общих слов вроде «удобно», «красиво», «лучше» без операционного смысла.
+- Если термин может быть понят неправильно, определяйте его явно.
 
-- Policy for fixing Emacs startup errors
+## Правила для Nix
+- Модуль должен вносить вклад, а не финализировать мир.
+- Предпочтение: `lib.mkDefault`, композиция списков, локальные опции.
+- `lib.mkForce` допустим только на уровне host-конфигурации, когда нужна окончательная фиксация политики.
+- Не строить модульные списки через прямую зависимость от `config.environment.systemPackages`, если это создаёт рекурсию или скрытую связанность.
+- Разбивать крупные Nix-файлы на модули по ответственности.
 
-- If Emacs fails to start when using the repository init (errors, backtraces, void-variable, etc), fix the issue in this repository (pro-nix). Do not patch `~/.config/emacs` directly to "work around" a bug. The only allowed exceptions are local user overrides that intentionally diverge and are documented.
+## Правила для Emacs Lisp
+- Одна функция — одна задача.
+- Публичные функции обязаны иметь docstring с кратким контрактом.
+- Побочные эффекты должны быть локализованы и описаны.
+- Изменения поведения должны сопровождаться ERT-тестами.
+- Избегайте длинных монолитных функций; выносите шаги в отдельные helper-функции.
 
-- Deployment note
+## Правила для структуры кода
+- Один файл — одна ответственность.
+- Не смешивайте экспериментальный код с каноническими модулями.
+- Если файл начинает описывать две сущности, разделите его.
+- При споре о границах модуля выбирайте более узкую и проверяемую границу.
 
-- The actual system activation (e.g. `just switch` performed by an operator with sudo) is the step that copies/deploys tested repository files to the runtime location (`~/.config/emacs/` or the system-managed equivalent). Ensure repository tests pass locally before asking the operator to run `just switch`.
+## Критерии качества агента
+- Агент не должен «улучшать всё сразу».
+- Агент должен выбирать минимальный дифф, который закрывает Intent.
+- Агент должен предпочитать существующий паттерн проекта новому абстрактному решению.
+- Агент должен уметь объяснить, почему правка безопасна и как она проверяется.
 
-Примеры исправления частых ошибок
+## Управление проектом
+- Большие изменения делятся на этапы: Surface, Proof, Code, Verify.
+- Если изменение затрагивает несколько подсистем, сначала сократите Intent.
+- Если правка требует миграции, опишите rollback заранее.
+- Если изменения можно выразить меньшим количеством файлов, так и делайте.
 
-- "Git tree is dirty":
-  - Решение: `git add -A && git commit -m "WIP: save before nix switch"` или `git stash`.
+## Проверки
+- `./tools/surface-lint.sh`
+- `./tools/holo-verify.sh`
+- `nix fmt`
+- `nix flake check`
+- headless ERT для Emacs-изменений
 
-- "attribute 'environment.systemPackages' already defined":
-  - Найдите все определения: `rg "environment.systemPackages" -n`.
-  - Уберите дублирующие определения, либо используйте `lib.mkForce (config.environment.systemPackages or []) ++ [ ... ]` в одном месте, либо объедините в один общий список.
-  - Запустите `nix --show-trace ...` чтобы получить точное место ошибки.
-
-- Общая отладка Nix: добавьте `--show-trace` к nix команде и читайте трассу; обычно она указывает точный файл и строку с конфликтом.
-
-Норматив: перед `just switch` CI-проход должен быть зелёным, либо пользователь должен подтвердить локальное прохождение тестов.
-
-### Правила Emacs Lisp
-
-- Функции — маленькие и именованные по назначению.
-- Предпочитайте явные контракты (простые типы, ожидания) перед хитрой логикой.
-- Для внешних пакетов применяйте `use-package`; для локальной политики — `defun`/`setq`.
-- Делайте порядок загрузки явным при зависимости модулей.
-
-### Политика ключевых биндингов
-
-- Все общие биндинги определяются в `emacs-keys.org`.
-- Сборка происходит через `org-babel-execute:org`.
-- Локальные переопределения в `~/.emacs.d/keys.org` (используйте префикс `:org`).
-- После правок выполняйте `just install-emacs`.
-
-Примечание: итоговый файл `~/.emacs.d/keys.el` загружается Emacs при старте.
+## Конфликты и сомнения
+- При сомнении следуйте существующему стилю репозитория, а не абстрактному идеалу.
+- Если требование конфликтует с воспроизводимостью или читаемостью, приоритет у воспроизводимости и проверяемости.
+- Если задача расплывчата, сначала уточните Intent, а не пишите код.

@@ -124,7 +124,9 @@ in
         # Дополнительно добавляем idempotent правила через extraCommands, чтобы
         # разрешить IPv4 и IPv6 multicast (224.0.0.251 и ff02::fb), используемые
         # Avahi для обнаружения в сети.
-        extraCommands = lib.mkForce ''
+        # Add idempotent iptables rules as a default; allow hosts to override
+        # by using lib.mkDefault instead of lib.mkForce.
+        extraCommands = lib.mkDefault ''
           # Allow IPv4 mDNS UDP port 5353 (multicast 224.0.0.251)
           iptables -C INPUT -p udp --dport 5353 -d 224.0.0.251 -j ACCEPT 2>/dev/null || iptables -I INPUT -p udp --dport 5353 -d 224.0.0.251 -j ACCEPT || true
           # Allow IPv6 mDNS (multicast ff02::fb)

@@ -179,7 +179,9 @@ in
 
     providedPackages = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [];
+      # Add mmm-mode by default so packages that compile against it (eg. nix-mode-mmm)
+      # are available from Nix rather than being auto-installed at runtime.
+      default = [ "mmm-mode" ];
       description = "List of Emacs package names (symbols) provided by Nix and exposed to the runtime as pro-packages-provided-by-nix.";
     };
 

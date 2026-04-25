@@ -1,0 +1,15 @@
+#!/bin/sh
+# Обёртка: запускает Emacs Lisp скрипт для регенерации emacs/base/provided-packages.el
+# Usage: ./scripts/regenerate-provided-packages
+set -eu
+
+# Find script directory (repo root is parent of scripts)
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+EMACS_CMD=${EMACS_CMD:-emacs}
+
+if ! command -v "$EMACS_CMD" >/dev/null 2>&1; then
+  echo "Error: emacs not found in PATH. Set EMACS_CMD to alternative if needed." >&2
+  exit 1
+fi
+
+exec "$EMACS_CMD" --batch -Q -l "$SCRIPT_DIR/regenerate-provided-packages.el" "$@"

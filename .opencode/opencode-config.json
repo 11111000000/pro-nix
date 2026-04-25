@@ -1,0 +1,40 @@
+{
+  "language_preference": "ru",
+  "repo_summary": "pro-nix — воспроизводимая NixOS- и Emacs-конфигурация с публичными контрактами в SURFACE.md и решениями в HOLO.md.",
+  "comment_style": "русский; точный; сжатый; контрактный; без расплывчатых оценок",
+  "docstring_contract": [
+    "Назначение",
+    "Инварианты",
+    "Побочные эффекты",
+    "Контракт",
+    "Проверка"
+  ],
+  "formatters": {
+    "nix": "nixpkgs-fmt",
+    "elisp": "headless-ert",
+    "sh": "shfmt"
+  },
+  "precommit": [
+    "./tools/surface-lint.sh",
+    "./tools/holo-verify.sh",
+    "nix fmt",
+    "nix flake check"
+  ],
+  "verify_on_edit": [
+    "nixos/modules/**",
+    "modules/**",
+    "emacs/base/**"
+  ],
+  "strict_mode_paths": [
+    "nixos/modules/**",
+    "modules/**",
+    "emacs/base/**"
+  ],
+  "policy": {
+    "require_change_gate_for_frozen": true,
+    "require_russian_docs": true,
+    "prefer_minimal_diff": true,
+    "prefer_existing_patterns": true,
+    "no_autofix_without_verify": true
+  }
+}

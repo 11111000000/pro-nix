@@ -1,6 +1,12 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": [
-    "docs/hds-llm-seed-en.md"
-  ]
+    "AGENTS.md",
+    "SURFACE.md",
+    "HOLO.md",
+    "README.md"
+  ],
+  "workspace": {
+    "policy": "pro-nix: read the repository contracts first; prefer minimal diffs; write all documentation and comments in Russian; preserve Nix modularity and Emacs testability."
+  }
 }

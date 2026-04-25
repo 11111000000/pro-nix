@@ -61,6 +61,8 @@
       # Keep this as a forced list because Tor expects the directive lines to be
       # present exactly as specified; we point at /run/current-system/sw to use
       # whatever versions the system provides.
+      # Tor expects explicit ClientTransportPlugin lines; keep as mkForce to
+      # ensure Tor configuration gets the exact directives it requires.
       ClientTransportPlugin = lib.mkForce [
         "obfs4 exec /run/current-system/sw/bin/obfs4proxy"
         "meek exec /run/current-system/sw/bin/meek-client"

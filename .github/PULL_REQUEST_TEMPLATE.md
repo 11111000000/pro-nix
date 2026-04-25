@@ -1,43 +1,35 @@
 # Change Gate
 
-Intent: [one-sentence summary of the change]
+Intent: [одной строкой опишите цель изменения]
 
 Pressure: [Bug | Feature | Debt | Ops]
 
 Surface impact: (none) | touches: <SURFACE item(s)> [FROZEN/FLUID]
 
-## Summary
+Proof: tests: <команды или файлы, подтверждающие изменение>
 
-This PR groups the first tranche of Emacs UI/UX improvements and infrastructure:
+## Краткое описание
 
-- docs: add detailed UX priorities & plan (docs/system-reminder.md)
-- tests: add ERT `test-theme-contrast.el` and GUI smoke skeleton
-- emacs helpers: startup metrics and font availability checker
+Опишите изменение в 2-4 пунктах. Пишите о результате и причине, а не о процессе.
 
-Surface impact: touches: Emacs GUI UX Layer [FLUID], FontsAndIcons [FLUID], OnboardingWizard [FLUID]
+## Проверки
 
-## Verifications / Proof
+- [ ] Я обновил `SURFACE.md`, если менялось публичное поведение.
+- [ ] Я добавил или обновил Proof для `[FROZEN]` поверхностей.
+- [ ] Я запустил `nix fmt`.
+- [ ] Я запустил `nix flake check`.
+- [ ] Я запустил `./tools/surface-lint.sh`.
+- [ ] Я запустил `./tools/holo-verify.sh`.
 
-- ERT: `emacs --batch -l emacs/base/init.el -f ert-run-tests-batch` (includes test-theme-contrast)
-- GUI smoke (requires Xvfb): `./.pro-emacs-wrapper/emacs-pro -Q -l tests/gui/gui-smoke.el`
+## Migration
 
-Proof: tests: <commands/files that validate this change>
+Заполняется только если затронут `[FROZEN]`.
 
-If touching [FROZEN], include Migration block below.
-
-Migration (only when touching [FROZEN]):
-- Impact: <SurfaceItem(s) Old→New, scope>
+- Impact: <что меняется>
 - Strategy: additive_v2 | feature_toggle | break_with_window
-- Window/Version: <semver/timeframe>
-- Data/Backfill: <steps or "n/a">
-- Rollback: <safe revert plan>
+- Window/Version: <окно или версия>
+- Data/Backfill: <что нужно перенести или "n/a">
+- Rollback: <безопасный откат>
 - Tests:
-  - Keep: <existing tests kept>
-  - Add: <new tests>
-
-Checklist (before marking PR ready):
-- [ ] I added/updated SURFACE.md if public behavior changed.
-- [ ] I added/updated Proof (tests) for any [FROZEN] surface items.
-- [ ] I ran `nix flake check` locally and fixed issues.
-- [ ] I ran `./tools/holo-verify.sh` and fixed issues.
-- [ ] I included a concise Change Gate block above.
+  - Keep: <что сохраняется>
+  - Add: <что добавляется>

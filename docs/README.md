@@ -1,8 +1,8 @@
 Analysis artifacts
 ==================
 
-This directory contains a machine-friendly analysis of the pro-nix repository
-produced by an automated agent on 2026-04-25. Files:
+Этот каталог содержит машинно-ориентированный анализ репозитория pro-nix,
+подготовленный автоматическим агентом 2026-04-25. Файлы:
 
 - analyse/00-overview.md — goals and method
 - analyse/01-modules.md — modules catalog
@@ -11,5 +11,6 @@ produced by an automated agent on 2026-04-25. Files:
 - analyse/04-recommendations.md — prioritized improvements and steps
 - analyse/05-enumerated-functions.md — scripts and entrypoints list
 
-Use `tools/holo-verify.sh` to run contract tests referenced in HOLO.md. Use
-`tools/surface-lint.sh` to ensure SURFACE.md and referenced proofs are present.
+Используйте `tools/holo-verify.sh` для запуска контрактных тестов, указанных в
+`HOLO.md`. Используйте `tools/surface-lint.sh`, чтобы проверить наличие
+`SURFACE.md` и ссылок на Proof.
