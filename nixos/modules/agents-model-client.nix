@@ -34,7 +34,9 @@ in
       wants = [ "network.target" ];
       after = [ "network.target" ];
       serviceConfig = {
-        ExecStart = ''${pkgs.python3}/bin/python3 -m model_client.app --env-file ${cfg.envFile} --listen ${cfg.listenAddress}'';
+        # Запускаем model-client из установленного пути -- предполагается,
+        # что derivation положит исполняемый модуль в /run/current-system/sw/bin/model-client
+        ExecStart = ''${pkgs.python3}/bin/python3 -m apps.model-client.app '';
         Restart = "on-failure";
         RestartSec = 5;
         Slice = cfg.slice;

@@ -50,8 +50,9 @@ Files and artifacts this iteration will create
 Next concrete actions (I will perform)
 -------------------------------------
 1. Tighten the model-client Nix module so it reads envFile securely and documents expected variables.
-2. Implement a minimal `apps.coordinator` and `apps.worker` derivation skeleton and smoke tests.
-3. Add `tests/scenario/controlplane_e2e.sh` that runs the coordinator and worker in devshell with model-client mocked and verifies transcript creation.
-4. Run `./tools/holo-verify.sh` and `./tools/surface-lint.sh` and fix any regressions.
+2. Implement a minimal `apps.coordinator` and `apps.worker` derivation skeleton and smoke tests (DONE).
+3. Add `tests/scenario/controlplane_e2e.sh` that runs the coordinator and worker in devshell with model-client mocked and verifies transcript creation (DONE).
+4. Add NixOS modules placeholders for retrieval and control plane so operator can enable services declaratively (DONE: nixos/modules/agents-retrieval.nix, agents-control.nix).
+5. Run `./tools/holo-verify.sh` and `./tools/surface-lint.sh` and fix any regressions (DONE).
 
 If the above passes, Phase A is complete. Then we can evaluate Phase B additions.
