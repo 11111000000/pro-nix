@@ -51,6 +51,11 @@ Disable if you observe frame jitter on your setup."
 
 ;; Cape: add useful CAPF backends
 (when (or (pro--package-provided-p 'cape) (pro-packages--maybe-install 'cape t) (require 'cape nil t))
+  ;; Ensure common cape submodules are loaded so their symbols (cape-keyword,
+  ;; cape-symbol etc.) are defined immediately. Some cape helpers are in
+  ;; separate files (cape-keyword) and may not be autoloaded in all setups.
+  (ignore-errors (require 'cape-keyword nil t))
+  (ignore-errors (require 'cape-dabbrev nil t))
   ;; order: specific -> general
   (dolist (fn '(cape-file cape-keyword cape-dabbrev))
     (unless (member fn completion-at-point-functions)
