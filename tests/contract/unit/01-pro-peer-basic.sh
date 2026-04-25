@@ -5,6 +5,9 @@ root="$(cd "$(dirname "$0")/../../.." && pwd)"
 
 echo "01: pro-peer basic checks"
 
+# This unit proof keeps the peer/security contract visible without requiring a
+# full system activation in CI.
+
 NIX="nix"
 
 val=$($NIX eval --json .#nixosConfigurations.huawei.config.pro-peer 2>/dev/null || true)
