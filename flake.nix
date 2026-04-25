@@ -6,11 +6,6 @@
     nixpkgs.url = "nixpkgs/nixos-25.11";
     home-manager.url = "github:nix-community/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    # Local agent-factory flake (dev): pro-agent lives at ../pro-agent and
-    # provides runtime derivations and nixos modules for the agent factory.
-    pro-agent = {
-      url = "path:../pro-agent";
-    };
   };
 
   outputs = inputs@{ self, nixpkgs, home-manager, ... }:
