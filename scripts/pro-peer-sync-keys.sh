@@ -13,6 +13,8 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --input) INPUT="$2"; shift 2;;
     --out) OUT="$2"; shift 2;;
+    --dry-run) DRY_RUN=1; shift;;
+    --no-backup) BACKUP=0; shift;;
     -h|--help) usage; exit 0;;
     *) echo "Unknown arg: $1"; usage; exit 2;;
   esac
@@ -33,16 +35,8 @@ if [ ! -f "$INPUT" ]; then
   exit 0
 fi
 
-DRY_RUN=0
-BACKUP=1
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --dry-run) DRY_RUN=1; shift;;
-    --no-backup) BACKUP=0; shift;;
-    --input|--out) shift 2;;
-    *) shift;;
-  esac
-done
+DRY_RUN=${DRY_RUN:-0}
+BACKUP=${BACKUP:-1}
 
 tmp=$(mktemp "$OUT.tmp.XXXXXX")
 trap 'rm -f "$tmp"' EXIT

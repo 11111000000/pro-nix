@@ -144,9 +144,14 @@ in
     })
 
     (lib.mkIf config.pro-peer.enableKeySync {
+      # Make package contribution additive and low-priority so top-level
+      # aggregation decides final list. Avoid lib.mkForce at module level.
       environment.systemPackages = lib.mkDefault (with pkgs; [ gnupg ]);
       environment.etc."pro-peer-sync-keys.sh".source = ../scripts/pro-peer-sync-keys.sh;
       environment.etc."pro-peer-sync-keys.sh".mode = "0755";
+      # Expose a canary helper script for operators to run dry-run locally
+      environment.etc."pro-peer-canary.sh".source = ../scripts/pro-peer-canary.sh;
+      environment.etc."pro-peer-canary.sh".mode = "0755";
 
       systemd.services."pro-peer-sync-keys" = {
         description = "Pro‑peer: sync authorized_keys from encrypted file";
