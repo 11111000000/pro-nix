@@ -20,9 +20,10 @@
          (files (when (file-directory-p mods-dir) (directory-files mods-dir nil "^pro-.*\\.el$"))))
     (should (not (null files)))
     (dolist (f files)
-      (let* ((bn (file-name-nondirectory f))
-             (feat-name (intern (file-name-sans-extension bn))))
-        (with-temp-message (format "requiring %s" feat-name)
-          (should (require feat-name nil t)))))))
+      (let ((bn (file-name-nondirectory f)))
+        (with-temp-message (format "loading %s" bn)
+          ;; Use `load' on the file to avoid feature/require resolution
+          ;; issues during early init; load returns non-nil on success.
+          (should (load (expand-file-name bn mods-dir) nil t)))))))
 
 ;;; test-smoke-pro-modules.el ends here
