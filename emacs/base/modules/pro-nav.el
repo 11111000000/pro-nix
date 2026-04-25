@@ -171,10 +171,12 @@
   ;; hard failures during `require'. Prefer the presence of the underlying
   ;; dash-docs library before loading consult-dash.
   (when (and (or (pro--package-provided-p 'dash-docs) (locate-library "dash-docs")
-                 (and (fboundp 'pro-packages--maybe-install) (pro-packages--maybe-install 'dash-docs t)))
-             (require 'consult-dash nil t))
-    (when (fboundp 'consult-customize)
-      (consult-customize consult-dash :initial (thing-at-point 'symbol))))
+                 (and (fboundp 'pro-packages--maybe-install) (pro-packages--maybe-install 'dash-docs t))))
+    (condition-case err
+        (when (require 'consult-dash nil t)
+          (when (fboundp 'consult-customize)
+            (consult-customize consult-dash :initial (thing-at-point 'symbol))))
+      (error (message "[pro-nav] consult-dash load failed: %S" err)))))
 
   ;; consult-yasnippet: allow searching snippets via consult UI when available
   (when (require 'consult-yasnippet nil t)
