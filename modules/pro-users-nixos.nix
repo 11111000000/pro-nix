@@ -33,7 +33,7 @@ in
       home.stateVersion = "23.11";
         pro.emacs = {
           enable = true;
-          gui.enable = true;
+          gui.enable = false;
           # Packages that Nix will provide to Emacs at runtime. Keep this
           # list minimal and reproducible to avoid network installs on
           # user machines. Users may extend via `extraPackages` in their
