@@ -61,11 +61,10 @@ Disable if you observe frame jitter on your setup."
     (unless (member fn completion-at-point-functions)
       (add-to-list 'completion-at-point-functions fn)))
 
-  ;; Fallback shims: if cape provides specific helpers are not present (for
-  ;; example in constrained environments where cape wasn't installed), define
-  ;; lightweight alternatives so keybindings referencing cape-* don't remain
-  ;; permanently pending. These shims attempt to call `completion-at-point'
-  ;; with simple bounds and are intentionally conservative.
+  ;; Fallback shims: define lightweight cape helpers if real package is
+  ;; not available. Placing them outside the `when' ensures they exist even
+  ;; if cape wasn't installed; they are simple wrappers over
+  ;; `completion-at-point' and safe to call.
   (unless (fboundp 'cape-keyword)
     (defun cape-keyword (&optional interactive)
       "Fallback: complete language keywords at point via `completion-at-point'."

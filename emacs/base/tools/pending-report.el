@@ -16,7 +16,7 @@ This is heuristic mapping used to diagnose why a binding remains pending."
      ((string-prefix-p "exwm-" s) (list :features (list 'exwm) :pkgs (list 'exwm)))
      ((string-match-p "eldoc" s) (list :features (list 'eldoc 'eldoc-box) :pkgs (list 'eldoc-box)))
      ((string-match-p "imenu" s) (list :features (list 'consult 'imenu) :pkgs (list 'consult)))
-     (t (list :features (list (intern s)) :pkgs (list (intern (car (split-string s "-"))))))))
+     (t (list :features (list (intern s)) :pkgs (list (intern (car (split-string s "-")))))))))
 
 (defun pending--check-entry (entry)
   "Check one pending ENTRY and print diagnostics." 
