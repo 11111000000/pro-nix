@@ -53,7 +53,7 @@ in
           extraPackages = [
             pkgs.emacsPackages.ace-window pkgs.emacsPackages.avy pkgs.emacsPackages.cape pkgs.emacsPackages.consult
             pkgs.emacsPackages.consult-dash pkgs.emacsPackages.consult-eglot pkgs.emacsPackages.consult-projectile pkgs.emacsPackages.consult-yasnippet
-            pkgs.emacsPackages.corfu pkgs.emacsPackages.corfu-posframe pkgs.emacsPackages.corfu-terminal pkgs.emacsPackages.dash-docs
+            pkgs.emacsPackages.corfu pkgs.emacsPackages.dash-docs
             pkgs.emacsPackages.eglot pkgs.emacsPackages.elfeed pkgs.emacsPackages.expand-region pkgs.emacsPackages.gptel
             pkgs.emacsPackages.kind-icon pkgs.emacsPackages.magit pkgs.emacsPackages.marginalia pkgs.emacsPackages.nix-mode
             pkgs.emacsPackages.orderless pkgs.emacsPackages.org pkgs.emacsPackages.projectile pkgs.emacsPackages.rainbow-delimiters

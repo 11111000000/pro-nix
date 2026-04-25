@@ -13,8 +13,6 @@ let
     pkgs.emacsPackages.consult-eglot
     pkgs.emacsPackages.consult-yasnippet
     pkgs.emacsPackages.corfu
-    pkgs.emacsPackages.corfu-posframe
-    pkgs.emacsPackages.corfu-terminal
     pkgs.emacsPackages.cape
     pkgs.emacsPackages.kind-icon
     pkgs.emacsPackages.avy
