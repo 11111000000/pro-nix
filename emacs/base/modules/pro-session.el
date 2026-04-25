@@ -5,7 +5,7 @@
 
 (defun pro/session-save (&optional file)
   "Save current session to FILE (elisp). Return path.
-Default FILE is ""~/.emacs.d/.pro-session.el".
+Default FILE is "~/.emacs.d/.pro-session.el".
 Saved data: alist of (FILE . POINT) and window-state (frame-root-window).
 "
   (let* ((out (or file (expand-file-name ".pro-session.el" user-emacs-directory)))
