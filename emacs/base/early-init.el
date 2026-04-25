@@ -19,7 +19,11 @@
 ;; Enable noninteractive auto-install of missing pro packages by default.
 ;; This environment variable is checked by pro-packages--maybe-install and
 ;; used to auto-install packages from MELPA when appropriate.
-(setenv "PRO_PACKAGES_AUTO_INSTALL" "1")
+;; По умолчанию включаем автоустановку пакетов, но уважаем внешнюю
+;; установку переменной окружения чтобы позволить CI/локальные запуски
+;; отключать автоприём (например PRO_PACKAGES_AUTO_INSTALL=0).
+(unless (getenv "PRO_PACKAGES_AUTO_INSTALL")
+  (setenv "PRO_PACKAGES_AUTO_INSTALL" "1"))
 
 (provide 'pro-early-init)
 

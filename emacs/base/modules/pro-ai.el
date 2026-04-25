@@ -320,6 +320,4 @@ by providers and prints a short status message."
              (pro-ai--backend-display-name backend))))
 
 (provide 'pro-ai)
-(provide 'ai)
-
 ;;; pro-ai.el ends here
