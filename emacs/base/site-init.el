@@ -1,11 +1,25 @@
 ;;; site-init.el --- pro Emacs base -*- lexical-binding: t; -*-
 
+;; Список модулей по умолчанию. Все системные модули именуются с префиксом
+;; "pro-" для явности и однозначности. Пользовательский manifest может
+;; по-прежнему перечислять имена без префикса; ниже мы канонизируем имена
+;; так, чтобы site-init работал предсказуемо.
+;;
+;; Решение: по просьбе пользователя — включаем все модули из emacs/base/modules
+;; в список модулей по умолчанию. Это делает конфигурацию более явной и
+;; гарантирует, что все помощники и адаптеры будут загружены при старте.
 (defvar pro-emacs-base-default-modules
-  ;; Список модулей по умолчанию. Все системные модули именуются с префиксом
-  ;; "pro-" для явности и однозначности. Пользовательский manifest может
-  ;; по-прежнему перечислять имена без префикса; ниже мы канонизируем имена
-  ;; так, чтобы site-init работал предсказуемо.
-  '(pro-core pro-ui pro-packages pro-package-bootstrap pro-project pro-git pro-nix pro-js pro-ai pro-agent-shell pro-exwm pro-keys pro-nav pro-completion pro-terminals pro-windows pro-tabs))
+  '(pro-core pro-ui pro-packages pro-package-bootstrap pro-project pro-git
+    pro-nix pro-js pro-ai pro-agent-shell pro-agent pro-c pro-chat pro-compat
+    pro-completion pro-completion-keys pro-consult-helpers pro-dired
+    pro-emacs-check-fonts pro-exwm-sim pro-exwm pro-feeds pro-fix-corfu
+    pro-haskell pro-java pro-key-utils pro-keys pro-lisp pro-nix-refresh
+    pro-org pro-python pro-reload pro-session pro-startup-metrics pro-tabs
+    pro-terminals pro-test-helpers pro-tests pro-tests-keys pro-text
+    pro-ui-completion pro-ui-fonts pro-ui-fringes pro-ui-icons
+    pro-ui-improvements pro-ui-modeline pro-ui-theme pro-ui-tty
+    pro-vterm-theme pro-windows pro-nav pro-completion)
+  "Полный список модулей, загружаемых по умолчанию при старте Emacs.")
 (defvar pro-emacs-base-system-modules-dir nil)
 (defvar pro-emacs-base-user-modules-dir (expand-file-name "~/.config/emacs/modules"))
 (defvar pro-emacs-base-user-manifest (expand-file-name "~/.config/emacs/modules.el"))
