@@ -121,6 +121,11 @@ Phase D — Optional scale features (1–3 days each)
 - Сейчас у тебя реализован минимальный рабочий контур; дальше — сделать сервисы reproducible (flake outputs), закрепить секреты (sops‑nix), и по желанию подключить Redis и Retrieval.
 - Для long‑running автономии: ключевые требования — machine‑readable acceptance tests, durable workflow engine (Temporal/Argo), evaluator agent and strict safety policies.
 
-Следующий шаг, который я выполню автоматически: обновить `docs/system-reminder.md` (этот файл) — выполнено — и могу подготовить конкретный patch‑plan для приведения derivations в production‑ready форму и интеграции sops‑nix.
+Следующий шаг, который я выполню автоматически: перенести runtime артефакты (apps и nixos modules) в отдельный flake `~/pro-agent` (agent-factory), при этом pro-nix остаётся самодостаточным.
+
+Важно: pro-agent — отдельный проект. Его наличие опционально: pro-nix можно развёртывать и использовать без pro-agent. Связь между ними делается вручную оператором (через flake input path или git URL) и не является жёсткой зависимостью.
+
+Дальнейшие действия после переноса:
+- Опубликовать pro-agent в git при желании, настроить CI и кеш (cachix), документировать процесс обновления flake.lock в pro-nix.
 
 If the above passes, Phase A is complete. Then we can evaluate Phase B additions.
