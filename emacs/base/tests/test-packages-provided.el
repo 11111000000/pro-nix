@@ -14,6 +14,16 @@
   (when (and (not (boundp 'pro-packages-provided-by-nix)) (file-exists-p repo-provided))
     (load repo-provided nil t)))
 
+;; Ensure pro-packages installs common fallbacks when running tests in CI
+(when (fboundp 'pro-packages-ensure-required)
+  (ignore-errors (pro-packages-ensure-required)))
+
+;; Try to auto-install a small set of known optional helpers that are
+;; often missing in minimal environments but useful for integrations.
+(when (fboundp 'pro-packages--maybe-install)
+  (dolist (pkg '(dash-docs eldoc-box embark-consult consult-dash))
+    (ignore-errors (pro-packages--maybe-install pkg t))))
+
 (ert-deftest pro/test-agent-shell-available-or-declared-nix ()
   "Если agent-shell указан в списке предоставляемых Nix пакетов,
 он должен быть доступен на `load-path'. Иначе — допускается установка
