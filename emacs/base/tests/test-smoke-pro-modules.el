@@ -14,11 +14,10 @@
 
 Используется `require` в безопасном режиме (без интерактивных установок).
 "
-  (let* ((mods-dir (expand-file-name "emacs/base/modules"
-                                    (or (file-name-directory (or load-file-name buffer-file-name))
-                                        default-directory)))
-         (files (when (file-directory-p mods-dir)
-                  (directory-files mods-dir nil "^pro-.*\\.el$"))))
+  (let* ((cwd (or default-directory (getenv "PWD") "."))
+         (repo-root (or (and (fboundp 'locate-dominating-file) (locate-dominating-file cwd ".git")) cwd))
+         (mods-dir (expand-file-name "emacs/base/modules" repo-root))
+         (files (when (file-directory-p mods-dir) (directory-files mods-dir nil "^pro-.*\\.el$"))))
     (should (not (null files)))
     (dolist (f files)
       (let* ((bn (file-name-nondirectory f))
