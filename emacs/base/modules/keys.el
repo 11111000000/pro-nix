@@ -349,5 +349,7 @@ Return the path of the generated file.
 ;; defined. Placing `provide' earlier could cause `with-eval-after-load'
 ;; callbacks in other modules to run before the registry functions exist,
 ;; leading to void-variable / void-function errors during startup.
+  ;; Предоставляем только префиксный feature `pro-keys'. Поддержка
+  ;; старых имён (например `keys') удаляется в рамках сходимости к новой
+  ;; политике именования: все системные модули должны быть `pro-...`.
   (provide 'pro-keys)
-  (provide 'keys)

@@ -1,4 +1,4 @@
-;;; agent.el --- агентный буфер -*- lexical-binding: t; -*-
+;;; pro-agent.el --- агентный буфер -*- lexical-binding: t; -*-
 
 ;; Этот модуль оставляет агентский интерфейс коротким и повторяемым.
 
@@ -20,4 +20,4 @@ happened."
         (agent-shell))
     (user-error "agent-shell integration is not available")))
 
-(provide 'agent)
+(provide 'pro-agent)
