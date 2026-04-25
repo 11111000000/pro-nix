@@ -31,6 +31,9 @@
     ;; Export suggested keys to an org fragment for review on demand.
     (pro/export-registered-keys-to-org)))
 
+;; Provide both the prefixed and unprefixed feature names for compatibility
+;; with user-managed modules that may `require` the unprefixed name.
 (provide 'pro-completion-keys)
+(provide 'completion-keys)
 
 ;;; pro-completion-keys.el ends here
