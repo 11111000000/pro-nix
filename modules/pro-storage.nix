@@ -1,4 +1,17 @@
-# Файл: автосгенерированная шапка — комментарии рефакторятся
+# Название: modules/pro-storage.nix — Samba, Syncthing и хранилища в LAN
+# Summary (EN): File-sharing services for LAN (Samba, Syncthing) and firewall rules
+# Цель:
+#   Включить Samba и Syncthing как дефолтные службы для локального обмена
+#   файлами между хостами. Настроить firewall-правила и Avahi-анонсы.
+# Контракт:
+#   Опции: services.samba.enable, services.syncthing.enable
+#   Побочные эффекты: открывает порты 445, 139, 21027, 22000, 8384; создаёт
+#   Samba shares (/srv/samba/{hostName}, /srv/samba/public); добавляет Avahi service.
+# Предпосылки:
+#   Требуются пакеты: samba, syncthing; для Avahi — avahi.
+# Как проверить (Proof):
+#   Проверить порты: `ss -tlnp | grep -E '445|8384'`, или `systemctl status nmbd smbd`
+# Last reviewed: 2026-04-25
 { config, lib, ... }:
 
 let

@@ -1,8 +1,25 @@
+# Название: modules/pro-privacy.nix — Конфигурация приватных сетей (Tor, obfs4, Snowflake)
+# Summary (EN): Tor and pluggable transports configuration for client anonymity
+# Цель:
+#   Обеспечить безопасные и проверяемые дефолты для Tor и вспомогательных
+#   транспортив (obfs4, meek, snowflake). Комментарии объясняют, какие опции
+#   влияют на boot/verify и почему некоторые файлы управляются вне декларативной
+#   модели (bridges.conf).
+# Контракт:
+#   Опции: services.tor.client.enable, services.tor.bridges (list) — при
+#           заполнении блочного списка будут сгенерированы Bridge строки.
+#   Побочные эффекты: добавляет systemd.services.tor-ensure-bridges и
+#   tor-ensure-perms; создаёт /etc/tor/bridges.conf.example.
+# Предпосылки:
+#   Требуются пакеты obfs4proxy, snowflake-client, meek-client в профиле при
+#   использовании ClientTransportPlugin; некоторые опции могут требовать ядра
+#   с поддержкой сетевых возможностей.
+# Как проверить (Proof):
+#   ./tools/holo-verify.sh unit (tests/contract/tor-01.sh)
+# Last reviewed: 2026-04-25
 { config, pkgs, lib, ... }:
 
 {
-  # Раздел: приватность и анонимные сети — учебное объяснение
-  #
   # Суть раздела:
   # Приводится конфигурация клиентских средств приватности: Tor и сопутствующие
   # транспорты (obfs4, snowflake, meek). Комментарии поясняют роль ControlPort,

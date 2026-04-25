@@ -1,3 +1,16 @@
+# Название: modules/systemd-policy.nix — Политика запуска systemd-служб
+# Summary (EN): D-Bus and polkit service ordering policies
+# Цель:
+#   Задать явный порядок запуска systemd-служб (dbus-broker, polkit) для
+#   минимизации рекурсивных зависимостей при оценке модулей.
+# Контракт:
+#   Опции: services.dbus.implementation
+#   Побочные эффекты: настраивает order для polkit после dbus.
+# Предпосылки:
+#   Требуется systemd (любая современная версия NixOS).
+# Как проверить (Proof):
+#   `systemctl status polkit` — должен быть active после dbus
+# Last reviewed: 2026-04-25
 { config, lib, pkgs, ... }:
 
 {

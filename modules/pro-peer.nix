@@ -1,4 +1,21 @@
-# Файл: автосгенерированная шапка — комментарии рефакторятся
+# Название: modules/pro-peer.nix — Обнаружение пиров и управление ключами SSH
+# Summary (EN): Peer discovery (Avahi), SSH hardening and authorized_keys sync
+# Цель:
+#   Включает службы обнаружения в LAN (mDNS/Avahi), устанавливает безопасные
+#   дефолты для SSH и обеспечивает механизм синхронизации authorized_keys из
+#   зашифрованного файла при необходимости.
+# Контракт:
+#   Опции: config.pro-peer.enable — включение модуля;
+#           config.pro-peer.enableKeySync — включить systemd-сервис синхронизации ключей;
+#           config.pro-peer.keysGpgPath — путь к зашифрованному файлу ключей.
+#   Побочные эффекты: создаёт tmpfiles правила для /var/lib/pro-peer и файла
+#   /var/lib/pro-peer/authorized_keys; добавляет systemd.services.pro-peer-sync-keys
+#   при enableKeySync; может включать tor.hidden service если allowTorHiddenService.
+# Предпосылки:
+#   Требуются пакеты: gnupg (при enableKeySync), avahi (для mDNS). Для Tor — tor.
+# Как проверить (Proof):
+#   ./tools/holo-verify.sh unit (tests/contract/pro-peer-01.sh)
+# Last reviewed: 2026-04-25
 { config, pkgs, lib, ... }:
 
 let

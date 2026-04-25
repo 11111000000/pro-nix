@@ -1,3 +1,17 @@
+# Название: modules/packages-runtime.nix — Базовые рантайм-пакеты
+# Summary (EN): Core runtime packages required for activation and shell access
+# Цель:
+#   Определить минимальный набор пакетов, необходимых для активации,
+#   shell-доступа и базового обслуживания системы. Остальные пакеты
+#   добавляются через environment.systemPackages или отдельные модули.
+# Контракт:
+#   Опции: environment.systemPackages (базовый список,可以被 дополнен)
+#   Побочные эффекты: добавляет bashInteractive, openssh, coreutils, procps, dbus.
+# Предпосылки:
+#   Используется в NixOS-конфигурации; пакеты должны присутствовать в pkgs.
+# Как проверить (Proof):
+#   `nix eval .#nixosConfigurations.<host>.config.environment.systemPackages --json | jq -r '.[]' | grep -E '^bash|^openssh'`
+# Last reviewed: 2026-04-25
 { config, pkgs, lib, ... }:
 
 # Minimal runtime packages that must be present in the final system profile.

@@ -1,10 +1,18 @@
-# Раздел: сетевые службы и системные сервисы — учебный текст
-#
-# Суть:
-# Описывает базовые сетевые службы (NetworkManager, systemd-resolved),
-# SSH и механизмы контроля доступа (auditd, AppArmor, fail2ban). Комментарии
-# указывают на взаимодействия опций и требования (например, поддержка ядра
-# для auditd).
+# Название: modules/pro-services.nix — Базовые сетевые службы и контроль доступа
+# Summary (EN): Network services (NetworkManager, SSH, auditd, fail2ban)
+# Цель:
+#   Включить базовые сетевые службы (NetworkManager, systemd-resolved), SSH
+#   с жёсткими настройками и механизмы контроля (auditd, AppArmor, fail2ban).
+# Контракт:
+#   Опции: networking.networkmanager.enable, services.openssh.settings.*
+#   Побочные эффекты: открывает порты 22, 80, 443, 53; включает firewall;
+#   добавляет systemd-юниты auditd, fail2ban, apparmor.
+# Предпосылки:
+#   Требуется ядро с поддержкой аудита для auditd; AppArmor может отсутствовать
+#   в некоторых дистрибутивах.
+# Как проверить (Proof):
+#   `systemctl status fail2ban`, `ss -tlnp | grep 22`
+# Last reviewed: 2026-04-25
 { ... }:
 
 {

@@ -1,3 +1,16 @@
+# Название: modules/headscale.nix — Headscale control plane для WireGuard
+# Summary (EN): Headscale service (WireGuard-based VPN control plane)
+# Цель:
+#   Включить Headscale как control plane для WireGuard VPN. Позволяет
+#   управлять mesh-сетью хостов через единый сервис.
+# Контракт:
+#   Опции: config.headscale.enable, config.headscale.listenAddress
+#   Побочные эффекты: создаёт systemd.services.headscale; пишет /etc/headscale/config.yaml.
+# Предпосылки:
+#   Требуется пакет headscale; для работы нужен внешний интерфейс на порту 8080.
+# Как проверить (Proof):
+#   `systemctl status headscale`, `curl http://localhost:8080/health`
+# Last reviewed: 2026-04-25
 # Файл: автосгенерированная шапка — комментарии рефакторятся
 { config, pkgs, lib, ... }:
 
