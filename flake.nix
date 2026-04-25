@@ -178,6 +178,9 @@ EOF
             pkgs.emacsPackages.cape pkgs.emacsPackages.kind-icon pkgs.emacsPackages.avy
             pkgs.emacsPackages.expand-region pkgs.emacsPackages.yasnippet pkgs.emacsPackages.projectile
             pkgs.emacsPackages.treemacs pkgs.emacsPackages.vterm pkgs.emacsPackages.ace-window pkgs.emacsPackages.embark
+            ;; Additional packages to emulate the Nix-provided Emacs profile
+            pkgs.emacsPackages.dash-docs pkgs.emacsPackages.agent-shell pkgs.emacsPackages.treemacs-icons-dired
+            pkgs.emacsPackages.all-the-icons pkgs.emacsPackages.nerd-icons pkgs.emacsPackages.embark-consult
           ]);
         in ''
           echo "Entering pro-nix devshell with Emacs available"
