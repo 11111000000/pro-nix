@@ -284,12 +284,18 @@ persist or apply suggestions."
           (let ((n (if (listp safe-keys) (length safe-keys) -1)))
             (message "pro: registered %s suggested keys from %s" (if (>= n 0) (format "%d" n) "(unknown count)") module-id)))))
     (error
-     ;; Avoid referencing the handler variable `err` here. In some early
-     ;; startup/byte-compiled contexts the dynamic binding may not be
-     ;; accessible which causes a secondary `void-variable` error. We already
-     ;; write detailed diagnostics to /tmp/pro-register-<module>.log above,
-     ;; so keep the handler simple and robust.
-     (message "pro: failed to register module keys for %s (see /tmp/pro-register-*.log)" (or (and (boundp 'module-id) module-id) "<module?>"))))
+     ;; Write an explicit diagnostic file containing the error object so an
+     ;; operator can inspect the exact failure. This is more reliable than
+     ;; attempting to include the err object in the message which in some
+     ;; esoteric startup/byte-compiled contexts produced `void-variable`
+     ;; faults. We still print a short message to *Messages*.
+     (let ((module-id (or (and (boundp 'module-id) module-id) "<module?>"))
+           (err-obj err)
+           (out (format "/tmp/pro-register-error-%s.log" (format-time-string "%Y%m%d%H%M%S"))))
+       (ignore-errors
+         (with-temp-file out
+           (insert (format "TIME: %s\nMODULE: %s\nERROR: %S\n\n" (current-time-string) module-id err-obj)))))
+     (message "pro: failed to register module keys for %s (see /tmp/pro-register-error-*.log)" (or (and (boundp 'module-id) module-id) "<module?>")))))
 
 (defun pro/unregister-module-keys (module)
   "Unregister keys suggested by MODULE." 
