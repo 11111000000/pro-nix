@@ -138,7 +138,9 @@ in
       # конфигурации: принудительно делаем пустую декларацию authorizedKeys.
       # Фактический runtime‑файл записывается службой синхронизации в
       # /var/lib/pro-peer/authorized_keys и будет прочитан при запуске SSH.
-      users.users.root.openssh.authorizedKeys = lib.mkForce { keys = []; keyFiles = []; };
+      # Do not force root authorized keys to an empty set at module level;
+      # make this additive/default so host configuration can provide keys.
+      users.users.root.openssh.authorizedKeys = lib.mkDefault { keys = []; keyFiles = []; };
     })
 
     (lib.mkIf config.pro-peer.enableKeySync {
