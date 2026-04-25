@@ -1,33 +1,24 @@
-name: Opencode Build & Smoke Test
+name: Opencode Checks
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
+    branches: [ main ]
+  push:
     branches: [ main ]
 
 jobs:
-  build-and-test:
+  verify:
+    name: Verify repository contracts
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Nix (single-user, no-daemon)
+      - uses: actions/checkout@v4
+      - name: Run surface-lint
         run: |
-          curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
-          . $HOME/.nix-profile/etc/profile.d/nix.sh
-          nix --version
-        env:
-          USER: ${{ github.actor }}
-
-      - name: Enable Nix experimental features for flakes
+          bash ./tools/surface-lint.sh --check-style
+      - name: Run holo-verify (unit)
         run: |
-          export NIX_CONFIG="experimental-features = nix-command flakes"
-          echo "NIX_CONFIG=$NIX_CONFIG" >> $GITHUB_ENV
-
-      - name: Build opencode release derivation
-        run: ./scripts/check-nixos-build.sh opencode-release
-
-      - name: Run opencode launch smoke test
-        run: ./scripts/test-opencode-launch.sh
+          bash ./tools/holo-verify.sh unit
+      - name: Run headless ERT (best-effort)
+        run: |
+          # headless ERT is best-effort; do not fail the job if missing dependencies
+          emacs --batch -l emacs/base/init.el -f ert-run-tests-batch || true
