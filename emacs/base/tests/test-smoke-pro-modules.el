@@ -23,6 +23,6 @@
       (let* ((bn (file-name-nondirectory f))
              (feat-name (intern (file-name-sans-extension bn))))
         (with-temp-message (format "requiring %s" feat-name)
-          (should (require feat-name nil t))))))
+          (should (require feat-name nil t)))))))
 
 ;;; test-smoke-pro-modules.el ends here
