@@ -289,12 +289,11 @@ persist or apply suggestions."
      ;; attempting to include the err object in the message which in some
      ;; esoteric startup/byte-compiled contexts produced `void-variable`
      ;; faults. We still print a short message to *Messages*.
-     (let ((module-id (or (and (boundp 'module-id) module-id) "<module?>"))
-           (err-obj err)
-           (out (format "/tmp/pro-register-error-%s.log" (format-time-string "%Y%m%d%H%M%S"))))
+    (let ((module-id (or (and (boundp 'module-id) module-id) "<module?>"))
+          (out (format "/tmp/pro-register-error-%s.log" (format-time-string "%Y%m%d%H%M%S"))))
        (ignore-errors
          (with-temp-file out
-           (insert (format "TIME: %s\nMODULE: %s\nERROR: %S\n\n" (current-time-string) module-id err-obj)))))
+           (insert (format "TIME: %s\nMODULE: %s\nERROR: %s\n\n" (current-time-string) module-id (format "%S" err))))))
      (message "pro: failed to register module keys for %s (see /tmp/pro-register-error-*.log)" (or (and (boundp 'module-id) module-id) "<module?>")))))
 
 (defun pro/unregister-module-keys (module)
