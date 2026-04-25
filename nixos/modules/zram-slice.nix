@@ -1,5 +1,10 @@
 { config, lib, pkgs, ... }:
 
+# Назначение: обеспечить runtime-настройку zram swap и опциональный opencode.slice.
+# Инварианты:
+# - Скрипты и unit-файлы должны быть идемпотентными и безопасными для повторного запуска.
+# - Модуль не вносит неожиданных изменений в systemPackages.
+
 let
   cfg = config.services.zramSlice;
 in

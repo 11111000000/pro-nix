@@ -35,6 +35,11 @@
     "require_russian_docs": true,
     "prefer_minimal_diff": true,
     "prefer_existing_patterns": true,
-    "no_autofix_without_verify": true
+    "no_autofix_without_verify": true,
+    "self_improving": {
+      "enabled": true,
+      "path": "~/self-improving/memory.md",
+      "note_ru": "Перед нетривиальной работой загружайте файл self-improving/memory.md и при откате или после значимых исправлений добавляйте одну короткую запись о извлечённом уроке. Правило: сохранять компактные, проверяемые наблюдения; возможности автоматического использования правил допустимы, но пересматриваемы."
+    }
   }
 }

@@ -1,8 +1,13 @@
 { config, pkgs, lib, ... }:
 
-# NixOS module: install udev rules for Android devices (adb) so devices are
-# accessible without sudo after a nixos-rebuild switch. This copy is intended
-# to be imported into the pro-nix global host modules so rules apply for all hosts.
+# Назначение: установить udev-правила для Android (adb), чтобы устройства были
+# доступны обычным пользователям (без sudo) после применения конфигурации.
+# Инварианты:
+# - Правила конфигурируются через environment.etc и не изменяют глобальные
+#   системные политики вне своего пространства имён.
+# Ограничения:
+# - Не финализировать environment.systemPackages в модуле; использовать lib.mkDefault
+#   чтобы позволить хостам переопределять пакеты.
 
 {
   options = { };

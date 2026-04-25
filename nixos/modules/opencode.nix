@@ -1,9 +1,15 @@
 { config, pkgs, lib, opencode_from_release ? null, ... }:
 
+# Назначение: модуль управления доставкой и установкой шаблонов/пакетов opencode.
+# Инварианты:
+# - Модуль предоставляет опции в пространстве provisioning.opencode и не
+#   финализирует systemPackages (использует lib.mkDefault).
+# - Ответственность за конкретную сборку opencode (derivation) лежит в flake
+#   или system-packages.nix; модуль только добавляет пакет в профиль, если он
+#   предоставлен.
+
 let
-  # Путь по умолчанию к шаблону конфигурации, который будет устанавливаться в
-  # /etc/skel/pro-templates/.opencode/config.json при включении модуля.
-  # Файл лежит в репозитории в docs/opencode-default-config.json.
+  # Путь по умолчанию к шаблону конфигурации для /etc/skel
   defaultTemplate = ''${toString ./../docs/opencode-default-config.json}'';
 in
 {

@@ -315,11 +315,13 @@
     # Build the final package list by starting from module contributions
     # (which should use lib.mkDefault) and appending local utility packages.
     # Then apply lib.mkForce at the very end if a host wants to lock the list.
-    let
-      basePackages = (config.environment.systemPackages or []);
-      localExtras = (with pkgs; [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = true; }) ++ [ opencodeCmd opencodeBin ]);
-    in
-    environment.systemPackages = lib.mkDefault (with pkgs; basePackages ++ localExtras);
+    # Build the final package list from module contributions and local extras.
+    environment.systemPackages = lib.mkDefault (with pkgs;
+      (config.environment.systemPackages or [])
+      ++ [ just jq ]
+      ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = true; })
+      ++ [ opencodeCmd opencodeBin ]
+    );
 
   # Порядок формирования systemPackages:
   # - Модули дополняют environment.systemPackages (lib.mkDefault).
