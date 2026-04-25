@@ -106,6 +106,55 @@ Return t if PKG is now available (installed or provided)."
                      (pro-packages--save-decisions) nil)
               ('cancel nil)))))))))
 
+
+;; User-facing convenience wrappers (commands) used by keybindings.
+(defun pro-packages-install (pkg)
+  "Интерактивно установить PKG (символ или строка) через package.el.
+PKG может быть символом или строкой. Эта команда вызывает
+`pro-packages--do-install' после обновления архивов при необходимости." 
+  (interactive (list (intern (completing-read "Install package: " (mapcar #'symbol-name (mapcar #'car package-alist)) nil nil))))
+  (let ((sym (if (symbolp pkg) pkg (intern (format "%s" pkg)))))
+    (if (pro-packages--do-install sym)
+        (message "pro-packages: installed %s" sym)
+      (message "pro-packages: failed to install %s" sym))))
+
+(defun pro-packages-install-vc (pkg)
+  "Установить PKG из VCS если доступно. Использует package-vc если есть." 
+  (interactive (list (read-string "Install VC package (name or recipe): ")))
+  (if (fboundp 'package-vc-install)
+      (condition-case err
+          (progn (package-vc-install pkg) (message "pro-packages: package-vc-install %s" pkg))
+        (error (message "pro-packages: package-vc-install failed: %S" err)))
+    (message "pro-packages: package-vc not available; try manual install")))
+
+(defun pro-packages-refresh ()
+  "Обновить списки архивов (package-refresh-contents)." 
+  (interactive)
+  (condition-case err
+      (progn (package-refresh-contents) (message "pro-packages: refreshed package archives") t)
+    (error (message "pro-packages: refresh failed: %S" err) nil)))
+
+(defun pro-packages-upgrade-all ()
+  "Переустановить/обновить все установленные пакеты до доступных версий.
+Это простая реализация: обновляем archive и переустанавливаем пакеты
+из списка `package-alist'." 
+  (interactive)
+  (pro-packages-refresh)
+  (let ((pkgs (mapcar #'car package-alist)))
+    (dolist (p pkgs)
+      (when (and (symbolp p) (not (memq p '(package package-elpa))))
+        (condition-case err
+            (progn (package-install p) (message "pro-packages: upgraded %s" p))
+          (error (message "pro-packages: failed to upgrade %s: %S" p err))))))
+  (message "pro-packages: upgrade-all done"))
+
+(defun pro-packages-upgrade-built-ins ()
+  "Попытка обновить встроенные/system-provided пакеты — синоним pro-packages-upgrade-all.
+Резервная реализация: вызывает `pro-packages-upgrade-all'." 
+  (interactive)
+  (message "pro-packages: upgrade-built-ins (delegating to upgrade-all)")
+  (pro-packages-upgrade-all))
+
 (provide 'pro-packages)
 
 ;;; pro-packages.el ends here
