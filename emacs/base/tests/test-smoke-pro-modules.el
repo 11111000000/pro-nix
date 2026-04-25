@@ -15,7 +15,8 @@
 Используется `require` в безопасном режиме (без интерактивных установок).
 "
   (let* ((mods-dir (expand-file-name "emacs/base/modules"
-                                    (file-name-directory (or load-file-name buffer-file-name))))
+                                    (or (file-name-directory (or load-file-name buffer-file-name))
+                                        default-directory)))
          (files (when (file-directory-p mods-dir)
                   (directory-files mods-dir nil "^pro-.*\\.el$"))))
     (should (not (null files)))
