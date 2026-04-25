@@ -20,6 +20,11 @@ let
     pkgs.emacsPackages.yasnippet
     pkgs.emacsPackages.projectile
     pkgs.emacsPackages.treemacs
+    # UI and agent integrations
+    pkgs.emacsPackages.agent-shell
+    pkgs.emacsPackages.treemacs-icons-dired
+    pkgs.emacsPackages.all-the-icons
+    pkgs.emacsPackages.nerd-icons
     pkgs.emacsPackages.consult-projectile
     pkgs.emacsPackages.elfeed
     pkgs.emacsPackages.eglot
