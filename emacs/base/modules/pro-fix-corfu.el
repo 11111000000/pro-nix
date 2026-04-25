@@ -8,8 +8,15 @@ If FRAME is nil, use selected frame."
   (let* ((attrs (frame-monitor-attributes (or frame (selected-frame))))
          (workarea (assoc 'workarea attrs))
          (geom (cdr workarea)))
-    (when geom
-      (list (nth 0 geom) (nth 1 geom) (nth 2 geom) (nth 3 geom)))))
+    ;; `frame-monitor-attributes' may return the workarea in different
+    ;; container types depending on platform/Emacs version: a list of 4
+    ;; numbers, a vector, or occasionally an unexpected value (number
+    ;; or nil). Be defensive: only return a list of four numbers. In
+    ;; other cases return nil so callers fall back to default behaviour.
+    (cond
+     ((and (listp geom) (= (length geom) 4)) geom)
+     ((and (vectorp geom) (= (length geom) 4)) (append geom nil))
+     (t nil))))
 
 (defun pro/corfu--adjust-child-frame-position (orig-fun &rest args)
   "Advice wrapper around corfu child frame creation to respect monitor geometry.

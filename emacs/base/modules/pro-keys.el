@@ -217,6 +217,13 @@
           (_ (message "  unknown pending entry: %S" entry)))))))
 
 (setq pro-keys-exwm-global-keys nil)
+;; Ensure small pro helpers are available when we apply keybindings.
+;; Some bindings reference pro/* functions (eg. pro/consult-buffer) and
+;; in practice the loading order may cause those functions to be absent
+;; when keys are parsed from the Org table. Requiring the helpers here
+;; makes key application deterministic and avoids leaving pending
+;; bindings for pro/* commands.
+(ignore-errors (require 'pro-consult-helpers nil t))
 (pro-keys-load-org-file pro-keys-system-file)
 (pro-keys-load-org-file pro-keys-user-file)
 

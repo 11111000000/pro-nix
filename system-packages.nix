@@ -236,6 +236,7 @@ let
     # to 1 we still execute the binary directly (this branch is equivalent
     # to the original behaviour but we don't special-case subcommand names).
     if [ "''${OPENCODE_DIRECT_RUN:-0}" = "1" ]; then
+      # Preserve the literal argv sequence when OPENCODE_DIRECT_RUN is set.
       exec "$BIN" "$@"
     fi
 
@@ -268,6 +269,8 @@ let
         # Попытка запустить напрямую через Nix glibc loader — если она
         # сработает, то исполняемый файл запустится в локальном окружении
         # без bwrap/steam-run.
+        # When forwarding through the loader, use `--` to ensure all
+        # subsequent arguments are passed verbatim to the target binary.
         exec "$LOADER" "$BIN" -- "$@" || true
       fi
     fi
