@@ -14,3 +14,8 @@ Entries:
 - Name: Pro-peer Key Sync
   Stability: [FLUID]
   Spec: `pro-peer.enableKeySync` controls a systemd service `pro-peer-sync-keys` and a template script `scripts/pro-peer-sync-keys.sh`. Proof: `scripts/pro-peer-sync-keys.sh` and systemd timer unit behaviour.
+
+- Name: LLM Research Surface
+  Stability: [FLUID]
+  Spec: repository exposes a reproducible `llm-lab` entrypoint for notebook-based LLM research and evaluation.
+  Proof: `tests/contract/unit/03-llm-tools.sh`

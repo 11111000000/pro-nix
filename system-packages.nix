@@ -39,6 +39,28 @@ let
     exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 "${pipxPkg}/bin/pipx" run aider-chat -- "$@"
   '';
 
+  llmResearchEnv = pkgs.python3.withPackages (ps: with ps; [
+    jupyterlab
+    ipykernel
+    transformers
+    datasets
+    sentencepiece
+    tokenizers
+    numpy
+    pandas
+    matplotlib
+    scipy
+    plotly
+    seaborn
+  ]);
+
+  llmLabCmd = pkgs.writeShellScriptBin "llm-lab" ''
+    # Запускаем notebook/lab в воспроизводимом Python-контуре для экспериментов
+    # с моделями, эмбеддингами, датасетами и RAG-пайплайнами.
+    export JUPYTER_PATH="${llmResearchEnv}/share/jupyter"
+    exec ${llmResearchEnv}/bin/jupyter-lab "$@"
+  '';
+
   # Детерминированный пакет: скачивает официальную сборку opencode и помещает
   # её в Nix store. Этот код даёт воспроизводимый бинарный артефакт на случай,
   # если flake не предоставляет готовую версию.
@@ -336,6 +358,7 @@ github-cli
   goose
   pipxPkg
   aiderCmd
+  llmLabCmd
   opencodeCmd
   opencodeBin
   htop

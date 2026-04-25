@@ -24,20 +24,18 @@
 (defun pro-emacs-base--module-file (dir name)
   "Найти файл модуля в DIR по NAME.
 
-Функция пытается найти сначала файл с именем pro-<name>.el, затем <name>.el.
-Возвращается путь к первому найденному файлу. Если ничего не найдено,
-возвращается путь pro-<name>.el как потенциальный приемлемый результат для
-логирования/диагностики.
+NAME может быть 'core' или 'pro-core' — функция нормализует имя и ищет
+в следующем порядке: pro-<base>.el, <base>.el. Возвращается путь к первому
+существующему файлу или nil, если ни один кандидат не найден.
 "
   (let* ((s (if (symbolp name) (symbol-name name) (format "%s" name)))
-         (pro (format "%s.el" (pro-emacs-base--canonical-name s)))
-         (plain (format "%s.el" s))
-         (p-pro (expand-file-name pro dir))
-         (p-plain (expand-file-name plain dir)))
+         (base (if (string-prefix-p "pro-" s) (substring s 4) s))
+         (cand-pro (expand-file-name (format "pro-%s.el" base) dir))
+         (cand-plain (expand-file-name (format "%s.el" base) dir)))
     (cond
-     ((file-readable-p p-pro) p-pro)
-     ((file-readable-p p-plain) p-plain)
-     (t p-pro))))
+     ((file-readable-p cand-pro) cand-pro)
+     ((file-readable-p cand-plain) cand-plain)
+     (t nil))))
 
 (defun pro-emacs-base--feature-provided-p (feature-name)
   "Проверить, предоставлена ли фича FEATURE-NAME.

@@ -34,6 +34,7 @@ tests: `./tools/holo-verify.sh`, `./tools/surface-lint.sh`, `nix flake check`, `
 1. Environment layer
    - `devenv` or `nix develop`
    - reproducible shell for agent development
+   - research shell for LLM work: `llm-lab`
 
 2. Runtime layer
    - NixOS `systemd.services.*`
@@ -56,6 +57,7 @@ tests: `./tools/holo-verify.sh`, `./tools/surface-lint.sh`, `nix flake check`, `
    - structured logs
    - health/readiness
    - optional Podman Desktop
+   - notebook-based research and evaluation via `llm-lab`
 
 ## Implementation phases
 

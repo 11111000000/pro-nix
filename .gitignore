@@ -4,7 +4,7 @@
 logs/
 result
 .tao/
-analyse/
+docs/analyse/
 result-cf19/
 logs/
 local.nix

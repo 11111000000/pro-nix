@@ -29,6 +29,8 @@ Decisions:
   Rationale: pro-peer is an operational surface that manages distribution of authorized_keys and encrypted per-host artifacts. It affects host setup and security; changes touching it require operator coordination and proof (smoke scripts + systemd unit checks).
   Exit: Documented migration and a minimal smoke-test (scripts/pro-peer-sync-keys.sh) present.
 
+- [Draft] LLM Research Surface: provide a reproducible notebook-based environment for model inspection, prompt tests, dataset exploration, and lightweight evaluation. Exit: `llm-lab` is exposed on PATH and covered by `tests/contract/unit/03-llm-tools.sh`.
+
 Proofs / Verification Commands (add to Change Gate):
 - Contract tests: `tests/contract/test_surface_health.spec`
 - Vertical scenario: `tests/scenario/example_scenario.test`
@@ -43,6 +45,8 @@ Proofs / Verification Commands (add to Change Gate):
   - `./tools/docs-link-check.sh`
 - Testing guide: `docs/TESTING.md`
 - PR template (Change Gate): `.github/PULL_REQUEST_TEMPLATE.md`
+
+- LLM research entrypoint: `llm-lab`
 
 Notes:
 - Add or freeze decisions only when Exit criteria and Proof are present. Use the Change Gate format in PR descriptions.
