@@ -1,22 +1,27 @@
 ;;; pro-reload.el --- Soft reload helpers for pro-nix -*- lexical-binding: t; -*-
-;; Safe helpers to reload modules and trigger background package updates.
+;; Простые и безопасные функции для перезагрузки модулей и фоновых обновлений.
 
 (require 'subr-x)
 
 (defun pro--resolve-module-file (module)
-  "Return absolute path to MODULE el file in pro system modules dir.
-MODULE may be a symbol or string like "terminals".
-Return nil if not found." 
-  (let* ((name (if (symbolp module) (symbol-name module) module))
-         (dir (and (boundp 'pro-emacs-base-system-modules-dir) pro-emacs-base-system-modules-dir))
+  "Вернуть путь к файлу MODULE.el в системном каталоге модулей pro.
+MODULE может быть символом или строкой (например "terminals").
+Возвращает nil, если файл не найден или недоступен.
+"
+  (let* ((name (if (symbolp module) (symbol-name module) (format "%s" module)))
+         (dir (and (boundp 'pro-emacs-base-system-modules-dir)
+                   pro-emacs-base-system-modules-dir))
          (path (and dir (expand-file-name (format "%s.el" name) dir))))
     (and path (file-readable-p path) path)))
 
 (defun pro/reload-module (module)
-  "Reload MODULE (symbol or string) from pro system modules directory.
-This attempts to load the module file with `load-file' and reports success or error.
-Returns t on success, nil on failure." 
-  (interactive (list (intern (completing-read "Module: " (let ((mods (when (boundp 'pro-emacs-base-default-modules) pro-emacs-base-default-modules))) (mapcar (lambda (s) (if (symbolp s) (symbol-name s) s)) mods) nil t)))) )
+  "Перезагрузить MODULE из каталога pro-модулей.
+MODULE — символ или строка. Возвращает t при успехе, nil при ошибке.
+" 
+  (interactive (list (intern (completing-read "Module: "
+                                               (mapcar (lambda (m) (if (symbolp m) (symbol-name m) (format "%s" m)))
+                                                       (when (boundp 'pro-emacs-base-default-modules) pro-emacs-base-default-modules))
+                                               nil t))))
   (let ((file (pro--resolve-module-file module)))
     (if (not file)
         (progn (message "pro/reload-module: module file not found: %s" module) nil)
@@ -25,57 +30,55 @@ Returns t on success, nil on failure."
         (error (message "error reloading %s: %S" module err) nil)))))
 
 (defun pro/reload-all-modules ()
-  "Reload all modules listed in `pro-emacs-base-default-modules'.
-This is a soft reload: it loads each module file in turn. It will not
-recreate stateful singletons; modules should implement idempotent loading to
-support this workflow." 
+  "Перезагрузить все модули из `pro-emacs-base-default-modules'."
   (interactive)
-  (when (boundp 'pro-emacs-base-default-modules)
+  (when (and (boundp 'pro-emacs-base-default-modules) pro-emacs-base-default-modules)
     (dolist (m pro-emacs-base-default-modules)
-      (pro/reload-module m))))
+      (ignore-errors (pro/reload-module m)))))
 
 (defun pro/update-melpa-in-background ()
-  "Trigger a background Emacs batch process to update MELPA packages.
-This runs scripts/melpa-update.el in a separate Emacs --batch process so the
-interactive Emacs remains responsive. The background process will refresh
-archives and install packages listed in `emacs/base/provided-packages.el' or
-`package-selected-packages' as available." 
-  (interactive)
-    (let* ((repo (file-name-directory (or load-file-name buffer-file-name)))
-           (script (expand-file-name "scripts/melpa-update.el" (file-name-directory repo)))
-           (cmd (list (or (executable-find "emacs") "emacs") "--batch" "-Q" "-l" script)))
-      (message "Starting background MELPA update (see *Messages* for progress)")
-      (apply #'start-process "pro-melpa-update" "*pro-melpa-update*" cmd)))
-
-(defun pro/nix-generate-and-refresh-paths ()
-  "Run scripts/nix-update-emacs-paths.sh and refresh load-path with results.
-This calls the generator script which writes emacs/base/nix-emacs-paths.el and
-then loads that file and calls pro/nix-load-path-refresh." 
+  "Запустить фоновый процесс для обновления MELPA/ELPA.
+Запускает отдельный Emacs --batch, который выполняет скрипт
+scripts/melpa-update.el. Это не блокирует текущую сессию.
+"
   (interactive)
   (let* ((repo (file-name-directory (or load-file-name buffer-file-name)))
-         (script (expand-file-name "scripts/nix-update-emacs-paths.sh" (file-name-directory repo)))
-         (paths-el (expand-file-name "emacs/base/nix-emacs-paths.el" (file-name-directory repo))))
-    (when (file-executable-p script)
-      (call-process script nil nil nil)
-      (when (file-readable-p paths-el)
-        (load-file paths-el)
+         (script (expand-file-name "scripts/melpa-update.el" (or repo ".")))
+         (emacs-bin (or (executable-find "emacs") "emacs")))
+    (when (file-exists-p script)
+      (start-process "pro-melpa-update" "*pro-melpa-update*" emacs-bin "--batch" "-Q" "-l" script)
+      (message "pro: started background MELPA update"))))
+
+(defun pro/nix-generate-and-refresh-paths ()
+  "Вызвать скрипт генерации путей Nix и обновить load-path.
+Ожидается, что scripts/nix-update-emacs-paths.sh создаёт файл
+emacs/base/nix-emacs-paths.el с переменной `pro/nix-site-lisp-paths'.
+"
+  (interactive)
+  (let* ((repo (file-name-directory (or load-file-name buffer-file-name)))
+         (script (expand-file-name "scripts/nix-update-emacs-paths.sh" (or repo ".")))
+         (out (expand-file-name "emacs/base/nix-emacs-paths.el" (or repo "."))))
+    (when (and (file-executable-p script) (zerop (call-process script nil nil nil)))
+      (when (file-readable-p out)
+        (load-file out)
         (when (boundp 'pro/nix-site-lisp-paths)
-          (setq pro/nix-site-lisp-paths pro/nix-site-lisp-paths)
           (require 'nix-refresh nil t)
-          (pro/nix-load-path-refresh pro/nix-site-lisp-paths)
-          (message "pro: nix paths generated and applied")))) )
+          (when (fboundp 'pro/nix-load-path-refresh)
+            (pro/nix-load-path-refresh pro/nix-site-lisp-paths)))))))
 
 (defun pro/session-save-and-restart-emacs (&optional save-file)
-  "Save session to SAVE-FILE and restart Emacs, restoring session afterwards.
-This attempts a smooth restart: it saves open files and window-state, then
-spawns a new Emacs process which will load the session on start.
-" 
+  "Сохранить сессию и перезапустить Emacs, восстановив сессию.
+Функция попытётся вызвать `pro/session-save' для сохранения состояния,
+а затем запустить новый Emacs, который загрузит сохранённую сессию.
+"
   (interactive)
-  (let* ((save (or save-file (pro/session-save)))
-         (emacs-bin (or (executable-find "emacs") "emacs"))
-         (cmd (list emacs-bin "--eval" (format "(progn (load \"%s\") (pro/session-restore))" save))))
-    (message "pro: spawning new Emacs to restore session and exiting current Emacs")
-    (apply #'start-process "pro-restart" "*pro-restart*" cmd)
-    (kill-emacs)))
+  (let* ((save (or save-file (and (fboundp 'pro/session-save) (pro/session-save))))
+         (emacs-bin (or (executable-find "emacs") "emacs")))
+    (when save
+      (start-process "pro-restart" "*pro-restart*" emacs-bin "--eval" (format "(progn (load \"%s\") (pro/session-restore))" save))
+      (message "pro: spawned new Emacs to restore session; exiting current Emacs")
+      (kill-emacs))))
 
 (provide 'pro-reload)
+
+;;; pro-reload.el ends here
