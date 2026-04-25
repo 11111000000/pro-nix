@@ -161,8 +161,11 @@ in
         # CPUAccounting и CPUQuota — защитная мера, не функциональная зависимость.
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = builtins.concatStringsSep " " [ "/etc/pro-peer-sync-keys.sh" "--input" config.pro-peer.keysGpgPath "--out" "/var/lib/pro-peer/authorized_keys" ];
-          CPUAccounting = "true";
+          # Use absolute path to bash from the current system profile so the
+          # unit does not depend on PATH during activation. This makes the
+          # unit reproducible and avoids errors like "env: 'bash': No such
+          # file or directory" during `nixos-rebuild switch`.
+          ExecStart = ''/run/current-system/sw/bin/bash /etc/pro-peer-sync-keys.sh --input ${config.pro-peer.keysGpgPath} --out /var/lib/pro-peer/authorized_keys'';
           CPUQuota = "30%";
         };
       };
@@ -185,8 +188,7 @@ in
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = builtins.concatStringsSep " " [ "/etc/pro-peer-backup-hiddenservice.sh" "--hidden-dir" "/var/lib/tor/ssh_hidden_service" "--recipient" config.pro-peer.torBackupRecipient "--out-dir" "/var/lib/pro-peer" ];
-          CPUAccounting = "true";
+          ExecStart = ''/run/current-system/sw/bin/bash /etc/pro-peer-backup-hiddenservice.sh --hidden-dir /var/lib/tor/ssh_hidden_service --recipient ${config.pro-peer.torBackupRecipient} --out-dir /var/lib/pro-peer'';
           CPUQuota = "30%";
         };
       };
@@ -202,7 +204,6 @@ in
         serviceConfig = {
           ExecStart = builtins.concatStringsSep " " [ (builtins.toString pkgs.yggdrasil + "/bin/yggdrasil") "-useconffile" (if config.pro-peer.yggdrasilConfigPath != null then config.pro-peer.yggdrasilConfigPath else "/etc/yggdrasil.conf") ];
           Restart = "on-failure";
-          CPUAccounting = "true";
           CPUQuota = "40%";
           CPUWeight = "150";
         };
@@ -223,10 +224,9 @@ in
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = ''/etc/pro-peer-wg-quick-wrapper ${if config.pro-peer.wireguardConfigPath != null then config.pro-peer.wireguardConfigPath else "wg0"}'';
+          ExecStart = ''/run/current-system/sw/bin/bash /etc/pro-peer-wg-quick-wrapper ${if config.pro-peer.wireguardConfigPath != null then config.pro-peer.wireguardConfigPath else "wg0"}'';
           # The wrapper normalizes exit codes and always returns 0.
           RemainAfterExit = "yes";
-          CPUAccounting = "true";
           CPUQuota = "30%";
         };
       };
