@@ -168,6 +168,14 @@
                 ((memq sym '(consult-imenu consult-ripgrep consult-goto-line consult-yasnippet consult-eglot-symbols)) (ignore-errors (require 'consult nil t)))
                 ((memq sym '(eldoc-box-help-at-point)) (ignore-errors (require 'eldoc-box nil t)))
                 ((memq sym '(exwm-reset exwm-workspace-switch)) (when (display-graphic-p) (ignore-errors (require 'exwm nil t)))))
+             ;; If symbol contains a slash (eg. er/expand-region), try requiring
+             ;; both parts as packages: before and after the slash.
+             (unless (or (fboundp sym) (not (string-match-p "/" (symbol-name sym))))
+               (let* ((parts (split-string (symbol-name sym) "/"))
+                      (first (intern (car parts)))
+                      (second (intern (cadr parts))))
+                 (ignore-errors (require second nil t))
+                 (ignore-errors (require first nil t))))
              (if (and (symbolp sym) (fboundp sym))
                  (global-set-key (kbd key) sym)
                (push entry remaining)))))
