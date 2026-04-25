@@ -186,16 +186,16 @@ EOF
         in ''
           echo "Entering pro-nix devshell with Emacs available"
           WRAP_DIR="${toString ./.}/.pro-emacs-wrapper"
-          mkdir -p "$WRAP_DIR"
+          mkdir -p "$PWD/.pro-emacs-wrapper"
           EMACS_BIN="${toString emacsPkg}/bin/emacs"
-          cat > "$WRAP_DIR/emacs-pro" <<SH
+           cat > "$PWD/.pro-emacs-wrapper/emacs-pro" <<SH
 #!/bin/sh
 EMACS_BIN="${toString emacsPkg}/bin/emacs"
 exec "$EMACS_BIN" -Q ${flags} "$@"
 SH
-          chmod +x "$WRAP_DIR/emacs-pro"
-          export PATH="$WRAP_DIR:$PATH"
-          echo "Created emacs wrapper at $WRAP_DIR/emacs-pro"
+           chmod +x "$PWD/.pro-emacs-wrapper/emacs-pro"
+           export PATH="$PWD/.pro-emacs-wrapper:$PATH"
+           echo "Created emacs wrapper at $PWD/.pro-emacs-wrapper/emacs-pro"
         '';
       };
     };
