@@ -179,9 +179,9 @@ in
 
     providedPackages = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      # Add mmm-mode by default so packages that compile against it (eg. nix-mode-mmm)
-      # are available from Nix rather than being auto-installed at runtime.
-      default = [ "mmm-mode" ];
+      # Default set of packages we prefer to provide via Nix to ensure
+      # reproducible load-paths and avoid runtime auto-installs.
+      default = [ "magit" "consult" "vertico" "orderless" "marginalia" "gptel" "consult-dash" "dash-docs" "consult-eglot" "consult-yasnippet" "corfu" "cape" "kind-icon" "avy" "expand-region" "yasnippet" "projectile" "treemacs" "consult-projectile" "elfeed" "eglot" "rainbow-delimiters" "nix-mode" "mmm-mode" "org" "vterm" "ace-window" ];
       description = "List of Emacs package names (symbols) provided by Nix and exposed to the runtime as pro-packages-provided-by-nix.";
     };
 
