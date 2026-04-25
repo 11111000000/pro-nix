@@ -21,6 +21,14 @@
     (add-to-list 'load-path pro-emacs-base-system-modules-dir))
   ;; Now load site-init which will load configured modules
   (load (expand-file-name "site-init.el" base-dir) nil t)
+  ;; Ensure a set of required packages are available before modules perform
+  ;; package-driven installs. This helps avoid race conditions where package
+  ;; installation/compilation of one package (eg. nix-mode) requires another
+  ;; package (eg. mmm-mode) to be present during compilation. Install the
+  ;; defaults noninteractively when possible.
+  (when (require 'pro-packages nil t)
+    (ignore-errors (when (fboundp 'pro-packages-ensure-required)
+                     (pro-packages-ensure-required))))
   (pro-emacs-base-start))
 
 (provide 'pro-init)

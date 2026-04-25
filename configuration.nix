@@ -295,7 +295,8 @@
 
   xdg.portal = {
     enable = true;
-    extraPortals = lib.mkForce [ pkgs.xdg-desktop-portal-gtk ];
+    # Allow modules to contribute portals additively.
+    extraPortals = lib.mkDefault [ pkgs.xdg-desktop-portal-gtk ];
   };
 
   # By default optional heavy packages are disabled. To enable them set
@@ -311,9 +312,14 @@
   # утилиты. Не импортируем модуль packages-runtime вручную здесь — он уже
   # присутствует в списке imports выше и его вклад доступен через
   # config.environment.systemPackages.
-    environment.systemPackages = lib.mkDefault (with pkgs;
-    (config.environment.systemPackages or []) ++ [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = true; }) ++ [ opencodeCmd opencodeBin ]
-  );
+    # Build the final package list by starting from module contributions
+    # (which should use lib.mkDefault) and appending local utility packages.
+    # Then apply lib.mkForce at the very end if a host wants to lock the list.
+    let
+      basePackages = (config.environment.systemPackages or []);
+      localExtras = (with pkgs; [ just jq ] ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = true; }) ++ [ opencodeCmd opencodeBin ]);
+    in
+    environment.systemPackages = lib.mkDefault (with pkgs; basePackages ++ localExtras);
 
   # Порядок формирования systemPackages:
   # - Модули дополняют environment.systemPackages (lib.mkDefault).

@@ -375,6 +375,10 @@ github-cli
   powertop              # Power consumption and CPU frequency diagnostics
   #python3Full           # python3 и python (совместимость с shebang и stubs).
   nodejs_20
+  # Make sure real python binaries are present globally in the pro-nix profile
+  # so scripts and shebangs can rely on /run/current-system/sw/bin/python and python3.
+  python
+  python3
   esbuild
   nodePackages.prettier # Форматирование JS/TS для Apheleia (Emacs).
   networkmanagerapplet  # Индикатор Wi-Fi в трее.
