@@ -1,20 +1,23 @@
 ;;; test-smoke-pro-modules.el --- Smoke test: require all pro-* modules -*- lexical-binding: t; -*-
 ;;
-;; Простой ERT-тест, который пытается `require` каждый модуль
-;; emacs/base/modules/pro-*.el по имени фичи (provide 'pro-<name>). Это
-;; призвано ловить явные ошибки загрузки модулей при рефакторинге и
-;; служит базовым контракт-тестом для CI.
+;; Русский: тест, требующий наличия всех модулей pro-*.el. Тест запущен
+;; в CI/--batch и не должен вызывать интерактивные промпты — для этого мы
+;; используем (require FEATURE nil t) чтобы получить non-nil/false без ошибок.
+;;
+;; Результат теста: успех, если все модули предоставляют свои префиксные
+;; фичи и могут быть require'd в чистой среде.
 
 (require 'ert)
 
 (ert-deftest pro-smoke/require-all-modules ()
   "Require all emacs/base/modules/pro-*.el modules without error.
 
-Тест делает только неблокирующие require'ы — используем (require F nil t)
-чтобы избежать интерактивных промптов и нежелательной установки пакетов.
+Используется `require` в безопасном режиме (без интерактивных установок).
 "
-  (let* ((mods-dir (expand-file-name "emacs/base/modules" (file-name-directory (or load-file-name buffer-file-name))))
-         (files (when (file-directory-p mods-dir) (directory-files mods-dir nil "^pro-.*\\.el$"))))
+  (let* ((mods-dir (expand-file-name "emacs/base/modules"
+                                    (file-name-directory (or load-file-name buffer-file-name))))
+         (files (when (file-directory-p mods-dir)
+                  (directory-files mods-dir nil "^pro-.*\\.el$"))))
     (should (not (null files)))
     (dolist (f files)
       (let* ((bn (file-name-nondirectory f))
