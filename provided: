@@ -1,0 +1,5 @@
+
+Error: end-of-file nil
+  command-line-1(("-l" "emacs/base/init.el" "--eval" "(progn (message \"Checking pro module features\") (dolist (m pro-emacs-base-default-modules) (let ((sym (intern m))) (message %s" "-" "%S m (featurep sym)))) (kill-emacs 0))"))
+  command-line()
+  normal-top-level()

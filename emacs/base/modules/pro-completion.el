@@ -60,6 +60,29 @@ Disable if you observe frame jitter on your setup."
   (dolist (fn '(cape-file cape-keyword cape-dabbrev))
     (unless (member fn completion-at-point-functions)
       (add-to-list 'completion-at-point-functions fn)))
+
+  ;; Fallback shims: if cape provides specific helpers are not present (for
+  ;; example in constrained environments where cape wasn't installed), define
+  ;; lightweight alternatives so keybindings referencing cape-* don't remain
+  ;; permanently pending. These shims attempt to call `completion-at-point'
+  ;; with simple bounds and are intentionally conservative.
+  (unless (fboundp 'cape-keyword)
+    (defun cape-keyword (&optional interactive)
+      "Fallback: complete language keywords at point via `completion-at-point'."
+      (interactive)
+      (let ((bounds (bounds-of-thing-at-point 'symbol)))
+        (when bounds
+          (completion-at-point (car bounds) (cdr bounds)))))
+    (put 'cape-keyword 'no-side-effect t))
+
+  (unless (fboundp 'cape-symbol)
+    (defun cape-symbol (&optional interactive)
+      "Fallback: complete symbols at point via `completion-at-point'."
+      (interactive)
+      (let ((bounds (bounds-of-thing-at-point 'symbol)))
+        (when bounds
+          (completion-at-point (car bounds) (cdr bounds)))))
+    (put 'cape-symbol 'no-side-effect t))
   ;; Disable ispell CAPF where it causes slowness
   (add-hook 'prog-mode-hook #'pro-completion--disable-ispell-capf)
   (add-hook 'text-mode-hook #'pro-completion--disable-ispell-capf))

@@ -3,7 +3,7 @@
     "aitunnel": {
       "host": "api.aitunnel.ru",
       "token": "",
-      "preferred_model": "gpt-5-mini"
+      "preferred_model": "gpt-5.4-mini"
     }
   },
   "settings": {
