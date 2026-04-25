@@ -22,7 +22,7 @@ Saved data: alist of (FILE . POINT) and window-state (frame-root-window).
         (prin1 `(setq pro/session-window-state ',wstate) (current-buffer))
         (princ "\n" (current-buffer))))
     (message "pro: session saved to %s" out)
-    out)
+    out))
 
 (defun pro/session-restore (&optional file)
   "Restore session saved in FILE (as written by `pro/session-save').
@@ -49,7 +49,7 @@ This will visit files and attempt to restore window state. Returns t on success.
             (window-state-put wstate (frame-root-window) 'safe nil)
             (message "pro: window state restored"))
         (error (message "pro: error restoring window state: %S" err))))
-    t)
+    t))
 
 (provide 'pro-session)
 

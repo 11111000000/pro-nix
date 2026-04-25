@@ -1,248 +1,130 @@
-# System Reminder — UX/UI Priorities & Plan (selected)
-
-Этот документ даёт детализованный диалектический анализ и пошаговый план работы для выбранных приоритетов UI/UX Emacs в pro-nix.
-Выбранные пункты (из общего анализа):
-- 1) Accessibility и контрастность
-- 2) GUI smoke testing & headful validation
-- 4) IME / платформа (input parity)
-- 5) Keybinding discoverability & conflict resolution
-- 7) Startup performance metrics & lazy-loading policy
-- 8) Session management и workspace restore
-- 9) TTY/SSH parity & fallbacks
-
-Документ структурирован по каждому пункту: тезис → антитезис → синтез, затем конкретные таски, Proof (тесты/команды), предполагаемые файлы/скелеты, оценка усилий, риски и смягчения.
-
-Общие HDS-принципы
-- Все изменения, затрагивающие public surface или [FROZEN] элементы, должны следовать Change Gate: Intent, Pressure, Surface impact, Proof.
-- Для каждого нового публичного поведения добавить запись в SURFACE.md и ссылку на Proof (ERT/скрипты/CI job).
-
-1) Accessibility и контрастность
-
-Тезис
-- В репозитории есть темы и UI-модули, но нет единой политики доступности (контраст, масштабирование, размер шрифта). Это приводит к разнообразию тем с возможным плохим читабельным контрастом.
-
-Антитезис
-- Жёсткие требования к контрасту ломают творчество пользователей и кастомные темы. Некоторые пользователи предпочитают низкий контраст.
-
-Синтез
-- Ввести политику: набор рекомендуемых профилей (default, high-contrast, large-text). Не навязывать, но тестировать и гарантировать, что дефолтный профиль удовлетворяет базовым критериям читабельности.
-
-Минимальные таски
-1. Добавить запись в SURFACE.md: "Accessibility / Theme baseline" (FLUID) с Proof командой.
-2. Реализовать ERT-тест `tests/contract/test-theme-contrast.el`:
-   - Проверяет, что face `default` имеет соотношение яркостей fg/bg >= порога (примерно WCAG AA ~4.5:1 для маленького текста). Простая аппроксимация через вычисление яркости RGB.
-3. Добавить конфигурационный ключ (design-only сначала): `pro.emacs.ui.accessibility = {profile = "default" | "high-contrast" | "large"}`.
-
-Proof / команды
-- `emacs --batch -l emacs/base/init.el -f ert-run-tests-batch` (запуск ERT включая test-theme-contrast)
-
-Предполагаемые файлы / skeletons
-- tests/contract/test-theme-contrast.el (новый)
-- docs/accessibility.md (описание профилей)
-
-Оценка усилий
-- 1–2 developer-days (spec + тест + docs)
-
-Риски и смягчения
-- Ложные срабатывания для пользовательских тем — пометить тест как non-blocking для кастомных тем и только blocking для pro-nix default theme.
-
-2) GUI smoke testing & headful validation
-
-Тезис
-- Headless ERT присутствует, но GUI специфические фичи (child-frame, posframe, icon fonts) не покрыты CI, поэтому regressions могут появляться незаметно.
-
-Антитезис
-- Headful тесты сложнее: требуют Xvfb/runner и нестабильны с пиксельными проверками. Это увеличит CI время/сложность.
-
-Синтез
-- Добавить независимую GUI-smoke job, выполняемую в Xvfb; вместо pixel-tests проверять признаки (наличие child-frame, posframe API, font availability, корректное создание фрейма/окна). Пиксельные проверки — опциональны и должны быть терпимыми к небольшим отклонениям.
-
-Минимальные таски
-1. Добавить скрипт `tests/gui/gui-smoke.el` (emacs-lisp) который:
-   - Запускается с Xvfb (в CI) и `emacs --batch` или `emacs --quick`.
-   - Загружает минимальный UI-модуль и проверяет: `display-graphic-p`, создание child-frame, `corfu-posframe` availability, `font-family-list` содержит ожидаемые шрифты.
-2. Добавить GitHub Actions job `gui-smoke` с запуском Xvfb и вызовом скрипта.
-
-Proof / команды
-- `./.pro-emacs-wrapper/emacs-pro -Q -l tests/gui/gui-smoke.el` (local)
-
-Предполагаемые файлы
-- tests/gui/gui-smoke.el
-- .github/workflows/gui-smoke.yml (опционально gated)
-
-Оценка усилий
-- 2–4 developer-days (скрипт + CI job + отладка на runner)
-
-Риски и смягчения
-- CI runner может не поддерживать GUI; использовать Xvfb в контейнере, флаг gate чтобы job запускался только при изменениях в emacs/ UI модулях.
-
-3) IME / платформа (input parity)
-
-Тезис
-- Много пользователей используют нелатинские вводы (CJK, IME). В репозитории есть упоминания w32-ime; однако нет стандартизованного тестирования IME поведения и документированных адаптеров для Wayland/macOS/Windows.
-
-Антитезис
-- Эмулировать IME в CI сложно; изменения могут оставаться недетектированными. Часть платформа-специфичных багов надо ловить вручную.
-
-Синтез
-- Создать платформенную матрицу, документировать known caveats и создать ручные тест-кейсы. Для автоматизации — проверять API availability и поведение composition callbacks там, где возможно (например w32-ime on Windows runner).
-
-Минимальные таски
-1. Инвентаризация: файл `docs/platform-input.md` с таблицей (Linux X11, Wayland, macOS, Windows) и текущими status/caveats.
-2. Добавить SURFACE.md заметку про IME behavior (FLUID).
-3. Добавить manual test checklist и инструкции для воспроизведения IME issues (скрипты, команды).
-
-Proof / команды
-- Manual guided tests; автоматические smoke checks где доступны (w32-ime presence on Windows runners).
-
-Предполагаемые файлы
-- docs/platform-input.md
-- tests/manual/README-ime.md (инструкция для тестера)
-
-Оценка усилий
-- 1–3 developer-days (документация + checklist). Исправления платформенные — отдельные задачи.
-
-Риски и смягчения
-- Невозможность полноавтоматического тестирования — документировать и привлекать контрибьюторов с платформами.
-
-4) Keybinding discoverability & conflict resolution
-
-Тезис
-- Есть `emacs-keys.org` и suggestion merge flow, но нет интерактивного UX для приёма/отклонения предложений и управления конфликтами.
-
-Антитезис
-- Автоматические диалоги могут раздражать опытных пользователей; интерактивные шаги требуют UI, который нужно поддерживать.
-
-Синтез
-- Добавить opt-in onboarding step и команду для разрешения конфликтов: `pro-emacs-keys-resolve`. Логировать результаты и сохранять принятые решения в ~/.config файле.
-
-Минимальные таски
-1. Документировать current merge algorithm (emacs/base/modules/keys.el) в docs/keys-workflow.md.
-2. Реализовать команду `pro-emacs-keys-resolve` (stub) и интерактивный prompt, который показывает конфликтующие биндинги и позволяет выбрать. Скелет: `emacs/base/modules/keys-resolver.el`.
-3. Добавить ERT-тест `tests/contract/test-keys-merge.el` для немануальной логики слияния.
-
-Proof / команды
-- `emacs --batch -l emacs/base/init.el --eval '(pro-emacs-keys-resolve-run-tests)'` (ERT)
-
-Предполагаемые файлы
-- emacs/base/modules/keys-resolver.el (новый)
-- tests/contract/test-keys-merge.el
-- docs/keys-workflow.md
-
-Оценка усилий
-- 1–3 developer-days
-
-Риски и смягчения
-- Интерактивный UX может быть навязчив — сделать opt-in и доступной командой для повторного запуска.
-
-5) Startup performance metrics & lazy-loading policy
-
-Тезис
-- Нет систематического сбора метрик запуска; lazy-loading решает UX, но без измерений действия слепы.
-
-Антитезис
-- Лёгкая телеметрия может быть шумной и объемной; не хотим отправлять данные наружу. Нужно держать данные локальными.
-
-Синтез
-- Собрать локальные метрики startup (time-to-first-input, time-to-ready, module load times) и хранить в `~/.local/state/pro-emacs/metrics.json`. Использовать эти данные для принятия решений о lazy-load.
-
-Минимальные таски
-1. Добавить `emacs/base/modules/startup-metrics.el` — логирует тайминги при загрузке основных модулей.
-2. Добавить `scripts/emacs-print-metrics.sh` для обработки и печати результатов.
-3. Добавить CI command для запуска quick-start benchmark.
-
-Proof / команды
-- `emacs --batch -l emacs/base/init.el --eval '(pro-emacs-startup-metrics-write)'` и просмотр `~/.local/state/pro-emacs/metrics.json`.
-
-Предполагаемые файлы
-- emacs/base/modules/startup-metrics.el
-- scripts/emacs-print-metrics.sh
-
-Оценка усилий
-- 0.5–1.5 developer-days
-
-Риски и смягчения
-- Шум в логах — агрегировать и очищать старые записи; не отправлять данные внешним сервисам без явного согласия.
-
-6) Session management и robust workspace restore
-
-Тезис
-- Существуют механизмы session restore, но они не детализированы и не протестированы на сложных состояниях (vterm, LSP, sockets).
-
-Антитезис
-- Полное восстановление внешних процессов невозможно; гарантий restore should be explicit about scope.
-
-Синтез
-- Определить контракт: что гарантированно восстанавливается (буферы, позиции, open files, window-config), что нет (external processes). Реализовать безопасное snapshot/restore для поддерживаемых элементов.
-
-Минимальные таски
-1. Документировать contract: `docs/session-contract.md`.
-2. Реализовать простой snapshot writer `emacs/base/modules/session-serializer.el` (save buffer list, file positions, window-config by `window-state-get`).
-3. Реализовать restore helper, который пытается восстановить и логирует несопоставимые объекты.
-4. Добавить ERT: `tests/contract/test-session-restore.el` — симулирует snapshot, restart и restore for basic items.
-
-Proof / команды
-- `./scripts/emacs-pro-wrapper.sh --batch -l tests/contract/test-session-restore.el -f ert-run-tests-batch`
-
-Оценка усилий
-- 2–5 developer-days
-
-Риски и смягчения
-- Не все типы буферов восстанавливаются (vterm) — document and provide manual guidance.
-
-7) TTY/SSH parity & fallbacks
-
-Тезис
-- Многие пользователи работают по SSH / TTY; GUI features должны иметь понятные fallback-режимы.
-
-Антитезис
-- Полная паритета невозможна; некоторые UX элементы (icons, child-frames) недоступны в TTY.
-
-Синтез
-- Формализовать fallback policy: все GUI features должны иметь терминальные альтернативы или gracefully degrade. Отдельно тестировать `emacs -nw` загрузку и минимальный UX.
-
-Минимальные таски
-1. Audit `emacs/base/modules/ui-tty.el` и гарантировать набор fallback настроек.
-2. Добавить ERT `tests/contract/test-tty.el` — запускает `emacs -nw` в pty (headless) и проверяет, что основные функции (modeline, completion fallback) работают.
-
-Proof / команды
-- `emacs -Q -nw -l tests/contract/test-tty.el --batch` (или wrapper)
-
-Оценка усилий
-- 0.5–1.5 developer-days
-
-Риски и смягчения
-- Различия терминалов — покрыть 256-color / truecolor и основные $TERM вариации в документации.
-
-Roadmap и последовательность работ (минимально-инвазивный путь)
-1. Документация и Surface: добавить/обновить записи в SURFACE.md и docs/* для Accessibility, IME, Keys, Session, TTY. (0.5–1d)
-2. Быстрые тесты и инструменты (быстрые победы):
-   - test-theme-contrast.el
-   - startup-metrics.el
-   - pro-emacs-check-fonts (runtime check)
-   - basic session snapshot writer (lightweight)
-   (примерно 2–4d)
-3. GUI smoke CI job (Xvfb) — конфигурация и отладка (2–4d)
-4. Keybinding resolver и onboarding wiring (1–3d)
-5. Session restore hardening и soft-reload integration (следующая итерация, 1–2 sprints)
-6. Platform IME work — параллельно, с привлечением тестеров по платформам.
-
-Ownership и кому назначать
-- Owner (Lead): emacs/core maintainer — координация Soft Reload, session restore.
-- Owner (Docs & Tests): инженер QA / Docs — написать docs и ERT skeletons.
-- Owner (CI): DevOps — добавить Xvfb job и CI policy.
-
-Change Gate / Proof requirements
-- Для всех изменений в поведении UI добавить запись в SURFACE.md и Proof (ERT path or CI job). Для Soft Reload (FROZEN) proof обязателен перед включением по умолчанию.
-
-Следующие конкретные точки действий (готовые PR-и):
-1. PR: docs + SURFACE updates (accessibility, IME note, keys, session contract) — small, non-invasive (I can open).
-2. PR: ERT `test-theme-contrast.el` + startup-metrics skeleton + pro-emacs-check-fonts reporter.
-3. PR: GUI smoke test skeleton + GitHub Action (gated to run on UI changes).
-4. PR: keys-resolver.el skeleton and ERT for merge logic.
-5. PR: session-serializer minimal implementation + ERT.
-
-Если подтвердите, начну с PR №1 (docs + SURFACE updates) и PR №2 (ERT skeletons). После их слияния продолжим с GUI smoke CI.
-
----
-Прошу подтвердить: начать с PR №1 (docs & SURFACE) и PR №2 (ERT skeletons: theme-contrast, startup-metrics, fonts-check). После подтверждения начну вносить и закоммитю изменения.
+# System Reminder — Agent Factory Implementation Plan
+
+This document records the detailed analysis and step-by-step plan to implement a local "agent factory" on NixOS for software development use-cases. It assumes: no local hosting of large models, sqlitevec/chroma-lite as the local retrieval engine, Redis as task broker, sops-nix/age for secrets, systemd-first runtime with optional podman containerization, single-host deployment.
+
+Status
+------
+- Mode: build (implement changes).
+- Goal: provide reproducible Nix-native orchestration for agents that interact with external model providers and local retrieval/eval infrastructure — without downloading large models locally.
+
+High-level architecture
+-----------------------
+Layers:
+- Environment: flakes + devShells + llm-lab for research.
+- Runtime: systemd units (NixOS modules) + optional podman images.
+- Control plane: coordinator (HTTP) + worker runtime (queue via Redis).
+- Retrieval: sqlitevec / chroma-lite wrapper (local RAG store).
+- Model client: proxy that standardizes calls to external model providers (reads API keys from runtime env).
+- Evaluation: eval harness CLI and notebook integration.
+- Operations: secrets (sops-nix/age), resource slices, observability, smoke tests.
+
+Design decisions (confirmed)
+---------------------------
+- Retrieval engine: sqlitevec / chroma-lite (lightweight local index).
+- Queue backend: Redis.
+- Secrets: sops-nix / age preferred (repo-centric encrypted secrets) + environment files managed by operator.
+- Runtime: systemd units as primary; podman optional for containerized workers.
+- Deployment: single-host (no Kubernetes) and no automatic model download.
+
+Concrete files to add (first iteration)
+------------------------------------
+Documentation & contracts:
+- docs/SURFACE.md (update — new surface items for Model Client, Control Plane, Worker, Retrieval, Evaluation) — already added placeholders; ensure references.
+- docs/HOLO.md (update decisions + Proof references) — updated.
+- docs/operators/agents-setup.md (runbook for enabling modules and injecting secrets)
+
+NixOS modules (nixos/modules):
+- nixos/modules/agents-model-client.nix — systemd unit + options: enable, listenAddress, envFile, slice settings
+- nixos/modules/agents-retrieval.nix — optional sqlitevec service + storagePath
+- nixos/modules/agents-control.nix — coordinator + worker systemd templates and options
+
+Derivations and apps (flake outputs):
+- flake outputs: apps.x86_64-linux.model-client (FastAPI proxy derivation)
+- apps.x86_64-linux.retrieval-server (sqlitevec wrapper)
+- apps.x86_64-linux.coordinator (minimal Python HTTP server)
+- apps.x86_64-linux.worker (minimal worker)
+
+Scripts / smoke tests (tests/contract, tests/scenario):
+- tests/contract/test_modelclient_smoke.sh
+- tests/contract/test_retrieval_smoke.sh
+- tests/scenario/controlplane_e2e.sh (mocked model client)
+- tests/contract/test_agent_secrets.sh (exists) — ensure references
+
+Dev UX and helper scripts:
+- scripts/dev/run-model-client.sh (run derivation in devshell)
+- scripts/dev/run-retrieval.sh
+
+Observability & resources
+-------------------------
+- systemd slices: agents.slice with defaults (MemoryMax=4G, CPUQuota=80%, IOWeight=200)
+- each service: /health, /ready endpoints and /metrics (Prom text format)
+- logs: JSON to stdout (journald collects)
+
+Secrets model
+-------------
+- Primary: sops-nix (encrypted YAML committed) + nixos module support to decrypt at build/activation OR
+- Operator flow: place /etc/agents/model-client.env with mode 600 and set module option points to it.
+- Tests ensure no plain secrets are committed (tests/contract/test_agent_secrets.sh)
+
+Step-by-step implementation plan (phases)
+----------------------------------------
+Phase 0 — contracts (small, safe)
+1. Add/update SURFACE.md & HOLO.md entries for new surfaces (Model Client, Control Plane, Worker, Retrieval, Evaluation) and reference proof scripts.
+2. Add stub smoke tests in tests/contract (scripts that initially assert configuration/docs presence).
+Proof: run ./tools/holo-verify.sh and ./tools/surface-lint.sh.
+
+Phase 1 — Model Client (first runnable service)
+1. Create derivation apps.model-client (FastAPI proxy) that reads MODEL_API_URL and MODEL_API_KEY from env and proxies requests; no model download.
+2. Add nixos/modules/agents-model-client.nix to create systemd service and configure slice.
+3. Add tests/contract/test_modelclient_smoke.sh that can run the derivation in devshell and call /health.
+Proof: holo-verify passes smoke test.
+
+Phase 2 — Retrieval (sqlitevec/chroma-lite)
+1. Add derivation apps.retrieval-server (Python wrapper around sqlitevec or chroma-lite bindings).
+2. Add nixos/modules/agents-retrieval.nix for service management (disabled by default).
+3. Add tests/contract/test_retrieval_smoke.sh performing upsert + query in devshell.
+
+Phase 3 — Control plane (coordinator + worker) & Broker
+1. Add derivations apps.coordinator and apps.worker (minimal Python reference implementations using Redis).
+2. Add nixos/modules/agents-control.nix with systemd units (coordinator.service, worker@.service template), config options and Redis connection.
+3. Add tests/scenario/controlplane_e2e.sh that runs coordinator + worker against a mocked model client and checks transcript output.
+
+Phase 4 — Secrets, Observability, Eval harness
+1. Add sops-nix integration doc and example sealed secret for model client (operator to decrypt and place env file) — docs/operators/agents-setup.md.
+2. Add metrics endpoints and promote standard JSON logging in services.
+3. Add apps.eval-run derivation and example notebooks in llm-lab.
+
+Phase 5 — Podman option & optional components
+1. Provide podman image derivations for worker/coordinator for operator to run in container.
+2. Optionally add qdrant module for more advanced retrieval.
+
+Tests and CI
+------------
+- Add new test scripts to tests/contract and tests/scenario and wire them into ./tools/holo-verify.sh.
+- CI should run `nix flake check` and holo-verify in unit mode.
+
+Commands to run locally (developer)
+---------------------------------
+- devshell: `nix develop .#devShells.x86_64-linux.default`
+- run model client in devshell: `nix run .#model-client` or `python -m model_client.app --config dev.env`
+- run retrieval smoke in devshell: `nix run .#retrieval-server` and `rag-cli upsert/query`
+- run controlplane e2e (dev): `bash tests/scenario/controlplane_e2e.sh`
+
+Files to expect in repository after implementation (summary)
+----------------------------------------------------------------
+- nixos/modules/agents-model-client.nix
+- nixos/modules/agents-retrieval.nix
+- nixos/modules/agents-control.nix
+- flake.nix updates: outputs.apps.{model-client,retrieval-server,coordinator,worker,eval-run}
+- scripts/dev/* and scripts/smoke/*
+- tests/contract/test_modelclient_smoke.sh
+- tests/contract/test_retrieval_smoke.sh
+- tests/scenario/controlplane_e2e.sh
+- docs/operators/agents-setup.md
+
+Next immediate action (I will perform now)
+-----------------------------------------
+1. Create the contract stubs and surface/HOLO updates if not already present (safe docs + tests).
+2. Add model-client module skeleton and a minimal Python proxy derivation (flake output) — implement smoke test that runs the derivation in devshell and hits /health.
+
+If you confirm, I will start implementing Phase 0 -> Phase 1 now and create commits per step. If you want a different ordering, reply with changes.

@@ -2,7 +2,9 @@
 ;; Apply UI niceties in a controlled manner. This file is safe to load in headless
 ;; environments: GUI-only features are guarded by display-graphic-p.
 
-(require 'ui)
+;; Модуль pro-ui-improvements зависит от pro-ui — используем canonical
+;; имя фичи `pro-ui` (модули теперь переименованы в pro-*).
+(require 'pro-ui nil t)
 
 (defun pro-ui-apply-all ()
   "Apply recommended UI settings (fonts, ligatures, icons, completion) when appropriate." 
