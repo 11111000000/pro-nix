@@ -32,7 +32,7 @@ tests robust when invoked from different CWDs or from CI runners.
 (defun pro-test-load-base (modules-dir)
   "Load base Emacs modules from MODULES-DIR and return errors."
   (setq pro-test--load-errors nil)
-  (dolist (file '("core.el" "ui.el" "packages.el" "package-bootstrap.el" "keys.el" "nav.el" "ai.el" "agent.el" "chat.el"))
+  (dolist (file '("core.el" "ui.el" "packages.el" "package-bootstrap.el" "keys.el" "nav.el" "ai.el" "pro-agent.el" "chat.el"))
     (pro-test--safe-load (expand-file-name file modules-dir)))
   (nreverse pro-test--load-errors))
 
