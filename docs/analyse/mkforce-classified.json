@@ -1,0 +1,18 @@
+{
+  "convert": [
+    "modules/pro-desktop.nix: extraPortals, QT_QPA_PLATFORMTHEME converted to lib.mkDefault",
+    "modules/pro-privacy.nix: environment.systemPackages converted to lib.mkDefault (transports kept as mkForce)",
+    "modules/pro-users.nix: security.sudo.extraRules converted to lib.mkDefault",
+    "modules/pro-storage.nix: services.samba.settings.\"global\" converted to lib.mkDefault",
+    "modules/pro-peer.nix: extraCommands and root.openssh.authorizedKeys converted to lib.mkDefault"
+  ],
+  "keep": [
+    "hosts/*/configuration.nix: boot.loader and fileSystems mkForce are host-level intentional overrides",
+    "configuration.nix: settings.substituters left as mkForce at top-level (intentional)",
+    "modules/pro-privacy.nix: ClientTransportPlugin kept as mkForce (Tor expects exact directives)"
+  ],
+  "review": [
+    "Any remaining lib.mkForce occurrences in transcripts (.agent-shell/... or .org/) — informational only",
+    "modules or files that set security-critical options (authorizedKeys, substituters) — require manual review/canary before change"
+  ]
+}
