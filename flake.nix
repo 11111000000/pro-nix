@@ -12,7 +12,8 @@
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
-      pkgs = import nixpkgs { inherit system; };
+      # Import nixpkgs with our local overlays (including emacs-extra)
+      pkgs = import nixpkgs { inherit system; overlays = (import ./nix/overlays/emacs-extra.nix :: []) ; };
       emacsPkg = pkgs.emacs30 or pkgs.emacs;
       pythonWithTextual = pkgs.python3.withPackages (ps: with ps; [ textual psutil ]);
       # Python environment for agent apps (coordinator/worker)
