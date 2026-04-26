@@ -156,8 +156,19 @@ NAME может быть 'core' или 'pro-core' — функция норма�
          ((and (not (file-readable-p user-file))
                (condition-case nil (require (intern module-name) nil t) (error nil)))
           (message "[pro-emacs] skipping module %s; feature provided by package" module-name))
-         ((file-readable-p user-file)
-          (load user-file nil t))
+          ((file-readable-p user-file)
+           ;; Load user module defensively: a user-local file may contain
+           ;; syntax/runtime errors which would abort the whole init. If
+           ;; loading the user file fails, try to fall back to the system
+           ;; module when available and emit a clear diagnostic.
+           (condition-case err
+               (load user-file nil t)
+             (error
+              (message "[pro-emacs] failed to load user module %s: %S" user-file err)
+              (when (and pro-emacs-base-system-modules-dir
+                         (file-readable-p system-file))
+                (message "[pro-emacs] falling back to system module %s" system-file)
+                (load system-file nil t)))))
          ((and pro-emacs-base-system-modules-dir
                (not (file-exists-p pro-emacs-base-disable-marker))
                (file-readable-p system-file))
