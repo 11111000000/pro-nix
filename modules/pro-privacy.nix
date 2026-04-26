@@ -91,7 +91,7 @@
     before = [ "tor.service" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = ''/bin/sh -c 'mkdir -p /etc/tor && if [ ! -e /etc/tor/bridges.conf ]; then cp /etc/tor/bridges.conf.example /etc/tor/bridges.conf && chown root:root /etc/tor/bridges.conf && chmod 0640 /etc/tor/bridges.conf; fi'"'';
+      ExecStart = ''/bin/sh -c 'mkdir -p /etc/tor && if [ ! -e /etc/tor/bridges.conf ]; then cp /etc/tor/bridges.conf.example /etc/tor/bridges.conf && chown root:root /etc/tor/bridges.conf && chmod 0640 /etc/tor/bridges.conf; fi'';""'
     };
   };
 
@@ -101,7 +101,7 @@
     before = [ "tor.service" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = ''/bin/sh -c 'mkdir -p /var/lib/tor && chown -R tor:tor /var/lib/tor || true; chmod 700 /var/lib/tor || true; [ -d /var/lib/tor/ssh_hidden_service ] && chmod 700 /var/lib/tor/ssh_hidden_service || true'"'';
+      ExecStart = ''/bin/sh -c 'mkdir -p /var/lib/tor && chown -R tor:tor /var/lib/tor || true; chmod 700 /var/lib/tor || true; [ -d /var/lib/tor/ssh_hidden_service ] && chmod 700 /var/lib/tor/ssh_hidden_service || true'';""'
     };
     wantedBy = [ "multi-user.target" ];
   };

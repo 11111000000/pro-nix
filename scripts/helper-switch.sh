@@ -59,7 +59,8 @@ if [ "$(id -u)" -eq 0 ]; then
     exec true
   else
     if has_pattern_in_file "Rejected send message" "$tmpf"; then
-      cat >&2 <<MSG
+      # Use shell builtin read+printf loop to avoid depending on external `cat`.
+      while IFS= read -r _line; do printf '%s\n' "$_line" >&2; done <<'MSG'
 Живая активация не удалась из-за временной гонки D-Bus / polkit ("Rejected send message").
 Рекомендуемые действия оператора:
   1) Просмотреть сохранённый вывод: sudo less "${tmpf}" (или journalctl -b).
@@ -68,7 +69,7 @@ if [ "$(id -u)" -eq 0 ]; then
 выполнит fallback (boot+reboot) автоматически.
 MSG
     else
-      cat >&2 <<MSG
+      while IFS= read -r _line; do printf '%s\n' "$_line" >&2; done <<'MSG'
 nixos-rebuild switch завершился с ошибкой. См. вывод выше для деталей. Чтобы
 попробовать безопасную активацию при загрузке, выполните:
   sudo nixos-rebuild boot --flake ".#${HOST_ARG}" && sudo reboot
@@ -128,30 +129,60 @@ if sudo -n true 2>/dev/null && sudo systemd-run --quiet --wait --collect --pipe 
     exit 1
   fi
 
-  if sudo nixos-rebuild switch --flake ".#$HOST_ARG" 2>&1 | tee "$tmpf"; then
-    rm -f "$tmpf"
-    exec true
-  else
-    if has_pattern_in_file "Rejected send message" "$tmpf"; then
-      cat >&2 <<MSG
-Живая активация не удалась из-за временной гонки D-Bus / polkit ("Rejected send message").
+local attempt=0
+  local max_attempts=3
+  local delay=1
+  while [ $attempt -lt $max_attempts ]; do
+    attempt=$((attempt+1))
+    if sudo nixos-rebuild switch --flake ".#$HOST_ARG" 2>&1 | tee "$tmpf"; then
+      rm -f "$tmpf"
+      exec true
+    fi
+    if has_pattern_in_file "Rejected send message\|Sender is not authorized to send message" "$tmpf"; then
+      if [ $attempt -lt $max_attempts ]; then
+        sleep $delay
+        delay=$((delay*2))
+        continue
+      else
+        echo "[just] все попытки перезапуска завершились неудачей, обратитесь к журналу: ${tmpf}" >&2
+        if has_pattern_in_file "Sender is not authorized to send message" "$tmpf"; then
+          while IFS= read -r _line; do printf '%s\n' "$_line" >&2; done <<'MSG'
+Живая активация не удалась из-за временной гонки D-Bus / polkit ("Sender is not authorized to send message").
 Рекомендуемые действия оператора:
   1) Просмотреть сохранённый вывод: sudo less "${tmpf}" (или journalctl -b).
   2) Если приемлемо, выполнить: sudo nixos-rebuild boot --flake ".#${HOST_ARG}" && sudo reboot
 Если в окружении установлено AUTO_REBOOT_ON_ACTIVATION_RACE=1, скрипт
 выполнит fallback (boot+reboot) автоматически.
 MSG
-    else
-      cat >&2 <<MSG
+        else
+          while IFS= read -r _line; do printf '%s\n' "$_line" >&2; done <<'MSG'
 nixos-rebuild switch завершился с ошибкой. См. вывод выше для деталей. Чтобы
 попробовать безопасную активацию при загрузке, выполните:
   sudo nixos-rebuild boot --flake ".#${HOST_ARG}" && sudo reboot
 MSG
-    fi
-    rm -f "$tmpf"
-    exit 1
-  fi
+        fi
+        rm -f "$tmpf"
+        exit 1
+      fi
+    else
+      rm -f "$tmpf"
+      exec true
+fi
+done
+  # Если все попытки закончились ошибкой без шаблона — не должно попасть сюда
+  echo "[just] все попытки перезапуска завершились неудачей, обратитесь к журналу: ${tmpf}" >&2
+  rm -f "$tmpf"
+  exit 1
 else
   echo "[just] sudo unavailable or cannot gain privileges; performing non-root build check (no switch)" >&2
   exec nix --extra-experimental-features 'nix-command flakes' build --print-out-paths ".#nixosConfigurations.\"$HOST_ARG\".config.system.build.toplevel" --no-link
+fi
+done
+# If all attempts failed without matching pattern, exit with error (safety net)
+echo "[just] все попытки перезапуска завершились неудачей, обратитесь к журналу: ${tmpf}" >&2
+rm -f "$tmpf"
+exit 1
+else
+echo "[just] sudo unavailable or cannot gain privileges; performing non-root build check (no switch)" >&2
+exec nix --extra-experimental-features 'nix-command flakes' build --print-out-paths ".#nixosConfigurations.\"$HOST_ARG\".config.system.build.toplevel" --no-link
 fi
