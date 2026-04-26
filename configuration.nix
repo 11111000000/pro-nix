@@ -320,7 +320,7 @@
       (config.environment.systemPackages or [])
       ++ [ just jq ]
       ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = true; })
-      ++ [ opencodeCmd opencodeBin ]
+      ++ [ opencodeCmd opencodeBin mc ]
     );
 
   # Порядок формирования systemPackages:
