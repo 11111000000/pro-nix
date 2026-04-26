@@ -79,6 +79,14 @@
 - `nix flake check`
 - headless ERT для Emacs-изменений
 
+### Обязательный preflight перед `just switch` / `nixos-rebuild switch`
+- Перед live-активацией агент обязан проверить вычислимость профиля пакетов:
+  - `nix --extra-experimental-features 'nix-command flakes' eval --json .#nixosConfigurations.<host>.config.environment.systemPackages`
+- Для изменений в `system-packages.nix` агент обязан запускать:
+  - `tests/contract/unit/09-system-packages-eval.sh`
+- Если preflight/eval падает, live-активация запрещена. Сначала исправляется причина,
+  затем повторяются preflight-проверки.
+
 ## Конфликты и сомнения
 - При сомнении следуйте существующему стилю репозитория, а не абстрактному идеалу.
 - Если требование конфликтует с воспроизводимостью или читаемостью, приоритет у воспроизводимости и проверяемости.
