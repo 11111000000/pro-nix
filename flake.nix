@@ -171,7 +171,7 @@ EOF
 
         devShells.${system}.default = pkgs.mkShell {
         name = "pro-nix-dev";
-        buildInputs = [ emacsPkg pkgs.ripgrep pkgs.fd pkgs.findutils pkgs.stress-ng pkgs.fio pkgs.powertop pkgs.iotop pkgs.lm_sensors pkgs.time pkgs.shellcheck pkgs.direnv pkgs.gh (pkgs.callPackage ./nix/emacs-recipes/agent-shell.nix {}) ];
+        buildInputs = [ emacsPkg pkgs.ripgrep pkgs.fd pkgs.findutils pkgs.stress-ng pkgs.fio pkgs.powertop pkgs.iotop pkgs.lm_sensors pkgs.time pkgs.shellcheck pkgs.direnv pkgs.gh (pkgs.callPackage ./nix/emacs-recipes/agent-shell.nix {}) (pkgs.callPackage ./nix/emacs-recipes/shell-maker.nix {}) ];
         shellHook = let
           rawPkgs = [
             pkgs.emacsPackages.vertico pkgs.emacsPackages.consult pkgs.emacsPackages.orderless

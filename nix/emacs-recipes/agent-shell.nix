@@ -11,6 +11,7 @@ stdenv.mkDerivation rec {
   };
   nativeBuildInputs = [ emacs ];
   buildInputs = [];
+  propagatedBuildInputs = [];
   dontConfigure = true;
   installPhase = ''
     mkdir -p $out/share/emacs/site-lisp/${pname}
