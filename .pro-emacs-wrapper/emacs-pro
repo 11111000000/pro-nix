@@ -5,6 +5,9 @@
 
 EMACS_BIN="/nix/store/lf7ji0bga7vix2zms5d91ipx62ps5sh2-emacs-30.2/bin/emacs"
 
+# Ensure automatic package installs are disabled by default for reproducibility.
+export PRO_PACKAGES_AUTO_INSTALL="${PRO_PACKAGES_AUTO_INSTALL:-0}"
+
 # If the caller already asked for batch mode, preserve it. Otherwise default
 # to --batch unless PRO_EMACS_INTERACTIVE=1.
 case "$*" in
