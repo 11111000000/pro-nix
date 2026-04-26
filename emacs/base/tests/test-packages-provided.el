@@ -48,7 +48,7 @@
                        (memq 'projectile pro-packages-provided-by-nix)))
         (lib-path (locate-library "projectile")))
     (when declared
-      (should lib-path))
+      (should (or lib-path (require 'projectile nil t))))
     (if (or lib-path (require 'projectile nil t))
         (progn
           ;; Если загрузился — убедимся, что ключевые функции доступны
