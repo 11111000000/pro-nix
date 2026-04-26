@@ -316,12 +316,20 @@
     # (which should use lib.mkDefault) and appending local utility packages.
     # Then apply lib.mkForce at the very end if a host wants to lock the list.
     # Build the final package list from module contributions and local extras.
-    environment.systemPackages = lib.mkDefault (with pkgs;
-      (config.environment.systemPackages or [])
-      ++ [ just jq ]
-      ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = true; })
-      ++ [ opencodeCmd opencodeBin mc ]
-    );
+    # Сборка единого списка пакетов для всех хостов.
+    # Правило: модули могут предлагать дополнительные пакеты через lib.mkDefault;
+    # здесь мы консолидируем вклад модулей и фиксируем базовый профиль для всех хостов.
+    # По умолчанию enableOptional = false чтобы сервера не тянули GUI/игры.
+    let
+      commonPackages = with pkgs;
+        [ just jq ]
+        ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; })
+        ++ [ opencodeCmd opencodeBin python python3 ];
+    in
+    # Финализируем список на верхнем уровне (гармоничный вариант): используем lib.mkForce
+    # чтобы гарантировать единообразие окружения на всех хостах. Это согласовано с
+    # политикой проекта, где верхний уровень может фиксировать политику пакетов.
+    environment.systemPackages = lib.mkForce ((config.environment.systemPackages or []) ++ commonPackages);
 
   # Порядок формирования systemPackages:
   # - Модули дополняют environment.systemPackages (lib.mkDefault).
