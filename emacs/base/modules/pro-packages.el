@@ -85,6 +85,12 @@ Return t on success."
   '()
   "Alist mapping package symbols to GitHub repo and revision for package-vc fallback.")
 
+(defvar pro-packages-auto-install-allowlist
+  '()
+  "List of package symbols that are allowed to be auto-installed from MELPA
+when PRO_PACKAGES_AUTO_INSTALL=1. Keeps automatic network installs small and
+predictable. Empty by default — operator must opt-in to specific packages.")
+
 (defun pro-packages--maybe-install (pkg &optional allow-melpa)
   "Ensure PKG is available. If missing and ALLOW-MELPA is non-nil, prompt-and-install.
 Return t if PKG is now available (installed or provided)." 
@@ -121,9 +127,11 @@ install from a pinned GitHub repo. Return t on success, nil otherwise.
      ((pro--package-provided-p pkg) t)
 
      ;; Not provided: consider installing from MELPA if allowed by env/arg
-     ((and allow-melpa (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "0") "1"))
-      (when (pro-packages--do-install pkg)
-        (progn (ignore-errors (require pkg nil t)) (pro--package-provided-p pkg))))
+    ((and allow-melpa (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "0") "1")
+          (memq pkg pro-packages-auto-install-allowlist))
+     ;; Only auto-install from MELPA if pkg is explicitly allowlisted.
+     (when (pro-packages--do-install pkg)
+       (progn (ignore-errors (require pkg nil t)) (pro--package-provided-p pkg))))
 
      ;; Not in MELPA or not allowed; last resort: package-vc from pinned repo
      ((and (assoc pkg pro-packages-vc-fallback-alist) (fboundp 'package-vc-install))
