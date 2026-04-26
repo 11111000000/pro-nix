@@ -38,7 +38,7 @@ let
     agent-shell = (if haveRepoFunc
       then super.emacsPackageFromRepository {
         pname = "agent-shell";
-        repository = "pro-agent/agent-shell";
+        repository = "xenodium/agent-shell";
         revision = "master";
       }
       else super.callPackage ../emacs-recipes/agent-shell.nix {});
