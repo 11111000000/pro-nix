@@ -373,9 +373,7 @@ in
   xvfbRun
 
   # Общие утилиты составляют инструментальный фон и упрощают выполнение задач.
-  (writeShellScriptBin "nix-gui" ''
-    exec ${nix}/bin/nix --experimental-features 'nix-command flakes' run github:nix-gui/nix-gui -- "$@"
-  '')
+  nixGuiCmd
   wget
   diffutils
   curl
@@ -451,16 +449,11 @@ gh
   duc               # Быстрый индексатор + консоль/GUI
 
   # Браузеры обернуты в мягкий лимит памяти, чтобы графический поток не вытеснял остальной рабочий контур.
-  # Обёртки `writeShellScriptBin` переопределяют команды для применения ограничений ресурсов.
-  (writeShellScriptBin "chromium" ''
-    exec systemd-run --user --scope -p MemoryMax=4500M -p MemoryHigh=4G -p CPUQuota=90% -- ${chromium}/bin/chromium "$@"
-  '')
-  (writeShellScriptBin "firefox" ''
-    exec systemd-run --user --scope -p MemoryMax=2500M -p MemoryHigh=2G -p CPUQuota=90% -- ${firefox}/bin/firefox "$@"
-  '')
-  (writeShellScriptBin "emacs-panic" ''
-    pkill -INT -u "$USER" -x emacs >/dev/null 2>&1 || pkill -INT -u "$USER" -f 'emacs.*daemon' >/dev/null 2>&1 || true
-  '')
+  # Обёртки перемещены выше как готовые деривации, чтобы rawList содержал только
+  # ссылки на уже созданные пакеты/скрипты.
+  chromiumCmd
+  firefoxCmd
+  emacsPanicCmd
   tor-browser
 
   # Мессенджеры находятся рядом с остальными каналами связи.
