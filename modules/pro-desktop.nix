@@ -138,7 +138,7 @@
   # Ensure awk is available during activation (some activation scripts use awk).
   # Обеспечиваем, чтобы модули могли дополнять systemPackages без потери
   # вкладов при финальной агрегации в configuration.nix.
-  environment.systemPackages = lib.mkDefault (with pkgs; [ gawk
+  environment.systemPackages = lib.mkDefault (with pkgs; [ gawk qt5ct qt6ct
     # Install a system-wide xsessions entry so GDM shows EXWM for all users.
     (runCommand "pro-exwm-xsession" {} ''
       mkdir -p $out/share/xsessions
