@@ -165,6 +165,12 @@ install from a pinned GitHub repo. Return t on success, nil otherwise.
             (progn
               (package-vc-install url)
               (ignore-errors (require pkg nil t))
+              ;; Try to install small runtime deps for this VC package if known
+              (dolist (d (cdr (assoc pkg pro-packages-vc-deps)))
+                (when (and (boundp 'pro-packages-auto-install-allowlist)
+                           (memq d pro-packages-auto-install-allowlist)
+                           (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "0") "1"))
+                  (ignore-errors (pro-packages--do-install d))))
               (pro--package-provided-p pkg))
           (error (message "[pro-packages] package-vc failed for %s" pkg) nil))))
 
