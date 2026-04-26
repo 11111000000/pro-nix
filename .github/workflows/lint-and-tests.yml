@@ -23,4 +23,4 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y emacs-nox build-essential libncurses5-dev libgtk-3-dev libwebkit2gtk-4.0-dev libgconf-2-4
       - name: Run Emacs E2E assertions
         run: |
-          emacs --batch -l scripts/emacs-e2e-assertions.el
+          emacs --batch -l scripts/test-emacs-e2e-assertions.el

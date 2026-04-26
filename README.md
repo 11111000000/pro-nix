@@ -74,7 +74,7 @@ Quickstart — коротко
 
 6) Emacs headless E2E тесты
 
-    ./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el
+   ./scripts/dev-emacs-pro-wrapper.sh --batch -l scripts/test-emacs-e2e-assertions.el -l scripts/test-emacs-e2e-run-tests.el
 
 Базовый набор утилит
 -------------------
