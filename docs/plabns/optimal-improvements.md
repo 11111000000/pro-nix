@@ -73,7 +73,7 @@ Pressure: Ops
 Surface impact: touches: Pro-peer Key Sync [FLUID]
 
 Steps:
-1. Атомарность: убедиться, что скрипт pro-peer-sync-keys.sh пишет в временный
+1. Атомарность: убедиться, что скрипт ops-pro-peer-sync-keys.sh пишет в временный
    файл и перемещает его в /var/lib/pro-peer/authorized_keys с chmod 0600.
 2. Добавить preflight: проверка GPG-расшифровки перед перезаписью; backup старого
    файла (`authorized_keys.bak.<timestamp>`).
@@ -82,7 +82,7 @@ Steps:
 
 Verification:
 - unit test: запуск скрипта с тестовым gpg файлём в tmp и проверка /var/lib/pro-peer content
-- holo-verify integration: `bash scripts/pro-peer-sync-keys.sh --dry-run` (новый флаг)
+- holo-verify integration: `bash scripts/ops-pro-peer-sync-keys.sh --dry-run` (новый флаг)
 
 Success criteria:
 - Скрипт idempotent, атомарен, логирует операции, не приводит к временному
@@ -151,7 +151,7 @@ Steps:
 3. Add pre-commit hook template that blocks `*.gpg`, `*.key`, `.pem` from commit.
 
 Verification:
-- Developer can follow docs to create encrypted artifact and use `scripts/pro-peer-sync-keys.sh --dry-run` to validate.
+- Developer can follow docs to create encrypted artifact and use `scripts/ops-pro-peer-sync-keys.sh --dry-run` to validate.
 
 Success criteria:
 - No secrets in repo; reproducible steps for operators to provision secrets.

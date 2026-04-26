@@ -13,7 +13,7 @@ printf 'dummy' > "$inp"
 
 # Run script in dry-run mode; it should exit 0 and not write output
 out="$tmpdir/out.auth"
-bash "$root/scripts/pro-peer-sync-keys.sh" --input "$inp" --out "$out" --dry-run
+bash "$root/scripts/ops-pro-peer-sync-keys.sh" --input "$inp" --out "$out" --dry-run
 
 if [ -e "$out" ]; then
   echo "dry-run should not write output file" >&2

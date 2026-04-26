@@ -44,8 +44,8 @@ Proof: ./tools/holo-verify.sh unit
 - Генерация options registry (кратко): `./tools/generate-options-v2.sh`
 
 Canary / Rollback (pro-peer example)
-- Dry-run: `sudo /etc/pro-peer-canary.sh --input /tmp/test-authorized_keys.gpg --out /var/lib/pro-peer/authorized_keys`
-- Apply on canary: `sudo /etc/pro-peer-sync-keys.sh --input /tmp/test-authorized_keys.gpg --out /var/lib/pro-peer/authorized_keys`
+- Dry-run: `sudo /etc/ops-pro-peer-canary.sh --input /tmp/test-authorized_keys.gpg --out /var/lib/pro-peer/authorized_keys`
+- Apply on canary: `sudo /etc/ops-pro-peer-sync-keys.sh --input /tmp/test-authorized_keys.gpg --out /var/lib/pro-peer/authorized_keys`
 - Rollback: `sudo cp /var/lib/pro-peer/authorized_keys.bak.<timestamp> /var/lib/pro-peer/authorized_keys && sudo chown root:root /var/lib/pro-peer/authorized_keys && sudo chmod 600 /var/lib/pro-peer/authorized_keys`
 
 Контакты и эскалация

@@ -27,7 +27,7 @@ Decisions:
 - [Draft] Pro-peer: Discovery & Key Sync
   Pressure: Ops
   Rationale: pro-peer is an operational surface that manages distribution of authorized_keys and encrypted per-host artifacts. It affects host setup and security; changes touching it require operator coordination and proof (smoke scripts + systemd unit checks).
-  Exit: Documented migration and a minimal smoke-test (scripts/pro-peer-sync-keys.sh) present.
+  Exit: Documented migration and a minimal smoke-test (scripts/ops-pro-peer-sync-keys.sh) present.
 
 - [Draft] LLM Research Surface: provide a reproducible notebook-based environment for model inspection, prompt tests, dataset exploration, and lightweight evaluation. Exit: `llm-lab` is exposed on PATH and covered by `tests/contract/unit/03-llm-tools.sh`.
 
@@ -35,7 +35,7 @@ Proofs / Verification Commands (add to Change Gate):
 - Contract tests: `tests/contract/test_surface_health.spec`
 - Vertical scenario: `tests/scenario/example_scenario.test`
 - Soft Reload e2e: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el`
-- Pro-peer smoke: `bash scripts/pro-peer-sync-keys.sh --help` (or run systemd unit in dry-run)
+- Pro-peer smoke: `bash scripts/ops-pro-peer-sync-keys.sh --help` (or run systemd unit in dry-run)
 - Samba automount smoke: `bash scripts/mount-smb.sh --help`
 
 - HDS seed (local): `docs/hds-llm-seed-en.md` — repository-local copy of the HDS LLM seed used by agents and verification steps.

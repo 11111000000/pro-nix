@@ -22,7 +22,7 @@ Screens / Steps
 - Tor Hidden Service: upload encrypted hidden service blob (encrypted by operator), then `proctl exec` to place it and restart tor (if applicable).
 
 4) Keys sync
-- Upload authorized_keys.gpg via `proctl upload-file` to /etc/pro-peer/authorized_keys.gpg (as_root) then run `proctl exec --cmd '/etc/pro-peer-sync-keys.sh --input /etc/pro-peer/authorized_keys.gpg --out /var/lib/pro-peer/authorized_keys' --as-root`. Wizard checks /var/lib/pro-peer/authorized_keys afterwards.
+- Upload authorized_keys.gpg via `proctl upload-file` to /etc/pro-peer/authorized_keys.gpg (as_root) then run `proctl exec --cmd '/etc/ops-pro-peer-sync-keys.sh --input /etc/pro-peer/authorized_keys.gpg --out /var/lib/pro-peer/authorized_keys' --as-root`. Wizard checks /var/lib/pro-peer/authorized_keys afterwards.
 
 5) Review & APPLY
 - Provide preview of commands to run (dry-run mode) and a typed confirmation box where user must type "APPLY" to actually execute. Each step will create backups and list the backup paths.

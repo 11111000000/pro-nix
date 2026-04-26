@@ -19,8 +19,8 @@ SURFACE — реестр публичных контрактов
 - Имя: Pro-peer Key Sync
   Стабильность: [FLUID]
   Спецификация: опция `pro-peer.enableKeySync` управляет systemd-сервисом
-  `pro-peer-sync-keys` и скриптом `scripts/pro-peer-sync-keys.sh` для синхронизации ключей.
-  Proof: `scripts/pro-peer-sync-keys.sh` (smoke) и соответствующие unit-файлы systemd.
+  `pro-peer-sync-keys` и скриптом `scripts/ops-pro-peer-sync-keys.sh` для синхронизации ключей.
+  Proof: `scripts/ops-pro-peer-sync-keys.sh` (smoke) и соответствующие unit-файлы systemd.
 
 - Имя: LLM Research Surface
   Стабильность: [FLUID]

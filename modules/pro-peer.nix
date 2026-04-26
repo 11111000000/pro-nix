@@ -149,11 +149,11 @@ in
       # Make package contribution additive and low-priority so top-level
       # aggregation decides final list. Avoid lib.mkForce at module level.
       environment.systemPackages = lib.mkDefault (with pkgs; [ gnupg ]);
-      environment.etc."pro-peer-sync-keys.sh".source = ../scripts/ops-pro-peer-sync-keys.sh;
-      environment.etc."pro-peer-sync-keys.sh".mode = "0755";
+      environment.etc."ops-pro-peer-sync-keys.sh".source = ../scripts/ops-ops-pro-peer-sync-keys.sh;
+      environment.etc."ops-pro-peer-sync-keys.sh".mode = "0755";
       # Expose a canary helper script for operators to run dry-run locally
-      environment.etc."pro-peer-canary.sh".source = ../scripts/ops-pro-peer-canary.sh;
-      environment.etc."pro-peer-canary.sh".mode = "0755";
+      environment.etc."ops-pro-peer-canary.sh".source = ../scripts/ops-ops-pro-peer-canary.sh;
+      environment.etc."ops-pro-peer-canary.sh".mode = "0755";
 
       systemd.services."pro-peer-sync-keys" = {
         description = "Pro‑peer: sync authorized_keys from encrypted file";
@@ -167,7 +167,7 @@ in
           # unit does not depend on PATH during activation. This makes the
           # unit reproducible and avoids errors like "env: 'bash': No such
           # file or directory" during `nixos-rebuild switch`.
-          ExecStart = ''/run/current-system/sw/bin/bash /etc/pro-peer-sync-keys.sh --input ${config.pro-peer.keysGpgPath} --out /var/lib/pro-peer/authorized_keys'';
+          ExecStart = ''/run/current-system/sw/bin/bash /etc/ops-pro-peer-sync-keys.sh --input ${config.pro-peer.keysGpgPath} --out /var/lib/pro-peer/authorized_keys'';
           CPUQuota = "30%";
         };
       };
@@ -181,8 +181,8 @@ in
 
     (lib.mkIf (config.pro-peer.allowTorHiddenService && (config.pro-peer.torBackupRecipient != null)) {
       environment.systemPackages = lib.mkDefault (with pkgs; [ gnupg tar ]);
-      environment.etc."pro-peer-backup-hiddenservice.sh".source = ../scripts/ops-backup-hiddenservice.sh;
-      environment.etc."pro-peer-backup-hiddenservice.sh".mode = "0755";
+      environment.etc."pro-peer-ops-backup-hiddenservice.sh".source = ../scripts/ops-ops-backup-hiddenservice.sh;
+      environment.etc."pro-peer-ops-backup-hiddenservice.sh".mode = "0755";
 
       systemd.services."pro-peer-backup-hiddenservice" = {
         description = "Backup tor hidden service key encrypted to recipient";
@@ -190,7 +190,7 @@ in
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = ''/run/current-system/sw/bin/bash /etc/pro-peer-backup-hiddenservice.sh --hidden-dir /var/lib/tor/ssh_hidden_service --recipient ${config.pro-peer.torBackupRecipient} --out-dir /var/lib/pro-peer'';
+          ExecStart = ''/run/current-system/sw/bin/bash /etc/pro-peer-ops-backup-hiddenservice.sh --hidden-dir /var/lib/tor/ssh_hidden_service --recipient ${config.pro-peer.torBackupRecipient} --out-dir /var/lib/pro-peer'';
           CPUQuota = "30%";
         };
       };

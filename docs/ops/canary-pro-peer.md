@@ -11,11 +11,11 @@ Preconditions
 Steps
 1. Copy the encrypted authorized_keys.gpg to the canary host at /tmp/test-authorized_keys.gpg (or use the operator-managed secret path).
 2. On canary host run (as root):
-   - /etc/pro-peer-canary.sh --input /tmp/test-authorized_keys.gpg --out /var/lib/pro-peer/authorized_keys
+   - /etc/ops-pro-peer-canary.sh --input /tmp/test-authorized_keys.gpg --out /var/lib/pro-peer/authorized_keys
    This runs in dry-run mode and will print expected actions.
 3. Inspect output: it should show backup file name and the mv step (dry-run: would move...). Ensure no unexpected changes.
 4. If output acceptable, run actual apply:
-   - sudo /etc/pro-peer-sync-keys.sh --input /tmp/test-authorized_keys.gpg --out /var/lib/pro-peer/authorized_keys
+   - sudo /etc/ops-pro-peer-sync-keys.sh --input /tmp/test-authorized_keys.gpg --out /var/lib/pro-peer/authorized_keys
 5. Verify:
    - ls -l /var/lib/pro-peer/authorized_keys
    - cat /var/lib/pro-peer/authorized_keys | wc -l (expect number of keys)
