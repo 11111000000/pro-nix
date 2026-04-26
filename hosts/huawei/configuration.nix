@@ -91,4 +91,9 @@ AllowTcpForwarding no
     cpuQuota = "80%";
     ioWeight = 200;
   };
+
+  # Host-specific guarantee: ensure essential interactive utilities are present
+  # Use lib.mkForce at host level to ensure operator-required tools (mc) are
+  # available even if module aggregation changed elsewhere.
+  environment.systemPackages = lib.mkForce ((config.environment.systemPackages or []) ++ [ pkgs.mc ]);
 }
