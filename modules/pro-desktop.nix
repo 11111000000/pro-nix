@@ -128,7 +128,7 @@
   environment.variables = {
     LANG = "ru_RU.UTF-8";
     LC_CTYPE = "ru_RU.UTF-8";
-    GTK_KEY_THEME = "Emacs";
+    GTK_KEY_THEME = lib.mkDefault "Emacs";
     # Provide a sensible default for Qt platform theme; allow hosts to override.
     QT_QPA_PLATFORMTHEME = lib.mkDefault "qt5ct";
     XCURSOR_THEME = "Adwaita";
@@ -142,11 +142,12 @@
     # Install a system-wide xsessions entry so GDM shows EXWM for all users.
     (runCommand "pro-exwm-xsession" {} ''
       mkdir -p $out/share/xsessions
-      cat > $out/share/xsessions/exwm.desktop <<'EOF'
+    cat > $out/share/xsessions/exwm.desktop <<'EOF'
 [Desktop Entry]
 Name=EXWM
 Comment=Emacs Window Manager
-Exec=/bin/bash -lc '$HOME/.config/pro/exwm-session'
+# Use a shell so $HOME expands; prefer /usr/bin/env for portability.
+Exec=/usr/bin/env bash -lc "$HOME/.config/pro/exwm-session"
 Type=Application
 DesktopNames=EXWM
 X-GNOME-WmName=EXWM

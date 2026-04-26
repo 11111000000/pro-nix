@@ -226,6 +226,12 @@ let
     #   ресурсов.
     # - Для интерактивных команд (acp, acp-shell) и если OPENCODE_DIRECT_RUN=1,
     #   нужно сохранить stdin/stdout — тогда выполняем бинарник напрямую.
+    # - Для любого CLI-вызова с аргументами тоже выполняем бинарник напрямую:
+    #   это сохраняет argv без промежуточной прослойки и не ломает subcommands.
+    if [ "$#" -gt 0 ] || [ "''${OPENCODE_DIRECT_RUN:-0}" = "1" ]; then
+      exec "$BIN" "$@"
+    fi
+
     # Always forward CLI arguments to the underlying binary. Some upstream
     # scripts (notably the acp server scripts) rely on receiving the same
     # argv sequence that was passed to the wrapper. The previous logic only
@@ -271,7 +277,7 @@ let
         # без bwrap/steam-run.
         # When forwarding through the loader, use `--` to ensure all
         # subsequent arguments are passed verbatim to the target binary.
-        exec "$LOADER" "$BIN" -- "$@" || true
+        exec "$LOADER" "$BIN" "$@" || true
       fi
     fi
 
