@@ -25,12 +25,18 @@
   # чтобы избежать рекурсивных зависимостей при оценке модулей. Другие модули
   # могут дополнять поля systemd.services.polkit через стандартные механизмы
   # слияния модулей; здесь мы лишь задаём минимальные необходимые поля.
-  systemd.services.polkit = {
-    after = [ "dbus.service" "sysinit-reactivation.target" ];
-    wants = [ "dbus.service" ];
-    serviceConfig = {
-      RestartSec = "3s";
-    };
-  };
+   systemd.services.polkit = {
+     # Ensure polkit is ordered after the system bus (dbus-broker) and
+     # the reactivation target used during live switch. Use unit-level
+     # attributes `after`/`wants` so they land in [Unit] of the generated
+     # service file (not in [Service]). This reduces the window where
+     # polkit restarts while the system bus is not yet ready.
+     after = [ "dbus.service" "dbus-broker.service" "sysinit-reactivation.target" ];
+     wants = [ "dbus.service" "dbus-broker.service" ];
+     serviceConfig = {
+       Restart = "on-failure";
+       RestartSec = "3s";
+     };
+   };
 
 }

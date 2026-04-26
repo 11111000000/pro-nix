@@ -6,7 +6,7 @@ set -euo pipefail
 # `nixos-rebuild switch` (когда sudo может повысить привилегии), либо
 # non-root сборку toplevel-деривации для проверки в контейнерных окружениях.
 
-HOST_ARG="${1:-}" 
+HOST_ARG="${1:-}"
 
 # Если вызывают `just switch HOST=foo`, некоторые оболочки передают
 # буквальную строку `HOST=foo` в качестве аргумента. Удаляем префикс
@@ -14,7 +14,15 @@ HOST_ARG="${1:-}"
 HOST_ARG="${HOST_ARG#HOST=}"
 
 if [ -z "$HOST_ARG" ]; then
-  HOST_ARG="$(cat /etc/hostname 2>/dev/null || hostname -s 2>/dev/null || true)"
+  # Prefer reading /etc/hostname using shell redirection to avoid depending on
+  # external `cat` binary which may be unavailable during partial activations.
+  if [ -r /etc/hostname ]; then
+    HOST_ARG=$(</etc/hostname)
+  elif command -v hostname >/dev/null 2>&1; then
+    HOST_ARG=$(hostname -s 2>/dev/null || hostname 2>/dev/null || true)
+  else
+    HOST_ARG=""
+  fi
 fi
 
 if [ -z "$HOST_ARG" ]; then
@@ -31,6 +39,18 @@ if [ ! -f "./hosts/$HOST_ARG/configuration.nix" ]; then
 fi
 
 # If already running as root (sudo invoked this script), run nixos-rebuild directly
+has_tool() { command -v "$1" >/dev/null 2>&1 || return 1; }
+
+has_pattern_in_file() {
+  # Prefer ripgrep (rg) if available, fall back to grep.
+  local pattern="$1" file="$2"
+  if has_tool rg; then
+    rg -q "$pattern" "$file" 2>/dev/null
+  else
+    grep -q -F "$pattern" "$file" 2>/dev/null
+  fi
+}
+
 if [ "$(id -u)" -eq 0 ]; then
   echo "[just] running as root; performing nixos-rebuild switch for host: $HOST_ARG"
   tmpf=$(mktemp)
@@ -38,20 +58,20 @@ if [ "$(id -u)" -eq 0 ]; then
     rm -f "$tmpf"
     exec true
   else
-    if rg -q "Rejected send message" "$tmpf" 2>/dev/null; then
-      cat >&2 <<'MSG'
+    if has_pattern_in_file "Rejected send message" "$tmpf"; then
+      cat >&2 <<MSG
 Живая активация не удалась из-за временной гонки D-Bus / polkit ("Rejected send message").
 Рекомендуемые действия оператора:
-  1) Просмотреть сохранённый вывод: cat "${tmpf}" (или journalctl -b).
-  2) Если приемлемо, выполнить: nixos-rebuild boot --flake ".#${HOST_ARG}" && reboot
+  1) Просмотреть сохранённый вывод: sudo less "${tmpf}" (или journalctl -b).
+  2) Если приемлемо, выполнить: sudo nixos-rebuild boot --flake ".#${HOST_ARG}" && sudo reboot
 Если в окружении установлено AUTO_REBOOT_ON_ACTIVATION_RACE=1, скрипт
 выполнит fallback (boot+reboot) автоматически.
 MSG
     else
-      cat >&2 <<'MSG'
+      cat >&2 <<MSG
 nixos-rebuild switch завершился с ошибкой. См. вывод выше для деталей. Чтобы
 попробовать безопасную активацию при загрузке, выполните:
-  nixos-rebuild boot --flake ".#${HOST_ARG}" && reboot
+  sudo nixos-rebuild boot --flake ".#${HOST_ARG}" && sudo reboot
 MSG
     fi
     rm -f "$tmpf"
@@ -77,17 +97,17 @@ if sudo -n true 2>/dev/null && sudo systemd-run --quiet --wait --collect --pipe 
     rm -f "$tmpf"
     exec true
   else
-    if rg -q "Rejected send message" "$tmpf" 2>/dev/null; then
-      cat >&2 <<'MSG'
+    if has_pattern_in_file "Rejected send message" "$tmpf"; then
+      cat >&2 <<MSG
 Живая активация не удалась из-за временной гонки D-Bus / polkit ("Rejected send message").
 Рекомендуемые действия оператора:
-  1) Просмотреть сохранённый вывод: sudo cat "${tmpf}" (или journalctl -b).
+  1) Просмотреть сохранённый вывод: sudo less "${tmpf}" (или journalctl -b).
   2) Если приемлемо, выполнить: sudo nixos-rebuild boot --flake ".#${HOST_ARG}" && sudo reboot
 Если в окружении установлено AUTO_REBOOT_ON_ACTIVATION_RACE=1, скрипт
 выполнит fallback (boot+reboot) автоматически.
 MSG
     else
-      cat >&2 <<'MSG'
+      cat >&2 <<MSG
 nixos-rebuild switch завершился с ошибкой. См. вывод выше для деталей. Чтобы
 попробовать безопасную активацию при загрузке, выполните:
   sudo nixos-rebuild boot --flake ".#${HOST_ARG}" && sudo reboot
