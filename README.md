@@ -74,7 +74,20 @@ Quickstart — коротко
 
 6) Emacs headless E2E тесты
 
-   ./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el
+    ./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el
+
+Базовый набор утилит
+-------------------
+- pro-nix поставляет минимальный набор утилит, полезных для повседневной разработки и отладки:
+  - gh — GitHub CLI
+  - git, wget, curl, jq — работа с репозиториями и HTTP
+  - shellcheck, shfmt — проверка и форматирование shell-скриптов
+  - bat — подсветка вывода и удобный просмотр файлов
+  - tldr — краткие примеры использования команд
+  - mc, tmux, fzf, tree — навигация и управление сессиями
+  - lnav, htop, mosh — просмотр логов, мониторинг и удалённые сессии
+
+Если вы хотите изменить этот набор, правьте system-packages.nix и создайте PR с Change Gate.
 
 Почему flake-first?
 -------------------
