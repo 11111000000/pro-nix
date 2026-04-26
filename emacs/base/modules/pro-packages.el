@@ -85,6 +85,14 @@ Return t on success."
   '()
   "Alist mapping package symbols to GitHub repo and revision for package-vc fallback.")
 
+;; Map of package -> list of dependency symbols that should be attempted
+;; installed after a successful package-vc install. This is a pragmatic
+;; developer convenience for packages that declare deps not present in the
+;; runtime. Keep minimal and explicit.
+(defvar pro-packages-vc-deps
+  '((agent-shell . (acp shell-maker)))
+  "Alist mapping VC-installed package symbols to their runtime dependencies.")
+
 (defvar pro-packages-auto-install-allowlist
   '()
   "List of package symbols that are allowed to be auto-installed from MELPA
