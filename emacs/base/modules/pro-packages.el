@@ -91,12 +91,13 @@ Return t if PKG is now available (installed or provided)."
     (when allow-melpa
       (pro-packages--load-decisions)
        (let* ((decision (alist-get pkg pro-packages-decisions))
-              ;; Default to auto-install enabled. This makes the pro profile
-              ;; more user-friendly out of the box: when PRO_PACKAGES_AUTO_INSTALL
-              ;; is not set we treat it as enabled so missing packages are
-              ;; installed automatically. Users can still override by setting
-              ;; PRO_PACKAGES_AUTO_INSTALL=0 in their environment.
-              (auto-env (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "1") "1")))
+               ;; Default to auto-install disabled. For reproducibility we prefer
+               ;; that missing packages are surfaced as a configuration issue
+               ;; unless the operator explicitly opts in by setting
+               ;; PRO_PACKAGES_AUTO_INSTALL=1 in the environment (useful for
+               ;; interactive machines or dev shells). This avoids surprising
+               ;; network installs in CI or automated runs.
+               (auto-env (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "0") "1")))
         (cond
          ((eq decision 'always)
           (when (pro-packages--do-install pkg) (setq decision 'installed) t))
