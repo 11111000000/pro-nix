@@ -182,9 +182,15 @@ EOF
             pkgs.emacsPackages.treemacs pkgs.emacsPackages.vterm pkgs.emacsPackages.ace-window pkgs.emacsPackages.embark
             pkgs.emacsPackages.dash-docs pkgs.emacsPackages.embark-consult
             # Try overlay-provided packages when available (agent-shell, treemacs-icons-dired, eldoc-box)
-            (if (and (builtins.hasAttr "emacsPackages" pkgsOverlay) (builtins.hasAttr "agent-shell" pkgsOverlay.emacsPackages)) then pkgsOverlay.emacsPackages.agent-shell else null)
-            (if (and (builtins.hasAttr "emacsPackages" pkgsOverlay) (builtins.hasAttr "treemacs-icons-dired" pkgsOverlay.emacsPackages)) then pkgsOverlay.emacsPackages."treemacs-icons-dired" else null)
-            (if (and (builtins.hasAttr "emacsPackages" pkgsOverlay) (builtins.hasAttr "eldoc-box" pkgsOverlay.emacsPackages)) then pkgsOverlay.emacsPackages.eldoc-box else null)
+            (if (builtins.hasAttr "emacsPackages" pkgsOverlay)
+              then (if (builtins.hasAttr "agent-shell" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.agent-shell else null)
+              else null)
+            (if (builtins.hasAttr "emacsPackages" pkgsOverlay)
+              then (if (builtins.hasAttr "treemacs-icons-dired" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages."treemacs-icons-dired" else null)
+              else null)
+            (if (builtins.hasAttr "emacsPackages" pkgsOverlay)
+              then (if (builtins.hasAttr "eldoc-box" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.eldoc-box else null)
+              else null)
           ]);
         in ''
           echo "Entering pro-nix devshell with Emacs available"
