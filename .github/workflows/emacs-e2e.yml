@@ -33,9 +33,9 @@ jobs:
           echo "=== Run: auto-install=1 (default) ==="
           nix-shell -p emacsPackages.vertico emacsPackages.consult emacsPackages.orderless emacsPackages.marginalia \
             emacsPackages.corfu emacsPackages.cape emacsPackages.vterm emacsPackages.ace-window \
-            emacsPackages.consult-dash emacsPackages.consult-eglot emacsPackages.consult-yasnippet emacsPackages.embark --run "./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el" || ( echo "E2E failed (auto-install=1)"; exit 1 )
+            emacsPackages.consult-dash emacsPackages.consult-eglot emacsPackages.consult-yasnippet emacsPackages.embark --run "./scripts/dev-emacs-pro-wrapper.sh --batch -l scripts/test-emacs-e2e-assertions.el -l scripts/test-emacs-e2e-run-tests.el" || ( echo "E2E failed (auto-install=1)"; exit 1 )
 
           echo "=== Run: auto-install=0 (reproducibility) ==="
           PRO_PACKAGES_AUTO_INSTALL=0 nix-shell -p emacsPackages.vertico emacsPackages.consult emacsPackages.orderless emacsPackages.marginalia \
             emacsPackages.corfu emacsPackages.cape emacsPackages.vterm emacsPackages.ace-window \
-            emacsPackages.consult-dash emacsPackages.consult-eglot emacsPackages.consult-yasnippet emacsPackages.embark --run "./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el" || ( echo "E2E failed (auto-install=0)"; exit 1 )
+            emacsPackages.consult-dash emacsPackages.consult-eglot emacsPackages.consult-yasnippet emacsPackages.embark --run "./scripts/dev-emacs-pro-wrapper.sh --batch -l scripts/test-emacs-e2e-assertions.el -l scripts/test-emacs-e2e-run-tests.el" || ( echo "E2E failed (auto-install=0)"; exit 1 )
