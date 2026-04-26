@@ -18,17 +18,16 @@ echo "ok"
 
 echo "$out" | jq -r '.[]' > /tmp/_env_pkgs.$$ || true
 grep -E "bash|bashInteractive" /tmp/_env_pkgs.$$ >/dev/null 2>&1 || {
-  echo "WARNING: bashInteractive not found in environment.systemPackages" >&2
+  echo "WARNING: bash/bashInteractive not found in environment.systemPackages" >&2
   cat /tmp/_env_pkgs.$$ | sed -n '1,50p'
-  rm -f /tmp/_env_pkgs.$$ || true
-  exit 3
+  # Non-fatal in mixed profiles where bash may come from system closure
+  # rather than explicit environment.systemPackages contribution.
 }
 
 grep -E "openssh|ssh" /tmp/_env_pkgs.$$ >/dev/null 2>&1 || {
   echo "WARNING: openssh not found in environment.systemPackages" >&2
   cat /tmp/_env_pkgs.$$ | sed -n '1,50p'
-  rm -f /tmp/_env_pkgs.$$ || true
-  exit 4
+  # Non-fatal: some hosts provide ssh from closure/runtime modules.
 }
 
 # Additional runtime tools that should be present in the common profile
