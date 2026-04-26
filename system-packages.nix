@@ -312,7 +312,25 @@ let
   '';
   pip3Cmd = pkgs.writeShellScriptBin "pip3" ''
     exec ${myPython}/bin/python3 -m pip "$@"
-'';
+  '';
+
+  # Вынесенные вспомогательные обёртки - чтобы rawList содержал только
+  # ссылки на уже построенные деривации, а не inline-выражения.
+  nixGuiCmd = pkgs.writeShellScriptBin "nix-gui" ''
+    exec ${pkgs.nix}/bin/nix --experimental-features 'nix-command flakes' run github:nix-gui/nix-gui -- "$@"
+  '';
+
+  chromiumCmd = pkgs.writeShellScriptBin "chromium" ''
+    exec systemd-run --user --scope -p MemoryMax=4500M -p MemoryHigh=4G -p CPUQuota=90% -- ${chromium}/bin/chromium "$@"
+  '';
+
+  firefoxCmd = pkgs.writeShellScriptBin "firefox" ''
+    exec systemd-run --user --scope -p MemoryMax=2500M -p MemoryHigh=2G -p CPUQuota=90% -- ${firefox}/bin/firefox "$@"
+  '';
+
+  emacsPanicCmd = pkgs.writeShellScriptBin "emacs-panic" ''
+    pkill -INT -u "$USER" -x emacs >/dev/null 2>&1 || pkill -INT -u "$USER" -f 'emacs.*daemon' >/dev/null 2>&1 || true
+  '';
 in
 
 with pkgs;
