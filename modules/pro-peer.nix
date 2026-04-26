@@ -149,10 +149,10 @@ in
       # Make package contribution additive and low-priority so top-level
       # aggregation decides final list. Avoid lib.mkForce at module level.
       environment.systemPackages = lib.mkDefault (with pkgs; [ gnupg ]);
-      environment.etc."pro-peer-sync-keys.sh".source = ../scripts/pro-peer-sync-keys.sh;
+      environment.etc."pro-peer-sync-keys.sh".source = ../scripts/ops-pro-peer-sync-keys.sh;
       environment.etc."pro-peer-sync-keys.sh".mode = "0755";
       # Expose a canary helper script for operators to run dry-run locally
-      environment.etc."pro-peer-canary.sh".source = ../scripts/pro-peer-canary.sh;
+      environment.etc."pro-peer-canary.sh".source = ../scripts/ops-pro-peer-canary.sh;
       environment.etc."pro-peer-canary.sh".mode = "0755";
 
       systemd.services."pro-peer-sync-keys" = {
@@ -181,7 +181,7 @@ in
 
     (lib.mkIf (config.pro-peer.allowTorHiddenService && (config.pro-peer.torBackupRecipient != null)) {
       environment.systemPackages = lib.mkDefault (with pkgs; [ gnupg tar ]);
-      environment.etc."pro-peer-backup-hiddenservice.sh".source = ../scripts/backup-hiddenservice.sh;
+      environment.etc."pro-peer-backup-hiddenservice.sh".source = ../scripts/ops-backup-hiddenservice.sh;
       environment.etc."pro-peer-backup-hiddenservice.sh".mode = "0755";
 
       systemd.services."pro-peer-backup-hiddenservice" = {
