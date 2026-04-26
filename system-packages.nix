@@ -345,7 +345,7 @@ in
   # Ниже — базовый набор пакетов, полезный для рабочего поля разработчика и
   # администратора. Пакеты организованы по группам: редакторы, утилиты,
   # диагностика, приватность и сети, сборка и языки разработки, медиа.
-  (if enableOptional then optionalPackages else []) ++ [
+  let rawList = (if enableOptional then optionalPackages else []) ++ [
   kbd
   # Редактор и связанные пакеты: инструменты для работы с текстом, ссылками и навигацией.
   emacsRuntime
@@ -604,4 +604,7 @@ gh
   python3Cmd
   pipCmd
   pip3Cmd
-]
+  ];
+in
+  # Ensure we return a clean list without nulls (conditional includes use null)
+  builtins.filter (x: x != null) rawList

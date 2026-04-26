@@ -326,13 +326,13 @@
     # Finalize the global package list without referencing the option itself
     # to avoid infinite recursion during module evaluation. We force the final
     # list here so all hosts inherit the same base developer tooling.
-    # Temporary minimal, well-known set of common utilities and developer tools
-    # Placed here to avoid including complex expressions from system-packages.nix
-    # until that file is refactored to guarantee only derivations in its result.
+    # Final global package list: consolidate module contributions and the common
+    # system packages. system-packages.nix must return a clean list of derivations.
     environment.systemPackages = lib.mkForce (with pkgs;
-      [ just jq git gh shellcheck shfmt bat tldr mc tmux fzf tree lnav mosh
-        ripgrep fd findutils htop openssh bashInteractive python3 nodejs
-      ]
+      let
+        base = [ just jq git gh shellcheck shfmt bat tldr mc tmux fzf tree lnav mosh ripgrep fd findutils htop openssh python3 ];
+        spkgs = (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; });
+      in builtins.filter (x: x != null) (base ++ spkgs)
     );
 
   # Порядок формирования systemPackages:
