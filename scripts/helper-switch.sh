@@ -65,6 +65,14 @@ fi
 if sudo -n true 2>/dev/null && sudo systemd-run --quiet --wait --collect --pipe --service-type=exec --unit=nixos-switch-preflight /bin/true >/dev/null 2>&1; then
   echo "[just] performing nixos-rebuild switch for host: $HOST_ARG"
   tmpf=$(mktemp)
+  # Preflight: ensure evaluated package list is valid before attempting live switch
+  if ! sudo nix --extra-experimental-features 'nix-command flakes' eval --json .#nixosConfigurations."$HOST_ARG".config.environment.systemPackages >/dev/null 2>&1; then
+    echo "[just] preflight eval failed; not attempting live switch" >&2
+    echo "Run: sudo nix --extra-experimental-features 'nix-command flakes' eval --json .#nixosConfigurations.\"$HOST_ARG\".config.environment.systemPackages" >&2
+    rm -f "$tmpf"
+    exit 1
+  fi
+
   if sudo nixos-rebuild switch --flake ".#$HOST_ARG" 2>&1 | tee "$tmpf"; then
     rm -f "$tmpf"
     exec true
