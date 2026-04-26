@@ -173,7 +173,7 @@ EOF
         name = "pro-nix-dev";
         buildInputs = [ emacsPkg pkgs.ripgrep pkgs.fd pkgs.findutils pkgs.stress-ng pkgs.fio pkgs.powertop pkgs.iotop pkgs.lm_sensors pkgs.time pkgs.shellcheck pkgs.direnv pkgs.gh ];
         shellHook = let
-          emacsPaths = lib.concatStringsSep ":" (map (p: p + "/share/emacs/site-lisp") [
+          flags = lib.concatStringsSep " " (map (p: "-L " + p + "/share/emacs/site-lisp") [
             pkgs.emacsPackages.vertico pkgs.emacsPackages.consult pkgs.emacsPackages.orderless
             pkgs.emacsPackages.marginalia pkgs.emacsPackages.gptel pkgs.emacsPackages.consult-dash
             pkgs.emacsPackages.consult-eglot pkgs.emacsPackages.consult-yasnippet pkgs.emacsPackages.corfu
@@ -186,12 +186,10 @@ EOF
           echo "Entering pro-nix devshell with Emacs available"
           mkdir -p "$PWD/.pro-emacs-wrapper"
           EMACS_BIN="${toString emacsPkg}/bin/emacs"
-          cat > "$PWD/.pro-emacs-wrapper/emacs-pro" <<'SH'
+          cat > "$PWD/.pro-emacs-wrapper/emacs-pro" <<SH
 #!/bin/sh
-# Wrapper: set EMACSLOADPATH so Emacs finds Nix-provided packages, then exec Emacs
 EMACS_BIN="${toString emacsPkg}/bin/emacs"
-export EMACSLOADPATH="${toString emacsPaths}:$EMACSLOADPATH"
-exec "$EMACS_BIN" -Q "$@"
+exec "$EMACS_BIN" -Q ${flags} "$@"
 SH
           chmod +x "$PWD/.pro-emacs-wrapper/emacs-pro"
           export PATH="$PWD/.pro-emacs-wrapper:$PATH"
