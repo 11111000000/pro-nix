@@ -18,33 +18,37 @@
   "Interactive buffer selection aware of EXWM and tab-bar.
 If buffer is visible in a window showing an EXWM buffer, select that window;
 otherwise try to switch to a tab that shows the buffer, preserving the
-original tab when not found. Falls back to `consult-buffer` behaviour.
+original tab when not found. Falls back to `consult-buffer' behaviour.
 This implementation is intentionally small and defensive: it calls
-`consult--read` only when consult is present." 
+`consult--read' only when consult is present." 
   (interactive)
   (if (not (and (require 'consult nil t) (fboundp 'consult--read)))
       (call-interactively #'consult-buffer)
-    (let* ((buf-name (consult--read (mapcar #'buffer-name (buffer-list))
+    (let* ((names (mapcar #'buffer-name (buffer-list)))
+           (buf-name (consult--read names
                                     :prompt "Buffer: "
                                     :require-match t
                                     :category 'buffer))
-           (buf (get-buffer buf-name)))
-      (if (and (get-buffer-window buf 'visible)
+           (buf (and buf-name (get-buffer buf-name))))
+      (when buf
+        (cond
+         ((and (get-buffer-window buf 'visible)
                (with-current-buffer buf (derived-mode-p 'exwm-mode)))
-          (select-window (get-buffer-window buf 'visible))
-        (if (with-current-buffer buf (derived-mode-p 'exwm-mode))
-            (let* ((orig-tab (1+ (tab-bar--current-tab-index)))
-                   (tabs (tab-bar-tabs))
-                   tab-found)
-              (cl-loop for i from 1 to (length tabs) do
-                       (unless (= i orig-tab)
-                         (tab-bar-select-tab i)
-                         (when (get-buffer-window buf 'visible)
-                           (setq tab-found t)
-                           (cl-return))))
-              (unless tab-found
-                (tab-bar-select-tab orig-tab))
-              (switch-to-buffer buf)
+          (select-window (get-buffer-window buf 'visible)))
+         ((with-current-buffer buf (derived-mode-p 'exwm-mode))
+          (let ((orig-tab (1+ (tab-bar--current-tab-index)))
+                (tabs (tab-bar-tabs))
+                (tab-found nil))
+            (cl-loop for i from 1 to (length tabs) do
+                     (unless (= i orig-tab)
+                       (tab-bar-select-tab i)
+                       (when (get-buffer-window buf 'visible)
+                         (setq tab-found t)
+                         (cl-return))))
+            (unless tab-found
+              (tab-bar-select-tab orig-tab))
+            (switch-to-buffer buf)))
+         (t
           (switch-to-buffer buf)))))))
 
 (defun pro/consult-buffer-other-window ()
