@@ -12,10 +12,10 @@
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
-      # Import nixpkgs (do not apply local emacs overlay in devshell runs to
-      # avoid incompatibilities in CI images). Overlays that add custom
-      # emacs packaging can be re-enabled when maintenance updates them.
+      # Import nixpkgs. Also create a variant with the local emacs overlay
+      # so we can optionally reference emacsPackages that the overlay exposes.
       pkgs = import nixpkgs { inherit system; };
+      pkgsOverlay = import nixpkgs { inherit system; overlays = [ (import ./nix/overlays/emacs-extra.nix) ]; };
       emacsPkg = pkgs.emacs30 or pkgs.emacs;
       pythonWithTextual = pkgs.python3.withPackages (ps: with ps; [ textual psutil ]);
       # Python environment for agent apps (coordinator/worker)
