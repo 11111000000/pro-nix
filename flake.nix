@@ -173,7 +173,7 @@ EOF
         name = "pro-nix-dev";
         buildInputs = [ emacsPkg pkgs.ripgrep pkgs.fd pkgs.findutils pkgs.stress-ng pkgs.fio pkgs.powertop pkgs.iotop pkgs.lm_sensors pkgs.time pkgs.shellcheck pkgs.direnv pkgs.gh ];
         shellHook = let
-          flags = lib.concatStringsSep " " (map (p: "-L " + p + "/share/emacs/site-lisp") [
+          rawPkgs = [
             pkgs.emacsPackages.vertico pkgs.emacsPackages.consult pkgs.emacsPackages.orderless
             pkgs.emacsPackages.marginalia pkgs.emacsPackages.gptel pkgs.emacsPackages.consult-dash
             pkgs.emacsPackages.consult-eglot pkgs.emacsPackages.consult-yasnippet pkgs.emacsPackages.corfu
@@ -182,16 +182,12 @@ EOF
             pkgs.emacsPackages.treemacs pkgs.emacsPackages.vterm pkgs.emacsPackages.ace-window pkgs.emacsPackages.embark
             pkgs.emacsPackages.dash-docs pkgs.emacsPackages.embark-consult
             # Try overlay-provided packages when available (agent-shell, treemacs-icons-dired, eldoc-box)
-            (if (builtins.hasAttr "emacsPackages" pkgsOverlay)
-              then (if (builtins.hasAttr "agent-shell" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.agent-shell else null)
-              else null)
-            (if (builtins.hasAttr "emacsPackages" pkgsOverlay)
-              then (if (builtins.hasAttr "treemacs-icons-dired" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages."treemacs-icons-dired" else null)
-              else null)
-            (if (builtins.hasAttr "emacsPackages" pkgsOverlay)
-              then (if (builtins.hasAttr "eldoc-box" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.eldoc-box else null)
-              else null)
-          ]);
+            (if (and (builtins.hasAttr "emacsPackages" pkgsOverlay) (builtins.hasAttr "agent-shell" pkgsOverlay.emacsPackages)) then pkgsOverlay.emacsPackages.agent-shell else null)
+            (if (and (builtins.hasAttr "emacsPackages" pkgsOverlay) (builtins.hasAttr "treemacs-icons-dired" pkgsOverlay.emacsPackages)) then pkgsOverlay.emacsPackages."treemacs-icons-dired" else null)
+            (if (and (builtins.hasAttr "emacsPackages" pkgsOverlay) (builtins.hasAttr "eldoc-box" pkgsOverlay.emacsPackages)) then pkgsOverlay.emacsPackages.eldoc-box else null)
+          ];
+          presentPkgs = builtins.filter (p: p != null) rawPkgs;
+          flags = lib.concatStringsSep " " (map (p: "-L " + p + "/share/emacs/site-lisp") presentPkgs);
         in ''
           echo "Entering pro-nix devshell with Emacs available"
           mkdir -p "$PWD/.pro-emacs-wrapper"
