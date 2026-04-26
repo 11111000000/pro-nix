@@ -1,7 +1,6 @@
-{ stdenv, fetchFromGitHub }:
+{ stdenv, fetchFromGitHub, emacs ? (import <nixpkgs> {}).emacs }:
 
-let pkgs = import <nixpkgs> {};
-in pkgs.stdenv.mkDerivation rec {
+stdenv.mkDerivation rec {
   pname = "acp";
   version = "0";
   src = fetchFromGitHub {
@@ -10,12 +9,12 @@ in pkgs.stdenv.mkDerivation rec {
     rev = "master";
     sha256 = "0hr1176sy8xrx6wkqadmvwdjm1sv7aq8ddrw8h3ha6sn74glx8ws";
   };
-  nativeBuildInputs = [ pkgs.emacs ];
+  nativeBuildInputs = [ emacs ];
   installPhase = ''
     mkdir -p $out/share/emacs/site-lisp/acp
     cp -r ./* $out/share/emacs/site-lisp/acp/
   '';
-  meta = with pkgs.lib; {
+  meta = with stdenv.lib; {
     description = "ACP protocol client for Emacs (acp.el)";
     homepage = "https://github.com/xenodium/acp.el";
     license = licenses.mit;
