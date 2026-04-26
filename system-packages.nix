@@ -549,6 +549,12 @@ gh
   ripgrep
   fd
   findutils
+  mc
+  tmux
+  fzf
+  tree
+  lnav
+  mosh
 
    # Темы курсора X11 — оформительская настройка указателя мыши.
   xorg.xcursorthemes
