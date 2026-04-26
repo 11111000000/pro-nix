@@ -78,10 +78,11 @@ Return t on success."
 
 ;; Mapping of package -> ("owner/repo" . "revision") for packages that are
 ;; commonly unavailable on ELPA but can be fetched directly from GitHub.
+;; Keep the VC fallback list minimal and explicit. We do not attempt
+;; arbitrary package-vc installs unless the operator explicitly allows
+;; auto-install and a trusted repo is configured here. Empty by default.
 (defvar pro-packages-vc-fallback-alist
-  '((agent-shell . ("pro-agent/agent-shell" . "master"))
-    (treemacs-icons-dired . ("Alexander-Miller/treemacs-icons-dired" . "v3.0"))
-    (eldoc-box . ("vitalie/eldoc-box" . "v0.3.0")))
+  '()
   "Alist mapping package symbols to GitHub repo and revision for package-vc fallback.")
 
 (defun pro-packages--maybe-install (pkg &optional allow-melpa)
