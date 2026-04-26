@@ -323,11 +323,13 @@
     # Финализируем список на верхнем уровне (гармоничный вариант): используем lib.mkForce
     # чтобы гарантировать единообразие окружения на всех хостах. Это согласовано с
     # политикой проекта, где верхний уровень может фиксировать политику пакетов.
-    environment.systemPackages = lib.mkForce (
-      (config.environment.systemPackages or [])
-      ++ (with pkgs; [ just jq ]
-        ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; })
-        ++ [ opencodeCmd opencodeBin python python3 ])
+    # Finalize the global package list without referencing the option itself
+    # to avoid infinite recursion during module evaluation. We force the final
+    # list here so all hosts inherit the same base developer tooling.
+    environment.systemPackages = lib.mkForce (with pkgs;
+      [ just jq ]
+      ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; })
+      ++ [ opencodeCmd opencodeBin python python3 ]
     );
 
   # Порядок формирования systemPackages:
