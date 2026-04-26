@@ -36,8 +36,8 @@ let
 
     agent-shell = super.emacsPackageFromRepository {
       pname = "agent-shell";
-      repository = "pro-agent/agent-shell";
-      revision = "master";
+      repository = "anomalyco/agent-shell";
+      revision = "v0.1.0";
     };
 
     golden-ratio = super.emacsPackageFromRepository {
