@@ -39,11 +39,13 @@ let
       }
       else super.callPackage ../emacs-recipes/eldoc-box.nix {});
 
-    agent-shell = super.emacsPackageFromRepository {
-      pname = "agent-shell";
-      repository = "anomalyco/agent-shell";
-      revision = "v0.1.0";
-    };
+    agent-shell = (if haveRepoFunc
+      then super.emacsPackageFromRepository {
+        pname = "agent-shell";
+        repository = "pro-agent/agent-shell";
+        revision = "master";
+      }
+      else super.callPackage ../emacs-recipes/agent-shell.nix {});
 
     golden-ratio = super.emacsPackageFromRepository {
       pname = "golden-ratio";
