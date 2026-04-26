@@ -95,6 +95,9 @@ predictable. Empty by default — operator must opt-in to specific packages.")
 ;; from MELPA when PRO_PACKAGES_AUTO_INSTALL=1. This is a pragmatic short-term
 ;; measure; long-term we prefer to ship this package via Nix overlay.
 (setq pro-packages-auto-install-allowlist (cons 'eldoc-box pro-packages-auto-install-allowlist))
+;; Add known runtime dependencies for agent-shell so developer devShell can
+;; auto-install them from MELPA when PRO_PACKAGES_AUTO_INSTALL=1 is set.
+(setq pro-packages-auto-install-allowlist (append pro-packages-auto-install-allowlist '(acp shell-maker)))
 
 ;; Provide a small, explicit VC fallback for agent-shell so devshell users
 ;; can get the package immediately while we finish Nix packaging. This is
