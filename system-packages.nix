@@ -363,7 +363,11 @@ in
   jq
   just
 git
-github-cli
+gh
+  shellcheck
+  shfmt
+  bat
+  tldr
   goose
   pipxPkg
   aiderCmd
