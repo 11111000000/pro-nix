@@ -1,5 +1,5 @@
 # Русский: комментарии и пояснения оформлены в стиле учебника
-{ lib, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   imports = [ ../../modules/pro-users.nix ];
