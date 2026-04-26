@@ -99,19 +99,17 @@ Return t on success."
 when PRO_PACKAGES_AUTO_INSTALL=1. Keeps automatic network installs small and
 predictable. Empty by default — operator must opt-in to specific packages.")
 
-;; For developer convenience in devShell, allow eldoc-box to be auto-installed
-;; from MELPA when PRO_PACKAGES_AUTO_INSTALL=1. This is a pragmatic short-term
-;; measure; long-term we prefer to ship this package via Nix overlay.
-(setq pro-packages-auto-install-allowlist (cons 'eldoc-box pro-packages-auto-install-allowlist))
-;; Add known runtime dependencies for agent-shell so developer devShell can
-;; auto-install them from MELPA when PRO_PACKAGES_AUTO_INSTALL=1 is set.
-(setq pro-packages-auto-install-allowlist (append pro-packages-auto-install-allowlist '(acp shell-maker)))
+;; Developer conveniences (allowlist and VC fallbacks) were used during
+;; iterative development to bootstrap packages that were later added to the
+;; Nix overlay. In production/CI we prefer strict, declarative behaviour:
+;; PRO_PACKAGES_AUTO_INSTALL is disabled by default and no implicit VC
+;; fallbacks are present. If you need to enable a dev-only fallback, edit
+;; `pro-packages-auto-install-allowlist' or `pro-packages-vc-fallback-alist'
+;; in a local configuration outside the repository.
 
-;; Provide a small, explicit VC fallback for agent-shell so devshell users
-;; can get the package immediately while we finish Nix packaging. This is
-;; only used if PRO_PACKAGES_AUTO_INSTALL=1 and package-vc is available.
-(setq pro-packages-vc-fallback-alist (append pro-packages-vc-fallback-alist
-                                              '((agent-shell . ("xenodium/agent-shell" . "master")))))
+;; Keep allowlist and VC fallbacks empty by default for reproducibility.
+(setq pro-packages-auto-install-allowlist '())
+(setq pro-packages-vc-fallback-alist '())
 
 (defun pro-packages--maybe-install (pkg &optional allow-melpa)
   "Ensure PKG is available. If missing and ALLOW-MELPA is non-nil, prompt-and-install.

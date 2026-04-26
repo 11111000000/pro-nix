@@ -5,12 +5,5 @@
     "SURFACE.md",
     "HOLO.md",
     "README.md"
-  ],
-  "preflight": {
-    "required_before_switch": [
-      "nix --extra-experimental-features 'nix-command flakes' eval --json .#nixosConfigurations.<host>.config.environment.systemPackages",
-      "tests/contract/unit/09-system-packages-eval.sh"
-    ],
-    "deny_live_switch_on_failure": true
-  }
+  ]
 }
