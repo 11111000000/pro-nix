@@ -331,8 +331,7 @@
     environment.systemPackages = lib.mkForce (with pkgs;
       let
         base = [ just jq git gh shellcheck shfmt bat tldr mc tmux fzf tree lnav mosh ripgrep fd findutils htop openssh python3 ];
-        spkgs = (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; });
-      in builtins.filter (x: x != null) (base ++ spkgs)
+      in builtins.filter (x: x != null) base
     );
 
   # Порядок формирования systemPackages:
