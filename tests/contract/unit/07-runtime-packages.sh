@@ -3,7 +3,7 @@ set -euo pipefail
 
 root="$(cd "$(dirname "$0")/../../.." && pwd)"
 
-echo "07: runtime packages presence check (bashInteractive, openssh)"
+echo "07: runtime packages presence check (bashInteractive, openssh, gh, mc, python3, htop)"
 
 NIX_CMD="nix"
 
@@ -30,6 +30,18 @@ grep -E "openssh|ssh" /tmp/_env_pkgs.$$ >/dev/null 2>&1 || {
   rm -f /tmp/_env_pkgs.$$ || true
   exit 4
 }
+
+# Additional runtime tools that should be present in the common profile
+for pkg in gh mc python3 htop; do
+  echo -n "Checking for $pkg... "
+  grep -Ei "${pkg//+/\+}" /tmp/_env_pkgs.$$ >/dev/null 2>&1 || {
+    echo "WARNING: $pkg not found in environment.systemPackages" >&2
+    cat /tmp/_env_pkgs.$$ | sed -n '1,50p'
+    rm -f /tmp/_env_pkgs.$$ || true
+    exit 5
+  }
+  echo "ok"
+done
 
 rm -f /tmp/_env_pkgs.$$ || true
 echo "07: OK"
