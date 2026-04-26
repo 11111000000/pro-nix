@@ -23,13 +23,9 @@ let
     };
 
     # Prefer the helper if available; otherwise use our recipe
-    "treemacs-icons-dired" = (if haveRepoFunc
-      then super.emacsPackageFromRepository {
-        pname = "treemacs-icons-dired";
-        repository = "Alexander-Miller/treemacs-icons-dired";
-        revision = "v3.0";
-      }
-      else super.callPackage ../emacs-recipes/treemacs-icons-dired.nix {});
+    # treemacs ships treemacs-icons-dired within its package upstream; no
+    # separate recipe required here. If a separate package becomes necessary
+    # in future we can add a recipe in nix/emacs-recipes/.
 
     eldoc-box = (if haveRepoFunc
       then super.emacsPackageFromRepository {
