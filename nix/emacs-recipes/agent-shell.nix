@@ -4,10 +4,10 @@ emacsPackages.buildEmacsPackage rec {
   pname = "agent-shell";
   version = "0";
   src = fetchFromGitHub {
-    owner = "pro-agent";
+    owner = "xenodium";
     repo = "agent-shell";
     rev = "master";
-    sha256 = "0000000000000000000000000000000000000000000000000000";
+    sha256 = "1zda7sx6y51br1dx50a4m4xrcg4vvsc4iaf19asr1ghgpaf289aw";
   };
   meta = with stdenv.lib; {
     description = "Agent shell integration";
