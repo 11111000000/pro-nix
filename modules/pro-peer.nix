@@ -169,12 +169,12 @@ in
           # unit reproducible and avoids errors like "env: 'bash': No such
           # file or directory" during `nixos-rebuild switch`.
           # ExecStart should call the runtime path under /etc (unchanged name)
-          ExecStart = ''/run/current-system/sw/bin/bash /etc/pro-peer-sync-keys.sh --input ${config.pro-peer.keysGpgPath} --out /var/lib/pro-peer/authorized_keys'';
+          ExecStart = ''${pkgs.bash}/bin/bash /etc/pro-peer-sync-keys.sh --input ${config.pro-peer.keysGpgPath} --out /var/lib/pro-peer/authorized_keys'';
           CPUQuota = "30%";
         };
       };
 
-        systemd.timers."pro-peer-sync-keys.timer" = {
+        systemd.timers."pro-peer-sync-keys" = {
           description = "Periodic pro-peer key sync";
           timerConfig = { OnUnitActiveSec = config.pro-peer.keySyncInterval; };
           wantedBy = [ "timers.target" ];
@@ -192,7 +192,7 @@ in
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = ''/run/current-system/sw/bin/bash /etc/pro-peer-backup-hiddenservice.sh --hidden-dir /var/lib/tor/ssh_hidden_service --recipient ${config.pro-peer.torBackupRecipient} --out-dir /var/lib/pro-peer'';
+          ExecStart = ''${pkgs.bash}/bin/bash /etc/pro-peer-backup-hiddenservice.sh --hidden-dir /var/lib/tor/ssh_hidden_service --recipient ${config.pro-peer.torBackupRecipient} --out-dir /var/lib/pro-peer'';
           CPUQuota = "30%";
         };
       };
@@ -228,7 +228,7 @@ in
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = ''/run/current-system/sw/bin/bash /etc/pro-peer-wg-quick-wrapper ${if config.pro-peer.wireguardConfigPath != null then config.pro-peer.wireguardConfigPath else "wg0"}'';
+          ExecStart = ''${pkgs.bash}/bin/bash /etc/pro-peer-wg-quick-wrapper ${if config.pro-peer.wireguardConfigPath != null then config.pro-peer.wireguardConfigPath else "wg0"}'';
           # The wrapper normalizes exit codes and always returns 0.
           RemainAfterExit = "yes";
           CPUQuota = "30%";
@@ -248,6 +248,10 @@ in
           HiddenServicePort = "22 127.0.0.1:22";
         };
       };
+      # Отключаем сломанные сервисы из nixpkgs (ExecStart указывает на директорию вместо bin-файла).
+      # Функционал дублируется tmpfiles.rules и pro-peer-ensure-tor-perms.
+      systemd.services."tor-ensure-perms".enable = lib.mkForce false;
+      systemd.services."tor-ensure-bridges".enable = lib.mkForce false;
 
       # Почему tmpfiles вместо oneshot: tmpfiles применяется при загрузке, декларативный
       # способ, более надёжен; oneshot может не сработать при перезагрузке.
