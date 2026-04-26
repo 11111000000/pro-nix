@@ -76,6 +76,14 @@ Return t on success."
         t)
     (error (message "[pro-packages] failed to install %s: %s" pkg err) nil)))
 
+;; Mapping of package -> ("owner/repo" . "revision") for packages that are
+;; commonly unavailable on ELPA but can be fetched directly from GitHub.
+(defvar pro-packages-vc-fallback-alist
+  '((agent-shell . ("pro-agent/agent-shell" . "master"))
+    (treemacs-icons-dired . ("Alexander-Miller/treemacs-icons-dired" . "v3.0"))
+    (eldoc-box . ("vitalie/eldoc-box" . "v0.3.0")))
+  "Alist mapping package symbols to GitHub repo and revision for package-vc fallback.")
+
 (defun pro-packages--maybe-install (pkg &optional allow-melpa)
   "Ensure PKG is available. If missing and ALLOW-MELPA is non-nil, prompt-and-install.
 Return t if PKG is now available (installed or provided)." 
@@ -99,19 +107,33 @@ Return t if PKG is now available (installed or provided)."
           ;; where prompts would otherwise block the run.
           (when auto-env
             (message "[pro-packages] PRO_PACKAGES_AUTO_INSTALL=1: auto-installing %s" pkg))
-          (if (or noninteractive auto-env)
-              (if auto-env
-                  (pro-packages--do-install pkg)
-                (message "[pro-packages] noninteractive: skipping install of %s" pkg)
-                nil)
-            (pcase (pro-packages--ask-user pkg)
-              ('install (pro-packages--do-install pkg))
-              ('always (push (cons pkg 'always) pro-packages-decisions)
-                       (pro-packages--save-decisions)
-                       (pro-packages--do-install pkg))
-              ('never (push (cons pkg 'never) pro-packages-decisions)
-                     (pro-packages--save-decisions) nil)
-              ('cancel nil)))))))))
+             (if (or noninteractive auto-env)
+                 (if auto-env
+                     (progn
+                       (or (pro-packages--do-install pkg)
+                           ;; Try a VC fallback via package-vc if package.el failed
+                           (when (and (fboundp 'package-vc-install)
+                                      (assoc pkg pro-packages-vc-fallback-alist))
+                             (let* ((entry (cdr (assoc pkg pro-packages-vc-fallback-alist)))
+                                    (repo (car entry))
+                                    (rev (cdr entry)))
+                               (condition-case _e
+                                   (progn
+                                     (package-vc-install (format "https://github.com/%s" repo))
+                                     (message "[pro-packages] installed %s via package-vc" pkg)
+                                     t)
+                                 (error (message "[pro-packages] package-vc install failed for %s" pkg) nil))))
+                       )
+                   (message "[pro-packages] noninteractive: skipping install of %s" pkg)
+                   nil)
+              (pcase (pro-packages--ask-user pkg)
+                ('install (pro-packages--do-install pkg))
+                ('always (push (cons pkg 'always) pro-packages-decisions)
+                         (pro-packages--save-decisions)
+                         (pro-packages--do-install pkg))
+                ('never (push (cons pkg 'never) pro-packages-decisions)
+                      (pro-packages--save-decisions) nil)
+                ('cancel nil)))))))))
 
 
 ;; User-facing convenience wrappers (commands) used by keybindings.
