@@ -91,6 +91,11 @@ Return t on success."
 when PRO_PACKAGES_AUTO_INSTALL=1. Keeps automatic network installs small and
 predictable. Empty by default — operator must opt-in to specific packages.")
 
+;; For developer convenience in devShell, allow eldoc-box to be auto-installed
+;; from MELPA when PRO_PACKAGES_AUTO_INSTALL=1. This is a pragmatic short-term
+;; measure; long-term we prefer to ship this package via Nix overlay.
+(setq pro-packages-auto-install-allowlist (cons 'eldoc-box pro-packages-auto-install-allowlist))
+
 (defun pro-packages--maybe-install (pkg &optional allow-melpa)
   "Ensure PKG is available. If missing and ALLOW-MELPA is non-nil, prompt-and-install.
 Return t if PKG is now available (installed or provided)." 
