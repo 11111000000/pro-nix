@@ -96,6 +96,12 @@ predictable. Empty by default — operator must opt-in to specific packages.")
 ;; measure; long-term we prefer to ship this package via Nix overlay.
 (setq pro-packages-auto-install-allowlist (cons 'eldoc-box pro-packages-auto-install-allowlist))
 
+;; Provide a small, explicit VC fallback for agent-shell so devshell users
+;; can get the package immediately while we finish Nix packaging. This is
+;; only used if PRO_PACKAGES_AUTO_INSTALL=1 and package-vc is available.
+(setq pro-packages-vc-fallback-alist (append pro-packages-vc-fallback-alist
+                                              '((agent-shell . ("xenodium/agent-shell" . "master")))))
+
 (defun pro-packages--maybe-install (pkg &optional allow-melpa)
   "Ensure PKG is available. If missing and ALLOW-MELPA is non-nil, prompt-and-install.
 Return t if PKG is now available (installed or provided)." 
