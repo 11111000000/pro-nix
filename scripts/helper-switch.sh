@@ -93,6 +93,41 @@ if sudo -n true 2>/dev/null && sudo systemd-run --quiet --wait --collect --pipe 
     exit 1
   fi
 
+  # Wait for system bus to be responsive before attempting a live switch.
+  wait_for_system_bus() {
+    local timeout=${1:-30}
+    local waited=0
+    local busctl_cmd=""
+    if command -v busctl >/dev/null 2>&1; then
+      busctl_cmd=busctl
+    elif [ -x "/run/current-system/sw/bin/busctl" ]; then
+      busctl_cmd="/run/current-system/sw/bin/busctl"
+    fi
+
+    while [ $waited -lt $timeout ]; do
+      if [ -S /run/dbus/system_bus_socket ]; then
+        if [ -n "$busctl_cmd" ]; then
+          if sudo "$busctl_cmd" --system --no-status identity >/dev/null 2>&1; then
+            return 0
+          fi
+        else
+          # socket exists and we have no busctl; assume bus may be up
+          return 0
+        fi
+      fi
+      sleep 1
+      waited=$((waited+1))
+    done
+    return 1
+  }
+
+  if ! wait_for_system_bus 30; then
+    echo "[just] system bus not responsive after wait; skipping live switch to avoid activation race" >&2
+    echo "Run: sudo nixos-rebuild boot --flake \".#${HOST_ARG}\" && sudo reboot" >&2
+    rm -f "$tmpf"
+    exit 1
+  fi
+
   if sudo nixos-rebuild switch --flake ".#$HOST_ARG" 2>&1 | tee "$tmpf"; then
     rm -f "$tmpf"
     exec true
