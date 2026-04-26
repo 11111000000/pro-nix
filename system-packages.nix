@@ -320,12 +320,13 @@ let
     exec ${pkgs.nix}/bin/nix --experimental-features 'nix-command flakes' run github:nix-gui/nix-gui -- "$@"
   '';
 
+  # Use explicit pkgs.chromium reference to avoid depending on local var name.
   chromiumCmd = pkgs.writeShellScriptBin "chromium" ''
-    exec systemd-run --user --scope -p MemoryMax=4500M -p MemoryHigh=4G -p CPUQuota=90% -- ${chromium}/bin/chromium "$@"
+    exec systemd-run --user --scope -p MemoryMax=4500M -p MemoryHigh=4G -p CPUQuota=90% -- ${pkgs.chromium}/bin/chromium "$@"
   '';
 
   firefoxCmd = pkgs.writeShellScriptBin "firefox" ''
-    exec systemd-run --user --scope -p MemoryMax=2500M -p MemoryHigh=2G -p CPUQuota=90% -- ${firefox}/bin/firefox "$@"
+    exec systemd-run --user --scope -p MemoryMax=2500M -p MemoryHigh=2G -p CPUQuota=90% -- ${pkgs.firefox}/bin/firefox "$@"
   '';
 
   emacsPanicCmd = pkgs.writeShellScriptBin "emacs-panic" ''
