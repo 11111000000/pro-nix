@@ -329,7 +329,6 @@
     environment.systemPackages = lib.mkForce (with pkgs;
       [ just jq ]
       ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; })
-      ++ [ opencodeCmd opencodeBin ]
     );
 
   # Порядок формирования systemPackages:
