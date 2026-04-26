@@ -187,8 +187,14 @@ is set accordingly."
 ;; Embark-Consult: configure default actions and mappings for common types
 (when (pro-ui--try-require 'embark-consult)
   (with-eval-after-load 'embark-consult
-    ;; Ensure embark-consult registers useful collectors
-    (add-to-list 'embark-consult-sources 'consult--source-project-buffer)))
+    ;; Ensure embark-consult registers useful collectors.
+    ;; Guard against the variable not being defined yet to avoid "symbol's
+    ;; value as variable is void" during init when packages load in different
+    ;; orders.
+    (ignore-errors
+      (unless (boundp 'embark-consult-sources)
+        (defvar embark-consult-sources nil))
+      (add-to-list 'embark-consult-sources 'consult--source-project-buffer))))
 
     
 
