@@ -281,7 +281,7 @@ let
       fi
     fi
 
-    if command -v steam-run >/dev/null 2>&1 && { [ "$can_use_userns" = "1" ] || [ "${OPENCODE_FORCE_STEAM:-0}" = "1" ]; }; then
+    if command -v steam-run >/dev/null 2>&1 && { [ "$can_use_userns" = "1" ] || [ "''${OPENCODE_FORCE_STEAM:-0}" = "1" ]; }; then
       STEAM_RUN_CMD=$(command -v steam-run)
       # Передача аргументов через steam-run без изменений; используем '--'
       # чтобы отделить аргументы steam-run от аргументов исполняемого файла.

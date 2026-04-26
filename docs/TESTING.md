@@ -35,7 +35,7 @@ nix flake check --show-trace && ./tools/holo-verify.sh && bash tests/contract/te
 
 CI hints
 -
-- GitHub Actions workflows run `nix flake check` and Emacs E2E via `./scripts/emacs-pro-wrapper.sh`.
+- GitHub Actions workflows run `nix flake check` and Emacs E2E via `./scripts/dev-emacs-pro-wrapper.sh`.
 - If CI shows "Git tree is dirty" — commit or stash local changes before rerunning.
 
 HDS checklist

@@ -10,7 +10,7 @@ Surface impact: (none) — internal runtime behaviour of Emacs loader and UX; no
 Proof: Verification steps (manual / automated):
 - Start Emacs GUI/TTY and inspect *Messages* for errors about missing packages or wrong-type arguments.
 - Verify M-x opens consult-M-x (or fallback) and minibuffer navigation (C-n/C-p, TAB) cycles candidates.
-- Run headless smoke tests: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el` (repo-provided e2e smoke)
+- Run headless smoke tests: `./scripts/dev-emacs-pro-wrapper.sh --batch -l scripts/test-emacs-e2e-assertions.el -l scripts/test-emacs-e2e-run-tests.el` (repo-provided e2e smoke)
 
 Planned Changes (minimal, incremental):
 1. Early-load repository modules dir into `load-path` from `early-init.el` so local helper modules (pro-fix-corfu) are discoverable by `locate-library` and `require`. (Implemented)

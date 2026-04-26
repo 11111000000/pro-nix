@@ -58,7 +58,7 @@
    - Явное подключение `dired.el` в `init.el`; убедиться, что `ui.el` остаётся тонким, а dired/terminals — самостоятельными и тестируемыми.
 
 Доказательства (Proof/Verify)
-- Команда: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el` — успешно грузит базовые модули (включая dired/terminals).
+- Команда: `./scripts/dev-emacs-pro-wrapper.sh --batch -l scripts/test-emacs-e2e-assertions.el` — успешно грузит базовые модули (включая dired/terminals).
 - ERT: `./scripts/emacs-e2e-test.el`/новые тесты для dired/terminals — зелёные.
 - Визуально (локально в GUI): dired с иконками активируется, в TTY — работает без иконок и не падает.
 
