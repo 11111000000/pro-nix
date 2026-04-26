@@ -87,54 +87,58 @@ Return t on success."
 (defun pro-packages--maybe-install (pkg &optional allow-melpa)
   "Ensure PKG is available. If missing and ALLOW-MELPA is non-nil, prompt-and-install.
 Return t if PKG is now available (installed or provided)." 
-  (unless (pro--package-provided-p pkg)
-    (when allow-melpa
-      (pro-packages--load-decisions)
-       (let* ((decision (alist-get pkg pro-packages-decisions))
-               ;; Default to auto-install disabled. For reproducibility we prefer
-               ;; that missing packages are surfaced as a configuration issue
-               ;; unless the operator explicitly opts in by setting
-               ;; PRO_PACKAGES_AUTO_INSTALL=1 in the environment (useful for
-               ;; interactive machines or dev shells). This avoids surprising
-               ;; network installs in CI or automated runs.
-               (auto-env (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "0") "1")))
-        (cond
-         ((eq decision 'always)
-          (when (pro-packages--do-install pkg) (setq decision 'installed) t))
-         ((eq decision 'never) nil)
-         (t
-          ;; If the environment requests auto-install, treat it as an override
-          ;; and perform noninteractive installs. This is useful for CI/image builds
-          ;; where prompts would otherwise block the run.
-          (when auto-env
-            (message "[pro-packages] PRO_PACKAGES_AUTO_INSTALL=1: auto-installing %s" pkg))
-             (if (or noninteractive auto-env)
-                 (if auto-env
-                     (progn
-                       (or (pro-packages--do-install pkg)
-                           ;; Try a VC fallback via package-vc if package.el failed
-                           (when (and (fboundp 'package-vc-install)
-                                      (assoc pkg pro-packages-vc-fallback-alist))
-                             (let* ((entry (cdr (assoc pkg pro-packages-vc-fallback-alist)))
-                                    (repo (car entry))
-                                    (rev (cdr entry)))
-                               (condition-case _e
-                                   (progn
-                                     (package-vc-install (format "https://github.com/%s" repo))
-                                     (message "[pro-packages] installed %s via package-vc" pkg)
-                                     t)
-                                 (error (message "[pro-packages] package-vc install failed for %s" pkg) nil))))
-                       )
-                   (message "[pro-packages] noninteractive: skipping install of %s" pkg)
-                   nil)
-              (pcase (pro-packages--ask-user pkg)
-                ('install (pro-packages--do-install pkg))
-                ('always (push (cons pkg 'always) pro-packages-decisions)
-                         (pro-packages--save-decisions)
-                         (pro-packages--do-install pkg))
-                ('never (push (cons pkg 'never) pro-packages-decisions)
-                      (pro-packages--save-decisions) nil)
-                ('cancel nil)))))))))
+  ;; Backwards-compatible wrapper routed to the central policy function
+  ;; `pro/packages-ensure'. Keep this thin so existing call sites keep
+  ;; working until modules are migrated to use the clearer API.
+  (pro/packages-ensure pkg allow-melpa))
+
+
+(defun pro/packages-ensure (pkg &optional allow-melpa)
+  "Ensure PKG is available following the policy: Nix -> runtime -> MELPA -> Git.
+
+If PKG is declared in `pro-packages-provided-by-nix' we expect it to be
+present on `load-path' (Nix must provide it). If it's present, return t.
+If it is declared by Nix but missing, signal an error — this is a
+configuration problem and should be fixed declaratively.
+
+If the package is not declared by Nix, try to require it from the current
+runtime. If present — return t. If absent, and ALLOW-MELPA is non-nil and
+`PRO_PACKAGES_AUTO_INSTALL` is enabled, attempt to install from package.el.
+If that fails, consult `pro-packages-vc-fallback-alist` and try a package-vc
+install from a pinned GitHub repo. Return t on success, nil otherwise.
+"
+  (let ((declared (pro--package-declared-by-nix-p pkg)))
+    (cond
+     ;; Declared in Nix: must be present on load-path; otherwise it's a
+     ;; configuration error — surface it so CI fails instead of masking.
+     (declared
+      (if (pro--package-provided-p pkg)
+          t
+        (error "Package %s is declared in Nix but not available at runtime. Fix your Nix profile." pkg)))
+
+     ;; Runtime already provides it
+     ((pro--package-provided-p pkg) t)
+
+     ;; Not provided: consider installing from MELPA if allowed by env/arg
+     ((and allow-melpa (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "0") "1"))
+      (when (pro-packages--do-install pkg)
+        (progn (ignore-errors (require pkg nil t)) (pro--package-provided-p pkg))))
+
+     ;; Not in MELPA or not allowed; last resort: package-vc from pinned repo
+     ((and (assoc pkg pro-packages-vc-fallback-alist) (fboundp 'package-vc-install))
+      (let* ((entry (cdr (assoc pkg pro-packages-vc-fallback-alist)))
+             (repo (car entry))
+             (rev (cdr entry))
+             (url (format "https://github.com/%s" repo)))
+        (condition-case _err
+            (progn
+              (package-vc-install url)
+              (ignore-errors (require pkg nil t))
+              (pro--package-provided-p pkg))
+          (error (message "[pro-packages] package-vc failed for %s" pkg) nil))))
+
+     ;; Nothing worked
+     (t nil))))
 
 
 ;; User-facing convenience wrappers (commands) used by keybindings.

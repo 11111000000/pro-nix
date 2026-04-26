@@ -22,17 +22,22 @@ let
       revision = "v1.6";
     };
 
-    "treemacs-icons-dired" = super.emacsPackageFromRepository {
-      pname = "treemacs-icons-dired";
-      repository = "Alexander-Miller/treemacs-icons-dired";
-      revision = "v3.0";
-    };
+    # Prefer the helper if available; otherwise use our recipe
+    "treemacs-icons-dired" = (if haveRepoFunc
+      then super.emacsPackageFromRepository {
+        pname = "treemacs-icons-dired";
+        repository = "Alexander-Miller/treemacs-icons-dired";
+        revision = "v3.0";
+      }
+      else super.callPackage ../emacs-recipes/treemacs-icons-dired.nix {});
 
-    eldoc-box = super.emacsPackageFromRepository {
-      pname = "eldoc-box";
-      repository = "vitalie/eldoc-box";
-      revision = "v0.3.0";
-    };
+    eldoc-box = (if haveRepoFunc
+      then super.emacsPackageFromRepository {
+        pname = "eldoc-box";
+        repository = "vitalie/eldoc-box";
+        revision = "v0.3.0";
+      }
+      else super.callPackage ../emacs-recipes/eldoc-box.nix {});
 
     agent-shell = super.emacsPackageFromRepository {
       pname = "agent-shell";
