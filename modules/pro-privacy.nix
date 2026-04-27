@@ -92,7 +92,16 @@
     after = [ "dbus-broker.service" "polkit.service" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "/bin/sh -c 'mkdir -p /etc/tor && if [ ! -e /etc/tor/bridges.conf ]; then cp /etc/tor/bridges.conf.example /etc/tor/bridges.conf && chown root:root /etc/tor/bridges.conf && chmod 0640 /etc/tor/bridges.conf; fi'";
+      ExecStart = let
+        script = pkgs.writeShellScriptBin "tor-ensure-bridges" ''
+          mkdir -p /etc/tor
+          if [ ! -e /etc/tor/bridges.conf ]; then
+            cp /etc/tor/bridges.conf.example /etc/tor/bridges.conf
+            chown root:root /etc/tor/bridges.conf
+            chmod 0640 /etc/tor/bridges.conf
+          fi
+        '';
+      in "${script}/bin/tor-ensure-bridges";
     };
   };
 
@@ -103,7 +112,16 @@
     after = [ "dbus-broker.service" "polkit.service" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "/bin/sh -c 'mkdir -p /var/lib/tor && chown -R tor:tor /var/lib/tor || true; chmod 700 /var/lib/tor || true; [ -d /var/lib/tor/ssh_hidden_service ] && chmod 700 /var/lib/tor/ssh_hidden_service || true'";
+      ExecStart = let
+        script = pkgs.writeShellScriptBin "tor-ensure-perms" ''
+            mkdir -p /var/lib/tor
+            chown -R tor:tor /var/lib/tor || true
+            chmod 700 /var/lib/tor || true
+            if [ -d /var/lib/tor/ssh_hidden_service ]; then
+              chmod 700 /var/lib/tor/ssh_hidden_service
+            fi
+          '';
+      in "${script}/bin/tor-ensure-perms";
     };
     wantedBy = [ "multi-user.target" ];
   };
