@@ -98,7 +98,11 @@ EOF
     in {
       nixosConfigurations = hosts;
 
-      checks.${system}.default = hosts.huawei.config.system.build.toplevel;
+      checks.${system} = {
+        default = hosts.huawei.config.system.build.toplevel;
+        # NixOS VM tests for activation verification
+        basic-activation-test = (import ./tests/vm/test-basic-activation.nix { inherit (pkgs) pkgs; });
+      };
 
       apps.${system} = {
         check-all = {
