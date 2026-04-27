@@ -89,7 +89,6 @@
     wantedBy = [ "multi-user.target" ];
     # Ensure this runs before tor.service so the bridges file exists when Tor starts
     before = [ "tor.service" ];
-    after = [ "dbus-broker.service" "polkit.service" ];
     serviceConfig = {
       Type = "oneshot";
       ExecStart = let
@@ -109,7 +108,6 @@
   systemd.services."tor-ensure-perms" = {
     description = "Ensure /var/lib/tor ownership and modes for Tor";
     before = [ "tor.service" ];
-    after = [ "dbus-broker.service" "polkit.service" ];
     serviceConfig = {
       Type = "oneshot";
       ExecStart = let
