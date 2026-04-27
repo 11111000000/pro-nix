@@ -1,10 +1,10 @@
-# test-basic-activation.nix — минимальный тест активации
+# test-basic-activation.nix — минимальный тест
 { testers, ... }:
 
 testers.nixosTest {
   name = "basic-activation-test";
 
-  nodes.machine = { config, pkgs, lib, ... }: {
+  nodes.machine = { config, lib, ... }: {
     imports = [ ../../modules/pro-privacy.nix ];
 
     boot.loader.systemd-boot.enable = true;
@@ -22,23 +22,23 @@ testers.nixosTest {
 
   testScript = ''
     start_all();
-    \$machine->waitForUnit("multi-user.target");
-    \$machine->sleep(5);
+    machine->waitForUnit("multi-user.target");
+    machine->sleep(5);
 
     # Проверка unit-файлов
-    \$machine->succeed("systemd-analyze verify /etc/systemd/system/tor-ensure-bridges.service 2>&1");
-    \$machine->succeed("systemd-analyze verify /etc/systemd/system/tor-ensure-perms.service 2>&1");
+    machine->succeed("systemd-analyze verify /etc/systemd/system/tor-ensure-bridges.service 2>&1");
+    machine->succeed("systemd-analyze verify /etc/systemd/system/tor-ensure-perms.service 2>&1");
 
     # Проверка отсутствия Unbalanced quoting
-    my \$out = \$machine->execute("journalctl -b0 | grep -i 'Unbalanced quoting' || true");
-    if (\$out =~ /Unbalanced quoting/) {
-      die "Unbalanced quoting found: \$out";
+    my $out = machine->execute("journalctl -b0 | grep -i 'Unbalanced quoting' || true");
+    if ($out =~ /Unbalanced quoting/) {
+      die "Unbalanced quoting found: $out";
     }
 
     # Проверка ExecStart
-    my \$exec = \$machine->succeed("grep ExecStart /etc/systemd/system/tor-ensure-bridges.service");
-    if (\$exec !~ /\/nix\/store/) {
-      die "ExecStart missing /nix/store: \$exec";
+    my $exec = machine->succeed("grep ExecStart /etc/systemd/system/tor-ensure-bridges.service");
+    if ($exec !~ /\/nix\/store/) {
+      die "ExecStart missing /nix/store: $exec";
     }
 
     print "=== TEST PASSED ===\n";
