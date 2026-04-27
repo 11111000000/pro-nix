@@ -101,7 +101,7 @@ EOF
       checks.${system} = {
         default = hosts.huawei.config.system.build.toplevel;
         # NixOS VM tests for activation verification
-        basic-activation-test = (import ./tests/vm/test-basic-activation.nix { inherit (pkgs) pkgs; });
+        basic-activation-test = import ./tests/vm/test-basic-activation.nix { inherit (pkgs) testers; };
       };
 
       apps.${system} = {

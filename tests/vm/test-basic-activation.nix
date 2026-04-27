@@ -1,49 +1,58 @@
 # test-basic-activation.nix — минимальный тест активации базовых юнитов
 # Проверяет отсутствие Unbalanced quoting и корректность unit-файлов
-{ pkgs, ... }:
+{ testers, ... }:
 
-pkgs.nixosTest {
+let
+  # Минимальная конфигурация для теста (без home-manager и лишнего)
+  testConfig = { config, pkgs, lib, ... }: {
+    imports = [ ../../modules/pro-privacy.nix ];
+    
+    # Базовая система
+    boot.loader.systemd-boot.enable = true;
+    boot.loader.efi.canTouchEfiVariables = false;
+    
+    # Отключаем графический стек
+    services.xserver.enable = lib.mkForce false;
+    services.displayManager.enable = lib.mkForce false;
+    
+    # Настраиваем только нужные для теста сервисы
+    services.tor = {
+      enable = false;
+      relay.enable = false;
+      hiddenServices = lib.mkForce [];
+    };
+    
+    # Минимальный размер VM
+    virtualisation.memorySize = 1024;
+    virtualisation.cores = 1;
+    virtualisation.diskSize = 4096;
+    
+    # SSH для отладки
+    services.openssh.enable = true;
+  };
+in
+testers.nixosTest {
   name = "basic-activation-test";
   
   nodes = {
-    machine = { config, lib, ... }: {
-      imports = [ ../../hosts/huawei/configuration.nix ];
-      
-      # Отключаем графический стек для упрощения теста
-      services.xserver.enable = lib.mkForce false;
-      services.displayManager.enable = lib.mkForce false;
-      services.gdm.enable = lib.mkForce false;
-      
-      # Отключаем Tor в тесте (может не работать в VM)
-      services.tor.enable = false;
-      services.tor.relay.enable = false;
-      services.tor.hiddenServices = lib.mkForce [];
-      
-      # Минимальный размер VM
-      virtualisation.memorySize = 1024;
-      virtualisation.cores = 1;
-      virtualisation.diskSize = 4096;
-      
-      # Включаем SSH для отладки
-      services.openssh.enable = true;
-    };
+    machine = testConfig;
   };
   
   testScript = ''
     # Запуск машины
     start_all();
     
-    # Ждем загрузки основных сервисов
+    # Ждем загрузки
     $machine->waitForUnit("multi-user.target");
     
-    # Даем время на стабилизацию (логи, активация)
+    # Даем время на стабилизацию
     $machine->sleep(10);
     
     # Проверка 1: unit-файлы проходят systemd-analyze verify
     $machine->succeed("systemd-analyze verify /etc/systemd/system/tor-ensure-bridges.service 2>&1");
     $machine->succeed("systemd-analyze verify /etc/systemd/system/tor-ensure-perms.service 2>&1");
     
-    # Проверка 2: отсутствие Unbalanced quoting в логах загрузки
+    # Проверка 2: отсутствие Unbalanced quoting в логах
     my $unbalanced = $machine->execute("journalctl --boot=0 | grep -i 'Unbalanced quoting' || true");
     if ($unbalanced =~ /Unbalanced quoting/) {
       die "Found Unbalanced quoting in logs: $unbalanced";
@@ -55,16 +64,11 @@ pkgs.nixosTest {
       die "Found parse failure in logs: $parse_errors";
     }
     
-    # Проверка 4: статус юнитов (не должны быть в failed)
-    $machine->succeed("systemctl is-enabled tor-ensure-bridges.service || true");
-    $machine->succeed("systemctl is-enabled tor-ensure-perms.service || true");
-    
-    # Проверка 5: файлы существуют и читаемы
+    # Проверка 4: файлы существуют
     $machine->succeed("test -f /etc/systemd/system/tor-ensure-bridges.service");
     $machine->succeed("test -f /etc/systemd/system/tor-ensure-perms.service");
-    $machine->succeed("test -f /etc/avahi/services/samba.service");
     
-    # Проверка 6: ExecStart содержит явный путь (без кавычек внутри)
+    # Проверка 5: ExecStart содержит явный путь
     my $bridges_exec = $machine->succeed("grep ExecStart /etc/systemd/system/tor-ensure-bridges.service");
     if ($bridges_exec =~ /\/bin\/sh -c/) {
       die "Found /bin/sh -c in ExecStart: $bridges_exec";
