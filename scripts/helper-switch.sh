@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# set -euo pipefail
-
-# Usage: switch.sh [HOST]
-# Safe nixos-rebuild with BOOT as primary strategy (not switch).
-# This avoids the dbus/polkit race that causes "Sender is not authorized" errors.
+# simple-helper-switch — предварительная проверка перед switch
+#
+# Использует nixpkgs defaults напрямую (без кастомных модулей).
+# Предлагает использовать boot для избежания race conditions при switch.
 
 HOST_ARG="${1:-}"
 HOST_ARG="${HOST_ARG#HOST=}"
@@ -17,7 +16,7 @@ if [ -z "$HOST_ARG" ]; then
 fi
 
 if [ -z "$HOST_ARG" ]; then
-  echo "No hostname. Run: helper-switch.sh <host>" >&2
+  echo "No hostname detected." >&2
   exit 1
 fi
 
@@ -26,46 +25,32 @@ if [ ! -f "./hosts/$HOST_ARG/configuration.nix" ]; then
   exit 1
 fi
 
-echo "[helper-switch] started for host: $HOST_ARG"
+echo "[simple-helper] Checking configuration for host: $HOST_ARG"
 
-# Strategy: Use boot instead of switch to avoid dbus/polkit race
-# This activates the new generation on REBOOT, not immediately.
-do_boot() {
-  local attempt=0
-  local max_attempts=2
-  
-  while [ $attempt -lt $max_attempts ]; do
-    attempt=$((attempt + 1))
-    echo "[helper-switch] attempt $attempt/$max_attempts: nixos-rebuild boot..." >&2
-    
-    if nixos-rebuild boot --flake ".#$HOST_ARG" 2>&1; then
-      echo "[helper-switch] boot successful. Will reboot now." >&2
-      echo "[helper-switch] Run: sudo reboot to activate new generation" >&2
-      return 0
-    fi
-    
-    echo "[helper-switch] boot attempt $attempt failed" >&2
-    sleep 2
-  done
-  
-  return 1
-}
-
-# Main
-if [ "$(id -u)" -eq 0 ]; then
-  if do_boot; then
-    echo "[helper-switch] Done. Reboot manually: sudo reboot" >&2
-  else
-    echo "[helper-switch] boot failed. Check logs." >&2
-    exit 1
-  fi
-else
-  # Use sudo
-  if sudo nixos-rebuild boot --flake ".#$HOST_ARG" 2>&1; then
-    echo "[helper-switch] boot successful. Rebooting..." >&2
-    sudo reboot
-  else
-    echo "[helper-switch] boot failed." >&2
-    exit 1
-  fi
+# 1. Preflight eval — проверяем что конфигурация вычисляется
+echo "[simple-helper] Running preflight eval..."
+if ! nix --extra-experimental-features 'nix-command flakes' eval --json ".#nixosConfigurations.$HOST_ARG.config.environment.systemPackages" >/dev/null 2>&1; then
+  echo "[simple-helper] ERROR: preflight eval failed" >&2
+  exit 1
 fi
+
+echo "[simple-helper] Preflight eval passed."
+
+# 2. Запуск switch с сохранением логов
+echo ""
+echo "[simple-helper] Running switch for $HOST_ARG..."
+echo "[simple-helper] Logs will be saved to /tmp/switch-$(date +%s).log"
+
+sudo nixos-rebuild switch --flake ".#$HOST_ARG" 2>&1 | tee "/tmp/switch-$(date +%s).log"
+
+echo ""
+echo "=== Рекомендуемый способ активации ==="
+echo ""
+echo "# Вариант 1: boot (безопасно, активируется при reboot)"
+echo "  sudo nixos-rebuild boot --flake '.#$HOST_ARG'"
+echo "  sudo reboot"
+echo ""
+echo "# Вариант 2: switch (риск race condition, но быстрее)"
+echo "  sudo nixos-rebuild switch --flake '.#$HOST_ARG'"
+echo ""
+echo "Выберите способ и выполните вручную."

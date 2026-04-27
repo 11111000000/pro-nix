@@ -1,24 +1,3 @@
 #!/bin/sh
-# pro-emacs wrapper
-# By default run Emacs in --batch mode to avoid launching GUI in CI/headless.
-# To allow interactive GUI runs, set PRO_EMACS_INTERACTIVE=1 in the environment.
-
 EMACS_BIN="/nix/store/lf7ji0bga7vix2zms5d91ipx62ps5sh2-emacs-30.2/bin/emacs"
-
-# Ensure automatic package installs are disabled by default for reproducibility.
-export PRO_PACKAGES_AUTO_INSTALL="${PRO_PACKAGES_AUTO_INSTALL:-0}"
-
-# If the caller already asked for batch mode, preserve it. Otherwise default
-# to --batch unless PRO_EMACS_INTERACTIVE=1.
-case "$*" in
-  *--batch*|-batch*)
-    exec "$EMACS_BIN" "$@"
-    ;;
-  *)
-    if [ "${PRO_EMACS_INTERACTIVE:-0}" = "1" ]; then
-      exec "$EMACS_BIN" "$@"
-    else
-      exec "$EMACS_BIN" --batch "$@"
-    fi
-    ;;
-esac
+exec "/nix/store/lf7ji0bga7vix2zms5d91ipx62ps5sh2-emacs-30.2/bin/emacs" -Q -L /nix/store/9z6zrsx6dbgrh69z7qmmp3ns7nrkciih-emacs-vertico-20250908.1638/share/emacs/site-lisp -L /nix/store/bbk27mhvircmzxqryi6cvxkn5l1bw1xg-emacs-consult-20251006.1037/share/emacs/site-lisp -L /nix/store/vknmqrldsgf3p1rhc3gwbk5pi4v58hww-emacs-orderless-20250922.1344/share/emacs/site-lisp -L /nix/store/zdxx2l82jj4slw74wakxbn478f74slj6-emacs-marginalia-20251006.1126/share/emacs/site-lisp -L /nix/store/nbnd6ix9a8yiwzqmv65b7syj2v7l1pf6-emacs-gptel-20251007.257/share/emacs/site-lisp -L /nix/store/4i4wjs2kzr5yrjxvkk65hjlxq7yip2hn-emacs-consult-dash-20250114.1511/share/emacs/site-lisp -L /nix/store/y0pc0vim3pasly18cpqj362whljb10h1-emacs-consult-eglot-20250831.924/share/emacs/site-lisp -L /nix/store/7b9s4p1s9slkbidhk31nan2jxycn665m-emacs-consult-yasnippet-20250411.1922/share/emacs/site-lisp -L /nix/store/vvmf3z9k65rzc0vf94h3rwv5442nivca-emacs-corfu-20250923.1250/share/emacs/site-lisp -L /nix/store/zzw85ni0h2ws74zi2wg2jbyx6g396arv-emacs-cape-20250920.843/share/emacs/site-lisp -L /nix/store/c9qp85zvycqp9c3sd8n4d52y1jlz081i-emacs-kind-icon-0.2.2/share/emacs/site-lisp -L /nix/store/d74pfbs9ja9m9gqsfgxc797qa1f65dra-emacs-avy-20241101.1357/share/emacs/site-lisp -L /nix/store/24ra2savpcycdg05zsakv7sf3nyqfmcy-emacs-expand-region-20241217.1840/share/emacs/site-lisp -L /nix/store/f1g8hp9kwykyigv9p94z92295czh8rkz-emacs-yasnippet-20250602.1342/share/emacs/site-lisp -L /nix/store/ba35mk5n95lr30xc1l4w27r44qxkh9xi-emacs-projectile-20250704.908/share/emacs/site-lisp -L /nix/store/apmwkmnp1nbr3ck6nqvc8yh5yf5j5cwl-emacs-treemacs-20250907.1320/share/emacs/site-lisp -L /nix/store/9h33kymdfa8v9k96vmm9xd3xqkqn756q-emacs-vterm-20250929.1514/share/emacs/site-lisp -L /nix/store/87y5974f5rjnn3dndhbbvvsalq9jy5iq-emacs-ace-window-20220911.358/share/emacs/site-lisp -L /nix/store/6wwqr892194iij0f0s35w5qbkbrhrdp5-emacs-embark-20250825.1352/share/emacs/site-lisp -L /nix/store/52svbqiyx90wz2yippknm70j1vg2ws66-emacs-dash-docs-20210830.926/share/emacs/site-lisp -L /nix/store/sbnyhwqg3fdnp30qsrfqgih975nw25bj-emacs-embark-consult-20250622.535/share/emacs/site-lisp -L /nix/store/y97dq8qw7kgcb8axjaalgr9idg2gm5q4-emacs-treemacs-icons-dired-20250320.2145/share/emacs/site-lisp -L /nix/store/iaz9fcqk2gd05xwi5fp0l648q9hj1yv5-emacs-eldoc-box-20250920.125/share/emacs/site-lisp ""
