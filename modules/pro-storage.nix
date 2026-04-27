@@ -120,14 +120,16 @@ in
   };
 
   # Publish Samba via mDNS for Android discovery.
-environment.etc."avahi/services/samba.service".text = ''<?xml version="1.0" standalone='no'?>
-<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
-<service-group>
-  <service>
-    <type>_smb._tcp</type>
-    <port>445</port>
-  </service>
-</service-group>'';
+  environment.etc."avahi/services/samba.service".text = ''
+    <?xml version="1.0" standalone='no'?>
+    <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+    <service-group>
+      <service>
+        <type>_smb._tcp</type>
+        <port>445</port>
+      </service>
+    </service-group>
+  '';
 
   # Avahi is enabled above; Samba is configured to bind to the local LAN subnet
   # and will be discoverable on the local Wi‑Fi network. If additional mDNS

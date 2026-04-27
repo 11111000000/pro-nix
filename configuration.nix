@@ -33,12 +33,11 @@
   {
   environment.etc."pro/emacs-keys.org".source = ./emacs-keys.org;
 
-   imports = [
-     ./modules/system-boot.nix
-     ./modules/packages-runtime.nix
-     ./modules/systemd-policy.nix
+imports = [
+      ./modules/system-boot.nix
+      ./modules/packages-runtime.nix
 
-     # Общие модули формируют общую политику и не зависят от пользовательских настроек.
+      # Общие модули формируют общую политику и не зависят от пользовательских настроек.
       ./modules/pro-users.nix
       ./modules/pro-services.nix
       ./modules/pro-storage.nix

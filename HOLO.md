@@ -10,11 +10,14 @@ Invariants:
 3) INV-Canonical-Roundtrip: Frozen payloads that are serialized must roundtrip (encode∘decode = id) where applicable.
 4) INV-Surface-First: Public meaning changes start in SURFACE.md and are accompanied by Proof before code-only changes.
 5) INV-Traceability: Every change follows the Change Gate (Intent/Pressure/Surface impact/Proof) and references relevant tests.
+6) INV-Package-Sync: nix/provided-packages.nix ↔ emacs/base/provided-packages.el синхронизированы; скрипт regeneration согласует списки.
+7) INV-Module-Trace: site-init.el логирует загрузку модулей в *Messages*; pro-epistemology.el отслеживает источники знания.
+8) INV-Unit-Safety: systemd unit files must pass `systemd-analyze verify` and contain no `Unbalanced quoting` or `parse failure`; use explicit paths in ExecStart, avoid embedding `pkgs.writeShellScriptBin` inside Nix strings.
 
 Decisions:
-- [Draft] Emacs profile: provide a default portable Emacs + EXWM profile. Exit: provide a migration plan and Proof (headless tests) before freezing.
-- [FROZEN] Soft Reload: provide safe, opt-in mechanisms to update UI, keybindings, modules and packages without requiring a full Emacs restart; provide tooling to refresh Nix-provided site-lisp paths and to perform a controlled restart with session restore when native extensions change. Exit: Soft Reload surfaces implemented and verified via headless ERT tests. Proof: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el` + manual test commands listed in SURFACE.md.
-  
+- [FROZEN] Emacs Base: provide a default portable Emacs + EXWM profile via home-manager.nix. Verified via tests/contract/unit/02-emacs-options.sh.
+- [FROZEN] Soft Reload: provide safe, opt-in mechanisms to update UI, keybindings, modules and packages without requiring a full Emacs restart; provide tooling to refresh Nix-provided site-lisp paths and to perform a controlled restart with session restore when native extensions change. Exit: Verified via ERT tests (tests/contract/ert-soft-reload.el). Proof: `./scripts/emacs-pro-wrapper.sh --batch -l tests/contract/ert-soft-reload.el`
+
   Migration:
     Impact: Soft Reload touches Emacs session state and may require restart when native C-extensions or compiled elisp change; scope: Emacs GUI UX Layer, modelines, icon fonts, completion backends (posframe), and site-lisp paths.
     Strategy: additive_v2 — provide an explicit runtime "pro-emacs-reload" command that attempts a best-effort reload of site-lisp and module state; when native extensions are detected changed (native-compile or binary modules), surface a controlled restart prompt that preserves session state to disk and restores where possible.
@@ -23,13 +26,22 @@ Decisions:
     Rollback: disable `pro.emacs.softReload.enable` and restart Emacs; session files preserved for manual restore.
     Tests:
       - Keep: existing headless ERT tests and UI smoke tests.
-      - Add: `tests/contract/test-soft-reload.el` (soft reload helper presence), `tests/contract/test-theme-contrast.el` (face contrast checks).
-- [Draft] Pro-peer: Discovery & Key Sync
+      - Add: `tests/contract/ert-soft-reload.el` (ERT tests for soft reload), `tests/contract/ert-session.el` (ERT tests for session).
+
+- [FROZEN] Peer Discovery: provide Avahi + SSH hardening + Yggdrasil + WireGuard Helper. Verified via tests/contract/unit/01-pro-peer-basic.sh.
   Pressure: Ops
   Rationale: pro-peer is an operational surface that manages distribution of authorized_keys and encrypted per-host artifacts. It affects host setup and security; changes touching it require operator coordination and proof (smoke scripts + systemd unit checks).
-  Exit: Documented migration and a minimal smoke-test (scripts/ops-pro-peer-sync-keys.sh) present.
+  Exit: Smoke test present and passing.
 
 - [Draft] LLM Research Surface: provide a reproducible notebook-based environment for model inspection, prompt tests, dataset exploration, and lightweight evaluation. Exit: `llm-lab` is exposed on PATH and covered by `tests/contract/unit/03-llm-tools.sh`.
+
+- [Draft] Package Knowledge Graph: provide pro-epistemology.el for epistemic tracing of package sources. Exit: pro-epistemology.el created and covered by tests.
+
+- [FROZEN] Tor Ensure Services: provide tor-ensure-bridges and tor-ensure-perms with correct ExecStart paths; use after=dbus-broker.service polkit.service to avoid race condition. Exit: systemd-analyze verify passes; no "Unbalanced quoting" or "parse failure" in journalctl.
+  Pressure: Ops
+  Rationale: Incorrect ExecStart quoting (derivation-to-string conversion) caused systemd to ignore units, leading to cascade failures and reboots on live switch.
+  Exit: ExecStart uses explicit store paths via "${pkgs.writeShellScriptBin "name" ''...''}/bin/name";, not inline Nix strings with embedded writeShellScriptBin.
+  Proof: `tests/contract/validate-units.sh` (build etc, verify units, check for quoting/parse errors).
 
 Proofs / Verification Commands (add to Change Gate):
 - Contract tests: `tests/contract/test_surface_health.spec`
