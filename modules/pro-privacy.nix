@@ -87,20 +87,17 @@
   systemd.services."tor-ensure-bridges" = {
     description = "Ensure /etc/tor/bridges.conf exists (create from template)";
     wantedBy = [ "multi-user.target" ];
-    # Ensure this runs before tor.service so the bridges file exists when Tor starts
     before = [ "tor.service" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = let
-        script = pkgs.writeShellScriptBin "tor-ensure-bridges" ''
-          mkdir -p /etc/tor
-          if [ ! -e /etc/tor/bridges.conf ]; then
-            cp /etc/tor/bridges.conf.example /etc/tor/bridges.conf
-            chown root:root /etc/tor/bridges.conf
-            chmod 0640 /etc/tor/bridges.conf
-          fi
-        '';
-      in "${script}/bin/tor-ensure-bridges";
+      ExecStart = "${pkgs.writeShellScriptBin "tor-ensure-bridges" ''
+        mkdir -p /etc/tor
+        if [ ! -e /etc/tor/bridges.conf ]; then
+          cp /etc/tor/bridges.conf.example /etc/tor/bridges.conf
+          chown root:root /etc/tor/bridges.conf
+          chmod 0640 /etc/tor/bridges.conf
+        fi
+      ''}/bin/tor-ensure-bridges";
     };
   };
 
@@ -110,16 +107,14 @@
     before = [ "tor.service" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = let
-        script = pkgs.writeShellScriptBin "tor-ensure-perms" ''
-            mkdir -p /var/lib/tor
-            chown -R tor:tor /var/lib/tor || true
-            chmod 700 /var/lib/tor || true
-            if [ -d /var/lib/tor/ssh_hidden_service ]; then
-              chmod 700 /var/lib/tor/ssh_hidden_service
-            fi
-          '';
-      in "${script}/bin/tor-ensure-perms";
+      ExecStart = "${pkgs.writeShellScriptBin "tor-ensure-perms" ''
+        mkdir -p /var/lib/tor
+        chown -R tor:tor /var/lib/tor || true
+        chmod 700 /var/lib/tor || true
+        if [ -d /var/lib/tor/ssh_hidden_service ]; then
+          chmod 700 /var/lib/tor/ssh_hidden_service
+        fi
+      ''}/bin/tor-ensure-perms";
     };
     wantedBy = [ "multi-user.target" ];
   };
