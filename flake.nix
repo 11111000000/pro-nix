@@ -39,6 +39,16 @@
         ] ++ globalModules ++ extraModules;
       };
 
+      # Minimal VM host for testing without full configuration.nix (which brings in pro-peer, etc)
+      mkVmHost = extraModules: nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = { inherit emacsPkg opencode_from_release; };
+        modules = [
+          home-manager.nixosModules.home-manager
+          ./nixos/modules/opencode-config.nix
+        ] ++ extraModules;
+      };
+
       # Deterministic opencode derivation used by apps and made available
       # via specialArgs to system modules for reproducible installs.
       opencode_from_release = pkgs.stdenv.mkDerivation rec {
@@ -94,6 +104,7 @@ EOF
       hosts = {
         cf19 = mkHost [ ./hosts/cf19/configuration.nix ];
         huawei = mkHost [ ./hosts/huawei/configuration.nix ];
+        vm = mkVmHost [ ./hosts/vm/configuration.nix ];
       };
     in {
       nixosConfigurations = hosts;
