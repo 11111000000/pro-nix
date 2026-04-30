@@ -1,54 +1,245 @@
 # Вклад в pro-nix
-=================================
 
-Кратко: перед внесением изменений прочитайте `AGENTS.md`, затем `SURFACE.md`, затем `README.md`.
+`CONTRIBUTING.md` описывает практический процесс изменения репозитория. Общая
+карта проекта находится в `README.md`; публичные контракты — в `SURFACE.md`;
+инварианты и решения — в `HOLO.md`.
 
-Основные обязанности автора изменений
-- Писать комментарии и документы на русском языке в учебном стиле: кратко формулируйте цель, инварианты и предположения.
-- Один Intent — один коммит/PR. В теле коммита/PR указывайте Change Gate блок (см. шаблон ниже).
-- Не добавляйте секреты в репозиторий. Если нужен секрет — используйте operator-managed encrypted artifacts (sops/age) и упомяните это в Change Gate.
+Цель правил: сохранять воспроизводимость, композиционность модулей и
+проверяемость поведения. Изменение считается завершённым только тогда, когда его
+Intent ясен, Surface impact определён, Proof запущен или явно указан, а риск
+миграции описан для стабильных поверхностей.
 
-Обязательные проверки перед PR
-1. Убедитесь, что рабочий каталог чист: `git status --short`.
-2. Запустите unit-suite: `./tools/holo-verify.sh unit`.
-3. Запустите mkForce‑lint: `./tools/mkforce-lint.sh` — устраните явные проблемы или задокументируйте причину их оставления.
-4. Для изменений, затрагивающих SURFACE (см. `SURFACE.md`) — обязательно заполните Change Gate в описании PR.
+## Перед началом
 
-Change Gate — обязательный блок
-Каждый PR, который меняет публичные поверхности или поведение, должен содержать в описании PR блок:
+Прочитайте документы в этом порядке:
 
-Intent: <коротко, 1 предложение>
+1. `AGENTS.md` — локальная политика агентов и инженерные ограничения.
+2. `SURFACE.md` — публичные контракты и Proof-команды.
+3. `HOLO.md` — инварианты, решения и проверочная модель.
+4. `README.md` — общая карта репозитория.
+5. `CONTRIBUTING.md` — этот процесс изменения.
+
+Сформулируйте один доминирующий Intent. Если задача затрагивает несколько
+подсистем, сначала сузьте её до одного проверяемого изменения.
+
+## Change Gate
+
+Каждое содержательное изменение проходит через Change Gate. Для небольших
+локальных правок его можно держать в PR-описании. Для изменений, затрагивающих
+публичные контракты, Change Gate обязателен.
+
+Формат:
+
+```text
+Intent: <одна строка о цели изменения>
 Pressure: Bug | Feature | Debt | Ops
-Surface impact: (none) | touches: <список поверхностей из SURFACE.md>
-Proof: <список команд/тестов, которые проверяют изменение>
+Surface impact: (none) | touches: <SURFACE item(s)> [FROZEN/FLUID]
+Proof: <команды, тесты или CI-job, подтверждающие изменение>
+```
 
-Пример Change Gate
-Intent: Убрать принудительные наложения пакетов в модулях, чтобы модульные вклады были аддитивны
-Pressure: Bug
-Surface impact: touches: Healthcheck [FROZEN] (см. SURFACE.md)
-Proof: ./tools/holo-verify.sh unit
+Пример:
 
-Политики Nix (коротко)
-- Модули должны добавлять пакеты через `lib.mkDefault` или возвращать списки.
-- Окончательная агрегация пакетов — только в корневом `configuration.nix` (host-level); там допускается `lib.mkForce` для фиксации итогового списка.
-- Избегайте обращения модулей к `config.environment.systemPackages` при формировании собственных пакетов.
+```text
+Intent: Сделать pro-peer key sync проверяемым без live-активации.
+Pressure: Ops
+Surface impact: touches: Peer Key Sync [FLUID]
+Proof: bash scripts/ops-pro-peer-sync-keys.sh --help; ./tools/holo-verify.sh
+```
 
-Как писать безопасные патчи
-- Малые изменения: один модуль — одна PR. Каждый PR должен проходить unit‑suite.
-- Для безопасных, но влияющих на безопасность изменений (authorized_keys, sudo rules, samba global) — включайте canary‑план и rollback инструкции.
+Если изменение касается `SURFACE.md` с пометкой `[FROZEN]`, добавьте Migration:
 
-Рабочие команды
-- Запуск unit‑suite: `./tools/holo-verify.sh unit`
-- Генерация mkForce списка: `./tools/generate-mkforce-json.sh`
-- Lint lib.mkForce: `./tools/mkforce-lint.sh`
-- Генерация options registry (кратко): `./tools/generate-options-v2.sh`
+```text
+Migration:
+  Impact: <что меняется для пользователя или оператора>
+  Strategy: <как перейти на новое поведение>
+  Rollback: <как вернуться к прежнему состоянию>
+  Proof: <какая проверка подтверждает безопасный переход>
+```
 
-Canary / Rollback (pro-peer example)
-- Dry-run: `sudo /etc/ops-pro-peer-canary.sh --input /tmp/test-authorized_keys.gpg --out /var/lib/pro-peer/authorized_keys`
-- Apply on canary: `sudo /etc/ops-pro-peer-sync-keys.sh --input /tmp/test-authorized_keys.gpg --out /var/lib/pro-peer/authorized_keys`
-- Rollback: `sudo cp /var/lib/pro-peer/authorized_keys.bak.<timestamp> /var/lib/pro-peer/authorized_keys && sudo chown root:root /var/lib/pro-peer/authorized_keys && sudo chmod 600 /var/lib/pro-peer/authorized_keys`
+Если для `[FROZEN]` поверхности нет Proof или Migration, изменение нужно
+остановить до появления недостающих данных.
 
-Контакты и эскалация
-- Для мастер-планов (многофайловые изменения, затрагивающие SURFACE) — согласуйте с владельцем репозитория. Если у вас нет владельца, откройте issue с Change Gate и обсудите план в PR.
+## Surface First
 
-Спасибо за аккуратные и фокусные правки — придерживайтесь HDS (Surface → Proof → Code → Verify).
+Публичное поведение меняется в порядке `Surface -> Proof -> Code -> Verify`.
+
+- Если правка не меняет наблюдаемое поведение, укажите `Surface impact: none`.
+- Если правка меняет FLUID-поверхность, обновите `SURFACE.md` и Proof при
+  необходимости.
+- Если правка меняет FROZEN-поверхность, сначала зафиксируйте контракт,
+  Migration и Proof, затем меняйте код.
+- Если добавляется новый публичный entrypoint, опция, systemd-сервис или команда,
+  добавьте контрактную запись или объясните, почему это внутренняя деталь.
+
+## Правила письма
+
+Документация, комментарии и docstring в этом репозитории пишутся на русском
+языке.
+
+Пишите как контракт:
+
+- цель;
+- инварианты;
+- ограничения;
+- эффекты;
+- проверки.
+
+Не пишите расплывчатые формулы вроде «улучшить», «удобно», «красиво», если их
+нельзя проверить. Если термин может быть понят по-разному, дайте короткое
+определение.
+
+## Правила Nix
+
+- Модуль должен вносить вклад, а не финализировать систему.
+- В общих модулях предпочитайте `lib.mkDefault`, композицию списков и локальные
+  опции.
+- `lib.mkForce` допустим на host-уровне, когда нужно окончательно зафиксировать
+  политику.
+- Не формируйте модульные списки через прямую зависимость от
+  `config.environment.systemPackages`, если это создаёт рекурсию или скрытую
+  связанность.
+- Крупные Nix-файлы разделяйте по ответственности.
+- Для `systemd.services.<name>.serviceConfig.ExecStart` используйте явные пути к
+  скриптам или простые shell-команды. Не вставляйте `pkgs.writeShellScriptBin`
+  внутрь строки `ExecStart` так, чтобы derivation неявно превращался в путь.
+
+Для изменений в `environment.systemPackages` обязательны дополнительные проверки:
+
+```bash
+nix --extra-experimental-features 'nix-command flakes' eval --json .#nixosConfigurations.<host>.config.environment.systemPackages
+bash tests/contract/unit/09-system-packages-eval.sh
+```
+
+## Правила Emacs Lisp
+
+- Одна функция выполняет одну задачу.
+- Публичная функция имеет docstring с кратким контрактом.
+- Побочные эффекты локализованы и описаны.
+- Изменения поведения сопровождаются ERT-тестом или явным объяснением, почему
+  тест не применим.
+- Длинные монолитные функции разбиваются на helpers, если это улучшает границы
+  ответственности.
+
+Базовая проверка загрузки модуля:
+
+```bash
+emacs --batch --eval "(require 'pro-nix)"
+```
+
+Используйте конкретный модуль вместо `pro-nix`, если меняли другой файл.
+
+## Проверки
+
+Минимальный набор для документационных и контрактных изменений:
+
+```bash
+./tools/surface-lint.sh
+./tools/holo-verify.sh
+```
+
+Базовая flake-проверка:
+
+```bash
+nix flake check
+```
+
+Для проверки всех хостов через flake app:
+
+```bash
+nix run .#check-all
+```
+
+Для NixOS-хоста:
+
+```bash
+nix build .#nixosConfigurations.<host>.config.system.build.toplevel
+```
+
+Для live-активации сначала проверьте вычислимость профиля пакетов:
+
+```bash
+nix --extra-experimental-features 'nix-command flakes' eval --json .#nixosConfigurations.<host>.config.environment.systemPackages
+```
+
+Если preflight падает, `nixos-rebuild switch` запрещён до исправления причины.
+
+## Pull Request Checklist
+
+Перед PR проверьте:
+
+1. Intent сформулирован одной строкой.
+2. Change Gate заполнен.
+3. `Surface impact` соответствует фактическому изменению.
+4. Для `[FROZEN]` поверхности есть Migration и Proof.
+5. Секреты, токены и machine-local state не попали в diff.
+6. Запущены релевантные Proof-команды.
+7. Если проверка не запускалась, причина указана явно.
+
+## Безопасные патчи
+
+Делайте минимальный diff, который закрывает Intent.
+
+- Один PR — одна доминирующая цель.
+- Один файл — одна ответственность.
+- Не смешивайте экспериментальный код с каноническими модулями.
+- Не исправляйте соседние проблемы без отдельного Intent.
+- Не добавляйте backward compatibility без конкретного внешнего потребителя,
+  сохранённых данных или явного требования.
+
+Если изменение влияет на доступ, сеть, ключи, systemd units или live-активацию,
+добавьте canary и rollback в PR-описание.
+
+## Canary и rollback
+
+Для операционных изменений опишите:
+
+- где запускается canary;
+- какие команды подтверждают успех;
+- какие логи проверяются;
+- как вернуть прежнее состояние;
+- какой риск остаётся после rollback.
+
+Пример для pro-peer key sync:
+
+```bash
+sudo /etc/ops-pro-peer-canary.sh --input /tmp/test-authorized_keys.gpg --out /var/lib/pro-peer/authorized_keys
+sudo /etc/ops-pro-peer-sync-keys.sh --input /tmp/test-authorized_keys.gpg --out /var/lib/pro-peer/authorized_keys
+sudo cp /var/lib/pro-peer/authorized_keys.bak.<timestamp> /var/lib/pro-peer/authorized_keys
+sudo chown root:root /var/lib/pro-peer/authorized_keys
+sudo chmod 600 /var/lib/pro-peer/authorized_keys
+```
+
+## Секреты и локальные данные
+
+В репозиторий нельзя добавлять:
+
+- приватные ключи;
+- токены API;
+- незашифрованные credentials;
+- локальные state-файлы;
+- артефакты сборки и временные дампы.
+
+Если изменение требует секрета, опишите operator-managed механизм: sops/age,
+локальный файл вне git, host-specific overlay или другой утверждённый канал.
+
+## Полезные команды
+
+```bash
+git status --short
+./tools/surface-lint.sh
+./tools/holo-verify.sh
+./tools/mkforce-lint.sh
+./tools/generate-mkforce-json.sh
+./tools/generate-options-v2.sh
+nix flake check
+nix run .#check-all
+```
+
+## Эскалация
+
+Если изменение затрагивает несколько подсистем, FROZEN-поверхность,
+авторизацию, сеть, live-активацию или миграцию данных, согласуйте план до
+реализации. Если владелец недоступен, откройте issue или draft PR с Change Gate,
+Migration и предполагаемым Proof.
+
+Фокус проекта — не скорость изменения, а безопасная эволюция проверяемой системы.
