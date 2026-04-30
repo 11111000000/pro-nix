@@ -1,180 +1,152 @@
-# pro-nix: воспроизводимая NixOS-платформа
+# pro-nix — воспроизводимая платформа NixOS + Emacs + Ops + Agents
 
-pro-nix — воспроизводимая конфигурация NixOS, Emacs и операционных инструментов. Репозиторий задаёт целостную рабочую систему: базовую ОС, пользовательскую среду, сетевые сервисы, Emacs-платформу, агентные и LLM-инструменты, а также проверки, которые подтверждают поведение системы.
+Коротко: pro-nix — это воспроизводимая, проверяемая и композиционная конфигурация
+NixOS, переносимого Emacs-профиля и набора операционных инструментов и
+entrypoint-ов для агентных/LLM-экспериментов. Проект организован как набор
+публичных контрактов (SURFACE.md), инвариантов и решений (HOLO.md) и Proof-скриптов,
+которые подтверждают обещанное поведение.
 
-Состояние машины выводится из читаемой, проверяемой и композиционной спецификации. Публичное поведение описывается в SURFACE.md и подтверждается Proof.
+Цель README — дать сжатую, практическую карту репозитория: что это такое,
+для кого, из каких подсистем состоит и как быстро начать работу.
 
-## Суть
+Что ответит этот документ:
 
-pro-nix соединяет четыре слоя в один контур:
+- Что это и зачем? (одно предложение)
+- Из чего состоит репозиторий (архитектурная карта)
+- Кто какие роли играет (user/operator/contributor/researcher)
+- Как быстро проверить/собрать/запустить (quickstart)
+- Как проверяется «истина» проекта (SURFACE/HOLO/Proof)
 
-- NixOS — политика системы: загрузка, сеть, пользователи, сервисы, безопасность, пакеты.
-- Emacs — переносимая рабочая платформа: LSP, REPL, EXWM, soft reload.
-- Ops — операционные сценарии: peer discovery, Tor, key sync, headscale, storage, resource limits.
-- Agents/LLM — воспроизводимые entrypoint-ы для исследований, прототипирования и локальной агентной работы.
+Принципы
 
-Проект функционирует как контрактная система. SURFACE.md фиксирует публичные гарантии. HOLO.md фиксирует инварианты и решения. Код в modules/, hosts/, emacs/, scripts/ и tools/ реализует эти гарантии композиционно.
+- Воспроизводимость: конфигурация должна быть вычисляема и документируема.
+- Минимализм изменений: один Intent — одно изменение/PR.
+- Surface First: публичные обещания фиксируются в SURFACE.md перед изменением.
+- Проверяемость: для FROZEN-поверхностей Proof обязателен.
+- Безопасность: секреты и machine-local state — вне git.
 
-## Принципы
+Краткая архитектура
 
-- Воспроизводимость — основное требование к конфигурации.
-- Модуль вносит вклад, не финализируя систему.
-- Публичное поведение фиксируется как Surface и подтверждается Proof.
-- Секреты хранятся вне git.
-- Emacs — часть платформы.
-- Агентные и LLM-инструменты следуют правилам воспроизводимости.
+- flake.nix — внешний интерфейс: hosts, apps, checks, devShells.
+- configuration.nix — кросс-хостовая база политики NixOS.
+- hosts/* — host-specific конфигурации (huawei, cf19, vm).
+- modules/*, nixos/modules/* — составные NixOS-модули (network, peer, privacy, desktop, opencode, zram и т.д.).
+- emacs/home-manager.nix, emacs/base/* — переносимый Emacs-профиль, site-lisp, soft-reload helpers.
+- system-packages.nix / packages-runtime.nix — системные и runtime-пакеты (включая emacsRuntime, llm-lab, opencode).
+- scripts/*, tools/*, tests/* — проверочные скрипты, smoke и contract tests, утилиты верификации.
+- SURFACE.md / HOLO.md / CONTRIBUTING.md — публичные контракты, инварианты и процесс изменений.
 
-## Архитектура
+Подсистемы и ответственность
 
-| Область | Файлы | Назначение |
-|---------|-------|------------|
-| Flake-интерфейс | flake.nix | Единая точка входа: хосты, checks, apps, devshells. |
-| Общая NixOS-политика | configuration.nix | Кросс-хостовая база: загрузчик, сеть, пользователи, сервисы, runtime. |
-| Хосты | hosts/*/configuration.nix | Host-specific параметры и отличия. |
-| Модули NixOS | modules/*.nix, nixos/modules/*.nix | Составные политики: сеть, privacy, peer, desktop, opencode, zram. |
-| Пакеты | system-packages.nix, packages-runtime.nix | Базовые утилиты, Emacs runtime, optional-пакеты, LLM entrypoint-ы. |
-| Emacs | emacs/home-manager.nix, emacs/base/* | Переносимый профиль Emacs через Home Manager и site-lisp. |
-| Скрипты и проверки | scripts/*, tests/*, tools/* | Smoke, ops, contract tests и утилиты верификации. |
-| Документация | SURFACE.md, HOLO.md, docs/*, CONTRIBUTING.md | Контракты, решения и процессы изменения. |
+- NixOS: загрузчик, сеть, пользователи, сервисы, приложения, security-hardening.
+- Emacs: переносимый runtime, модули, soft-reload, session-serialization.
+- Peer & Privacy: avahi/mdns, pro-peer key sync, Tor client/hidden-service, Yggdrasil, WireGuard helper.
+- Ops & Runtimes: opencode delivery, headscale, systemd services, resource limits (zram/opencode slice).
+- Agents & LLM: llm-lab, proctl, model-client — reproducible entrypoints for experiments.
 
-## Подсистемы
+Хостовая матрица (кратко)
 
-NixOS
+- huawei — primary laptop/workstation; systemd-boot, zram/opencode limits.
+- cf19 — field/ops profile; GRUB/BIOS, pro-peer key sync, Tor hidden service for SSH.
+- vm — lightweight virtual image used for CI and fast iteration.
 
-configuration.nix собирает общую политику. hosts/* задают host-specific параметры: загрузчик, разделы, флаг включения сервисов и аппаратные опции.
+Quickstart
 
-Emacs
-
-emacs/home-manager.nix и emacs/base/* формируют переносимый профиль: предоставляют emacsRuntime, load-path и набор модулей с поддержкой soft reload.
-
-Peer, сеть и приватность
-
-pro-peer, pro-services, pro-privacy и headscale обеспечивают: NetworkManager, systemd-resolved, SSH hardening, Avahi/mDNS, синхронизацию ключей, Tor client, Tor hidden service, Yggdrasil и WireGuard helper.
-
-Пакеты и runtime
-
-system-packages.nix разделяет базовые и optional-пакеты. enableOptional контролирует включение тяжёлых GUI/сервисов.
-
-Агенты и LLM
-
-llm-lab, opencode и proctl — воспроизводимые entrypoint-ы для исследований и прототипирования. Эти инструменты входят в операционную среду и подчиняются тем же правилам воспроизводимости.
-
-## Хосты
-
-| Хост | Назначение | Особенности |
-|------|------------|-------------|
-| huawei | Основная laptop/workstation | systemd-boot, zram/opencode limits, рабочий набор сервисов. |
-| cf19 | Полевая/операционная конфигурация | GRUB/BIOS, pro-peer key sync, Tor hidden service for SSH. |
-| vm | Минимальная виртуальная конфигурация | Быстрая проверка сборки и изоляция экспериментов. |
-
-Сборка хоста:
-
-```bash
-nix build .#nixosConfigurations.huawei.config.system.build.toplevel
-```
-
-Live-активация выполняется после проверок:
-
-```bash
-sudo nixos-rebuild switch --flake .#huawei
-```
-
-## Быстрый старт
-
-1. Клонировать репозиторий:
+1. Клонировать репозиторий и войти в корень проекта:
 
 ```bash
 git clone git@github.com:11111000000/pro-nix.git
 cd pro-nix
 ```
 
-2. Проверить flake:
+2. Быстрая проверка flake и контрактов:
 
 ```bash
 nix flake check
+./tools/surface-lint.sh
 ```
 
-3. Собрать профиль хоста:
+3. Собрать профиль хоста (пример для huawei):
 
 ```bash
 nix build .#nixosConfigurations.huawei.config.system.build.toplevel
 ```
 
-4. Войти в devshell:
+4. Войти в devshell для разработки:
 
 ```bash
 nix develop .#devShells.x86_64-linux.default
 ```
 
-5. Запустить Emacs:
+5. Запустить portable Emacs (локально):
 
 ```bash
 ./scripts/emacs-pro-wrapper.sh
 ```
 
-6. Запустить проверочный entrypoint:
+6. Запустить полный набор проверок (entrypoint):
 
 ```bash
 nix run .#check-all
 ```
 
-## Контракты и Proof
+Контракты, Proof и верификация
 
-Код и публичные обещания разграничены. Изменения публичного поведения фиксируются в SURFACE.md и сопровождаются Proof.
+Проект отделяет код и публичные обещания. Любое поведение, которое необходимо
+гарантировать внешним пользователям или другим подсистемам, описано в SURFACE.md
+и сопровождается Proof-скриптом или тестом.
 
-- SURFACE.md — реестр публичных контрактов и команд для их проверки.
-- HOLO.md — инварианты и архитектурные решения.
-- AGENTS.md — правила взаимодействия агентов и инженерные ограничения.
-- CONTRIBUTING.md — процесс изменения: Change Gate, проверки, rollback/canary.
+- SURFACE.md — публичный реестр контрактов и команды Proof.
+- HOLO.md — инварианты, принципы и архитектурные решения.
+- CONTRIBUTING.md — порядок изменений: Change Gate, Migration, Proof и Verify.
 
-Минимальные проверки:
-
-```bash
-./tools/surface-lint.sh
-./tools/holo-verify.sh
-```
-
-Базовая flake-проверка:
+Основные команды проверки:
 
 ```bash
-nix flake check
+./tools/surface-lint.sh   # проверяет ссылки SURFACE → Proof и базовые style-правила
+./tools/holo-verify.sh    # прогон контрактов и вспомогательных проверок
+nix flake check           # стандартная flake-проверка
 ```
 
-## Рабочий цикл
+Жизненный цикл изменения (сжатая процедура)
 
-1. inspect — прочитать AGENTS.md, SURFACE.md, HOLO.md и релевантные модули.
-2. contract — определить влияние на публичную поверхность; для FROZEN подготовить Migration и Proof.
-3. patch — внести минимальную правку.
-4. verify — запустить Proof и релевантные проверки.
-5. switch — применять live-конфигурацию после успешных preflight-проверок.
+1. Inspect — прочитать AGENTS.md, SURFACE.md, HOLO.md и релевантные модули.
+2. Contract — сформулировать Intent, Surface impact и Proof (особенно для FROZEN).
+3. Patch — минимальный код/док-дифф, соблюдая правила Nix/Emacs проекта.
+4. Verify — запустить Proof, surface-lint и holo-verify.
+5. Switch — live-активация после успешных preflight-проверок (при необходимости).
 
-Подробный процесс — в CONTRIBUTING.md.
-
-## Границы репозитория
+Границы репозитория
 
 В репозитории хранится:
 
-- декларативная NixOS и Home Manager политика;
-- публичные контракты и решения;
-- проверяемые scripts, tools и tests;
-- воспроизводимые entrypoint-ы для Emacs, ops и LLM.
+- декларативная NixOS/Home-Manager конфигурация;
+- проверяемые скрипты и tests/contract;
+- документация контрактов (SURFACE.md, HOLO.md) и процесс изменения (CONTRIBUTING.md).
 
-В репозитории не хранятся:
+В репозитории НЕ хранится:
 
-- приватные ключи, токены и незашифрованные credentials;
-- machine-local state, который нельзя вывести из конфигурации;
-- временные артефакты сборки и дампы.
+- приватные ключи, незашифрованные credentials;
+- machine-local state и runtime-артефакты;
+- секреты для production — используются внешние operator-managed хранилища (sops/age, vault и т.п.).
 
-Host-specific секреты и локальные исключения находятся вне публичной истории или в operator-managed encrypted artifacts.
+Кому это полезно (ролевая карта)
 
-## Карта чтения
+- Пользователь — использует готовую конфигурацию и portable Emacs; читает README + SURFACE.
+- Оператор — разворачивает host-specific конфигурации, реагирует на canary и rollback инструкции.
+- Контрибьютор — формирует Change Gate, пишет Proof, запускает surface-lint/holo-verify.
+- Исследователь/LLM-энтузиаст — использует llm-lab, proctl и devShell для экспериментов.
 
-1. README.md — обзор и карта проекта.
-2. SURFACE.md — публичные гарантии и Proof.
-3. HOLO.md — инварианты и решения.
-4. CONTRIBUTING.md — процесс изменений.
+Карта чтения (рекомендуемая)
+
+1. README.md — обзор и краткая карта.
+2. SURFACE.md — публичные контракты и Proof-команды.
+3. HOLO.md — инварианты и архитектурные решения.
+4. CONTRIBUTING.md — процесс изменения и Change Gate.
 5. docs/ — детальные спецификации и runbook-и.
 
-## Короткая формула
+Короткая формула
 
-pro-nix — воспроизводимая рабочая система, где ОС, Emacs, сеть, ops-инструменты, агенты и проверки связаны единым контрактом.
+pro-nix — это не просто NixOS-конфиг: это воспроизводимая рабочая система, в которой
+NixOS, Emacs, сеть, операционные инструменты и entrypoint-ы для агентных исследований
+связаны единым контрактом и набором проверок.
