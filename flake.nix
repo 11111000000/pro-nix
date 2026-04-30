@@ -14,8 +14,18 @@
       lib = nixpkgs.lib;
       # Import nixpkgs. Also create a variant with the local emacs overlay
       # so we can optionally reference emacsPackages that the overlay exposes.
-      pkgs = import nixpkgs { inherit system; };
-      pkgsOverlay = import nixpkgs { inherit system; overlays = [ (import ./nix/overlays/emacs-extra.nix) ]; };
+      nixpkgsConfig = {
+        allowUnfree = true;
+      };
+      pkgs = import nixpkgs {
+        inherit system;
+        config = nixpkgsConfig;
+      };
+      pkgsOverlay = import nixpkgs {
+        inherit system;
+        config = nixpkgsConfig;
+        overlays = [ (import ./nix/overlays/emacs-extra.nix) ];
+      };
       emacsPkg = pkgs.emacs30 or pkgs.emacs;
       pythonWithTextual = pkgs.python3.withPackages (ps: with ps; [ textual psutil ]);
       # Python environment for agent apps (coordinator/worker)
@@ -29,6 +39,7 @@
 
       mkHost = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;
+        pkgs = pkgs;
         specialArgs = { inherit emacsPkg opencode_from_release; };
         modules = [
           home-manager.nixosModules.home-manager
@@ -42,6 +53,7 @@
       # Minimal VM host for testing without full configuration.nix (which brings in pro-peer, etc)
       mkVmHost = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;
+        pkgs = pkgs;
         specialArgs = { inherit emacsPkg opencode_from_release; };
         modules = [
           home-manager.nixosModules.home-manager
@@ -112,6 +124,9 @@ EOF
       checks.${system} = {
         default = hosts.huawei.config.system.build.toplevel;
         # NixOS VM tests for activation verification
+        huawei-boot = import ./tests/vm/huawei-boot.nix {
+          inherit (pkgs) testers home-manager;
+        };
         basic-activation-test = import ./tests/vm/test-basic-activation.nix { inherit (pkgs) testers; };
       };
 

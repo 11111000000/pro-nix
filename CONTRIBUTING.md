@@ -28,36 +28,41 @@ Intent ясен, Surface impact определён, Proof запущен или 
 локальных правок его можно держать в PR-описании. Для изменений, затрагивающих
 публичные контракты, Change Gate обязателен.
 
-Формат:
+Формат (шаблон для PR):
 
 ```text
-Intent: <одна строка о цели изменения>
-Pressure: Bug | Feature | Debt | Ops
+Intent: <одной строкой опишите цель изменения>
+Pressure: <Bug | Feature | Debt | Ops>
 Surface impact: (none) | touches: <SURFACE item(s)> [FROZEN/FLUID]
-Proof: <команды, тесты или CI-job, подтверждающие изменение>
+Proof: tests: <команды или файлы, подтверждающие изменение>
+
+## Краткое описание
+
+- <пункт 1 — что сделано>
+- <пункт 2 — зачем>
+- <пункт 3 — результат>
+- <пункт 4 — риски или ограничения>
+
+## Проверки
+
+- [ ] Я обновил `SURFACE.md`, если менялось публичное поведение.
+- [ ] Я добавил или обновил Proof для `[FROZEN]` поверхностей.
+- [ ] Я запустил `nix fmt`.
+- [ ] Я запустил `nix flake check`.
+- [ ] Я запустил `./tools/surface-lint.sh`.
+- [ ] Я запустил `./tools/holo-verify.sh`.
+
+## Migration (заполняется только если затронут `[FROZEN]`)
+
+- Impact: <что меняется>
+- Strategy: <additive_v2 | feature_toggle | break_with_window>
+- Window/Version: <окно или версия>
+- Data/Backfill: <что нужно перенести или "n/a">
+- Rollback: <безопасный откат>
+- Tests:
+  - Keep: <что сохраняется>
+  - Add: <что добавляется>
 ```
-
-Пример:
-
-```text
-Intent: Сделать pro-peer key sync проверяемым без live-активации.
-Pressure: Ops
-Surface impact: touches: Peer Key Sync [FLUID]
-Proof: bash scripts/ops-pro-peer-sync-keys.sh --help; ./tools/holo-verify.sh
-```
-
-Если изменение касается `SURFACE.md` с пометкой `[FROZEN]`, добавьте Migration:
-
-```text
-Migration:
-  Impact: <что меняется для пользователя или оператора>
-  Strategy: <как перейти на новое поведение>
-  Rollback: <как вернуться к прежнему состоянию>
-  Proof: <какая проверка подтверждает безопасный переход>
-```
-
-Если для `[FROZEN]` поверхности нет Proof или Migration, изменение нужно
-остановить до появления недостающих данных.
 
 ## Surface First
 
