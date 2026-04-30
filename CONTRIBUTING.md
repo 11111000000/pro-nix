@@ -139,3 +139,70 @@ Change Gate и Migration; добавьте контактную информац
 
 Фокус проекта — безопасная эволюция воспроизводимой системы, а не скорость
 изменений.
+
+---
+
+Работа с opencode — ветки и git worktree
+
+Если у вас несколько копий / агентов, которые одновременно разрабатывают репозиторий,
+рекомендуем использовать правило "one agent = one branch" в сочетании с `git worktree`.
+
+Конвенция имён веток
+
+- opencode/<agent-id>/<feature-slug>
+
+Примеры:
+
+- opencode/agent42/soft-reload-fix
+- opencode/session-20260430T095920Z/iter1
+
+Создание ветки и worktree (ручной способ)
+
+1. Создать ветку (от ветки, от которой хотите ответвиться, например origin/main):
+
+```bash
+git fetch origin
+git checkout -b opencode/<agent-id>/<feature> origin/main
+```
+
+2. Создать отдельный рабочий каталог с привязанной веткой:
+
+```bash
+git worktree add ../pro-nix-<agent-id>-<feature> opencode/<agent-id>/<feature>
+cd ../pro-nix-<agent-id>-<feature>
+```
+
+3. Работать в этом каталоге: правки, коммиты, push.
+
+```bash
+git add ... && git commit -m "feat: ..." && git push -u origin opencode/<agent-id>/<feature>
+```
+
+Удаление worktree и ветки
+
+```bash
+cd /path/to/original/repo
+git worktree remove ../pro-nix-<agent-id>-<feature>
+git branch -D opencode/<agent-id>/<feature>
+git push origin --delete opencode/<agent-id>/<feature>
+```
+
+Автоматизация: helper-скрипт
+
+В репозитории есть `scripts/create-opencode-branch.sh` — он создаёт ветку,
+пишет шаблон метаданных `.opencode/opencode-<agent>.json.template` и пушит ветку.
+Использование:
+
+```bash
+./scripts/create-opencode-branch.sh <agent-id> <feature-slug>
+# затем вручную создайте worktree, как выше, или используйте git worktree add
+```
+
+Примечания и ограничения
+
+- `git worktree` полезен, когда несколько worktree размещены на одной машине
+  (экономит место и разделяет рабочие каталоги). Каждый worktree имеет свои
+  незакоммиченные изменения и свой checked-out branch.
+- Один worktree не может иметь более одной checked-out ветки одновременно.
+- Не коммитьте per-agent секреты в ветку; используйте `.opencode/*.json` как
+  gitignored шаблон для локальной конфигурации.
