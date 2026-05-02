@@ -12,7 +12,9 @@
   [Service]
   Type=oneshot
   RemainAfterExit=no
-  ExecStart=/run/current-system/sw/bin/bash -c '/usr/local/bin/mount-smb-wrapper mount %i'
+  # Use a store-installed helper so ExecStart is a concrete path and avoids
+  # complex quoting inside the unit.
+  ExecStart=${pkgs.writeShellScriptBin "mount-smb-wrapper" ''/usr/local/bin/mount-smb-wrapper''}/bin/mount-smb-wrapper mount %i
   ExecStop=/run/current-system/sw/bin/umount /mnt/hosts/%i
   '';
 
