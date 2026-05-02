@@ -30,6 +30,16 @@
 
 with pkgs;
 
+/* RU: Файловый контракт:
+   Цель: предоставлять минимальный и стабильный набор рантайм-пакетов, необходимых
+     для активации и поддержки системы.
+   Контракт: использовать lib.mkDefault для элементов списка, чтобы хосты могли дополнить
+     или переопределить набор пакетов без рекурсивных зависимостей.
+   Побочные эффекты: добавляет базовые утилиты, сетевые клиенты и клиенты транспортив.
+   Proof: tests/contract/test_runtime_packages.sh
+   Last reviewed: 2026-05-02
+*/
+
 # Export as a NixOS module so it can be reliably included via `imports` and
 # also imported directly to read the list (as configuration.nix does).
 {

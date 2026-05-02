@@ -2,6 +2,15 @@
 ;;; pro-agent-shell.el --- Agent shell configuration -*- lexical-binding: t; -*-
 
 ;; Этот модуль настраивает agent-shell для интеграции с ИИ в ПРО-системе.
+;;
+;; Контракт файла:
+;; - Название: emacs/base/modules/pro-agent-shell.el — agent-shell настройки
+;; - Цель: настроить удобные дефолты и политики запуска для agent-shell, совместимые с Nix-окружением.
+;; - Контракт: экспортирует функцию pro-agent-shell-setup и настаивает на idempotent-инициализации.
+;; - Побочные эффекты: установка переменных окружения, регистрация путей транскриптов и keybindings.
+;; - Proof: emacs/base/tests/* (headless ERT) и ручные smoke-тесты через ./scripts/emacs-pro-wrapper.sh
+;; - Last reviewed: 2026-05-02
+
 
 (defcustom pro-agent-shell-enable-ui-optimization t
   "Включить оптимизацию UI agent-shell."

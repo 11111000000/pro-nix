@@ -2,19 +2,23 @@
 
 ;; Этот модуль оставляет агентский интерфейс коротким и повторяемым.
 
+;; Назначение: открыть настроенный agent-shell буфер.
+;;
+;; Контракт:
+;; - Вход: никаких аргументов.
+;; - Выход: вызывает agent-shell при успешном обнаружении модуля.
+;; - Побочные эффекты: при необходимости выполняет проинициализацию pro-agent-shell-setup.
+;; - Ошибки: вызывает user-error если модуль agent-shell недоступен.
 (defun pro-agent-open ()
-  "Open configured agent-shell buffer.
+  "Открыть настроенный agent-shell буфер.
 
-This ensures the local pro-agent-shell setup is applied before
-starting the package's UI. If the agent-shell module isn't
-available, signal a user error so the caller knows why nothing
-happened." 
+Если модуль agent-shell доступен — применяет локальные настройки pro-agent-shell-setup
+и открывает интерфейс. Если модуль отсутствует — бросает `user-error`.
+
+Тесты: emacs/base/tests/test-pro-agent.el (при наличии)."
   (interactive)
   (if (require 'agent-shell nil t)
       (progn
-        ;; Ensure our pro config is applied (the module's top-level code
-        ;; runs pro-agent-shell-setup when loaded). Call the setup again
-        ;; to be idempotent and make sure runtime options are applied.
         (when (fboundp 'pro-agent-shell-setup)
           (ignore-errors (pro-agent-shell-setup)))
         (agent-shell))

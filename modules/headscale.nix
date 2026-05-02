@@ -18,6 +18,15 @@
 # Файл: автосгенерированная шапка — комментарии рефакторятся
 { config, pkgs, lib, ... }:
 
+/* RU: Файловый контракт — Headscale module
+   Контракт:
+   - Цель: обеспечить native Headscale service как control plane для WireGuard.
+   - Контракт опций: headscale.enable, headscale.listenAddress.
+   - Побочные эффекты: systemd service, конфигурационные файлы в /etc/headscale.
+   - Proof: systemctl status headscale; curl health endpoint.
+   - Last reviewed: 2026-05-02
+*/
+
 let
   cfg = {};
 in

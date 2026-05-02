@@ -12,6 +12,11 @@
 #   `systemctl status home-manager-az` (если активирован)
 # Last reviewed: 2026-04-25
 # Файл: автосгенерированная шапка — комментарии рефакторятся
+/* RU: Rationale: keep Home Manager configuration minimal and reproducible.
+   - Purpose: provide consistent Emacs profile and user packages via home-manager.
+   - Contract: use extraSpecialArgs and imports; avoid installing large packages by default.
+   - Proof: systemctl status home-manager-<user> and headless ERT for Emacs profile.
+*/
 { config, lib, pkgs, ... }:
 
 let
