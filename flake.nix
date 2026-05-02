@@ -125,7 +125,12 @@ EOF
         default = hosts.huawei.config.system.build.toplevel;
         # NixOS VM tests for activation verification
         huawei-boot = import ./tests/vm/huawei-boot.nix {
-          inherit (pkgs) testers home-manager;
+          inherit (pkgs) testers;
+          # pass the home-manager module (not the input set) so the test
+          # can import it as a NixOS module. Previously we attempted to
+          # inherit `home-manager` from `pkgs` which produced the wrong
+          # value/type and caused flake evaluation errors in the VM test.
+          home-manager = home-manager.nixosModules.home-manager;
         };
         basic-activation-test = import ./tests/vm/test-basic-activation.nix { inherit (pkgs) testers; };
       };
