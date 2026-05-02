@@ -1,16 +1,21 @@
-# Название: modules/system-boot.nix — Загрузчик и параметры ядра
-# Summary (EN): GRUB, EFI, kernel and boot-time sysctl settings
+# Название: modules/system-boot.nix — Загрузчик, ядро и базовые параметры загрузки
+# Кратко: базовая конфигурация GRUB/EFI, выбор kernel package и системные sysctl.
+#
 # Цель:
-#   Задать базовые параметры загрузки: GRUB, EFI, LTS-ядро и sysctl для
-#   устойчивой работы хоста.
+#   Обеспечить воспроизводимые значения загрузчика и базовых kernel-опций, пригодные
+#   для большинства десктоп/ноутбук-хостов. Хост может переопределять значения.
+#
 # Контракт:
 #   Опции: boot.loader.*, boot.kernelPackages, boot.kernel.sysctl
-#   Побочные эффекты: устанавливает plymouth spinner; включает sysrq.
+#   Побочные эффекты: может включать plymouth spinner; устанавливает kernel.sysrq.
+#
 # Предпосылки:
-#   Требуется EFI-совместимая машина; GRUB должен поддерживаться.
+#   Подходит для EFI-машин; на BIOS/legacy-хостах опции могут быть переопределены.
+#
 # Как проверить (Proof):
 #   `nix build .#nixosConfigurations.<host>.config.system.build.toplevel`
-# Last reviewed: 2026-04-25
+#
+# Last reviewed: 2026-05-02
 { config, pkgs, lib, ... }:
 
 {

@@ -1,21 +1,26 @@
-# Название: modules/headscale.nix — Headscale control plane для WireGuard
-# Summary (EN): Headscale service (WireGuard-based VPN control plane)
-/* RU: Headscale — контроллер для WireGuard-подобного control-plane. Модуль настраивает
-   systemd unit, необходимые пакеты и зависимости. Контракт модуля описывает опции,
-   эффекты на сеть и проверки для healthcheck.
-*/
+# Название: modules/headscale.nix — Headscale (control plane для WireGuard)
+# Кратко: модуль включает headscale как контроллер mesh-сети WireGuard, создаёт
+# systemd unit и минимальную конфигурацию; оператор должен обеспечить безопасную
+# конфигурацию в overlay на уровне хоста.
+#
 # Цель:
-#   Включить Headscale как control plane для WireGuard VPN. Позволяет
-#   управлять mesh-сетью хостов через единый сервис.
+#   Обеспечить воспроизводимую, native-интеграцию headscale с systemd и системой
+#   пакетов Nix. Модуль не заменяет operator-managed конфиги; он предоставляет
+#   разумные дефолты и инструкции для override.
+#
 # Контракт:
-#   Опции: config.headscale.enable, config.headscale.listenAddress
-#   Побочные эффекты: создаёт systemd.services.headscale; пишет /etc/headscale/config.yaml.
+#   Опции: config.headscale.enable, config.headscale.listenAddress.
+#   Побочные эффекты: создаёт systemd.services.headscale; записывает /etc/headscale/config.yaml
+#   с минимальным примером (оператор должен заменить в host overlay).
+#
 # Предпосылки:
-#   Требуется пакет headscale; для работы нужен внешний интерфейс на порту 8080.
+#   Требуется пакет headscale; по-умолчанию слушает 0.0.0.0:8080 — оператору следует
+#   настроить firewall/адресацию при необходимости.
+#
 # Как проверить (Proof):
-#   `systemctl status headscale`, `curl http://localhost:8080/health`
-# Last reviewed: 2026-04-25
-# Файл: автосгенерированная шапка — комментарии рефакторятся
+#   `systemctl status headscale`; `curl http://localhost:8080/health`.
+#
+# Last reviewed: 2026-05-02
 { config, pkgs, lib, ... }:
 
 /* RU: Файловый контракт — Headscale module
