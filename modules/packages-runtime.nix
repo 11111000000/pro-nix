@@ -58,4 +58,6 @@ with pkgs;
     meek-client
     snowflake-client
   ]);
+
+  # Last reviewed: 2026-05-02
 }

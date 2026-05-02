@@ -18,7 +18,7 @@
 #   Требуются пакеты: gnupg (при enableKeySync), avahi (для mDNS). Для Tor — tor.
 # Как проверить (Proof):
 #   ./tools/holo-verify.sh unit (tests/contract/pro-peer-01.sh)
-# Last reviewed: 2026-04-25
+# Last reviewed: 2026-05-02
 { config, pkgs, lib, ... }:
 
 let

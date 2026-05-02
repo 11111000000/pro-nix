@@ -33,8 +33,7 @@ in
   services.samba.enable = lib.mkDefault true;
   services.samba.openFirewall = lib.mkDefault true;
   # Avahi can fail early during boot if /run/avahi-daemon is missing; ensure
-  # tmpfiles create expected runtime directories. Do not change avahi.enable
-  # behavior here — keep the service enabled as originally configured.
+  # tmpfiles create expected runtime directories. Keep avahi enabled for discovery.
   services.avahi.enable = true;
   services.avahi.publish.enable = true;
   # Configure Samba to be reachable on the local network only and advertise via mDNS

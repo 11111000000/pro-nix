@@ -61,4 +61,7 @@
     allowedUDPPorts = [ 53 ];
     trustedInterfaces = [ "docker0" ];
   };
+
+  # Last reviewed update for documentation consistency.
+  # Last reviewed: 2026-05-02
 }
