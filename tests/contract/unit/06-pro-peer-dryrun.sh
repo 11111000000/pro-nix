@@ -5,6 +5,12 @@ root="$(cd "$(dirname "$0")/../../.." && pwd)"
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
 
+# Proof requirement: gpg must be available for this dry-run smoke test.
+if ! command -v gpg >/dev/null 2>&1; then
+  echo "06: ERROR: 'gpg' is required for this test but not found in PATH" >&2
+  exit 1
+fi
+
 echo "06: pro-peer sync script dry-run test"
 
 # Create a dummy input file to simulate encrypted file (we won't actually decrypt)
