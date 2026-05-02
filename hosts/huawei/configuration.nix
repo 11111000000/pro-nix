@@ -1,4 +1,3 @@
-# Русский: комментарии и пояснения оформлены в стиле учебника
 { config, lib, pkgs, ... }:
 
 {
@@ -91,4 +90,8 @@ AllowTcpForwarding no
     cpuQuota = "80%";
     ioWeight = 200;
   };
+
+  # Ensure GitHub CLI is available on this host. Use lib.mkForce at host level
+  # so operators can rely on `gh` being present for PR workflows and automation.
+  environment.systemPackages = lib.mkForce ((config.environment.systemPackages or []) ++ [ pkgs.gh ]);
 }
