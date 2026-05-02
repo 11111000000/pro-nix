@@ -1,4 +1,3 @@
-# Русский: комментарии и пояснения оформлены в стиле учебника
 { config, lib, pkgs, ... }:
 
 {
@@ -92,9 +91,6 @@ AllowTcpForwarding no
     ioWeight = 200;
   };
 
-  # Host-specific guarantee: ensure essential interactive utilities are present
-  # Use lib.mkForce at host level to ensure operator-required tools (mc) are
-  # available even if module aggregation changed elsewhere.
-  # Add mc as a low-priority contribution so it merges with other module-provided lists
-  environment.systemPackages = lib.mkDefault ((config.environment.systemPackages or []) ++ [ pkgs.mc ]);
+  # GitHub CLI is provided from the top-level packages (configuration.nix).
+  # Avoid referencing config.environment.systemPackages here to prevent recursion.
 }

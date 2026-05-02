@@ -16,10 +16,11 @@ jobs:
       - name: Run HDS repository-local verification tools
         run: |
           set -euo pipefail
-          chmod +x ./tools/holo-verify.sh ./tools/surface-lint.sh ./tools/docs-link-check.sh || true
+          chmod +x ./tools/holo-verify.sh ./tools/surface-lint.sh ./tools/docs-link-check.sh
           echo "Running holo-verify.sh"
           ./tools/holo-verify.sh
           echo "Running surface-lint.sh"
-          ./tools/surface-lint.sh || true
+          # surface-lint must pass for repository health
+          ./tools/surface-lint.sh
           echo "Running docs-link-check.sh"
-          ./tools/docs-link-check.sh || true
+          ./tools/docs-link-check.sh

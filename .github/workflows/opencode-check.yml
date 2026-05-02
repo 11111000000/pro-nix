@@ -18,7 +18,7 @@ jobs:
       - name: Run holo-verify (unit)
         run: |
           bash ./tools/holo-verify.sh unit
-      - name: Run headless ERT (best-effort)
+      - name: Run headless ERT
         run: |
-          # headless ERT is best-effort; do not fail the job if missing dependencies
-          emacs --batch -l emacs/base/init.el -f ert-run-tests-batch || true
+          # Run headless ERT in CI; failures should fail the job so regressions are visible
+          emacs --batch -l emacs/base/init.el -f ert-run-tests-batch

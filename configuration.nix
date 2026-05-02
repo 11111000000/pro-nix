@@ -33,11 +33,12 @@
   {
   environment.etc."pro/emacs-keys.org".source = ./emacs-keys.org;
 
-imports = [
-      ./modules/system-boot.nix
-      ./modules/packages-runtime.nix
+   imports = [
+     ./modules/system-boot.nix
+     ./modules/packages-runtime.nix
+     ./modules/systemd-policy.nix
 
-      # Общие модули формируют общую политику и не зависят от пользовательских настроек.
+     # Общие модули формируют общую политику и не зависят от пользовательских настроек.
       ./modules/pro-users.nix
       ./modules/pro-services.nix
       ./modules/pro-storage.nix
@@ -315,23 +316,18 @@ imports = [
     # (which should use lib.mkDefault) and appending local utility packages.
     # Then apply lib.mkForce at the very end if a host wants to lock the list.
     # Build the final package list from module contributions and local extras.
-    # Сборка единого списка пакетов для всех хостов.
-    # Правило: модули могут предлагать дополнительные пакеты через lib.mkDefault;
-    # здесь мы консолидируем вклад модулей и фиксируем базовый профиль для всех хостов.
-    # По умолчанию enableOptional = false чтобы сервера не тянули GUI/игры.
-    # Финализируем список на верхнем уровне (гармоничный вариант): используем lib.mkForce
-    # чтобы гарантировать единообразие окружения на всех хостах. Это согласовано с
-    # политикой проекта, где верхний уровень может фиксировать политику пакетов.
-    # Finalize the global package list without referencing the option itself
-    # to avoid infinite recursion during module evaluation. We force the final
-    # list here so all hosts inherit the same base developer tooling.
-    # Final global package list: consolidate module contributions and the common
-    # system packages. system-packages.nix must return a clean list of derivations.
-    environment.systemPackages = lib.mkForce (with pkgs;
-      let
-        base = [ just jq git gh shellcheck shfmt bat tldr mc tmux fzf tree lnav mosh ripgrep fd findutils htop openssh python3 ];
-        spkgs = (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = true; });
-      in builtins.filter (x: x != null) (base ++ spkgs)
+    # Собираем окончательный список пакетов из чистого базового списка.
+    # Ранее здесь использовалась ссылка на config.environment.systemPackages,
+    # что могло вызвать рекурсию/непредсказуемость при активации. Теперь
+    # верхняя точка сборки — этот файл; модули должны добавлять пакеты через
+    # lib.mkDefault. Параметр enableOptional по умолчанию подразумевает false;
+    # здесь явно передаём false, чтобы не включать тяжёлые GUI-пакеты без явного
+    # разрешения в локальной конфигурации.
+    environment.systemPackages = lib.mkDefault (with pkgs;
+      []
+      ++ [ just jq gh ]
+      ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; })
+      ++ [ opencodeCmd opencodeBin ]
     );
 
   # Порядок формирования systemPackages:
@@ -377,7 +373,11 @@ imports = [
   environment.etc."xdg/qt5ct/qt5ct.conf".source = ./conf/qt5ct.conf;
   environment.etc."xdg/qt6ct/qt6ct.conf".source = ./conf/qt6ct.conf;
   environment.etc."xdg/kdeglobals".source = ./conf/kdeglobals;
-  environment.etc."X11/Xresources".source = ./conf/Xresources;
+  # Use the file contents directly to avoid referencing a pre-existing
+  # /nix/store path that may be missing during live activation. Это защитная
+  # правка: храним содержимое как text, чтобы nix сам создал фиксированную
+  # деривацию из строкового содержимого файла.
+  environment.etc."X11/Xresources".text = builtins.readFile ./conf/Xresources;
   environment.etc."xdg/dunst/dunstrc".source = ./conf/dunstrc;
 
   systemd.oomd = {

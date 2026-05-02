@@ -1,5 +1,8 @@
 # Название: modules/pro-desktop.nix — Настройки рабочего стека и шрифтов
 # Summary (EN): Desktop environment defaults, display manager, fonts and audio
+/* RU: Настройки окружения рабочего стола: дисплейный менеджер, шрифты и звук.
+   Комментарии далее в файле описывают эффекты опций и проверки их корректности.
+*/
 # Цель:
 #   Сформировать устойчивый и предсказуемый графический профиль: включить
 #   дисплейный менеджер, дефолты сессии, набор шрифтов и современный аудиостек.
@@ -15,6 +18,10 @@
 #   Откройте GDM/EXWM с этим профилем или проверьте наличие $out/share/xsessions/exwm.desktop
 # Last reviewed: 2026-04-25
 { config, pkgs, lib, ... }:
+
+/* RU: Файловый контракт (литературный заголовок) выше поясняет назначение модуля.
+   Ниже — реализация, следуйте контракту и не изменяйте семантику опций без Change Gate.
+*/
 
 {
   services.xserver.enable = true;
@@ -121,7 +128,10 @@
   environment.etc."xdg/qt5ct/qt5ct.conf".source = ../conf/qt5ct.conf;
   environment.etc."xdg/qt6ct/qt6ct.conf".source = ../conf/qt6ct.conf;
   environment.etc."xdg/kdeglobals".source = ../conf/kdeglobals;
-  environment.etc."X11/Xresources".source = ../conf/Xresources;
+  # During activation referencing a path can fail if the store path hasn't
+  # been materialized yet. Use text = builtins.readFile to let Nix create the
+  # file content derivation deterministically from the repository file.
+  environment.etc."X11/Xresources".text = builtins.readFile ../conf/Xresources;
   environment.etc."xdg/dunst/dunstrc".source = ../conf/dunstrc;
 
   # Глобальные переменные задают системные настройки локали и темы.

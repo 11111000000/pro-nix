@@ -1,5 +1,8 @@
 # Название: modules/pro-privacy.nix — Конфигурация приватных сетей (Tor, obfs4, Snowflake)
 # Summary (EN): Tor and pluggable transports configuration for client anonymity
+/* RU: Модуль управления Tor и вспомогательными транспортами для обеспечения анонимности клиента.
+   Комментарии внутри файла — на русском языке и описывают опции, побочные эффекты и проверки.
+*/
 # Цель:
 #   Обеспечить безопасные и проверяемые дефолты для Tor и вспомогательных
 #   транспортив (obfs4, meek, snowflake). Комментарии объясняют, какие опции
@@ -18,6 +21,30 @@
 #   ./tools/holo-verify.sh unit (tests/contract/tor-01.sh)
 # Last reviewed: 2026-04-25
 { config, pkgs, lib, ... }:
+
+let
+  helpers = {
+    ensureBridges = pkgs.writeShellScriptBin "ensure-tor-bridges" ''
+      #!/usr/bin/env bash
+      set -euo pipefail
+      mkdir -p /etc/tor
+      if [ ! -e /etc/tor/bridges.conf ]; then
+        cp /etc/tor/bridges.conf.example /etc/tor/bridges.conf
+        chown root:root /etc/tor/bridges.conf
+        chmod 0640 /etc/tor/bridges.conf
+      fi
+    '';
+
+    ensurePerms = pkgs.writeShellScriptBin "ensure-tor-perms" ''
+      #!/usr/bin/env bash
+      set -euo pipefail
+      mkdir -p /var/lib/tor
+      chown -R tor:tor /var/lib/tor || true
+      chmod 700 /var/lib/tor || true
+      [ -d /var/lib/tor/ssh_hidden_service ] && chmod 700 /var/lib/tor/ssh_hidden_service || true
+    '';
+  };
+in
 
 {
   # Суть раздела:
@@ -87,17 +114,14 @@
   systemd.services."tor-ensure-bridges" = {
     description = "Ensure /etc/tor/bridges.conf exists (create from template)";
     wantedBy = [ "multi-user.target" ];
+    # Ensure this runs before tor.service so the bridges file exists when Tor starts
     before = [ "tor.service" ];
+    # Install a small helper to create the bridges file. Using a writeShellScriptBin
+    # inline here avoids unbalanced quoting in ExecStart and allows systemd
+    # to reference a concrete path that `systemd-analyze verify` can validate.
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${pkgs.writeShellScriptBin "tor-ensure-bridges" ''
-        mkdir -p /etc/tor
-        if [ ! -e /etc/tor/bridges.conf ]; then
-          cp /etc/tor/bridges.conf.example /etc/tor/bridges.conf
-          chown root:root /etc/tor/bridges.conf
-          chmod 0640 /etc/tor/bridges.conf
-        fi
-      ''}/bin/tor-ensure-bridges";
+      ExecStart = "${helpers.ensureBridges}/bin/ensure-tor-bridges";
     };
   };
 
@@ -107,14 +131,8 @@
     before = [ "tor.service" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${pkgs.writeShellScriptBin "tor-ensure-perms" ''
-        mkdir -p /var/lib/tor
-        chown -R tor:tor /var/lib/tor || true
-        chmod 700 /var/lib/tor || true
-        if [ -d /var/lib/tor/ssh_hidden_service ]; then
-          chmod 700 /var/lib/tor/ssh_hidden_service
-        fi
-      ''}/bin/tor-ensure-perms";
+      # Install a small helper to set permissions safely and avoid complex inline quoting.
+      ExecStart = "${helpers.ensurePerms}/bin/ensure-tor-perms";
     };
     wantedBy = [ "multi-user.target" ];
   };
