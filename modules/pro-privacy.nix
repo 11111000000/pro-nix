@@ -52,6 +52,12 @@ in
   # транспорты (obfs4, snowflake, meek). Комментарии поясняют роль ControlPort,
   # SOCKSPort и шаблоны управления bridges. Это демонстрация практической
   # интеграции анонимных сетей на хосте.
+  #
+  # Rationale:
+  # - Keep defaults minimal and safe: do not enable bridges by default to allow
+  #   Tor to bootstrap in open networks. Hosts that require bridges opt-in.
+  # - Use writeShellScriptBin helpers for unit ExecStart to keep systemd unit
+  #   files verifiable by systemd-analyze and to avoid quoting pitfalls.
   services.tor = {
     enable = true;
     client.enable = true;
