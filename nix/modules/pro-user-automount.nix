@@ -1,5 +1,14 @@
 { lib, pkgs, ... }:
 
+let
+  helpers = {
+    mountSmbUser = pkgs.writeShellScriptBin "mount-smb-user" ''
+      #!/usr/bin/env bash
+      set -euo pipefail
+      exec /run/current-system/sw/bin/bash /etc/usr/local/bin/mount-smb-user "$@"
+    '';
+  };
+
 {
   # Optional systemd user automount template: mounts under $HOME/mnt/hosts/<host>
   environment.etc."systemd/user/smb-mount-user@.service".text = ''
@@ -9,7 +18,9 @@
 
   [Service]
   Type=oneshot
-  ExecStart=/run/current-system/sw/bin/bash -c '${pkgs.writeShellScriptBin "mount-smb-user" ''/home/placeholder''}'
+   # Use a store-installed helper so ExecStart is a concrete path and
+   # `systemd-analyze verify` can validate it reliably.
+   ExecStart = "${helpers.mountSmbUser}/bin/mount-smb-user";
   '';
 
   environment.etc."systemd/user/smb-mount-user@.automount".text = ''
