@@ -91,7 +91,6 @@ AllowTcpForwarding no
     ioWeight = 200;
   };
 
-  # Ensure GitHub CLI is available on this host. Use lib.mkForce at host level
-  # so operators can rely on `gh` being present for PR workflows and automation.
-  environment.systemPackages = lib.mkForce ((config.environment.systemPackages or []) ++ [ pkgs.gh ]);
+  # GitHub CLI is provided from the top-level packages (configuration.nix).
+  # Avoid referencing config.environment.systemPackages here to prevent recursion.
 }
