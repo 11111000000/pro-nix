@@ -23,6 +23,43 @@
 
 let
   cfg = {};
+
+  # Helper scripts installed into the system profile to avoid complex inline
+  # quoting in systemd unit ExecStart. This mirrors the pattern used in
+  # modules/pro-privacy.nix: create small store-installed wrappers and reference
+  # their absolute paths from unit files. Keeps units verifiable by
+  # `systemd-analyze verify`.
+  helpers = {
+    proPeerSync = pkgs.writeShellScriptBin "pro-peer-sync" ''
+      #!/usr/bin/env bash
+      set -euo pipefail
+      exec /run/current-system/sw/bin/bash /etc/pro-peer-sync-keys.sh --input ${config.pro-peer.keysGpgPath} --out /var/lib/pro-peer/authorized_keys
+    '';
+
+    proPeerBackupHidden = pkgs.writeShellScriptBin "pro-peer-backup-hiddenservice" ''
+      #!/usr/bin/env bash
+      set -euo pipefail
+      exec /run/current-system/sw/bin/bash /etc/pro-peer-backup-hiddenservice.sh --hidden-dir /var/lib/tor/ssh_hidden_service --recipient ${config.pro-peer.torBackupRecipient} --out-dir /var/lib/pro-peer
+    '';
+
+    proPeerEnsureTorPerms = pkgs.writeShellScriptBin "pro-peer-ensure-tor-perms" ''
+      #!/usr/bin/env bash
+      set -euo pipefail
+      if [ -d /var/lib/tor ]; then
+        chown -R tor:tor /var/lib/tor || true
+        chmod 700 /var/lib/tor || true
+        [ -d /var/lib/tor/ssh_hidden_service ] && chmod 700 /var/lib/tor/ssh_hidden_service || true
+      fi
+    '';
+
+    proPeerWgQuick = pkgs.writeShellScriptBin "pro-peer-wg-quick-wrapper" (''
+      #!/usr/bin/env bash
+      set -euo pipefail
+      WG_PATH="${if config.pro-peer.wireguardConfigPath != null then config.pro-peer.wireguardConfigPath else "wg0"}"
+      exec /run/current-system/sw/bin/bash /etc/pro-peer-wg-quick-wrapper "$WG_PATH"
+    '');
+  };
+
 in
 
 {
@@ -170,7 +207,7 @@ in
           # unit does not depend on PATH during activation. This makes the
           # unit reproducible and avoids errors like "env: 'bash': No such
           # file or directory" during `nixos-rebuild switch`.
-          ExecStart = ''/run/current-system/sw/bin/bash /etc/pro-peer-sync-keys.sh --input ${config.pro-peer.keysGpgPath} --out /var/lib/pro-peer/authorized_keys'';
+          ExecStart = "${helpers.proPeerSync}/bin/pro-peer-sync";
           CPUQuota = "30%";
         };
       };
@@ -193,7 +230,7 @@ in
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = ''/run/current-system/sw/bin/bash /etc/pro-peer-backup-hiddenservice.sh --hidden-dir /var/lib/tor/ssh_hidden_service --recipient ${config.pro-peer.torBackupRecipient} --out-dir /var/lib/pro-peer'';
+          ExecStart = "${helpers.proPeerBackupHidden}/bin/pro-peer-backup-hiddenservice";
           CPUQuota = "30%";
         };
       };
@@ -229,7 +266,7 @@ in
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = ''/run/current-system/sw/bin/bash /etc/pro-peer-wg-quick-wrapper ${if config.pro-peer.wireguardConfigPath != null then config.pro-peer.wireguardConfigPath else "wg0"}'';
+          ExecStart = "${helpers.proPeerWgQuick}/bin/pro-peer-wg-quick-wrapper";
           # The wrapper normalizes exit codes and always returns 0.
           RemainAfterExit = "yes";
           CPUQuota = "30%";
@@ -274,7 +311,7 @@ in
         before = [ "tor.service" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = ''/bin/sh -c 'if [ -d /var/lib/tor ]; then chown -R tor:tor /var/lib/tor || true; chmod 700 /var/lib/tor || true; [ -d /var/lib/tor/ssh_hidden_service ] && chmod 700 /var/lib/tor/ssh_hidden_service || true; fi'"'';
+          ExecStart = "${helpers.proPeerEnsureTorPerms}/bin/pro-peer-ensure-tor-perms";
         };
       };
     })
