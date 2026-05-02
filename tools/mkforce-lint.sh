@@ -1,5 +1,8 @@
 # Название: tools/mkforce-lint.sh — Проверка опасных использований lib.mkForce
 # Summary (EN): Lint for dangerous lib.mkForce and systemPackages usage
+/* RU: Скрипт-линтер, обнаруживающий опасные использования lib.mkForce и прямые модификации environment.systemPackages.
+   Proof: ./tools/mkforce-lint.sh --help
+*/
 # Цель:
 #   Сканировать репозиторий и выявлять потенциально опасные использования
 #   lib.mkForce и множественные определения environment.systemPackages.

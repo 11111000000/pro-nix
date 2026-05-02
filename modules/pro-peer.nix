@@ -1,5 +1,8 @@
 # Название: modules/pro-peer.nix — Обнаружение пиров и управление ключами SSH
 # Summary (EN): Peer discovery (Avahi), SSH hardening and authorized_keys sync
+/* RU: Модуль обнаружения пиров: Avahi, жёсткая настройка SSH и синхронизация authorized_keys.
+   Файл обязан содержать шапку контракта (назначение, контракт опций, побочные эффекты, Proof).
+*/
 # Цель:
 #   Включает службы обнаружения в LAN (mDNS/Avahi), устанавливает безопасные
 #   дефолты для SSH и обеспечивает механизм синхронизации authorized_keys из
