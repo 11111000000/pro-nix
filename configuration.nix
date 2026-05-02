@@ -271,10 +271,9 @@
     optimise.automatic = true;
   };
 
-  # Позволяем использовать не полностью открытые пакеты.
-  nixpkgs.config = {
-    allowUnfree = true;
-  };
+  # NOTE: nixpkgs config (eg. allowUnfree) should be provided by flake.nix
+  # via the nixpkgs import to avoid creating an externally-configured
+  # instance during flake evaluation. See flake.nix:nixpkgsConfig.
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 7.1: Steam и игровые приложения
