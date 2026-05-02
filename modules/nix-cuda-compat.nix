@@ -1,20 +1,21 @@
-# Название: modules/nix-cuda-compat.nix — CUDA-совместимость и overlays
-# Summary (EN): Nixpkgs overlays for CUDA compatibility
-/* RU: Оверлеи для совместимости с CUDA: предоставляет патчи и встраиваемые выражения,
-   которые обеспечивают корректную сборку модулей с привязкой к CUDA. Proof: local build tests.
-*/
+# Название: modules/nix-cuda-compat.nix — Оверлеи для совместимости с CUDA
+# Кратко: добавляет безопасные оверлеи в nixpkgs для улучшения совместимости CUDA-пакетов.
+#
 # Цель:
-#   Расширить nixpkgs overlays для поддержки CUDA-пакетов. Добавляет
-#   форматирование INI/XML и дополнительные типы в generators.
+#   Предоставить набор проверяемых оверлеев, которые расширяют форматы генераторов (ini/xml)
+#   и добавляют вспомогательные поля (cudaFlags) без форсирования пакетов.
+#
 # Контракт:
-#   Опции: nixpkgs.overlays (добавляет custom overlays)
-#   Побочные эффекты: модифицирует nixpkgs lib для ini/xml и добавляет cudaFlags.
+#   Опции: nixpkgs.overlays (по умолчанию расширяет список оверлеев)
+#   Побочные эффекты: модифицирует поведение prev.formats и добавляет cudaPackages поля.
+#
 # Предпосылки:
-#   Требуется nixpkgs с CUDA-поддержкой.
+#   Требуется совместимый nixpkgs с поддержкой CUDA.
+#
 # Как проверить (Proof):
 #   `nix eval .#nixpkgs.legacyPackages.x86_64-linux.cudaPackages.cudaFlags --json`
-# Last reviewed: 2026-04-25
-# Файл: автосгенерированная шапка — комментарии рефакторятся
+#
+# Last reviewed: 2026-05-02
 { lib, ... }:
 
 /* RU: Файловый контракт:
