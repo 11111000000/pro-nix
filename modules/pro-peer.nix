@@ -189,10 +189,10 @@ in
       # Make package contribution additive and low-priority so top-level
       # aggregation decides final list. Avoid lib.mkForce at module level.
       environment.systemPackages = lib.mkDefault (with pkgs; [ gnupg ]);
-      environment.etc."pro-peer-sync-keys.sh".source = ../scripts/pro-peer-sync-keys.sh;
+      environment.etc."pro-peer-sync-keys.sh".source = ../scripts/ops-pro-peer-sync-keys.sh;
       environment.etc."pro-peer-sync-keys.sh".mode = "0755";
       # Expose a canary helper script for operators to run dry-run locally
-      environment.etc."pro-peer-canary.sh".source = ../scripts/pro-peer-canary.sh;
+      environment.etc."pro-peer-canary.sh".source = ../scripts/ops-pro-peer-canary.sh;
       environment.etc."pro-peer-canary.sh".mode = "0755";
 
       systemd.services."pro-peer-sync-keys" = {
@@ -221,7 +221,7 @@ in
 
     (lib.mkIf (config.pro-peer.allowTorHiddenService && (config.pro-peer.torBackupRecipient != null)) {
       environment.systemPackages = lib.mkDefault (with pkgs; [ gnupg tar ]);
-      environment.etc."pro-peer-backup-hiddenservice.sh".source = ../scripts/backup-hiddenservice.sh;
+      environment.etc."pro-peer-backup-hiddenservice.sh".source = ../scripts/ops-backup-hiddenservice.sh;
       environment.etc."pro-peer-backup-hiddenservice.sh".mode = "0755";
       # Install a thin wrapper that normalizes invocation from systemd units.
       environment.etc."pro-peer-backup-hiddenservice-wrapper.sh".source = ../scripts/pro-peer-backup-hiddenservice.sh;
@@ -241,13 +241,17 @@ in
 
     (lib.mkIf config.pro-peer.enableYggdrasil {
       environment.systemPackages = lib.mkDefault (with pkgs; [ yggdrasil ]);
+      environment.etc."pro-peer-yggdrasil-wrapper.sh".source = ./scripts/pro-peer-yggdrasil-wrapper.sh;
+      environment.etc."pro-peer-yggdrasil-wrapper.sh".mode = "0755";
+
       systemd.services.yggdrasil = {
         description = "Yggdrasil mesh daemon (pro-peer)";
         wantedBy = [ "multi-user.target" ];
-        # Даём демону mesh небольшую долю CPU и защищаем систему от его
-        # перегрузки при интенсивной сетевой активности.
+        # Run via wrapper to avoid complex quoting in ExecStart and ensure
+        # the service points at a concrete path that `systemd-analyze verify`
+        # can resolve.
         serviceConfig = {
-          ExecStart = builtins.concatStringsSep " " [ (builtins.toString pkgs.yggdrasil + "/bin/yggdrasil") "-useconffile" (if config.pro-peer.yggdrasilConfigPath != null then config.pro-peer.yggdrasilConfigPath else "/etc/yggdrasil.conf") ];
+          ExecStart = "${helpers.proPeerWgQuick}/bin/pro-peer-wg-quick-wrapper";
           Restart = "on-failure";
           CPUQuota = "40%";
           CPUWeight = "150";
@@ -261,7 +265,7 @@ in
       # Устанавливаем небольшой оболочный wrapper для нормализации поведения
       # wg-quick; это позволяет systemd‑юниту оставаться простым и не
       # включать сложную shell‑логику.
-      environment.etc."pro-peer-wg-quick-wrapper".source = ./scripts/pro-peer-wg-quick-wrapper.sh;
+      environment.etc."pro-peer-wg-quick-wrapper".source = ../scripts/ops-pro-peer-wg-quick-wrapper.sh;
       environment.etc."pro-peer-wg-quick-wrapper".mode = "0755";
 
       systemd.services."pro-peer-wg-quick" = {
