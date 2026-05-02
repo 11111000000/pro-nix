@@ -89,9 +89,26 @@
     wantedBy = [ "multi-user.target" ];
     # Ensure this runs before tor.service so the bridges file exists when Tor starts
     before = [ "tor.service" ];
+    # Use a derivation-installed helper to avoid unbalanced quoting in ExecStart
+    # and to allow `systemd-analyze verify` to validate the generated unit.
+    # The helper creates /etc/tor if needed and copies the example file.
+    # We install the script into the system profile via a writeShellScriptBin derivation
+    # and reference its absolute path from the unit file.
+    preStart = let
+      ensureBridges = pkgs.writeShellScriptBin "ensure-tor-bridges" ''
+        #!/usr/bin/env bash
+        set -euo pipefail
+        mkdir -p /etc/tor
+        if [ ! -e /etc/tor/bridges.conf ]; then
+          cp /etc/tor/bridges.conf.example /etc/tor/bridges.conf
+          chown root:root /etc/tor/bridges.conf
+          chmod 0640 /etc/tor/bridges.conf
+        fi
+      '';
+    in
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = ''/bin/sh -c 'mkdir -p /etc/tor && if [ ! -e /etc/tor/bridges.conf ]; then cp /etc/tor/bridges.conf.example /etc/tor/bridges.conf && chown root:root /etc/tor/bridges.conf && chmod 0640 /etc/tor/bridges.conf; fi'"'';
+      ExecStart = "${ensureBridges}/bin/ensure-tor-bridges";
     };
   };
 
@@ -101,7 +118,8 @@
     before = [ "tor.service" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = ''/bin/sh -c 'mkdir -p /var/lib/tor && chown -R tor:tor /var/lib/tor || true; chmod 700 /var/lib/tor || true; [ -d /var/lib/tor/ssh_hidden_service ] && chmod 700 /var/lib/tor/ssh_hidden_service || true'"'';
+      # Install a small helper to set permissions safely and avoid complex inline quoting.
+      ExecStart = "${pkgs.writeShellScriptBin \"ensure-tor-perms\" ''\n#!/usr/bin/env bash\nset -euo pipefail\nmkdir -p /var/lib/tor\nchown -R tor:tor /var/lib/tor || true\nchmod 700 /var/lib/tor || true\n[ -d /var/lib/tor/ssh_hidden_service ] && chmod 700 /var/lib/tor/ssh_hidden_service || true\n''}/bin/ensure-tor-perms";
     };
     wantedBy = [ "multi-user.target" ];
   };
