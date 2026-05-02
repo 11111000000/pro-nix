@@ -223,6 +223,9 @@ in
       environment.systemPackages = lib.mkDefault (with pkgs; [ gnupg tar ]);
       environment.etc."pro-peer-backup-hiddenservice.sh".source = ../scripts/backup-hiddenservice.sh;
       environment.etc."pro-peer-backup-hiddenservice.sh".mode = "0755";
+      # Install a thin wrapper that normalizes invocation from systemd units.
+      environment.etc."pro-peer-backup-hiddenservice-wrapper.sh".source = ../scripts/pro-peer-backup-hiddenservice.sh;
+      environment.etc."pro-peer-backup-hiddenservice-wrapper.sh".mode = "0755";
 
       systemd.services."pro-peer-backup-hiddenservice" = {
         description = "Backup tor hidden service key encrypted to recipient";
@@ -230,7 +233,7 @@ in
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = "${helpers.proPeerBackupHidden}/bin/pro-peer-backup-hiddenservice";
+          ExecStart = "/run/current-system/sw/bin/bash /etc/pro-peer-backup-hiddenservice-wrapper.sh ${config.pro-peer.torBackupRecipient}";
           CPUQuota = "30%";
         };
       };
