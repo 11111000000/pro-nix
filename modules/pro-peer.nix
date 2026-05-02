@@ -268,13 +268,16 @@ in
       # the directories if missing and may not fix ownership on existing
       # directories, so add a lightweight oneshot service that enforces the
       # expected tor:tor ownership before tor.service runs.
+      environment.etc."pro-peer-ensure-tor-perms.sh".source = ./scripts/pro-peer-ensure-tor-perms.sh;
+      environment.etc."pro-peer-ensure-tor-perms.sh".mode = "0755";
+
       systemd.services."pro-peer-ensure-tor-perms" = {
         description = "Ensure /var/lib/tor ownership and modes for Tor";
         wantedBy = [ "multi-user.target" ];
         before = [ "tor.service" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = ''/bin/sh -c 'if [ -d /var/lib/tor ]; then chown -R tor:tor /var/lib/tor || true; chmod 700 /var/lib/tor || true; [ -d /var/lib/tor/ssh_hidden_service ] && chmod 700 /var/lib/tor/ssh_hidden_service || true; fi'"'';
+          ExecStart = ''/run/current-system/sw/bin/bash /etc/pro-peer-ensure-tor-perms.sh'';
         };
       };
     })
