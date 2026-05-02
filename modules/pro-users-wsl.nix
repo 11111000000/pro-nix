@@ -11,6 +11,9 @@
 #   После wsl.exe -- emacs запускается в терминальном режиме.
 # Last reviewed: 2026-04-25
 # Файл: автосгенерированная шапка — комментарии рефакторятся
+/* RU: Rationale: WSL requires terminal-only Emacs profile; avoid GUI-specific options.
+   Proof: Emacs launches in terminal mode under wsl.exe and headless ERT passes.
+*/
 { config, lib, pkgs, ... }:
 
 {
