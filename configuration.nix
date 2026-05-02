@@ -316,10 +316,17 @@
     # (which should use lib.mkDefault) and appending local utility packages.
     # Then apply lib.mkForce at the very end if a host wants to lock the list.
     # Build the final package list from module contributions and local extras.
+    # Собираем окончательный список пакетов из чистого базового списка.
+    # Ранее здесь использовалась ссылка на config.environment.systemPackages,
+    # что могло вызвать рекурсию/непредсказуемость при активации. Теперь
+    # верхняя точка сборки — этот файл; модули должны добавлять пакеты через
+    # lib.mkDefault. Параметр enableOptional по умолчанию подразумевает false;
+    # здесь явно передаём false, чтобы не включать тяжёлые GUI-пакеты без явного
+    # разрешения в локальной конфигурации.
     environment.systemPackages = lib.mkDefault (with pkgs;
-      (config.environment.systemPackages or [])
-      ++ [ just jq ]
-      ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = true; })
+      []
+      ++ [ just jq gh ]
+      ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; })
       ++ [ opencodeCmd opencodeBin ]
     );
 

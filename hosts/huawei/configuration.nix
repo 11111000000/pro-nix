@@ -1,4 +1,3 @@
-# Русский: комментарии и пояснения оформлены в стиле учебника
 { config, lib, pkgs, ... }:
 
 {
@@ -91,4 +90,7 @@ AllowTcpForwarding no
     cpuQuota = "80%";
     ioWeight = 200;
   };
+
+  # GitHub CLI is provided from the top-level packages (configuration.nix).
+  # Avoid referencing config.environment.systemPackages here to prevent recursion.
 }

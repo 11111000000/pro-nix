@@ -1,5 +1,8 @@
 # Название: modules/fbterm-tty.nix — Fbterm на выбранной TTY
 # Summary (EN): Fbterm service on selected TTY for better font rendering
+/* RU: Сервис fbterm для выбранного TTY — улучшенное отображение шрифтов в консоли.
+   Описание: модуль обеспечивает установку и конфигурацию fbterm на указанных TTY.
+*/
 # Цель:
 #   Запустить fbterm на выбранной консоли (по умолчанию tty2) с
 #   TrueType-шрифтами и улучшенным рендерингом.
