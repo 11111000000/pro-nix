@@ -12,6 +12,16 @@
 
 let
   opencode_user_dir = lib.mkOptionName "opencode.userDir";
+  helpers = {
+    ensureOpencodeSlice = pkgs.writeShellScriptBin "ensure-opencode-slice" ''
+      #!/usr/bin/env bash
+      set -euo pipefail
+      if [ ! -f /etc/systemd/system/opencode.slice ]; then
+        echo "opencode.slice not found"
+      fi
+      exit 0
+    '';
+  };
 in {
   options = {
     opencode = {
@@ -39,7 +49,9 @@ in {
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = "/bin/sh -c 'if [ ! -f /etc/systemd/system/opencode.slice ]; then echo \"opencode.slice not found\"; fi; exit 0'";
+        # Use a small store-installed helper so the unit's ExecStart is
+        # a concrete path that `systemd-analyze verify` can resolve.
+        ExecStart = "${helpers.ensureOpencodeSlice}/bin/ensure-opencode-slice";
       };
       enable = true;
     };
