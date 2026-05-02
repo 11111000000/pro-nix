@@ -7,13 +7,19 @@ NIX="nix"
 out=$($NIX eval --json .#nixosConfigurations.huawei.config.environment.systemPackages 2>/dev/null || true) || true
 if [ -z "$out" ]; then
   echo "08: SKIP (cannot evaluate environment.systemPackages in this environment)" >&2
-  exit 0
+  exit 1
 fi
 
-echo "$out" | jq -r '.[]' > /tmp/_env_pkgs.$$ || true
+# Write to a safe temp file inside our tmpdir to avoid clashes
+tmpf=$(mktemp /tmp/pro-privacy-pkgs.XXXXXX)
+echo "$out" | jq -r '.[]' > "$tmpf" || {
+  echo "08: ERROR: failed to write package list" >&2
+  rm -f "$tmpf"
+  exit 1
+}
 
 check_in_list() {
-  grep -E "$1" /tmp/_env_pkgs.$$ >/dev/null 2>&1
+  grep -E "$1" "$tmpf" >/dev/null 2>&1
 }
 
 if ! check_in_list "obfs4"; then
@@ -28,5 +34,5 @@ if ! check_in_list "snowflake"; then
   echo "WARNING: snowflake-client not found in environment.systemPackages" >&2
 fi
 
-rm -f /tmp/_env_pkgs.$$ || true
+rm -f "$tmpf" || true
 echo "08: OK (warnings may be present)"

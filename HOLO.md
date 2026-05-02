@@ -2,7 +2,6 @@
 
 Stage: RealityCheck
 
-
 Purpose: Provide concise manifest of the repository's public contract, базовые инварианты и ключевые решения, чтобы агенты и мейнтейнеры могли разумно и безопасно вносить изменения.
 
 Invariants:
