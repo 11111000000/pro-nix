@@ -15,8 +15,8 @@ jobs:
           echo "PR_BODY<<EOF" >> $GITHUB_ENV
           gh pr view ${{ github.event.pull_request.number }} --json body --jq .body >> $GITHUB_ENV || true
           echo "EOF" >> $GITHUB_ENV
-      - name: Run Change Gate checker (non-blocking)
-        run: ./.github/actions/check-change-gate/action.sh < <(echo "$PR_BODY") || true
+      - name: Run Change Gate checker
+        run: ./.github/actions/check-change-gate/action.sh < <(echo "$PR_BODY")
       - name: Guidance comment (if missing)
         if: failure()
         run: |
