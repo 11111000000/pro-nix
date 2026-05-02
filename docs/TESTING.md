@@ -24,7 +24,7 @@ Contract and scenario tests
 
 Emacs E2E
 -
-- Headless E2E: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el`
+- Headless E2E: `./scripts/dev-emacs-pro-wrapper.sh --batch -l scripts/test-emacs-e2e-assertions.el -l scripts/test-emacs-e2e-run-tests.el`
 - Alternative ERT run: `emacs --batch -l emacs/base/init.el -f ert-run-tests-batch`
 
 Recommended verify command before PR
@@ -35,7 +35,7 @@ nix flake check --show-trace && ./tools/holo-verify.sh && bash tests/contract/te
 
 CI hints
 -
-- GitHub Actions workflows run `nix flake check` and Emacs E2E via `./scripts/emacs-pro-wrapper.sh`.
+- GitHub Actions workflows run `nix flake check` and Emacs E2E via `./scripts/dev-emacs-pro-wrapper.sh`.
 - If CI shows "Git tree is dirty" — commit or stash local changes before rerunning.
 
 HDS checklist

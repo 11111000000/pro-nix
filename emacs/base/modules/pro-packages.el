@@ -85,16 +85,31 @@ Return t on success."
   '()
   "Alist mapping package symbols to GitHub repo and revision for package-vc fallback.")
 
+;; Map of package -> list of dependency symbols that should be attempted
+;; installed after a successful package-vc install. This is a pragmatic
+;; developer convenience for packages that declare deps not present in the
+;; runtime. Keep minimal and explicit.
+(defvar pro-packages-vc-deps
+  '((agent-shell . (acp shell-maker)))
+  "Alist mapping VC-installed package symbols to their runtime dependencies.")
+
 (defvar pro-packages-auto-install-allowlist
   '()
   "List of package symbols that are allowed to be auto-installed from MELPA
 when PRO_PACKAGES_AUTO_INSTALL=1. Keeps automatic network installs small and
 predictable. Empty by default — operator must opt-in to specific packages.")
 
-;; For developer convenience in devShell, allow eldoc-box to be auto-installed
-;; from MELPA when PRO_PACKAGES_AUTO_INSTALL=1. This is a pragmatic short-term
-;; measure; long-term we prefer to ship this package via Nix overlay.
-(setq pro-packages-auto-install-allowlist (cons 'eldoc-box pro-packages-auto-install-allowlist))
+;; Developer conveniences (allowlist and VC fallbacks) were used during
+;; iterative development to bootstrap packages that were later added to the
+;; Nix overlay. In production/CI we prefer strict, declarative behaviour:
+;; PRO_PACKAGES_AUTO_INSTALL is disabled by default and no implicit VC
+;; fallbacks are present. If you need to enable a dev-only fallback, edit
+;; `pro-packages-auto-install-allowlist' or `pro-packages-vc-fallback-alist'
+;; in a local configuration outside the repository.
+
+;; Keep allowlist and VC fallbacks empty by default for reproducibility.
+(setq pro-packages-auto-install-allowlist '())
+(setq pro-packages-vc-fallback-alist '())
 
 (defun pro-packages--maybe-install (pkg &optional allow-melpa)
   "Ensure PKG is available. If missing and ALLOW-MELPA is non-nil, prompt-and-install.
@@ -148,6 +163,12 @@ install from a pinned GitHub repo. Return t on success, nil otherwise.
             (progn
               (package-vc-install url)
               (ignore-errors (require pkg nil t))
+              ;; Try to install small runtime deps for this VC package if known
+              (dolist (d (cdr (assoc pkg pro-packages-vc-deps)))
+                (when (and (boundp 'pro-packages-auto-install-allowlist)
+                           (memq d pro-packages-auto-install-allowlist)
+                           (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "0") "1"))
+                  (ignore-errors (pro-packages--do-install d))))
               (pro--package-provided-p pkg))
           (error (message "[pro-packages] package-vc failed for %s" pkg) nil))))
 

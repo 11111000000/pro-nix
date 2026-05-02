@@ -2,11 +2,11 @@
 set -euo pipefail
 
 # Lightweight canary wrapper for pro-peer key sync.
-# Usage: scripts/pro-peer-canary.sh --input /path/to/authorized_keys.gpg --out /var/lib/pro-peer/authorized_keys
+# Usage: scripts/ops-pro-peer-canary.sh --input /path/to/authorized_keys.gpg --out /var/lib/pro-peer/authorized_keys
 # This will run the sync script in --dry-run mode and print expected actions.
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SCRIPT="$ROOT/scripts/pro-peer-sync-keys.sh"
+SCRIPT="$ROOT/scripts/ops-pro-peer-sync-keys.sh"
 
 usage() {
   cat <<EOF

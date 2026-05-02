@@ -1,85 +1,101 @@
 #!/usr/bin/env bash
+# collect-switch-logs.sh — сбор диагностической информации при switch
+# Скрипт сохраняет логи в постоянную директорию, переживающую перезагрузку
 set -euo pipefail
 
-# Collect system logs and status useful for diagnosing a failed `nixos-rebuild switch`.
-# Usage: ./scripts/collect-switch-logs.sh [OUTDIR]
-# If run as non-root the script will attempt to use sudo where possible; if sudo
-# cannot gain privileges it will still collect what it can and warn.
+# Используем постоянную директорию вместо /tmp (который очищается при ребуте)
+LOG_DIR="/home/az/pro-nix/logs/switch-diagnostics-$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$LOG_DIR"
 
-OUTBASE=${1:-./logs}
-TS=$(date -u +%Y%m%dT%H%M%SZ)
-OUTDIR="$OUTBASE/switch-logs-$TS"
-mkdir -p "$OUTDIR"
+echo "=== Сбор логов до switch ===" | tee "$LOG_DIR/00-status.log"
+echo "Логи будут сохранены в: $LOG_DIR" | tee -a "$LOG_DIR/00-status.log"
 
-echo "Collecting logs into: $OUTDIR"
+# 1. Логи текущей загрузки (до switch)
+echo "=== Сохранение логов текущей загрузки ===" | tee -a "$LOG_DIR/00-status.log"
+journalctl --boot=0 --no-pager > "$LOG_DIR/pre-switch-boot.log" 2>&1 || true
+journalctl --boot=0 --no-pager | grep -E "Unbalanced|parse failure|error|Failed" > "$LOG_DIR/pre-switch-errors.log" 2>&1 || true
 
-SUDO=""
-if sudo -n true 2>/dev/null; then
-  SUDO=sudo
+# 2. Проверка текущих unit-файлов
+echo "=== Копирование текущих unit-файлов ===" | tee -a "$LOG_DIR/00-status.log"
+mkdir -p "$LOG_DIR/units-pre"
+cp -r /etc/systemd/system/tor-ensure-*.service "$LOG_DIR/units-pre/" 2>/dev/null || true
+cp /etc/avahi/services/samba.service "$LOG_DIR/units-pre/" 2>/dev/null || true
+
+# 3. Сохранение списка failed units
+systemctl --failed > "$LOG_DIR/pre-switch-failed-units.log" 2>&1 || true
+
+# 4. Выполнение switch с сохранением логов
+echo "=== Выполнение switch --repair ===" | tee -a "$LOG_DIR/00-status.log"
+echo "ВНИМАНИЕ: Если система перезагрузится, логи сохранены в $LOG_DIR" | tee -a "$LOG_DIR/00-status.log"
+
+# Запускаем switch и сохраняем вывод
+SWITCH_LOG="$LOG_DIR/switch-output.log"
+if sudo nixos-rebuild switch --flake .#huawei --repair 2>&1 | tee "$SWITCH_LOG"; then
+    echo "=== Switch прошел успешно ===" | tee -a "$LOG_DIR/00-status.log"
+    
+    # 5. Если switch прошел (система не перезагрузилась), собираем логи после
+    echo "=== Сбор логов после switch ===" | tee -a "$LOG_DIR/00-status.log"
+    journalctl --boot=0 --no-pager > "$LOG_DIR/post-switch-boot.log" 2>&1 || true
+    journalctl --boot=0 --no-pager | grep -E "Unbalanced|parse failure|error|Failed" > "$LOG_DIR/post-switch-errors.log" 2>&1 || true
+    
+    # Копируем новые unit-файлы
+    mkdir -p "$LOG_DIR/units-post"
+    cp -r /etc/systemd/system/tor-ensure-*.service "$LOG_DIR/units-post/" 2>/dev/null || true
+    cp /etc/avahi/services/samba.service "$LOG_DIR/units-post/" 2>/dev/null || true
+    
+    # Проверяем failed units
+    systemctl --failed > "$LOG_DIR/post-switch-failed-units.log" 2>&1 || true
+    
+    # Запускаем проверку unit-файлов
+    echo "=== Проверка unit-файлов через systemd-analyze verify ===" | tee -a "$LOG_DIR/00-status.log"
+    systemd-analyze verify /etc/systemd/system/tor-ensure-bridges.service > "$LOG_DIR/verify-bridges.log" 2>&1 || true
+    systemd-analyze verify /etc/systemd/system/tor-ensure-perms.service > "$LOG_DIR/verify-perms.log" 2>&1 || true
+    
+    echo "=== Диагностика завершена ===" | tee -a "$LOG_DIR/00-status.log"
+    echo "Логи сохранены в: $LOG_DIR" | tee -a "$LOG_DIR/00-status.log"
+    ls -la "$LOG_DIR" | tee -a "$LOG_DIR/00-status.log"
 else
-  echo "WARNING: sudo -n true failed; attempting to collect without root."
-  echo "If you want full logs, re-run this script under an account that can sudo non-interactively, or run: sudo ./scripts/collect-switch-logs.sh" >&2
+    echo "=== Switch завершился с ошибкой (возможно, система перезагрузится) ===" | tee -a "$LOG_DIR/00-status.log"
+    echo "Логи сохранены в: $LOG_DIR" | tee -a "$LOG_DIR/00-status.log"
+    echo "После перезагрузки проверьте логи командой: ls -lt $LOG_DIR" | tee -a "$LOG_DIR/00-status.log"
 fi
 
-run() {
-  local f="$1"; shift
-  echo "- $*" >"$OUTDIR/$f.log"
-  if $SUDO sh -c "$*" >>"$OUTDIR/$f.log" 2>&1; then
-    true
-  else
-    echo "(command exited non-zero)" >>"$OUTDIR/$f.log"
-  fi
-}
+# Создаем README для следующей сессии
+cat > "$LOG_DIR/README.md" << 'EOF'
+# Логи диагностики switch
 
-# Basic system info
-echo "timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >"$OUTDIR/meta.txt"
-uname -a >>"$OUTDIR/meta.txt" 2>&1 || true
-id >>"$OUTDIR/meta.txt" 2>&1 || true
-echo "cwd: $(pwd)" >>"$OUTDIR/meta.txt"
-echo "user: $(whoami)" >>"$OUTDIR/meta.txt"
+## Если система перезагрузилась
 
-# Environment
-env | sort >"$OUTDIR/env.txt" || true
+После загрузки выполните:
 
-# Journals for relevant units
-run journal-dbus-broker "$SUDO journalctl -u dbus-broker.service -b --no-pager -n 1000"
-run journal-dbus "$SUDO journalctl -u dbus.service -b --no-pager -n 1000"
-run journal-polkit "$SUDO journalctl -u polkit.service -b --no-pager -n 800"
-run journal-apparmor "$SUDO journalctl -u apparmor.service -b --no-pager -n 400"
-run journal-switch-unit "$SUDO journalctl -u nixos-rebuild-switch-to-configuration -b --no-pager -n 1200 || true"
+```bash
+# Найти логи последней попытки
+LOG_DIR=$(ls -dt /home/az/pro-nix/logs/switch-diagnostics-* | head -1)
+cd "$LOG_DIR"
 
-# Grep the boot journal for key errors / signs
-if $SUDO sh -c "journalctl -b --no-pager -n 2000" >/dev/null 2>&1; then
-  $SUDO journalctl -b --no-pager -n 2000 | rg -n "dbus|dbus-broker|polkit|switch-to-configuration|Rejected send message|Failed to reload|Failed to restart|error:" >"$OUTDIR/journal-grep.txt" || true
-else
-  journalctl -b --no-pager -n 2000 | rg -n "dbus|dbus-broker|polkit|switch-to-configuration|Rejected send message|Failed to reload|Failed to restart|error:" >"$OUTDIR/journal-grep.txt" || true
-fi
+# Посмотреть статус
+cat 00-status.log
 
-# systemd unit statuses
-run status-dbus-broker "$SUDO systemctl status dbus-broker.service --no-pager"
-run status-dbus "$SUDO systemctl status dbus.service --no-pager"
-run status-polkit "$SUDO systemctl status polkit.service --no-pager"
-run status-apparmor "$SUDO systemctl status apparmor.service --no-pager"
-run list-failed "$SUDO systemctl list-units --state=failed --no-pager"
+# Посмотреть ошибки switch
+cat switch-output.log | grep -E "Unbalanced|parse failure|error|Failed"
 
-# Show if switch transient unit exists
-run status-switch-transient "$SUDO systemctl status nixos-rebuild-switch-to-configuration --no-pager || true"
+# Посмотреть логи предыдущей загрузки (которая упала)
+journalctl --boot=-1 --no-pager > failed-boot.log 2>&1
+journalctl --boot=-1 --no-pager | grep -E "Unbalanced|parse failure|Failed to start|systemd-logind.*reboot" > failed-boot-errors.log 2>&1
 
-# file lists useful for diagnosing missing binaries
-run sw-bin-list "$SUDO ls -la /run/current-system/sw/bin || true"
-run check-bash-ssh "$SUDO ls -la /run/current-system/sw/bin | rg -n 'bash|ssh' || true"
+# Сравнить unit-файлы
+diff -u units-pre/tor-ensure-bridges.service units-post/tor-ensure-bridges.service || true
+```
 
-# dmesg tail
-if $SUDO sh -c "dmesg -T -l emerg,alert,crit,err,warn | tail -n 200" >/dev/null 2>&1; then
-  $SUDO dmesg -T -l emerg,alert,crit,err,warn | tail -n 200 >"$OUTDIR/dmesg-warn-tail.txt" || true
-fi
+## Если система загрузилась
 
-# capture systemctl show of dbus-broker for properties
-run show-dbus-broker "$SUDO systemctl show dbus-broker.service --property=ActiveState,SubState,Result,ExecMainPID || true"
+```bash
+# Проверить failed units
+systemctl --failed
 
-# tar the result for easy upload
-tar -czf "$OUTDIR.tar.gz" -C "$(dirname "$OUTDIR")" "$(basename "$OUTDIR")"
+# Проверить логи
+cat "$LOG_DIR/post-switch-errors.log"
+```
+EOF
 
-echo "Collected logs in: $OUTDIR"
-echo "Archive: $OUTDIR.tar.gz"
-echo "You can upload the tar.gz or paste selected log excerpts here."
+echo "=== README создан: $LOG_DIR/README.md ==="

@@ -281,7 +281,7 @@ let
       fi
     fi
 
-    if command -v steam-run >/dev/null 2>&1 && { [ "$can_use_userns" = "1" ] || [ "${OPENCODE_FORCE_STEAM:-0}" = "1" ]; }; then
+    if command -v steam-run >/dev/null 2>&1 && { [ "$can_use_userns" = "1" ] || [ "''${OPENCODE_FORCE_STEAM:-0}" = "1" ]; }; then
       STEAM_RUN_CMD=$(command -v steam-run)
       # Передача аргументов через steam-run без изменений; используем '--'
       # чтобы отделить аргументы steam-run от аргументов исполняемого файла.
@@ -312,7 +312,26 @@ let
   '';
   pip3Cmd = pkgs.writeShellScriptBin "pip3" ''
     exec ${myPython}/bin/python3 -m pip "$@"
-'';
+  '';
+
+  # Вынесенные вспомогательные обёртки - чтобы rawList содержал только
+  # ссылки на уже построенные деривации, а не inline-выражения.
+  nixGuiCmd = pkgs.writeShellScriptBin "nix-gui" ''
+    exec ${pkgs.nix}/bin/nix --experimental-features 'nix-command flakes' run github:nix-gui/nix-gui -- "$@"
+  '';
+
+  # Use explicit pkgs.chromium reference to avoid depending on local var name.
+  chromiumCmd = pkgs.writeShellScriptBin "chromium" ''
+    exec systemd-run --user --scope -p MemoryMax=4500M -p MemoryHigh=4G -p CPUQuota=90% -- ${pkgs.chromium}/bin/chromium "$@"
+  '';
+
+  firefoxCmd = pkgs.writeShellScriptBin "firefox" ''
+    exec systemd-run --user --scope -p MemoryMax=2500M -p MemoryHigh=2G -p CPUQuota=90% -- ${pkgs.firefox}/bin/firefox "$@"
+  '';
+
+  emacsPanicCmd = pkgs.writeShellScriptBin "emacs-panic" ''
+    pkill -INT -u "$USER" -x emacs >/dev/null 2>&1 || pkill -INT -u "$USER" -f 'emacs.*daemon' >/dev/null 2>&1 || true
+  '';
 in
 
 with pkgs;
@@ -345,7 +364,7 @@ in
   # Ниже — базовый набор пакетов, полезный для рабочего поля разработчика и
   # администратора. Пакеты организованы по группам: редакторы, утилиты,
   # диагностика, приватность и сети, сборка и языки разработки, медиа.
-  (if enableOptional then optionalPackages else []) ++ [
+  let rawList = (if enableOptional then optionalPackages else []) ++ [
   kbd
   # Редактор и связанные пакеты: инструменты для работы с текстом, ссылками и навигацией.
   emacsRuntime
@@ -354,9 +373,7 @@ in
   xvfbRun
 
   # Общие утилиты составляют инструментальный фон и упрощают выполнение задач.
-  (writeShellScriptBin "nix-gui" ''
-    exec ${nix}/bin/nix --experimental-features 'nix-command flakes' run github:nix-gui/nix-gui -- "$@"
-  '')
+  nixGuiCmd
   wget
   diffutils
   curl
@@ -390,8 +407,7 @@ gh
   nodejs_20
   # Make sure real python binaries are present globally in the pro-nix profile
   # so scripts and shebangs can rely on /run/current-system/sw/bin/python and python3.
-  python
-  python3
+   python3
   esbuild
   nodePackages.prettier # Форматирование JS/TS для Apheleia (Emacs).
   networkmanagerapplet  # Индикатор Wi-Fi в трее.
@@ -433,16 +449,11 @@ gh
   duc               # Быстрый индексатор + консоль/GUI
 
   # Браузеры обернуты в мягкий лимит памяти, чтобы графический поток не вытеснял остальной рабочий контур.
-  # Обёртки `writeShellScriptBin` переопределяют команды для применения ограничений ресурсов.
-  (writeShellScriptBin "chromium" ''
-    exec systemd-run --user --scope -p MemoryMax=4500M -p MemoryHigh=4G -p CPUQuota=90% -- ${chromium}/bin/chromium "$@"
-  '')
-  (writeShellScriptBin "firefox" ''
-    exec systemd-run --user --scope -p MemoryMax=2500M -p MemoryHigh=2G -p CPUQuota=90% -- ${firefox}/bin/firefox "$@"
-  '')
-  (writeShellScriptBin "emacs-panic" ''
-    pkill -INT -u "$USER" -x emacs >/dev/null 2>&1 || pkill -INT -u "$USER" -f 'emacs.*daemon' >/dev/null 2>&1 || true
-  '')
+  # Обёртки перемещены выше как готовые деривации, чтобы rawList содержал только
+  # ссылки на уже созданные пакеты/скрипты.
+  chromiumCmd
+  firefoxCmd
+  emacsPanicCmd
   tor-browser
 
   # Мессенджеры находятся рядом с остальными каналами связи.
@@ -605,4 +616,7 @@ gh
   python3Cmd
   pipCmd
   pip3Cmd
-]
+  ];
+in
+  # Ensure we return a clean list without nulls (conditional includes use null)
+  builtins.filter (x: x != null) rawList

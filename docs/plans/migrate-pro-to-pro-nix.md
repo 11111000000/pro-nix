@@ -221,7 +221,7 @@
 ### Что проверено после переключения (runtime checklist)
 
 - `nixos-rebuild switch` выполнен и конфигурация активирована: см. системный путь в /nix/store (rebuild artefact).
-- Headless Emacs E2E пройден локально на хосте: выполнено `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el` — все обязательные пакеты доступны и функции работают (vertico, consult, corfu, cape, vterm, winner, ace-window, embark, marginalia).
+- Headless Emacs E2E пройден локально на хосте: выполнено `./scripts/dev-emacs-pro-wrapper.sh --batch -l scripts/test-emacs-e2e-assertions.el` — все обязательные пакеты доступны и функции работают (vertico, consult, corfu, cape, vterm, winner, ace-window, embark, marginalia).
 - CI workflow добавлен: `.github/workflows/emacs-e2e.yml` запускает `scripts/lint-keys.sh` и headless E2E в reproducible Nix shell.
 - Генератор списка пакетов `scripts/generate-provided-packages.el` добавлен — используйте его чтобы обновить `~/.config/emacs/provided-packages.el` или репозиторный fallback `emacs/base/provided-packages.el`.
 

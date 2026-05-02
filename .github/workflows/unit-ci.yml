@@ -17,3 +17,5 @@ jobs:
         run: ./tools/holo-verify.sh unit
       - name: Run mkForce lint
         run: ./tools/mkforce-lint.sh
+      - name: Evaluate system-packages contract
+        run: tests/contract/unit/09-system-packages-eval.sh

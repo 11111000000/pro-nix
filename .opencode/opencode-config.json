@@ -20,6 +20,10 @@
     "nix fmt",
     "nix flake check"
   ],
+  "preflight_before_switch": [
+    "nix --extra-experimental-features 'nix-command flakes' eval --json .#nixosConfigurations.<host>.config.environment.systemPackages",
+    "tests/contract/unit/09-system-packages-eval.sh"
+  ],
   "verify_on_edit": [
     "nixos/modules/**",
     "modules/**",
@@ -35,6 +39,7 @@
     "require_russian_docs": true,
     "prefer_minimal_diff": true,
     "prefer_existing_patterns": true,
+    "deny_live_switch_without_preflight": true,
     "no_autofix_without_verify": true,
     "self_improving": {
       "enabled": true,

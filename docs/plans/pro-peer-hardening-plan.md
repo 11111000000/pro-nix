@@ -20,7 +20,7 @@
 
 1. Включить `pro-peer.enable = true` на всех хостах (выполнено — модуль присутствует в `modules/pro-peer.nix`).
 2. Включить `pro-peer.enableKeySync = true` и разместить `authorized_keys.gpg` в `/etc/pro-peer/authorized_keys.gpg`.
-   - Скрипт `scripts/pro-peer-sync-keys.sh` теперь tolerant: если файл отсутствует, юнит завершится успешно (no-op).
+   - Скрипт `scripts/ops-pro-peer-sync-keys.sh` теперь tolerant: если файл отсутствует, юнит завершится успешно (no-op).
    - Рекомендуется операторный playbook `scripts/rotate-authorized-keys.sh` (еще не реализован) для безопасной доставки и ротации.
 3. Запустить и проверить systemd сервис `pro-peer-sync-keys.service` и timer (systemctl status/journalctl). Убедиться, что
    файл `/var/lib/pro-peer/authorized_keys` создан и имеет права 600 root:root после успешной расшифровки.

@@ -32,3 +32,9 @@ running
 /emacs/home/
 /home/
 result-devshell
+
+# Temporary files generated during testing
+switch-*.log
+validate-units-*.log
+result-*/
+nixos-result*/

@@ -286,7 +286,7 @@ class ProNixApp(App):
             self._request_confirm('Restart sshd (requires sudo)', ['sudo','systemctl','restart','sshd'])
         elif key in ('K',):
             # run key sync
-            self._request_confirm('Run pro-peer key sync (sudo)', ['sudo','/etc/pro-peer-sync-keys.sh','--input','/etc/pro-peer/authorized_keys.gpg','--out','/var/lib/pro-peer/authorized_keys'])
+            self._request_confirm('Run pro-peer key sync (sudo)', ['sudo','/etc/ops-pro-peer-sync-keys.sh','--input','/etc/pro-peer/authorized_keys.gpg','--out','/var/lib/pro-peer/authorized_keys'])
         elif key in ('j', 'J', 'down'):
             # single-line scroll down
             self.output.scroll_lines(1)
