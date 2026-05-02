@@ -1,17 +1,22 @@
-# Название: modules/pro-storage.nix — Samba, Syncthing и хранилища в LAN
-# Summary (EN): File-sharing services for LAN (Samba, Syncthing) and firewall rules
+# Название: modules/pro-storage.nix — Samba, Syncthing и локальные хранилища
+# Кратко: предоставляет конфигурационные заготовки для сервисов обмена файлами в LAN
+# (Samba, Syncthing), шаблоны avahi и рекомендуемые firewall-правила.
+#
 # Цель:
-#   Включить Samba и Syncthing как дефолтные службы для локального обмена
-#   файлами между хостами. Настроить firewall-правила и Avahi-анонсы.
+#   Обеспечить воспроизводимые, безопасные дефолты для общих файловых сервисов в
+#   локальной сети, оставляя оператору решение об активации и острой политике доступа.
+#
 # Контракт:
-#   Опции: services.samba.enable, services.syncthing.enable
-#   Побочные эффекты: открывает порты 445, 139, 21027, 22000, 8384; создаёт
-#   Samba shares (/srv/samba/{hostName}, /srv/samba/public); добавляет Avahi service.
+#   Опции: services.samba.enable, services.syncthing.enable, services.samba.openFirewall
+#   Побочные эффекты: при включении открываются SMB/Sync порты и создаются каталоги /srv/samba/*.
+#
 # Предпосылки:
-#   Требуются пакеты: samba, syncthing; для Avahi — avahi.
+#   Наличие пакетов samba, syncthing и avahi в окружении. Рекомендуется тестирование на выделенной машине.
+#
 # Как проверить (Proof):
-#   Проверить порты: `ss -tlnp | grep -E '445|8384'`, или `systemctl status nmbd smbd`
-# Last reviewed: 2026-04-25
+#   `ss -tlnp | grep -E '445|8384'` или `systemctl status nmbd smbd`.
+#
+# Last reviewed: 2026-05-02
 { config, lib, ... }:
 
 let
@@ -28,8 +33,7 @@ in
   services.samba.enable = lib.mkDefault true;
   services.samba.openFirewall = lib.mkDefault true;
   # Avahi can fail early during boot if /run/avahi-daemon is missing; ensure
-  # tmpfiles create expected runtime directories. Do not change avahi.enable
-  # behavior here — keep the service enabled as originally configured.
+  # tmpfiles create expected runtime directories. Keep avahi enabled for discovery.
   services.avahi.enable = true;
   services.avahi.publish.enable = true;
   # Configure Samba to be reachable on the local network only and advertise via mDNS

@@ -1,18 +1,21 @@
-# Название: modules/pro-services.nix — Базовые сетевые службы и контроль доступа
-# Summary (EN): Network services (NetworkManager, SSH, auditd, fail2ban)
+# Название: modules/pro-services.nix — Базовые сетевые службы и политики доступа
+# Кратко: конфигурация NetworkManager, SSH, auditd, AppArmor и fail2ban с безопасными дефолтами.
+#
 # Цель:
-#   Включить базовые сетевые службы (NetworkManager, systemd-resolved), SSH
-#   с жёсткими настройками и механизмы контроля (auditd, AppArmor, fail2ban).
+#   Предоставить набор проверяемых, безопасных дефолтов для сетевых служб и механизмов контроля
+#   на уровне хоста. Изменения, влияющие на открытые порты, оформляются через Change Gate.
+#
 # Контракт:
-#   Опции: networking.networkmanager.enable, services.openssh.settings.*
-#   Побочные эффекты: открывает порты 22, 80, 443, 53; включает firewall;
-#   добавляет systemd-юниты auditd, fail2ban, apparmor.
+#   Опции: networking.networkmanager.enable, services.openssh.settings.* и т.д.
+#   Побочные эффекты: при включении открываются порты 22, 80, 443, 53; добавляются systemd-юниты auditd и fail2ban.
+#
 # Предпосылки:
-#   Требуется ядро с поддержкой аудита для auditd; AppArmor может отсутствовать
-#   в некоторых дистрибутивах.
+#   Требуется ядро с поддержкой аудита для auditd; AppArmor может быть не доступен на некоторых системах.
+#
 # Как проверить (Proof):
-#   `systemctl status fail2ban`, `ss -tlnp | grep 22`
-# Last reviewed: 2026-04-25
+#   `systemctl status fail2ban` и `ss -tlnp | grep 22`.
+#
+# Last reviewed: 2026-05-02
 { ... }:
 
 /* RU: Файловый контракт (литературный заголовок) — см. начало файла.
@@ -58,4 +61,7 @@
     allowedUDPPorts = [ 53 ];
     trustedInterfaces = [ "docker0" ];
   };
+
+  # Last reviewed update for documentation consistency.
+  # Last reviewed: 2026-05-02
 }

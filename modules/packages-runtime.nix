@@ -1,27 +1,28 @@
 # Название: modules/packages-runtime.nix — Базовые рантайм-пакеты
-# Summary (EN): Core runtime packages required for activation and shell access
-/* RU: Базовый набор runtime-пакетов, необходимых для активации системы и доступа к shell.
-   Комментарии ниже объясняют почему пакеты не должны быть форсированы в top-level без явной нужды.
-
-  Файловый контракт:
-  Цель: обеспечить минимальный набор утилит, необходимых для корректной активации
-    и работы вспомогательных скриптов (`activate`, `ensure-perms`, helpers).
-  Контракт: environment.systemPackages должен использовать lib.mkDefault в модулях;
-    финальное решение о наборе пакетов принимается на уровне хоста.
-  Proof: tests/contract/test_runtime_packages.sh
-*/
+# Кратко: минимальный набор пакетов, необходимых для активации системы и базовых операций.
+#
+# Файловый контракт:
+#   Цель: обеспечить минимальный набор утилит, необходимых для корректной активации
+#     и работы вспомогательных скриптов (`activate`, `ensure-perms`, helpers).
+#   Контракт: environment.systemPackages должен использовать lib.mkDefault в модулях;
+#     финальное решение о наборе пакетов принимается на уровне хоста.
+#   Proof: tests/contract/test_runtime_packages.sh
+#
 # Цель:
-#   Определить минимальный набор пакетов, необходимых для активации,
-#   shell-доступа и базового обслуживания системы. Остальные пакеты
-#   добавляются через environment.systemPackages или отдельные модули.
+#   Определить минимальный набор пакетов, необходимых для активации, shell-доступа
+#   и базового обслуживания системы. Остальные пакеты добавляются через environment.systemPackages или отдельные модули.
+#
 # Контракт:
-#   Опции: environment.systemPackages (базовый список,可以被 дополнен)
+#   Опции: environment.systemPackages (базовый список, может быть дополнен)
 #   Побочные эффекты: добавляет bashInteractive, openssh, coreutils, procps, dbus.
+#
 # Предпосылки:
 #   Используется в NixOS-конфигурации; пакеты должны присутствовать в pkgs.
+#
 # Как проверить (Proof):
 #   `nix eval .#nixosConfigurations.<host>.config.environment.systemPackages --json | jq -r '.[]' | grep -E '^bash|^openssh'`
-# Last reviewed: 2026-04-25
+#
+# Last reviewed: 2026-05-02
 { config, pkgs, lib, ... }:
 
 # Minimal runtime packages that must be present in the final system profile.
@@ -57,4 +58,6 @@ with pkgs;
     meek-client
     snowflake-client
   ]);
+
+  # Last reviewed: 2026-05-02
 }

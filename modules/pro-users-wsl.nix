@@ -9,7 +9,7 @@
 #   Требуется WSL + Home Manager.
 # Как проверить (Proof):
 #   После wsl.exe -- emacs запускается в терминальном режиме.
-# Last reviewed: 2026-04-25
+# Last reviewed: 2026-05-02
 # Файл: автосгенерированная шапка — комментарии рефакторятся
 /* RU: Rationale: WSL requires terminal-only Emacs profile; avoid GUI-specific options.
    Proof: Emacs launches in terminal mode under wsl.exe and headless ERT passes.
