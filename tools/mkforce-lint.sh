@@ -1,8 +1,8 @@
 # Название: tools/mkforce-lint.sh — Проверка опасных использований lib.mkForce
 # Summary (EN): Lint for dangerous lib.mkForce and systemPackages usage
-/* RU: Скрипт-линтер, обнаруживающий опасные использования lib.mkForce и прямые модификации environment.systemPackages.
-   Proof: ./tools/mkforce-lint.sh --help
-*/
+# RU: Скрипт-линтер, обнаруживающий опасные использования lib.mkForce
+# и прямые модификации environment.systemPackages.
+# Proof: ./tools/mkforce-lint.sh --help
 # Цель:
 #   Сканировать репозиторий и выявлять потенциально опасные использования
 #   lib.mkForce и множественные определения environment.systemPackages.
@@ -37,6 +37,7 @@ for g in "${exclude_globs[@]}"; do
   rg_args+=(--glob "!$g")
 done
 for p in "${include_patterns[@]}"; do
+  # guard: skip if pattern resolves to directory listing that rg can't handle directly
   rg -n "lib\.mkForce" "${rg_args[@]}" --glob "$p" || true
 done
 if rg -n "lib\.mkForce" "${rg_args[@]}" --glob "${include_patterns[0]}" >/dev/null 2>&1; then
@@ -46,7 +47,12 @@ fi
 
 echo
 echo "Counting environment.systemPackages declarations in focused areas:" 
-count=$(rg -n "environment\.systemPackages" "${rg_args[@]}" --glob "{${include_patterns[*]}}" 2>/dev/null | wc -l || true)
+# Count occurrences per-file to avoid rg failing on complex glob list on some platforms
+count=0
+for p in "${include_patterns[@]}"; do
+  n=$(rg -n "environment\.systemPackages" "${rg_args[@]}" --glob "$p" 2>/dev/null | wc -l || true)
+  count=$((count + n))
+done
 echo "Found $count occurrences of environment.systemPackages (scoped)"
 if [ "$count" -gt 5 ]; then
   echo "WARNING: multiple environment.systemPackages declarations (>5) in focused areas. Consider consolidating or using lib.mkDefault in modules." >&2
