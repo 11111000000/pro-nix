@@ -61,6 +61,8 @@
   };
 
   # `kbdrate` устанавливает скорость повторения клавиш на виртуальной консоли.
+  # Rationale: keep VT tactile defaults calm to improve UX on laptops and
+  # prevent accidental repeats during password entry. Hosts may override this.
   systemd.services.kbdrate = {
     description = "Задание интервалов повторения на виртуальной консоли";
     wantedBy = [ "multi-user.target" ];
