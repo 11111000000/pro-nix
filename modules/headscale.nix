@@ -1,5 +1,9 @@
 # Название: modules/headscale.nix — Headscale control plane для WireGuard
 # Summary (EN): Headscale service (WireGuard-based VPN control plane)
+/* RU: Headscale — контроллер для WireGuard-подобного control-plane. Модуль настраивает
+   systemd unit, необходимые пакеты и зависимости. Контракт модуля описывает опции,
+   эффекты на сеть и проверки для healthcheck.
+*/
 # Цель:
 #   Включить Headscale как control plane для WireGuard VPN. Позволяет
 #   управлять mesh-сетью хостов через единый сервис.
