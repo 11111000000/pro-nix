@@ -121,7 +121,10 @@
   environment.etc."xdg/qt5ct/qt5ct.conf".source = ../conf/qt5ct.conf;
   environment.etc."xdg/qt6ct/qt6ct.conf".source = ../conf/qt6ct.conf;
   environment.etc."xdg/kdeglobals".source = ../conf/kdeglobals;
-  environment.etc."X11/Xresources".source = ../conf/Xresources;
+  # During activation referencing a path can fail if the store path hasn't
+  # been materialized yet. Use text = builtins.readFile to let Nix create the
+  # file content derivation deterministically from the repository file.
+  environment.etc."X11/Xresources".text = builtins.readFile ../conf/Xresources;
   environment.etc."xdg/dunst/dunstrc".source = ../conf/dunstrc;
 
   # Глобальные переменные задают системные настройки локали и темы.

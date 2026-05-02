@@ -366,7 +366,11 @@
   environment.etc."xdg/qt5ct/qt5ct.conf".source = ./conf/qt5ct.conf;
   environment.etc."xdg/qt6ct/qt6ct.conf".source = ./conf/qt6ct.conf;
   environment.etc."xdg/kdeglobals".source = ./conf/kdeglobals;
-  environment.etc."X11/Xresources".source = ./conf/Xresources;
+  # Use the file contents directly to avoid referencing a pre-existing
+  # /nix/store path that may be missing during live activation. Это защитная
+  # правка: храним содержимое как text, чтобы nix сам создал фиксированную
+  # деривацию из строкового содержимого файла.
+  environment.etc."X11/Xresources".text = builtins.readFile ./conf/Xresources;
   environment.etc."xdg/dunst/dunstrc".source = ./conf/dunstrc;
 
   systemd.oomd = {
