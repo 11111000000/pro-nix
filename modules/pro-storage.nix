@@ -78,6 +78,8 @@ in
   services.samba.settings."${hostName}" = {
       path = "/srv/samba/${hostName}";
       browseable = "yes";
+      # Rationale: share defaults intentionally permissive for discovery; hosts may tighten ACLs.
+      # Proof: tests/contract/unit/08-pro-privacy-packages.sh + manual SMB browse via avahi (see docs/plans/smb-discovery-and-mount.md).
       "read only" = "no";
       "guest ok" = "no";
       "force group" = "pro";
