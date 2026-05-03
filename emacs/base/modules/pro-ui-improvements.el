@@ -1,20 +1,29 @@
-;;; pro-ui-improvements.el --- Small UI improvements and wiring -*- lexical-binding: t; -*-
-;; Apply UI niceties in a controlled manner. This file is safe to load in headless
-;; environments: GUI-only features are guarded by display-graphic-p.
+;;; pro-ui-improvements.el --- Небольшие улучшения UI и их включение -*- lexical-binding: t; -*-
+;;
+;; Назначение: Собирать и применять рекомендуемые настройки пользовательского
+;; интерфейса (шрифты, лигатуры, иконки, автодополнение) в контролируемой
+;; последовательности. GUI‑функции защищены проверками display-graphic-p.
+;; Контракт: pro-ui-apply-all — идемпотентная публичная функция без побочных
+;; эффектов за пределами изменения видимости/шрифтовых настроек Emacs.
+;; Proof: ./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el
+;; Last reviewed: 2026-05-03
+;;
 
-;; Модуль pro-ui-improvements зависит от pro-ui — используем canonical
-;; имя фичи `pro-ui` (модули теперь переименованы в pro-*).
+;; Модуль зависит от 'pro-ui' — загружаем опционально, чтобы не проваливать
+;; инициализацию в headless средах.
 (require 'pro-ui nil t)
 
 (defun pro-ui-apply-all ()
-  "Apply recommended UI settings (fonts, ligatures, icons, completion) when appropriate." 
+  "Применяет рекомендуемые UI-настройки (шрифты, лигатуры, иконки, completion).
+Функция безопасна для интерактивного вызова и для привязки в хуки; каждый шаг
+проверяет наличие соответствующих публичных функций перед вызовом." 
   (interactive)
   (when (fboundp 'pro-ui-apply-fonts) (pro-ui-apply-fonts))
   (when (fboundp 'pro-ui-apply-ligatures) (pro-ui-apply-ligatures))
   (when (fboundp 'pro-ui-apply-icons) (pro-ui-apply-icons))
   (when (fboundp 'pro-ui-apply-completion) (pro-ui-apply-completion)))
 
-;; Run in graphical frames after initialization
+;; Выполняем после старта GUI-фреймов
 (when (display-graphic-p)
   (add-hook 'emacs-startup-hook #'pro-ui-apply-all))
 
