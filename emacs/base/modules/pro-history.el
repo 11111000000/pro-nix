@@ -19,7 +19,7 @@
 (defcustom pro-history-xdg-state-home
   (or (and (getenv "XDG_STATE_HOME") (expand-file-name (getenv "XDG_STATE_HOME")))
       (expand-file-name "~/.local/state"))
-  "Base directory for durable state."]
+  "Base directory for durable state."
   :type 'directory
   :group 'pro-history)
 
