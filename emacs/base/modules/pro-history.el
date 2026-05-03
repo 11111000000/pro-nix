@@ -84,6 +84,100 @@
     (auto-save-list . ,pro-history-auto-save-list-directory)
     (sessions . ,pro-history-session-directory)))
 
+(defcustom pro-history-backup-retention-days 90
+  "Default age in days after which backups are considered for pruning." 
+  :type 'integer
+  :group 'pro-history)
+
+(defcustom pro-history-session-retention-days 365
+  "Default age in days after which session snapshots are pruned." 
+  :type 'integer
+  :group 'pro-history)
+
+(defun pro-history-describe-paths-into-buffer (&optional buffer)
+  "Interactively show `pro-history-describe-paths' in BUFFER.
+If BUFFER is nil, display in *pro-history-paths* buffer." 
+  (interactive)
+  (let* ((info (pro-history-describe-paths))
+         (buf (get-buffer-create (or buffer "*pro-history-paths*"))))
+    (with-current-buffer buf
+      (setq-local truncate-lines t)
+      (erase-buffer)
+      (insert (format "pro-history paths (state=%s cache=%s)\n\n" pro-history-state-directory pro-history-cache-directory))
+      (dolist (pair info)
+        (insert (format "%s: %s\n" (car pair) (cdr pair))))
+      (goto-char (point-min)))
+    (display-buffer buf)))
+
+(defun pro-history--files-older-than (dir days)
+  "Return list of files under DIR older than DAYS (integer)." 
+  (let* ((cutoff (float-time (time-subtract (current-time) (days-to-time days)))))
+    (when (file-directory-p dir)
+      (let (res)
+        (dolist (f (directory-files-recursively dir ".*"))
+          (when (> cutoff (float-time (float-time (nth 5 (file-attributes f)))))
+            (push f res)))
+        res))))
+
+(defun pro-history-prune-backups (&optional days)
+  "Prune backup files older than DAYS in `pro-history-backup-directory'.
+If DAYS is nil use `pro-history-backup-retention-days'.
+Returns list of removed files." 
+  (interactive "P")
+  (let* ((d (or (and days (prefix-numeric-value days)) pro-history-backup-retention-days))
+         (files (pro-history--files-older-than pro-history-backup-directory d))
+         (removed '()))
+    (when (null files)
+      (message "pro-history: no backup files older than %d days" d)
+      files)
+    (dolist (f files)
+      (condition-case _err
+          (progn (delete-file f) (push f removed))
+        (error (message "pro-history: failed to remove %s" f))))
+    (when removed (message "pro-history: removed %d backup files" (length removed)))
+    removed))
+
+(defun pro-history-prune-sessions (&optional days)
+  "Prune session snapshot files older than DAYS from `pro-history-session-directory'.
+If DAYS is nil use `pro-history-session-retention-days'. Returns removed files." 
+  (interactive "P")
+  (let* ((d (or (and days (prefix-numeric-value days)) pro-history-session-retention-days))
+         (files (pro-history--files-older-than pro-history-session-directory d))
+         (removed '()))
+    (when (null files)
+      (message "pro-history: no session files older than %d days" d)
+      files)
+    (dolist (f files)
+      (condition-case _err
+          (progn (delete-file f) (push f removed))
+        (error (message "pro-history: failed to remove %s" f))))
+    (when removed (message "pro-history: removed %d session files" (length removed)))
+    removed))
+
+(defun pro-history-show-undo-files ()
+  "Open `pro-history` undo directory in dired if present." 
+  (interactive)
+  (let ((d (pro-history-state-file "undo")))
+    (if (file-directory-p d)
+        (dired (file-name-as-directory d))
+      (message "pro-history: undo directory does not exist: %s" d))))
+
+(defun pro-history-clear-undo (&optional confirm)
+  "Delete all files under undo history directory. Prompts unless CONFIRM is nil.
+Returns list of removed files." 
+  (interactive "P")
+  (let ((d (pro-history-state-file "undo")))
+    (unless (file-directory-p d)
+      (user-error "pro-history: undo directory missing: %s" d))
+    (when (or (not confirm) (y-or-n-p (format "Delete all undo files in %s? " d)))
+      (let ((files (directory-files-recursively d ".*")) removed)
+        (dolist (f files)
+          (condition-case _err
+              (when (file-regular-p f) (delete-file f) (push f removed))
+            (error (message "pro-history: failed to delete %s" f))))
+        (message "pro-history: removed %d undo files" (length removed))
+        removed))))
+
 ;; Configure backup policy
 (defun pro-history-configure-backups ()
   "Apply backup-directory-alist and related settings." 
