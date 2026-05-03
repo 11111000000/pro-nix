@@ -14,6 +14,20 @@
    Proof: `systemd-analyze verify /run/current-system/system/pro-samba-sync-keys.service`
 */
 
+let
+  # Provide a small store-installed helper so ExecStart references a concrete
+  # path in /nix/store rather than embedding a complex inline invocation.
+  # This keeps the resulting unit verifiable with `systemd-analyze verify`.
+  helpers = {
+    proSambaSync = pkgs.writeShellScriptBin "pro-samba-sync-keys-wrapper" ''
+      #!/usr/bin/env bash
+      set -euo pipefail
+      # Delegate to the /etc-installed wrapper which contains operator-provided
+      # logic. Using exec preserves exit code semantics for systemd.
+      exec /run/current-system/sw/bin/bash /etc/pro-samba-sync-keys-wrapper.sh "$@"
+    '';
+  };
+
 {
   # Install the sync helper script for encrypted creds distribution.
   environment.etc."pro-samba-sync-keys.sh".source = ../../scripts/pro-samba-sync-keys.sh;
@@ -28,7 +42,7 @@
     description = "Apply decrypted samba creds to /etc/samba/creds.d";
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "/run/current-system/sw/bin/bash /etc/pro-samba-sync-keys-wrapper.sh --input /tmp/authorized_creds.gpg --out /etc/samba/creds.d/%i";
+      ExecStart = "${helpers.proSambaSync}/bin/pro-samba-sync-keys-wrapper --input /tmp/authorized_creds.gpg --out /etc/samba/creds.d/%i";
       RemainAfterExit = "no";
     };
   };
