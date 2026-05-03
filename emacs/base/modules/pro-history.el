@@ -122,7 +122,7 @@
   (when (fboundp 'savehist-mode)
     (savehist-mode 1)))
 
-(defcustom pro-history-enable-undo-tree nil
+(defcustom pro-history-enable-undo-tree t
   "If non-nil, enable persistent undo via undo-tree when available." 
   :type 'boolean
   :group 'pro-history)
