@@ -14,7 +14,11 @@
 
 ;; UI zoom functions
 (unless (fboundp 'pro-ui-zoom-in)
-  (defcustom pro-ui-zoom-step 10 "Zoom step in tenths of a point." :type 'integer)
+  ;; Use defvar instead of defcustom here to avoid calling custom initialization
+  ;; machinery during early batch/startup which can lead to "void-variable"
+  ;; errors in minimal/test environments. This keeps the default simple and
+  ;; reliable while still documenting the variable.
+  (defvar pro-ui-zoom-step 10 "Zoom step in tenths of a point.")
   (defun pro-ui-zoom-in (&optional steps)
     (interactive "p")
     (let ((s (* (or steps 1) pro-ui-zoom-step)))

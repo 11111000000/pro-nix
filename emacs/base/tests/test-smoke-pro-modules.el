@@ -24,6 +24,13 @@
         (with-temp-message (format "loading %s" bn)
           ;; Use `load' on the file to avoid feature/require resolution
           ;; issues during early init; load returns non-nil on success.
-          (should (load (expand-file-name bn mods-dir) nil t)))))))
+          (should (load (expand-file-name bn mods-dir) nil t))))))
+
+;;; additionally: try loading our new pro-history module if present
+(ert-deftest pro-smoke/load-pro-history-if-present ()
+  "Load pro-history if available without error." 
+  (let ((file (expand-file-name "pro-history.el" (expand-file-name "emacs/base/modules" (or (and (fboundp 'locate-dominating-file) (locate-dominating-file default-directory ".git")) ".")))))
+    (when (file-readable-p file)
+      (should (load file nil t)))))
 
 ;;; test-smoke-pro-modules.el ends here
