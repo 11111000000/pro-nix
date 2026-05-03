@@ -9,9 +9,9 @@
       RemainAfterExit = "no";
     };
     wantedBy = [ "default.target" ];
+    # Use a concrete helper path instead of embedding writeShellScript in a -c invocation
     script = ''
-      cmd=/run/current-system/sw/bin/bash
-      exec $cmd -c "${pkgs.writeShellScript "mount-smb-wrapper" ''/bin/true''}/bin/mount-smb.sh mount %i"
+      exec /run/current-system/sw/bin/bash ${pkgs.writeShellScriptBin "mount-smb-wrapper" ''/usr/local/bin/mount-smb-wrapper''}/bin/mount-smb-wrapper mount %i
     '';
   };
 }
