@@ -1,4 +1,17 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
+
+/* RU: Файловый контракт — nix/modules/pro-smb-automount.nix
+   Кратко: шаблоны systemd unit'ов и вспомогательные wrapper-скрипты для
+   автоматического монтирования SMB-ресурсов с помощью repo-скрипта.
+
+   Цель: предоставить проверяемые unit-шаблоны, где ExecStart указывает на
+     конкретный путь в store, чтобы `systemd-analyze verify` мог разрешить путь.
+
+   Контракт: экспорт environment.etc."systemd/system/smb-mount@.service" и
+     соответствующий automount unit, а также helper script в /usr/local/bin.
+
+   Proof: `systemd-analyze verify /run/current-system/system/smb-mount@.service`
+*/
 
 {
   # Install system-level systemd unit templates for SMB automounting.

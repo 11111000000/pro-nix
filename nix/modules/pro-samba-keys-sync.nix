@@ -1,5 +1,19 @@
 { lib, pkgs, ... }:
 
+/* RU: Файловый контракт (nix/modules/pro-samba-keys-sync.nix)
+   Кратко: устанавливает необходимые скрипты-обёртки и systemd oneshot для
+   применения расшифрованных учётных данных samba в /etc/samba/creds.d.
+
+   Цель: обеспечить детерминированное и проверяемое размещение скриптов и
+     systemd-юнита, избегая inline-строк в ExecStart и проблем с кавычками.
+
+   Контракт: экспортировать environment.etc.<..> и systemd.services.pro-samba-sync-keys
+   без принудительного изменения других модулей. Использовать абсолютные пути
+   к некоторым скриптам для `systemd-analyze verify`.
+
+   Proof: `systemd-analyze verify /run/current-system/system/pro-samba-sync-keys.service`
+*/
+
 {
   # Install the sync helper script for encrypted creds distribution.
   environment.etc."pro-samba-sync-keys.sh".source = ../../scripts/pro-samba-sync-keys.sh;

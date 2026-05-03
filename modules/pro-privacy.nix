@@ -19,7 +19,7 @@
 #   с поддержкой сетевых возможностей.
 # Как проверить (Proof):
 #   ./tools/holo-verify.sh unit (tests/contract/tor-01.sh)
-# Last reviewed: 2026-04-25
+# Last reviewed: 2026-05-02
 { config, pkgs, lib, ... }:
 
 let
