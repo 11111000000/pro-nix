@@ -94,3 +94,27 @@ AllowTcpForwarding no
   # GitHub CLI is provided from the top-level packages (configuration.nix).
   # Avoid referencing config.environment.systemPackages here to prevent recursion.
 }
+
+/*
+ Minimal systemd unit override to ensure DBus activation of nm_dispatcher
+ Причина: в логах наблюдалась ошибка активации DBus -> systemd для
+ org.freedesktop.nm_dispatcher: "activation request failed: unit is invalid".
+ Это добавление создаёт явный валидный unit, который systemd сможет запустить
+ при запросе от dbus (минимальное и обратимое изменение на уровне хоста).
+ Pressure: Bug
+ */
+{
+  # Используем отдельный Nix block чтобы не ломать формат существующего файла;
+  # этот блок добавляется в конфигурацию хоста как дополнительный атрибут.
+  systemd.services."dbus-org.freedesktop.nm-dispatcher" = {
+    description = "dbus hand-off unit for NetworkManager dispatcher (override)";
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${pkgs.networkmanager}/libexec/nm-dispatcher";
+      Restart = "on-failure";
+      # Небольшая защитная мера — ограничиваем количество рестартов
+      RestartSec = "5s";
+    };
+  };
+}
