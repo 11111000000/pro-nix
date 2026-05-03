@@ -18,7 +18,7 @@
 # - Локальная проверка flake: `nix flake check`.
 # - Линтер документации SURFACE/HOLO: `./tools/surface-lint.sh`.
 #
-# Last reviewed: 2026-05-02
+# Last reviewed: 2026-05-03
 
 { config, pkgs, lib, ... }:
 

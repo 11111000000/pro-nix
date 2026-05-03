@@ -20,7 +20,7 @@
 # Как проверить (Proof):
 #   `systemctl status headscale`; `curl http://localhost:8080/health`.
 #
-# Last reviewed: 2026-05-02
+# Last reviewed: 2026-05-03
 { config, pkgs, lib, ... }:
 
 /* RU: Файловый контракт — Headscale module

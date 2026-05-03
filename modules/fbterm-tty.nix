@@ -17,7 +17,7 @@
 # Как проверить (Proof):
 #   Активировать конфигурацию и переключиться на tty2 (Ctrl+Alt+F2) — увидеть fbterm.
 #
-# Last reviewed: 2026-05-02
+# Last reviewed: 2026-05-03
 { pkgs, lib, ... }:
 
 {

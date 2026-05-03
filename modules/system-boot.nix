@@ -15,7 +15,7 @@
 # Как проверить (Proof):
 #   `nix build .#nixosConfigurations.<host>.config.system.build.toplevel`
 #
-# Last reviewed: 2026-05-02
+# Last reviewed: 2026-05-03
 { config, pkgs, lib, ... }:
 
 {
