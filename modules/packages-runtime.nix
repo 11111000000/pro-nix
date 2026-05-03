@@ -49,6 +49,10 @@ with pkgs;
   environment.systemPackages = lib.mkDefault (with pkgs; [
     bashInteractive
     openssh
+    # Ensure python3 is available in the minimal runtime so verification
+    # scripts and tools that expect `python3` can run during activation and
+    # in CI proofs (holo-verify expects python3 presence in runtime packages).
+    python3
     coreutils
     procps
     dbus
