@@ -1,4 +1,4 @@
-(;;; early-init.el --- pro Emacs bootstrap -*- lexical-binding: t; -*-
+;;; early-init.el --- pro Emacs bootstrap -*- lexical-binding: t; -*-
 
 ;; Название: emacs/base/early-init.el — Ранний bootstrap Emacs
 ;; Кратко: ранняя инициализация pro-Emacs: базовые переменные package, load-path и GUI-hygiene.
