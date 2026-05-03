@@ -8,7 +8,7 @@
 ;; Контракт: изменяет только Emacs ранние переменные (package-*, frame-*), добавляет pro modules в load-path.
 ;; Побочные эффекты: выставляет PRO_PACKAGES_AUTO_INSTALL=1 по умолчанию (можно переопределить внешней переменной окружения).
 ;; Proof: headless ERT и smoke checks: scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el
-;; Last reviewed: 2026-05-02
+;; Last reviewed: 2026-05-03
 
 (setq package-enable-at-startup nil)
 (setq package-quickstart-file (expand-file-name "quickstart.el" user-emacs-directory))
