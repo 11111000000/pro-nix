@@ -6,6 +6,7 @@
 
 HOST_ARG="${1:-}"
 HOST_ARG="${HOST_ARG#HOST=}"
+FLAKE_REF="path:$PWD"
 
 if [ -z "$HOST_ARG" ]; then
   if [ -r /etc/hostname ]; then
@@ -27,9 +28,10 @@ fi
 
 echo "[simple-helper] Checking configuration for host: $HOST_ARG"
 
-# 1. Preflight eval — проверяем что конфигурация вычисляется
+# 1. Preflight eval — проверяем что конфигурация вычисляется.
+# Явный path:-ref не заставляет root открывать рабочее дерево как Git-репозиторий.
 echo "[simple-helper] Running preflight eval..."
-if ! nix --extra-experimental-features 'nix-command flakes' eval --json ".#nixosConfigurations.$HOST_ARG.config.environment.systemPackages" >/dev/null 2>&1; then
+if ! nix --extra-experimental-features 'nix-command flakes' eval --json "$FLAKE_REF#nixosConfigurations.$HOST_ARG.config.environment.systemPackages" >/dev/null 2>&1; then
   echo "[simple-helper] ERROR: preflight eval failed" >&2
   exit 1
 fi
@@ -39,18 +41,19 @@ echo "[simple-helper] Preflight eval passed."
 # 2. Запуск switch с сохранением логов
 echo ""
 echo "[simple-helper] Running switch for $HOST_ARG..."
-echo "[simple-helper] Logs will be saved to /tmp/switch-$(date +%s).log"
+SWITCH_LOG="/tmp/switch-$(date +%s).log"
+echo "[simple-helper] Logs will be saved to $SWITCH_LOG"
 
-sudo nixos-rebuild switch --flake ".#$HOST_ARG" 2>&1 | tee "/tmp/switch-$(date +%s).log"
+sudo nixos-rebuild switch --flake "$FLAKE_REF#$HOST_ARG" 2>&1 | tee "$SWITCH_LOG"
 
 echo ""
 echo "=== Рекомендуемый способ активации ==="
 echo ""
 echo "# Вариант 1: boot (безопасно, активируется при reboot)"
-echo "  sudo nixos-rebuild boot --flake '.#$HOST_ARG'"
+echo "  sudo nixos-rebuild boot --flake '$FLAKE_REF#$HOST_ARG'"
 echo "  sudo reboot"
 echo ""
 echo "# Вариант 2: switch (риск race condition, но быстрее)"
-echo "  sudo nixos-rebuild switch --flake '.#$HOST_ARG'"
+echo "  sudo nixos-rebuild switch --flake '$FLAKE_REF#$HOST_ARG'"
 echo ""
 echo "Выберите способ и выполните вручную."
