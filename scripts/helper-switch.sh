@@ -44,7 +44,10 @@ echo "[simple-helper] Running switch for $HOST_ARG..."
 SWITCH_LOG="/tmp/switch-$(date +%s).log"
 echo "[simple-helper] Logs will be saved to $SWITCH_LOG"
 
-sudo nixos-rebuild switch --flake "$FLAKE_REF#$HOST_ARG" 2>&1 | tee "$SWITCH_LOG"
+if sudo nixos-rebuild switch --flake "$FLAKE_REF#$HOST_ARG" 2>&1 | tee "$SWITCH_LOG"; then
+  echo "[simple-helper] Switch completed successfully."
+  exit 0
+fi
 
 echo ""
 echo "=== Рекомендуемый способ активации ==="
