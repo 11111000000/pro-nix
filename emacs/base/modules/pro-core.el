@@ -10,8 +10,12 @@
 ;; Core defaults expected by tests and by modules: keep minimal and stable.
 ;; These are global defaults (not buffer-local) that make editor behaviour
 ;; reproducible in headless/test environments.
+;; Ensure both default and current-value are set so headless test buffers
+;; that evaluate `indent-tabs-mode' see the expected value.
 (setq-default indent-tabs-mode nil)
+(setq indent-tabs-mode nil)
 (setq-default fill-column 88)
+(setq fill-column 88)
 (setq ring-bell-function 'ignore)
 
 (provide 'pro-core)
