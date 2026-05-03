@@ -7,6 +7,13 @@
 ;; Proof: emacs/base/tests/* (см. тесты на core behavior).
 ;; Last reviewed: 2026-05-02
 
+;; Core defaults expected by tests and by modules: keep minimal and stable.
+;; These are global defaults (not buffer-local) that make editor behaviour
+;; reproducible in headless/test environments.
+(setq-default indent-tabs-mode nil)
+(setq-default fill-column 88)
+(setq ring-bell-function 'ignore)
+
 (provide 'pro-core)
 
 ;;; pro-core.el ends here
