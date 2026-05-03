@@ -10,6 +10,18 @@ let
   pyForBabel = "${pyWithRequests}/bin/python3";
 in
 {
+  # Small helpers to avoid complex ExecStart quoting for multi-command units
+  helpers = {
+    xsetDpmsOff = pkgs.writeShellScriptBin "xset-dpms-off" ''
+      #!/usr/bin/env bash
+      set -euo pipefail
+      # Use explicit xset binary from the system profile for reproducibility
+      /run/current-system/sw/bin/xset s noblank
+      /run/current-system/sw/bin/xset s off
+      /run/current-system/sw/bin/xset -dpms
+    '';
+  };
+
   "nm-applet" = {
     Unit = {
       Description = "NetworkManager Applet";
@@ -135,7 +147,7 @@ in
     };
     Service = {
       Type = "oneshot";
-      ExecStart = "${pkgs.bash}/bin/bash -lc '${pkgs.xorg.xset}/bin/xset s noblank; ${pkgs.xorg.xset}/bin/xset s off; ${pkgs.xorg.xset}/bin/xset -dpms'";
+      ExecStart = "${helpers.xsetDpmsOff}/bin/xset-dpms-off";
     };
     Install = { WantedBy = [ "exwm-session.target" ]; };
   };
