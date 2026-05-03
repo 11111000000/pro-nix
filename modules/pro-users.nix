@@ -13,7 +13,7 @@
 # Как проверить (Proof):
 #   Проверить наличие пользователей: `id az` на хосте или `nix eval .#...`;
 #   Поведение sudo: `sudo -l -U az` после сборки.
-# Last reviewed: 2026-05-02
+# Last reviewed: 2026-05-03
 { config, pkgs, lib, emacsPkg ? pkgs.emacs, ... }:
 
 /* RU: Файловый контракт — Пользователи и sudo
