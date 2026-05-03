@@ -48,6 +48,6 @@ nil t и with-eval-after-load для отложенной настройки."
    ((eq pro-ui-modeline-style 'doom) (pro-ui--enable-doom-if-available))
    (t ;; минимальная обработка: минимум сегментов
     (setq-default mode-line-format
-                  '((:eval (format " %s" (or (buffer-name) "")))))))
+                  '((:eval (format " %s" (or (buffer-name) ""))))))))
 
 (provide 'pro-ui-modeline)
