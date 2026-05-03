@@ -1,5 +1,11 @@
 { config, lib, pkgs, ... }:
 
+let
+  torBrowserLauncher = pkgs.writeShellScriptBin "tor-browser" ''
+    exec ${pkgs.tor-browser}/bin/tor-browser "$@"
+  '';
+in
+
 {
   # Import modules for this host
   imports = [
@@ -90,6 +96,8 @@ AllowTcpForwarding no
     cpuQuota = "80%";
     ioWeight = 200;
   };
+
+  environment.systemPackages = lib.mkAfter [ torBrowserLauncher ];
 
   # Явный DBus hand-off unit для nm-dispatcher: systemd должен видеть
   # валидный unit при активации org.freedesktop.nm_dispatcher.
