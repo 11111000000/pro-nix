@@ -10,7 +10,7 @@
 #   Требуется Home Manager и NixOS; список пакетов берётся из provided/.
 # Как проверить (Proof):
 #   `systemctl status home-manager-az` (если активирован)
-# Last reviewed: 2026-05-02
+# Last reviewed: 2026-05-03
 # Файл: автосгенерированная шапка — комментарии рефакторятся
 /* RU: Rationale: keep Home Manager configuration minimal and reproducible.
    - Purpose: provide consistent Emacs profile and user packages via home-manager.

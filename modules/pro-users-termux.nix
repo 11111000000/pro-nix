@@ -9,7 +9,7 @@
 #   Требуется Termux + Home Manager.
 # Как проверить (Proof):
 #   После `termux-login-emacs` — запускается в терминале.
-# Last reviewed: 2026-05-02
+# Last reviewed: 2026-05-03
 # Файл: автосгенерированная шапка — комментарии рефакторятся
 /* RU: Rationale: Termux environment requires terminal-only Emacs configuration.
    Keep GUI disabled and ensure home-manager sets portable profile that works in Android.
