@@ -244,7 +244,10 @@ in
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = "/run/current-system/sw/bin/bash /etc/pro-peer-backup-hiddenservice-wrapper.sh ${config.pro-peer.torBackupRecipient}";
+          # Use the store-installed helper so ExecStart references a concrete
+          # /nix/store path and does not embed potentially complex recipient
+          # values inside the unit file.
+          ExecStart = "${helpers.proPeerBackupHidden}/bin/pro-peer-backup-hiddenservice";
           CPUQuota = "30%";
         };
       };
