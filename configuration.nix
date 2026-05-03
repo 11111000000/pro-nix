@@ -325,7 +325,7 @@
     environment.systemPackages = lib.mkDefault (with pkgs;
       []
       ++ [ just jq gh tor-browser ]
-      ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; })
+      ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = true; })
       ++ [ opencodeCmd opencodeBin ]
     );
 
