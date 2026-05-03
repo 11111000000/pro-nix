@@ -6,7 +6,7 @@
 ;; - pro-ui-after-load-theme-hook — hook, вызываемый после load-theme.
 ;;
 ;; Proof: headless ERT и manual smoke checks via ./scripts/emacs-pro-wrapper.sh
-;; Last reviewed: 2026-05-02
+;; Last reviewed: 2026-05-03
 
 (defgroup pro-ui-theme nil
   "Theme helpers for pro UI"
