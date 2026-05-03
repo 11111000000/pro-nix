@@ -1,5 +1,13 @@
 ;;; pro-ui-completion.el --- Corfu / Cape / Kind-icon wiring -*- lexical-binding: t; -*-
 
+;; Назначение: интеграция подсказок завершения (Corfu, Cape) и иконок (kind-icon)
+;;
+;; Контракт:
+;; - pro-ui-apply-completion: публичная idempotent-функция, безопасная к повторному вызову.
+;; - Побочные эффекты: регистрация hooks, изменение переменных corfu/cape и добавление formatter'ов.
+;;
+;; Proof: headless ERT (emacs/base/tests/*) и ручные smoke tests.
+
 (defgroup pro-ui-completion nil
   "Completion UI configuration for pro UI"
   :group 'pro-ui)

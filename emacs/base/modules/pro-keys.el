@@ -1,12 +1,13 @@
 ;;; pro-keys.el --- Пользовательские клавиши и система предложений -*- lexical-binding: t; -*-
+;; Назначение: декларативный загрузчик горячих клавиш из Org-таблиц (system/user).
 ;;
-;; Модуль: keys.el — декларативный интерфейс горячих клавиш.
+;; Контракт:
+;; - Публичные команды: pro-keys-reload, pro-keys-apply-pending, pro-keys-report-pending,
+;;   pro/register-module-keys, pro/export-registered-keys-to-org.
+;; - Формат входных данных: Org-таблица с колонками: SECTION | KEY | COMMAND | ...
+;; - Побочные эффекты: определение глобальных ключей, запись provenance и возможный вызов require для отложенных команд.
 ;;
-;; Назначение:
-;; Обеспечивает загрузку глобальных и контекстных биндингов из `emacs-keys.org` и
-;; `~/.emacs.d/keys.org`. Формат строки — Org-таблица с колонками: SECTION | KEY | COMMAND | ...
-;; Модуль сохраняет поведение совместимым с EXWM и org-mode, применяя биндинги
-;; с приоритетом: system -> user.
+;; Proof: unit tests under emacs/base/tests/ (if present) and manual smoke tests.
 
 (require 'subr-x)
 

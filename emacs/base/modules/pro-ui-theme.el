@@ -1,5 +1,12 @@
 ;;; pro-ui-theme.el --- Theme helpers for pro UI -*- lexical-binding: t; -*-
-;; Safe early theme loading and after-load hook wiring.
+;; Назначение: безопасная ранняя загрузка тем и механизм hook'ов после load-theme.
+;;
+;; Контракт:
+;; - pro-ui-load-default-theme-if-set — безопасна к вызову из early-init.
+;; - pro-ui-after-load-theme-hook — hook, вызываемый после load-theme.
+;;
+;; Proof: headless ERT и manual smoke checks via ./scripts/emacs-pro-wrapper.sh
+;; Last reviewed: 2026-05-02
 
 (defgroup pro-ui-theme nil
   "Theme helpers for pro UI"
