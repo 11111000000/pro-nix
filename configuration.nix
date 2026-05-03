@@ -324,7 +324,7 @@
     # разрешения в локальной конфигурации.
     environment.systemPackages = lib.mkDefault (with pkgs;
       []
-      ++ [ just jq gh ]
+      ++ [ just jq gh tor-browser ]
       ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; })
       ++ [ opencodeCmd opencodeBin ]
     );

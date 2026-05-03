@@ -340,7 +340,7 @@ let
   optionalPackages = [
     chromium
     firefox
-    tor-browser
+   tor-browser
     telegram-desktop
     element-desktop
     jami
