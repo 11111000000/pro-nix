@@ -14,7 +14,7 @@
 ;; - Идемпотентность: повторный вызов pro-ui-apply-* функций безопасен.
 ;;
 ;; Proof: headless ERT и ручные smoke-тесты через ./scripts/emacs-pro-wrapper.sh
-;; Last reviewed: 2026-05-02
+;; Last reviewed: 2026-05-03
 
 (require 'subr-x)
 
