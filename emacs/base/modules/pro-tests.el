@@ -44,7 +44,9 @@ tests robust when invoked from different CWDs or from CI runners.
 (ert-deftest pro-test-core-basics ()
   "Core defaults must stay predictable."
   (load (expand-file-name "emacs/base/modules/core.el" (pro-test--repo-root)) nil t)
-  (should (null indent-tabs-mode))
+  ;; Some modules may change buffer-local `indent-tabs-mode' during init;
+  ;; assert it is not enabled rather than testing for the precise nil/listness.
+  (should (not indent-tabs-mode))
   (should (equal fill-column 88))
   (should (eq ring-bell-function 'ignore)))
 
