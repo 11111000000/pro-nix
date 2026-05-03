@@ -8,6 +8,6 @@
   rainbow-delimiters nix-mode mmm-mode org vterm ace-window
   ;; Additional UI & integration packages we prefer to provide via Nix
   agent-shell treemacs-icons-dired all-the-icons nerd-icons
-  nerd-icons-completion nerd-icons-ibuffer all-the-icons-completion))
+  nerd-icons-completion nerd-icons-ibuffer all-the-icons-completion undo-tree))
 
 (provide 'provided-packages)

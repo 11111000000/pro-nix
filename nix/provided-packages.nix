@@ -34,6 +34,7 @@ let
     pkgs.emacsPackages.org
     pkgs.emacsPackages.vterm
     pkgs.emacsPackages.ace-window
+    pkgs.emacsPackages.undo-tree
   ];
   names = builtins.concatStringsSep " " (map (p: builtins.substring 0 100 (toString p)) emacsPackages);
 in

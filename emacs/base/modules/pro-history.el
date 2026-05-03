@@ -122,6 +122,11 @@
   (when (fboundp 'savehist-mode)
     (savehist-mode 1)))
 
+(defcustom pro-history-enable-undo-tree nil
+  "If non-nil, enable persistent undo via undo-tree when available." 
+  :type 'boolean
+  :group 'pro-history)
+
 ;; Configure recentf
 (defun pro-history-configure-recentf ()
   "Configure recentf to use state directory and exclude pro internals." 
@@ -156,6 +161,15 @@
   (pro-history-configure-savehist)
   (pro-history-configure-recentf)
   (pro-history-configure-saveplace)
+  ;; Optional: enable persistent undo if undo-tree is available.
+  (when (and pro-history-enable-undo-tree (require 'undo-tree nil t))
+    (let ((ud-dir (pro-history-state-file "undo")))
+      (unless (file-directory-p ud-dir) (make-directory ud-dir t))
+      (setq undo-tree-auto-save-history t)
+      (setq undo-tree-history-directory-alist `((".*" . ,ud-dir)))
+      (setq undo-tree-history-overwrite t)
+      (when (fboundp 'global-undo-tree-mode)
+        (global-undo-tree-mode 1))))
   ;; Defensive: ensure we do not add data dirs to load-path
   (when (member pro-history-state-directory load-path)
     (setq load-path (remove pro-history-state-directory load-path)))
