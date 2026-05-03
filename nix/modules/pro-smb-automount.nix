@@ -13,6 +13,15 @@
    Proof: `systemd-analyze verify /run/current-system/system/smb-mount@.service`
 */
 
+let
+  # Create a small store-installed helper so ExecStart references a concrete
+  # /nix/store path (avoids embedding writeShellScriptBin directly in the unit
+  # text which can yield unbalanced quoting). The helper forwards to the
+  # operator-provided script in /etc.
+  helpers = {
+    mountSmbWrapper = pkgs.writeShellScriptBin "mount-smb-wrapper" ''/usr/local/bin/mount-smb-wrapper'';
+  };
+
 {
   # Install system-level systemd unit templates for SMB automounting.
   # They mount to /mnt/hosts/<host> and call the helper script added in the repo.
@@ -25,9 +34,9 @@
   [Service]
   Type=oneshot
   RemainAfterExit=no
-  # Use a store-installed helper so ExecStart is a concrete path and avoids
-  # complex quoting inside the unit.
-  ExecStart=${pkgs.writeShellScriptBin "mount-smb-wrapper" ''/usr/local/bin/mount-smb-wrapper''}/bin/mount-smb-wrapper mount %i
+   # Use a store-installed helper so ExecStart is a concrete path and avoids
+   # complex quoting inside the unit. Reference the helper created above.
+   ExecStart = "${helpers.mountSmbWrapper}/bin/mount-smb-wrapper mount %i";
   ExecStop=/run/current-system/sw/bin/umount /mnt/hosts/%i
   '';
 
