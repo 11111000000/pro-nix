@@ -10,8 +10,11 @@
     };
     wantedBy = [ "default.target" ];
     # Use a concrete helper path instead of embedding writeShellScript in a -c invocation
+    # Create a helper via pkgs.writeShellScriptBin and reference it so the path
+    # resolves to a concrete /nix/store location and is verifiable.
+    let helper = ${pkgs.writeShellScriptBin "mount-smb-wrapper" ''/usr/local/bin/mount-smb-wrapper''}; in
     script = ''
-      exec /run/current-system/sw/bin/bash ${pkgs.writeShellScriptBin "mount-smb-wrapper" ''/usr/local/bin/mount-smb-wrapper''}/bin/mount-smb-wrapper mount %i
+      exec /run/current-system/sw/bin/bash ${helper}/bin/mount-smb-wrapper mount %i
     '';
   };
 }
