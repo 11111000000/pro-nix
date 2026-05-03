@@ -9,7 +9,12 @@ RUN_HOME="$RUN_DIR/home"
 MASTER_LOG="$RUN_DIR/run.log"
 TTY_LOG="$RUN_DIR/tty.log"
 XORG_LOG="$RUN_DIR/xorg.log"
-EMACS_BIN="${EMACS_BIN:-emacs}"
+# Prefer repository-provided emacs wrapper which includes Nix-provided -L paths
+EMACS_BIN="${EMACS_BIN:-$PWD/.pro-emacs-wrapper/emacs-pro}"
+# Fallback to system emacs if wrapper not present or not executable
+if [ ! -x "$EMACS_BIN" ]; then
+  EMACS_BIN="${EMACS_BIN:-emacs}"
+fi
 REPO_MODULES_DIR="${EMACS_MODULES_DIR:-$PWD/emacs/base/modules}"
 REPO_BASE_DIR="${EMACS_BASE_DIR:-$PWD/emacs/base}"
 
@@ -58,7 +63,21 @@ run_tty() {
   repo_modules_esc="$(escape_path "$REPO_MODULES_DIR")"
   run_home_esc="$(escape_path "$RUN_HOME")"
   base_esc="$(escape_path "$REPO_BASE_DIR")"
-  cmd="HOME=\"$RUN_HOME\" $EMACS_BIN -nw --quick --eval \"(setq user-emacs-directory \\\"$run_home_esc/.emacs.d/\\\" pro-emacs-base-system-modules-dir nil pro-emacs-base-user-modules-dir \\\"$run_home_esc/.emacs.d/modules\\\" pro-emacs-base-user-manifest \\\"$run_home_esc/.emacs.d/modules.el\\\")\" --load \"$base_esc/init.el\" --eval \"(setq pro-emacs-base-default-modules '(core ui text nav keys org lisp nix python c java haskell project git ai feeds chat agent exwm))\" --eval \"(message \\\"[pro-emacs] tty-ready\\\")\" --eval \"(kill-emacs 0)\""
+  # Ensure the disposable HOME sees the repository's provided-packages and modules
+  mkdir -p "$RUN_HOME/.config/emacs"
+  # Generate a minimal provided-packages.el for the disposable run containing
+  # only packages we want to assert as "provided" in this headless test.
+  # Avoid copying the full repo file which may declare many packages not
+  # available in the ephemeral environment and cause pro/packages-ensure to
+  # error when a declared Nix package is missing at runtime.
+  cat > "$RUN_HOME/.config/emacs/provided-packages.el" <<'EOF'
+(setq pro-packages-provided-by-nix '(gptel agent-shell))
+
+(provide 'provided-packages)
+EOF
+
+  # Ensure string quoting for Lisp literal paths
+  cmd="HOME=\"$RUN_HOME\" $EMACS_BIN -nw --quick --eval \"(setq user-emacs-directory \\\"$run_home_esc/.emacs.d/\\\" pro-emacs-base-system-modules-dir \\\"$repo_modules_esc\\\" pro-emacs-base-user-modules-dir \\\"$run_home_esc/.emacs.d/modules\\\" pro-emacs-base-user-manifest \\\"$run_home_esc/.emacs.d/modules.el\\\")\" --load \"$base_esc/init.el\" --eval \"(setq pro-emacs-base-default-modules '(core ui text nav keys org lisp nix python c java haskell project git ai feeds chat agent exwm))\" --eval \"(message \\\"[pro-emacs] tty-ready\\\")\" --eval \"(kill-emacs 0)\""
   step "TTY bootstrap" "$TTY_LOG" script -qec "$cmd" /dev/null
 }
 
