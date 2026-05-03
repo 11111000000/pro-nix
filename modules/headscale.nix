@@ -29,7 +29,7 @@
    - Контракт опций: headscale.enable, headscale.listenAddress.
    - Побочные эффекты: systemd service, конфигурационные файлы в /etc/headscale.
    - Proof: systemctl status headscale; curl health endpoint.
-   - Last reviewed: 2026-05-02
+    - Last reviewed: 2026-05-03
 */
 
 let

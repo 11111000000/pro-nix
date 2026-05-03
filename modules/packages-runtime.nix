@@ -63,5 +63,5 @@ with pkgs;
     snowflake-client
   ]);
 
-  # Last reviewed: 2026-05-02
+# Last reviewed: 2026-05-03
 }
