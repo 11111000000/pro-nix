@@ -1,4 +1,14 @@
-;;; early-init.el --- pro Emacs bootstrap -*- lexical-binding: t; -*-
+(;;; early-init.el --- pro Emacs bootstrap -*- lexical-binding: t; -*-
+
+;; Название: emacs/base/early-init.el — Ранний bootstrap Emacs
+;; Кратко: ранняя инициализация pro-Emacs: базовые переменные package, load-path и GUI-hygiene.
+;;
+;; Цель: минимально вмешиваться в ранний этап загрузки Emacs, чтобы обеспечить
+;;  воспроизводимую загрузку модулей из репозитория и избежать записи в read-only init files.
+;; Контракт: изменяет только Emacs ранние переменные (package-*, frame-*), добавляет pro modules в load-path.
+;; Побочные эффекты: выставляет PRO_PACKAGES_AUTO_INSTALL=1 по умолчанию (можно переопределить внешней переменной окружения).
+;; Proof: headless ERT и smoke checks: scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el
+;; Last reviewed: 2026-05-02
 
 (setq package-enable-at-startup nil)
 (setq package-quickstart-file (expand-file-name "quickstart.el" user-emacs-directory))

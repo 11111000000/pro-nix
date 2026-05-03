@@ -1,5 +1,15 @@
 ;;; pro-reload.el --- Soft reload helpers for pro-nix -*- lexical-binding: t; -*-
-;; Простые и безопасные функции для перезагрузки модулей и фоновых обновлений.
+;; Название: emacs/base/modules/pro-reload.el — Soft reload utilities
+;; Кратко: безопасные helper-функции для перезагрузки модулей, фоновых обновлений и управления сессией.
+;;
+;; Контракт:
+;; - pro/reload-module, pro/reload-all-modules, pro/update-melpa-in-background, pro/nix-generate-and-refresh-paths,
+;;   pro/session-save-and-restart-emacs — публичные API этого файла.
+;; - Все функции должны быть idempotent и не ломать текущую сессию при ошибках (используют ignore-errors/condition-case).
+;; - Побочные эффекты: запуск фоновых процессов, запись файлов сессий, модификация load-path.
+;;
+;; Proof: headless ERT и ./scripts/emacs-pro-wrapper.sh smoke tests.
+;; Last reviewed: 2026-05-02
 
 (require 'subr-x)
 

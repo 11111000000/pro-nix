@@ -1,5 +1,14 @@
 ;;; init.el --- pro Emacs loader -*- lexical-binding: t; -*-
 
+;; Название: emacs/base/init.el — Основная загрузка pro-Emacs
+;; Кратко: выставляет user-emacs-directory, загружает pro-compat/pro-packages и стартует site-init.
+;;
+;; Цель: безопасно и предсказуемо поднять site-init и базовые pro-модули в окружении Nix/Home-Manager.
+;; Контракт: не менять глобальные user-emacs-directory вне явного пользовательского override; записывает custom-file в пользовательскую директорию.
+;; Побочные эффекты: может привести к автоустановке пакетов при вызове pro-packages-ensure-required.
+;; Proof: headless ERT (emacs/base/tests/*) и ./scripts/emacs-pro-wrapper.sh smoke tests.
+;; Last reviewed: 2026-05-02
+
 (let ((base-dir (file-name-directory (or load-file-name buffer-file-name))))
   (setq user-emacs-directory (file-name-as-directory (expand-file-name "~/.config/emacs/")))
   ;; Ensure Emacs customizations are written to a user-writable file under
