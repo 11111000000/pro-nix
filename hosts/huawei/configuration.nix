@@ -91,6 +91,18 @@ AllowTcpForwarding no
     ioWeight = 200;
   };
 
+  # Явный DBus hand-off unit для nm-dispatcher: systemd должен видеть
+  # валидный unit при активации org.freedesktop.nm_dispatcher.
+  systemd.services."dbus-org.freedesktop.nm-dispatcher" = {
+    description = "DBus hand-off unit for NetworkManager dispatcher";
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${pkgs.networkmanager}/libexec/nm-dispatcher";
+      Restart = "on-failure";
+      RestartSec = "5s";
+    };
+  };
+
   # GitHub CLI is provided from the top-level packages (configuration.nix).
   # Avoid referencing config.environment.systemPackages here to prevent recursion.
 }
