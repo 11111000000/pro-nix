@@ -16,7 +16,7 @@
 # Как проверить (Proof):
 #   `ss -tlnp | grep -E '445|8384'` или `systemctl status nmbd smbd`.
 #
-# Last reviewed: 2026-05-02
+# Last reviewed: 2026-05-03
 { config, lib, ... }:
 
 let

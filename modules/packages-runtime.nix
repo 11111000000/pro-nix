@@ -22,7 +22,7 @@
 # Как проверить (Proof):
 #   `nix eval .#nixosConfigurations.<host>.config.environment.systemPackages --json | jq -r '.[]' | grep -E '^bash|^openssh'`
 #
-# Last reviewed: 2026-05-02
+# Last reviewed: 2026-05-03
 { config, pkgs, lib, ... }:
 
 # Minimal runtime packages that must be present in the final system profile.

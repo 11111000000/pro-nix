@@ -15,7 +15,7 @@
 # Как проверить (Proof):
 #   `nix eval .#nixpkgs.legacyPackages.x86_64-linux.cudaPackages.cudaFlags --json`
 #
-# Last reviewed: 2026-05-02
+# Last reviewed: 2026-05-03
 { lib, ... }:
 
 /* RU: Файловый контракт:

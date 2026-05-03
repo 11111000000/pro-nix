@@ -15,7 +15,7 @@
 # Как проверить (Proof):
 #   `systemctl status fail2ban` и `ss -tlnp | grep 22`.
 #
-# Last reviewed: 2026-05-02
+# Last reviewed: 2026-05-03
 { ... }:
 
 /* RU: Файловый контракт (литературный заголовок) — см. начало файла.
