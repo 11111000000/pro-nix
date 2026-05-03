@@ -1,6 +1,14 @@
 ;; Русский: комментарии и пояснения оформлены в стиле учебника
 ;;; pro-packages.el --- prompt-and-install package flow -*- lexical-binding: t; -*-
-;; Minimal engine for prompt-and-install packages when not provided by Nix.
+;; Назначение: минимальный движок для интерактивной установки пакетов когда Nix их не предоставляет.
+;;
+;; Контракт:
+;; - pro-packages--maybe-install / pro/packages-ensure — публичные точки входа для проверки/установки пакетов.
+;; - Политика: Nix-provided > runtime > MELPA (с явным allowlist) > package-vc (last resort).
+;; - Побочные эффекты: модификация `package-alist' и возможная запись файла решений пользователя `pro-packages-decisions-file`.
+;;
+;; Proof: headless ERT (emacs/base/tests/*) и ручные smoke-тесты через scripts/emacs-pro-wrapper.sh
+;; Last reviewed: 2026-05-02
 
 (require 'package)
 (require 'subr-x)
