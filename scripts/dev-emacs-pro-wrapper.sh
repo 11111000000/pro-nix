@@ -8,6 +8,7 @@ set -euo pipefail
 PKGS=(
   vertico consult orderless marginalia gptel consult-dash consult-eglot consult-yasnippet
   corfu cape kind-icon avy expand-region yasnippet projectile treemacs vterm ace-window embark
+  dash s acp shell-maker agent-shell
 )
 
 LFLAGS=()

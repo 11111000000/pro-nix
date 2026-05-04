@@ -32,7 +32,7 @@ tests robust when invoked from different CWDs or from CI runners.
 (defun pro-test-load-base (modules-dir)
   "Load base Emacs modules from MODULES-DIR and return errors."
   (setq pro-test--load-errors nil)
-  (dolist (file '("core.el" "ui.el" "packages.el" "package-bootstrap.el" "keys.el" "nav.el" "ai.el" "pro-agent.el" "chat.el"))
+  (dolist (file '("pro-core.el" "pro-ui.el" "pro-packages.el" "pro-package-bootstrap.el" "pro-keys.el" "pro-nav.el" "pro-ai.el" "pro-agent.el" "pro-chat.el"))
     (pro-test--safe-load (expand-file-name file modules-dir)))
   (nreverse pro-test--load-errors))
 
@@ -43,7 +43,7 @@ tests robust when invoked from different CWDs or from CI runners.
 
 (ert-deftest pro-test-core-basics ()
   "Core defaults must stay predictable."
-  (load (expand-file-name "emacs/base/modules/core.el" (pro-test--repo-root)) nil t)
+  (load (expand-file-name "emacs/base/modules/pro-core.el" (pro-test--repo-root)) nil t)
   ;; Some modules may change buffer-local `indent-tabs-mode' during init;
   ;; assert it is not enabled rather than testing for the precise nil/listness.
   (should (not indent-tabs-mode))

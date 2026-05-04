@@ -329,6 +329,10 @@ let
     exec systemd-run --user --scope -p MemoryMax=2500M -p MemoryHigh=2G -p CPUQuota=90% -- ${pkgs.firefox}/bin/firefox "$@"
   '';
 
+  torBrowserCmd = pkgs.writeShellScriptBin "tor-browser" ''
+    exec ${pkgs.tor-browser}/bin/tor-browser "$@"
+  '';
+
   emacsPanicCmd = pkgs.writeShellScriptBin "emacs-panic" ''
     pkill -INT -u "$USER" -x emacs >/dev/null 2>&1 || pkill -INT -u "$USER" -f 'emacs.*daemon' >/dev/null 2>&1 || true
   '';
@@ -340,7 +344,6 @@ let
   optionalPackages = [
     chromium
     firefox
-   tor-browser
     telegram-desktop
     element-desktop
     jami
@@ -453,8 +456,8 @@ gh
   # ссылки на уже созданные пакеты/скрипты.
   chromiumCmd
   firefoxCmd
+  torBrowserCmd
   emacsPanicCmd
-  tor-browser
 
   # Мессенджеры находятся рядом с остальными каналами связи.
   telegram-desktop
@@ -482,7 +485,7 @@ gh
   # Tor и обфускация формируют слой, в котором адреса перестают быть прямой формой доступа.
   tor                     # Tor клиент (системный сервис)
   torsocks                # Проксирование приложений через Tor (torify)
-  tor-browser             # Браузер со встроенным Tor
+  torBrowserCmd           # Системный launcher для Tor Browser.
   obfs4                   # obfs4 transport для обхода DPI
   snowflake               # Snowflake мосты (WebRTC-маскировка)
   nyx                     # Мониторинг Tor в реальном времени (htop-подобный интерфейс)
@@ -521,7 +524,7 @@ gh
   # ────────────────────────────────────────────────────────────────────────────
   obfs4                 # Pluggable transports для мостов Tor.
   torsocks              # Проксирование приложений через Tor.
-  tor-browser           # Браузер со встроенным Tor.
+  torBrowserCmd         # Системный launcher для Tor Browser.
   
   # Федеративные и децентрализованные мессенджеры продолжают ту же линию, но уже без привязки к браузеру.
   element-desktop       # Matrix-клиент.
