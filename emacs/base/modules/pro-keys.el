@@ -24,6 +24,11 @@
   (expand-file-name "keys.org" user-emacs-directory)
   "Путь к пользовательскому файлу клавиш.")
 
+;; NOTE: We only ship `keys.org.example` as a template. The runtime
+;; expects the user to create `~/.config/emacs/keys.org` by copying or
+;; instantiating the example. This avoids accidental commits of a
+;; concrete user keys file and keeps per-user overrides local.
+
 (defconst pro-keys-system-file
   (or (let ((etc-file "/etc/pro/emacs-keys.org"))
         (and (file-readable-p etc-file) etc-file))

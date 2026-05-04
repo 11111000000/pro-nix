@@ -32,10 +32,11 @@ let
     home.file.".config/pro/ENVIRONMENT.md".source = ../ENVIRONMENT.md;
     home.file.".config/pro/README.agent.md".source = ../docs/plans/repo-agent-guide.md;
 
-    home.file.".config/emacs/keys.org".text = ''
-      # Пользовательский слой клавиш.
-      # Отредактируйте `~/.config/emacs/keys.org`, не трогая пример.
-    '';
+    # NOTE: We provide only the example template `keys.org.example`.
+    # The actual user file `~/.config/emacs/keys.org` is intentionally
+    # not created by default so that users explicitly copy/instantiate
+    # it from the example. This prevents accidental commits of a
+    # concrete keys file and keeps user overrides local.
   };
 
   guiFiles = {
