@@ -59,12 +59,13 @@ run_tty() {
   modules_dir_esc="$(escape_path "$MODULES_DIR")"
 
   local cmd
+  # Do not explicitly load test files here: init.el / site-init are responsible
+  # for loading modules and test helpers once. Explicitly loading tests from the
+  # harness caused duplicate ERT definitions when site-init also loaded them.
   cmd="HOME=\"$RUN_HOME\" $EMACS_BIN --batch --quick \
     --eval \"(setq pro-test-repo-root \\\"$REPO_DIR\\\")\" \
     --eval \"(setq user-emacs-directory \\\"$run_home_esc/.config/emacs/\\\" pro-emacs-base-system-modules-dir nil pro-emacs-base-user-modules-dir \\\"$run_home_esc/.config/emacs/modules\\\" pro-emacs-base-user-manifest \\\"$run_home_esc/.config/emacs/modules.el\\\")\" \
     --load \"$base_dir_esc/init.el\" \
-    --load \"$modules_dir_esc/test-helpers.el\" \
-    --load \"$modules_dir_esc/tests.el\" \
     --eval \"(ert-run-tests-batch-and-exit t)\""
 
   step "TTY ERT" "$TTY_LOG" bash -lc "$cmd"
@@ -95,8 +96,6 @@ run_xorg() {
     --eval "(setq pro-test-repo-root \"$REPO_DIR\")" \
     --eval "(setq user-emacs-directory \"$run_home_esc/.config/emacs/\" pro-emacs-base-system-modules-dir nil pro-emacs-base-user-modules-dir \"$run_home_esc/.config/emacs/modules\" pro-emacs-base-user-manifest \"$run_home_esc/.config/emacs/modules.el\")" \
     --load "$base_dir_esc/init.el" \
-    --load "$modules_dir_esc/test-helpers.el" \
-    --load "$modules_dir_esc/tests.el" \
     --eval "(ert-run-tests-batch-and-exit t)" \
     >>"$XORG_LOG" 2>&1
 

@@ -2,58 +2,126 @@
 
 Stage: RealityCheck
 
-Purpose: Provide concise manifest of the repository's public contract, базовые инварианты и ключевые решения, чтобы агенты и мейнтейнеры могли разумно и безопасно вносить изменения.
-
-Invariants:
-1) INV-Core-IO-Boundary: Ядро логики не должно содержать побочных эффектов; побочные эффекты реализуются в адаптерах (Nix-модули, emacs adapters).
-2) INV-Determinism: Функции и сборки, при прочих равных входных данных, дают детерминированный результат.
-3) INV-Canonical-Roundtrip: Файлы/передаваемые данные, помеченные как frozen, обязаны проходить roundtrip (encode∘decode = id) там, где это применимо.
-4) INV-Surface-First: Любые изменения публичного смысла начинаются с обновления SURFACE.md и сопровождаются Proof до изменения кода.
-5) INV-Traceability: Каждое изменение проходит Change Gate (Intent/Pressure/Surface impact/Proof) и ссылается на соответствующие тесты.
-6) INV-Docs-Russian: Вся документация, комментарии и docstring в репозитории — на русском языке. Это не косметическое требование, а контракт читаемости для команды.
-7) INV-Test-Coverage-for-Surface: Каждая запись в SURFACE должна иметь Proof — однозначную команду/скрипт/тест, проверяющий поведение.
-8) INV-Deterministic-Flake-Outputs: Flake outputs, используемые как Proof или CI-артефакты, должны быть buildable локально и воспроизводимы в CI. Любое изменение, затрагивающее flake outputs, сопровождается Proof и проверкой в CI.
-9) INV-OneFile-OneResponsibility: Один файл — одна ответственность. Если файл растёт за пределы одной ответственности, изменение оформляется через Change Gate и предлагается декомпозиция.
-10) INV-No-Secrets: Репозиторий не содержит секретов; любые упоминания секретов сопровождаются явной инструкцией о хранении вне репозитория.
-11) INV-Emacs-Package-Precedence: В pro-Emacs приоритет разрешения пакетов обязан быть таким: вручную установленные пакеты и runtime `package.el`-пакеты выше Nix-provided пакетов; архивы `gnu`, `nongnu` и `melpa` подключаются при старте, но `package-refresh-contents` выполняется только по необходимости при установке отсутствующего пакета или по явной команде пользователя.
+Purpose: короткий манифест репозитория: инварианты, публичные решения и правила изменения кода. HOLO служит справочником для агентов и мейнтейнеров — какие свойства гарантируются и как их проверять.
 
 
-Decisions:
-- [Draft] Emacs profile: provide a default portable Emacs + EXWM profile. Exit: provide a migration plan and Proof (headless tests) before freezing.
-- [FROZEN] Soft Reload: provide safe, opt-in mechanisms to update UI, keybindings, modules and packages without requiring a full Emacs restart; provide tooling to refresh Nix-provided site-lisp paths and to perform a controlled restart with session restore when native extensions change. Exit: Soft Reload surfaces implemented and verified via headless ERT tests. Proof: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el` + manual test commands listed in SURFACE.md.
-  
-  Migration:
-    Impact: Soft Reload touches Emacs session state and may require restart when native C-extensions or compiled elisp change; scope: Emacs GUI UX Layer, modelines, icon fonts, completion backends (posframe), and site-lisp paths.
-    Strategy: additive_v2 — provide an explicit runtime "pro-emacs-reload" command that attempts a best-effort reload of site-lisp and module state; when native extensions are detected changed (native-compile or binary modules), surface a controlled restart prompt that preserves session state to disk and restores where possible.
-    Window/Version: v1 (initial rollout) — opt-in behind `pro.emacs.softReload.enable = true` and feature gate; full default rollout deferred until Proof passes.
-    Data/Backfill: store session serialization in `~/.local/state/pro-emacs/session-<timestamp>.el` (or `~/.emacs.d/.local/session/`) and provide tooling to inspect and selectively restore buffers, frames and window-configs.
-    Rollback: disable `pro.emacs.softReload.enable` and restart Emacs; session files preserved for manual restore.
-    Tests:
-      - Keep: existing headless ERT tests and UI smoke tests.
-      - Add: `tests/contract/test-soft-reload.el` (soft reload helper presence), `tests/contract/test-theme-contrast.el` (face contrast checks).
-- [Draft] Pro-peer: Discovery & Key Sync
-  Pressure: Ops
-  Rationale: pro-peer is an operational surface that управляет распространением authorized_keys и пер-узловыми артефактами. Изменения требуют координации операторов и Proof (smoke scripts + systemd unit checks).
-  Exit: Documented migration and a minimal smoke-test (scripts/pro-peer-sync-keys.sh) present.
+Инварианты (INV-*)
 
-- [Draft] LLM Research Surface: provide a reproducible notebook-based environment for model inspection, prompt tests, dataset exploration, and lightweight evaluation. Exit: `llm-lab` is exposed on PATH and covered by `tests/contract/unit/03-llm-tools.sh`.
+Общая часть (процессные и общесистемные инварианты)
 
-Proofs / Verification Commands (add to Change Gate):
-- Contract tests: `tests/contract/test_surface_health.spec`
-- Vertical scenario: `tests/scenario/example_scenario.test`
-- Soft Reload e2e: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el`
-- Pro-peer smoke: `bash scripts/pro-peer-sync-keys.sh --help` (or run systemd unit in dry-run)
-- Samba automount smoke: `bash scripts/mount-smb.sh --help`
+1. INV-Core-IO-Boundary
+   Ядро логики не содержит побочных эффектов; все эффекты инкапсулируются в адаптерах (Nix-модули, скрипты, Emacs-адаптеры). Proof: code review + unit tests.
 
-- HDS seed (local): `docs/hds-llm-seed-en.md` — repository-local copy of the HDS LLM seed used by agents and verification steps.
-- Repository-local verify tools:
-  - `./tools/holo-verify.sh`
-  - `./tools/surface-lint.sh`
-  - `./tools/docs-link-check.sh`
-- Testing guide: `docs/TESTING.md`
-- PR template (Change Gate): `.github/PULL_REQUEST_TEMPLATE.md`
+2. INV-Determinism
+   Сборки и функции при тех же входных данных дают детерминированный результат. Изменения, влияющие на воспроизводимость, требуют Proof (nix build / nix eval). Proof: `nix build`, `nix eval`.
 
-- LLM research entrypoint: `llm-lab`
+3. INV-Surface-First
+   Любые изменения публичной поверхности начинаются с обновления SURFACE.md и формулировки Proof до изменения кода. Proof: `.github/actions/check-change-gate/action.sh` + review policy.
 
-Notes:
-- Add or freeze decisions only when Exit criteria and Proof are present. Use the Change Gate format in PR descriptions.
+4. INV-Traceability
+   Каждое изменение сопровождается Change Gate: Intent, Pressure (Bug/Feature/Debt/Ops), Surface impact и Proof. PR должен ссылаться на соответствующие тесты/скрипты. Proof: PR template + CI check.
+
+5. INV-Docs-Russian
+   Документация, комментарии и docstring — на русском языке. Proof: surface-lint/docs lint.
+
+6. INV-Test-Coverage-for-Surface
+   Каждая запись в SURFACE.md имеет Proof — однозначную команду/скрипт/тест, который можно запустить локально/в CI. Proof: `./tools/surface-lint.sh`.
+
+7. INV-Deterministic-Flake-Outputs
+   Flake outputs, используемые в Proof или CI, должны быть buildable локально. Proof: `nix flake check` + selective build.
+
+8. INV-OneFile-OneResponsibility
+   Один файл — одна ответственность. Если файл выходит за границы, предлагается декомпозиция через Change Gate. Proof: review + static checks.
+
+9. INV-No-Secrets
+   В репозитории не хранить секреты; любые инструкции по секретам указывают на approved tools (sops/age/Vault) и на процедуру ротации. Proof: grep checks + secrets-scan in CI.
+
+10. INV-Verification-Automation
+    Proof‑скрипты (`./tools/holo-verify.sh`, `./tools/surface-lint.sh`) покрывают все FROZEN поверхности в fast/full режимах и запускаются в CI. Proof: CI jobs present and passing.
+
+
+NixOS‑ориентированные инварианты (конфигурационные, проверяемые)
+
+11. INV-Module-Composition
+    Все модули добавляют опции и пакеты с использованием `lib.mkDefault`/`lib.mkIf` для композиции; `lib.mkForce` допускается только в host-level finalization. Proof: `tools/generate-options-md.sh`, `tools/mkforce-lint.sh`.
+
+12. INV-No-Recursive-SystemPackages
+    `environment.systemPackages` не должен ссылаться на `config.environment.systemPackages` в модулях (избегать рекурсии). Proof: `tests/contract/unit/09-system-packages-eval.sh`, static grep tests.
+
+13. INV-Host-Override-Last
+    Host-конфигурации могут переопределять значения, но базовые модули остаются additive. Proof: `nix eval .#nixosConfigurations.<host>.config` checks.
+
+14. INV-Boot-Policy-Explicit
+    Параметры загрузчика и ядра (boot.loader, boot.kernelPackages, sysctl) фиксируются явно в конфигурации. Proof: `nix eval --json .#nixosConfigurations.<host>.boot.loader`.
+
+15. INV-Firewall-Is-Additive
+    Политики firewall добавляют правила (concat/ lib.mkDefault), не перезаписывая глобальные списки. Proof: review + `nix eval` checks in modules/pro-peer.nix and configuration.nix.
+
+16. INV-Tor-Verify-Compatible
+    Tor конфигурирование избегает runtime `Include` директив, чтобы `tor --verify-config` проходил для декларативных конфигов. Proof: `tests/contract/tor-01.sh` and `./scripts/ops-ensure-tor.sh`.
+
+17. INV-SSH-Keys-Runtime
+    authorized_keys управляются runtime (e.g., `/var/lib/pro-peer/authorized_keys`) — не хранить динамические ключи в eval-time sources. Proof: `modules/pro-peer.nix` + `scripts/ops-pro-peer-sync-keys.sh` + unit tests.
+
+18. INV-Systemd-Units-Verifiable
+    ExecStart в unit-файлах должен ссылаться на конкретные store‑пути или на простые wrappers, чтобы `systemd-analyze verify` проходил. Proof: `tests/contract/validate-units.sh`, `scripts/verify-units.sh`.
+
+19. INV-Service-Resource-Limits
+    Долговременные/операционные сервисы имеют ограничение ресурсов (CPUQuota/Mem/oomd) по умолчанию или через slice. Proof: `nix eval` checks + `systemd-analyze verify`.
+
+20. INV-SystemPackages-Evaluates-Standalone
+    `system-packages.nix` вычисляется отдельно и возвращает список пакетов (не thunk). Proof: `tests/contract/unit/09-system-packages-eval.sh`.
+
+21. INV-Emacs-State-Isolated
+    Emacs state и cache находятся в XDG-пути (`~/.local/state/pro-emacs`, `~/.cache/pro-emacs`) и не попадают в `load-path`. Proof: `emacs/base/modules/pro-history.el` + `emacs/base/tests/test-history.el`.
+
+22. INV-Emacs-Package-Availability
+    Пакеты, объявленные Nix-ом, должны быть доступны на `load-path`; interactive installs допускаются только по allowlist. Proof: `emacs/base/modules/pro-packages.el` + headless ERT.
+
+23. INV-Opencode-Isolated
+    Opencode/runtime сервисы запускаются в выделенных slices и имеют reproducible build entrypoints. Proof: `nixos/modules/opencode.nix`, `tests/contract/unit/04-opencode-options.sh`.
+
+24. INV-Activation-Preflight
+    Перед `nixos-rebuild switch`/`just switch` выполняются preflight проверки: вычислимость профиля пакетов, unit verify, quick smoke tests. Proof: `scripts/helper-check-nixos-build.sh`, `tests/contract/test_live_activation_smoke.sh`.
+
+25. INV-Host-Matrix-Coverage
+    Для поддерживаемых хостов (huawei, cf19, vm, ...) определён набор Proofs и smoke tests; изменения в общих модулях требуют проверки в host matrix. Proof: `tests/vm/*`, host-specific `nix build` checks.
+
+26. INV-StateVersion-IsIntentional
+    `system.stateVersion` фиксируется и изменение требует migration plan. Proof: review + CI check for stateVersion drift.
+
+27. INV-Generated-Files-Declarative
+    Все /etc/файлы, tmpfiles rules и wrappers должны задаваться декларативно в Nix (environment.etc / systemd.tmpfiles.rules). Proof: `nix eval` and `tests/contract/validate-units.sh`.
+
+28. INV-Options-Versioning
+    Публичные Nix module options имеют версионирование и migration notes when changed. Proof: `tools/generate-options-md.sh` and CHANGELOG/UPGRADING notes.
+
+
+
+
+Decisions
+
+- [Draft] Emacs profile
+  Provide a default portable Emacs + EXWM profile. Exit criteria: migration plan and headless ERT Proof.
+
+- [FROZEN] Soft Reload
+  Safe opt-in механизм обновления UI/модулей Emacs без полного перезапуска. Proof: headless ERT suite listed in SURFACE.md.
+  Migration notes: при изменениях native-compiled компонентов требуется контролируемый рестарт с сохранением сессии.
+
+- [Draft] Pro-peer Discovery & Key Sync
+  Operational surface for distributing authorized_keys between trusted hosts. Pressure: Ops. Exit: documented migration and smoke tests.
+
+- [Draft] LLM Research Surface
+  Provide reproducible notebook-based environment and entrypoints (llm-lab). Exit: `llm-lab` on PATH and proof script coverage.
+
+
+Proofs / Verification Commands (use in Change Gate)
+
+- `./tools/surface-lint.sh`
+- `./tools/holo-verify.sh`
+- `nix flake check`
+- `tests/contract/test_surface_health.spec`
+
+Notes
+
+- Не вносите изменения в FROZEN-поверхности без полного Change Gate и Proof. Для документационных правок в SURFACE/HOLO достаточно Intent/Pressure=Debt и Proof: `./tools/surface-lint.sh`.
