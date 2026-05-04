@@ -16,6 +16,23 @@
 (setq frame-inhibit-implied-resize t)
 (setq inhibit-splash-screen t)
 
+;; Ensure ELPA packages are visible during startup.
+;; `package-enable-at-startup' is disabled to keep startup deterministic,
+;; but the user profile still needs `package-initialize' so installed ELPA
+;; packages such as gptel are visible on `load-path'.
+(when (fboundp 'package-initialize)
+  (let ((inhibit-message t))
+    (ignore-errors (package-initialize))))
+
+;; Ensure package.el directories (ELPA) are added to `load-path' early.
+;; We disable automatic initialization at startup to retain control, but
+;; many environments still expect installed ELPA packages to be visible.
+;; Call `package-initialize' explicitly and quietly so `locate-library'
+;; and `package-installed-p' work during the rest of init.
+(when (fboundp 'package-initialize)
+  (let ((inhibit-message t))
+    (ignore-errors (package-initialize))))
+
 ;; Ensure local pro modules directory is on `load-path' as early as possible.
 ;; This prevents the bootstrap installer from attempting to install helper
 ;; modules that are shipped with the repo (for example pro-fix-corfu).
