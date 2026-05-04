@@ -9,6 +9,14 @@ shopt -s nullglob
 MODE=${1:-unit}
 if [ "$MODE" = "unit" ]; then
   pattern="$root/tests/contract/unit/*"
+elif [ "$MODE" = "nixos-fast" ]; then
+  # fast nixos checks: system-packages eval, verify-units, and host toplevel build for primary host
+  echo "Running nixos-fast checks"
+  set -x
+  ./scripts/helper-check-nixos-build.sh huawei || { echo "helper-check-nixos-build failed"; exit 2; }
+  ./scripts/verify-units.sh || { echo "verify-units failed"; exit 3; }
+  set +x
+  pattern="$root/tests/contract/unit/*"
 else
   pattern="$root/tests/contract/*"
 fi
