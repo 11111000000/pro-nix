@@ -1,6 +1,9 @@
 ;; Русский: комментарии и пояснения оформлены в стиле учебника
 ;;; tests.el --- headless ERT tests -*- lexical-binding: t; -*-
 
+;; Guard against being loaded multiple times in the same Emacs process.
+(unless (featurep 'pro-tests)
+
 (require 'ert)
 
 (defvar pro-test-repo-root nil)
