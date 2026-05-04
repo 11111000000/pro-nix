@@ -59,6 +59,14 @@ git clone git@github.com:11111000000/pro-nix.git
 cd pro-nix
 ```
 
+Перед любой правкой агент обязан перейти в linked worktree:
+
+```bash
+./scripts/check-worktree.sh
+./scripts/setup-worktree.sh fix/example
+cd ../worktree-fix-example
+```
+
 2. Быстрая проверка flake и контрактов:
 
 ```bash

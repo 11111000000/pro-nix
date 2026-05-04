@@ -6,7 +6,7 @@
 ;; Цель: минимально вмешиваться в ранний этап загрузки Emacs, чтобы обеспечить
 ;;  воспроизводимую загрузку модулей из репозитория и избежать записи в read-only init files.
 ;; Контракт: изменяет только Emacs ранние переменные (package-*, frame-*), добавляет pro modules в load-path.
-;; Побочные эффекты: выставляет PRO_PACKAGES_AUTO_INSTALL=1 по умолчанию (можно переопределить внешней переменной окружения).
+;; Побочные эффекты: включает автоустановку пакетов по умолчанию; обновление архивов выполняется только по необходимости на уровне package policy.
 ;; Proof: headless ERT и smoke checks: scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el
 ;; Last reviewed: 2026-05-03
 
@@ -43,12 +43,6 @@
   (when (file-directory-p pro-modules-dir)
     (add-to-list 'load-path pro-modules-dir)))
 
-;; Enable noninteractive auto-install of missing pro packages by default.
-;; This environment variable is checked by pro-packages--maybe-install and
-;; used to auto-install packages from MELPA when appropriate.
-;; По умолчанию включаем автоустановку пакетов, но уважаем внешнюю
-;; установку переменной окружения чтобы позволить CI/локальные запуски
-;; отключать автоприём (например PRO_PACKAGES_AUTO_INSTALL=0).
 (unless (getenv "PRO_PACKAGES_AUTO_INSTALL")
   (setenv "PRO_PACKAGES_AUTO_INSTALL" "1"))
 
