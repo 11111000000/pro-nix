@@ -97,11 +97,7 @@ AllowTcpForwarding no
     ioWeight = 200;
   };
 
-  let
-    # Provide a fallback derivation for agent-shell from repository recipes
-    agentShell = pkgs.callPackage ../../nix/emacs-recipes/agent-shell.nix {};
-  in
-  environment.systemPackages = lib.mkAfter [ torBrowserLauncher agentShell ];
+  environment.systemPackages = lib.mkAfter [ torBrowserLauncher (pkgs.callPackage ../../nix/emacs-recipes/agent-shell.nix {}) ];
 
   # Явный DBus hand-off unit для nm-dispatcher: systemd должен видеть
   # валидный unit при активации org.freedesktop.nm_dispatcher.
