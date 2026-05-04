@@ -259,6 +259,53 @@ by providers and prints a short status message."
   "Вернуть имя текущего AI-провайдера."
   (symbol-name (pro-ai--backend-choice)))
 
+;; --- Carriage integration -------------------------------------------------
+(defcustom pro-ai-carriage-path
+  (expand-file-name "~/Code/carriage")
+  "Каталог локального клона carriage (см. README в репозитории).
+Если каталог присутствует, модуль попытается добавить его \"lisp\"-папку
+в `load-path' и загрузить пакет carriage.
+"
+  :type 'directory
+  :group 'pro-ui)
+
+(defcustom pro-ai-enable-carriage t
+  "Если non-nil, попытаться загрузить carriage из `pro-ai-carriage-path'."
+  :type 'boolean
+  :group 'pro-ui)
+
+(defcustom pro-ai-carriage-enable-global-mode nil
+  "Если non-nil — включать `carriage-global-mode' после загрузки carriage.
+Оставьте nil по умолчанию: глобальный режим — опционален и может вмешиваться
+в интерактивные сессии." :type 'boolean :group 'pro-ui)
+
+(defun pro-ai--setup-carriage ()
+  "Добавить carriage в `load-path' и применить базовые настройки из README.
+
+Поведение:
+- если `pro-ai-enable-carriage' и путь `pro-ai-carriage-path' существует —
+  добавить папку "lisp" в `load-path' и попытаться `require`-нуть carriage;
+- после загрузки установить `carriage-i18n-locale' в 'ru при наличии переменной;
+- опционально включить `carriage-global-mode' если `pro-ai-carriage-enable-global-mode' true.
+"
+  (when (and pro-ai-enable-carriage
+             (file-directory-p pro-ai-carriage-path))
+    (let ((lisp (expand-file-name "lisp" pro-ai-carriage-path)))
+      (when (file-directory-p lisp)
+        (add-to-list 'load-path lisp)
+        (condition-case _err
+            (progn
+              (require 'carriage nil t)
+              (when (boundp 'carriage-i18n-locale)
+                (setq carriage-i18n-locale 'ru))
+              (when (and pro-ai-carriage-enable-global-mode
+                         (fboundp 'carriage-global-mode))
+                (carriage-global-mode 1))
+              (message "[pro-ai] carriage loaded from %s" pro-ai-carriage-path))
+          (error (message "[pro-ai] failed to load carriage from %s" lisp))))))
+
+(pro-ai--setup-carriage)
+
 ;; Note: do not eagerly register backends here. Backends are registered when
 ;; `gptel' is loaded (see the `with-eval-after-load' block below) or on-demand
 ;; when the user opens the AI entry via `pro-ai-open-entry'. Eager registration
