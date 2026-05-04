@@ -211,9 +211,17 @@ install from a pinned GitHub repo. Return t on success, nil otherwise.
      ;; Runtime/manual install already provides it.
      ((pro--package-runtime-available-p pkg) t)
 
-     ;; Declared in Nix, but not available after package initialization.
+     ;; Объявлен в Nix, но не доступен в текущем runtime.
+     ;; В пользовательских/переходных окружениях допускаем fallback на MELPA,
+     ;; если это явно разрешено политикой автозагрузки.
      (declared
-      (error "Package %s is declared in Nix but not available at runtime. Fix your Nix profile." pkg))
+      (if (and allow-melpa
+               (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "0") "1"))
+          (progn
+            (message "[pro-packages] %s declared by Nix, but missing at runtime; trying MELPA fallback" pkg)
+            (when (pro-packages--do-install pkg)
+              (pro--package-provided-p pkg)))
+        (error "Package %s is declared in Nix but not available at runtime. Fix your Nix profile." pkg)))
 
      ;; Not provided: consider installing from MELPA if allowed by env/arg
      ((and allow-melpa (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "0") "1")

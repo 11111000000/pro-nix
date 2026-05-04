@@ -181,7 +181,7 @@ in
       type = lib.types.listOf lib.types.str;
       # Default set of packages we prefer to provide via Nix to ensure
       # reproducible load-paths and avoid runtime auto-installs.
-      default = [ "magit" "consult" "vertico" "orderless" "marginalia" "gptel" "consult-dash" "dash-docs" "consult-eglot" "consult-yasnippet" "corfu" "cape" "kind-icon" "avy" "expand-region" "yasnippet" "projectile" "treemacs" "consult-projectile" "elfeed" "eglot" "rainbow-delimiters" "nix-mode" "mmm-mode" "org" "vterm" "ace-window" ];
+      default = [ "magit" "consult" "vertico" "orderless" "marginalia" "gptel" "agent-shell" "consult-dash" "dash-docs" "consult-eglot" "consult-yasnippet" "corfu" "cape" "kind-icon" "avy" "expand-region" "yasnippet" "projectile" "treemacs" "consult-projectile" "elfeed" "eglot" "rainbow-delimiters" "nix-mode" "mmm-mode" "org" "vterm" "ace-window" ];
       description = "List of Emacs package names (symbols) provided by Nix and exposed to the runtime as pro-packages-provided-by-nix.";
     };
 
@@ -207,13 +207,13 @@ in
 
       home.packages = hmPackages ++ cfg.extraPackages ++ availableProvidedNix ++ lib.optionals cfg.gui.enable guiPackages;
 
-      # Make noninteractive installs opt-out disabled by default — enable auto
-      # install for pro-packages via environment variable so headless/CI runs
-      # behave the same as interactive setups.
+      # Включаем автоустановку пакетов в рантайме (MELPA/ELPA fallback)
+      # по явной политике профиля. Это позволяет подтянуть пакеты,
+      # отсутствующие в текущем наборе Nix, не ломая первый запуск.
       home.sessionVariables = {
         QUOTING_STYLE = "literal";
         LANG = "ru_RU.UTF-8";
-        EMACSLOADPATH = "${config.home.homeDirectory}/.config/emacs/modules:";
+        EMACSLOADPATH = "${lib.concatStringsSep ":" (map (pkg: "${pkg}/share/emacs/site-lisp") availableProvidedNix)}:${config.home.homeDirectory}/.config/emacs/modules:";
         PRO_PACKAGES_AUTO_INSTALL = "1";
       };
 
@@ -253,9 +253,10 @@ EOF
         fi
       '';
 
-      # Generate provided-packages.el for runtime if configured
+      # Генерируем runtime-список только из реально доступных Nix-пакетов,
+      # чтобы pro-packages не считал отсутствующие пакеты "гарантированными".
       home.file.".config/emacs/provided-packages.el".text = let
-        pkgsList = cfg.providedPackages;
+        pkgsList = availableProvided;
         sexp = lib.concatStringsSep " " (map (p: p) pkgsList);
       in ''(setq pro-packages-provided-by-nix '(${sexp}))'';
     }
