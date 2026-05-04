@@ -35,7 +35,7 @@ tests robust when invoked from different CWDs or from CI runners.
 (defun pro-test-load-base (modules-dir)
   "Load base Emacs modules from MODULES-DIR and return errors."
   (setq pro-test--load-errors nil)
-  (dolist (file '("pro-core.el" "pro-ui.el" "pro-packages.el" "pro-package-bootstrap.el" "pro-keys.el" "pro-nav.el" "pro-ai.el" "pro-agent.el" "pro-chat.el"))
+  (dolist (file '("pro-core.el" "pro-ui.el" "pro-packages.el" "pro-package-bootstrap.el" "pro-keys.el" "pro-nav.el" "pro-ai.el" "pro-agent-shell.el" "pro-chat.el"))
     (pro-test--safe-load (expand-file-name file modules-dir)))
   (nreverse pro-test--load-errors))
 
@@ -55,10 +55,10 @@ tests robust when invoked from different CWDs or from CI runners.
     (should (equal fill-column 88))
     (should (eq ring-bell-function 'ignore))))
 
-(unless (fboundp 'pro-test-nav-loads-when-available)
+  (unless (fboundp 'pro-test-nav-loads-when-available)
   (ert-deftest pro-test-nav-loads-when-available ()
     "Navigation module should not signal in headless mode."
-    (should (pro-test--safe-load (expand-file-name "emacs/base/modules/nav.el" (pro-test--repo-root))))))
+    (should (pro-test--safe-load (expand-file-name "emacs/base/modules/pro-nav.el" (pro-test--repo-root))))))
 
 (unless (fboundp 'pro-test-ai-json-present)
   (ert-deftest pro-test-ai-json-present ()
