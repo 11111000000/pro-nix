@@ -5,6 +5,25 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 echo "Running holo verification from $root"
 
+# Basic Emacs Lisp parse check for repository-provided modules. This ensures
+# syntax/read errors (unbalanced parens, truncated files) in emacs/base/modules
+# are detected early. Use the dev wrapper so Nix-provided site-lisp paths are
+# available when parsing.
+if [ -x "$root/scripts/helper-check-elisp.sh" ]; then
+  echo "Running Emacs Lisp parse checks for repo modules..."
+  EMACS="$root/scripts/dev-emacs-pro-wrapper.sh" MODULE_DIR="$root/emacs/base/modules" \
+    bash "$root/scripts/helper-check-elisp.sh" || { echo "helper-check-elisp failed"; exit 4; }
+fi
+
+# Also run parse checks on the user's local Emacs modules if present. This
+# helps catch local init/init.el issues (like truncated files) early when the
+# developer runs holo-verify locally. Skip silently if the directory is absent.
+if [ -d "$HOME/.config/emacs/modules" ]; then
+  echo "Running Emacs Lisp parse checks for user modules in $HOME/.config/emacs/modules..."
+  EMACS="$root/scripts/dev-emacs-pro-wrapper.sh" MODULE_DIR="$HOME/.config/emacs/modules" \
+    bash "$root/scripts/helper-check-elisp.sh" || { echo "helper-check-elisp (user) failed"; exit 5; }
+fi
+
 shopt -s nullglob
 MODE=${1:-unit}
 if [ "$MODE" = "unit" ]; then
