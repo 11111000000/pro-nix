@@ -7,7 +7,7 @@ in pkgs.stdenv.mkDerivation rec {
   src = fetchFromGitHub {
     owner = "xenodium";
     repo = "shell-maker";
-    rev = "master";
+    rev = "8fb4a30da4479d50d273a1dbafa61420cca36619";
     sha256 = "09lgcvcvnrkfxg47m844177c1cns2qjkjv34lpn1k6pakias6xrn";
   };
   nativeBuildInputs = [ pkgs.emacs ];

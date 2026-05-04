@@ -6,7 +6,7 @@ stdenv.mkDerivation rec {
   src = fetchFromGitHub {
     owner = "xenodium";
     repo = "agent-shell";
-    rev = "master";
+    rev = "411c9042f1ea55ee515c7e5918e056fe3ff1f2a8";
     sha256 = "1q1v8kczvsdcwlddivayfvdzpyj0ad3rn49a1pynr1dvxamdq5gx";
   };
   nativeBuildInputs = [ emacs ];
