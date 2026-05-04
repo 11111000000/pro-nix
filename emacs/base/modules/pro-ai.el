@@ -1,4 +1,3 @@
-;; Русский: комментарии и пояснения оформлены в стиле учебника
 ;;; pro-ai.el --- AI policy and entrypoint -*- lexical-binding: t; -*-
 
 (require 'json)
@@ -296,30 +295,33 @@ by providers and prints a short status message."
 Оставьте nil по умолчанию: глобальный режим — опционален и может вмешиваться
 в интерактивные сессии." :type 'boolean :group 'pro-ui)
 
-(defun pro-ai--setup-carriage ()
-  "Добавить carriage в `load-path' и применить базовые настройки из README.
+(defun pro-ai--carriage-lisp-directory ()
+  "Вернуть каталог Lisp-файлов локального carriage."
+  (expand-file-name "lisp" pro-ai-carriage-path))
 
-Поведение:
-- если `pro-ai-enable-carriage' и путь `pro-ai-carriage-path' существует —
-  добавить папку "lisp" в `load-path' и попытаться `require`-нуть carriage;
-- после загрузки установить `carriage-i18n-locale' в 'ru при наличии переменной;
-- опционально включить `carriage-global-mode' если `pro-ai-carriage-enable-global-mode' true.
-"
+(defun pro-ai--setup-carriage ()
+  "Подключить локальный carriage без прерывания init.
+
+Если `pro-ai-enable-carriage' разрешает интеграцию и локальный clone существует,
+добавить Lisp-каталог в `load-path', загрузить feature `carriage', выставить
+русскую локаль при наличии переменной и включить глобальный режим только по
+явной опции `pro-ai-carriage-enable-global-mode'. Ошибка загрузки carriage
+превращается в diagnostic message, чтобы init Emacs оставался доступен."
   (when (and pro-ai-enable-carriage
-             (file-directory-p pro-ai-carriage-path))
-    (let ((lisp (expand-file-name "lisp" pro-ai-carriage-path)))
-      (when (file-directory-p lisp)
-        (add-to-list 'load-path lisp)
+              (file-directory-p pro-ai-carriage-path))
+    (let ((carriage-lisp-directory (pro-ai--carriage-lisp-directory)))
+      (when (file-directory-p carriage-lisp-directory)
+        (add-to-list 'load-path carriage-lisp-directory)
         (condition-case _err
-            (progn
-              (require 'carriage nil t)
+            (when (require 'carriage nil t)
               (when (boundp 'carriage-i18n-locale)
                 (setq carriage-i18n-locale 'ru))
               (when (and pro-ai-carriage-enable-global-mode
                          (fboundp 'carriage-global-mode))
                 (carriage-global-mode 1))
               (message "[pro-ai] carriage loaded from %s" pro-ai-carriage-path))
-          (error (message "[pro-ai] failed to load carriage from %s" lisp))))))
+          (error (message "[pro-ai] failed to load carriage from %s"
+                          (pro-ai--carriage-lisp-directory))))))))
 
 (pro-ai--setup-carriage)
 

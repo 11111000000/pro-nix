@@ -55,6 +55,25 @@
       (pro-ai--maybe-auto-load-gptel)
       (should-not required))))
 
+(ert-deftest pro/ai-setup-carriage-survives-load-errors ()
+  "`pro-ai--setup-carriage' не должен прерывать init при ошибке carriage."
+  (pro-test-ai--ensure-modules-load-path)
+  (require 'pro-ai)
+  (let* ((pro-ai-enable-carriage t)
+         (pro-ai-carriage-path temporary-file-directory)
+         (carriage-lisp-directory (pro-ai--carriage-lisp-directory))
+         (load-path load-path))
+    (when (file-directory-p carriage-lisp-directory)
+      (cl-letf (((symbol-function 'require)
+                 (lambda (feature &optional _filename _noerror)
+                   (if (eq feature 'carriage)
+                       (error "carriage load failed")
+                     t)))
+                ((symbol-function 'message)
+                 (lambda (&rest _args) nil)))
+        (should-not (pro-ai--setup-carriage))
+        (should (member carriage-lisp-directory load-path))))))
+
 (provide 'test-ai)
 
 ;;; test-ai.el ends here
