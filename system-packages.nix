@@ -122,12 +122,12 @@ let
     # вызове --version, считаем его несовместимым и пропускаем.
     if [ -x "$STORE_BIN" ]; then
       if command -v timeout >/dev/null 2>&1; then
-        if timeout 2s "$STORE_BIN" --version >/dev/null 2>&1; then
-          BIN="$STORE_BIN"
-        else
-          echo "[opencode] store binary present but failed quick check, skipping" >&2
-          BIN=""
-        fi
+      if timeout 2s "$STORE_BIN" --version >/dev/null 2>&1; then
+           BIN="$STORE_BIN"
+      else
+        echo "[opencode] store binary present but failed quick check, skipping" >&2
+        BIN=""
+      fi
       else
         # No timeout utility; attempt a simple invocation and trust it on success
         if "$STORE_BIN" --version >/dev/null 2>&1; then
@@ -228,22 +228,16 @@ let
     #   нужно сохранить stdin/stdout — тогда выполняем бинарник напрямую.
     # - Для любого CLI-вызова с аргументами тоже выполняем бинарник напрямую:
     #   это сохраняет argv без промежуточной прослойки и не ломает subcommands.
+    # If caller provided args or explicitly requested direct run, record intent
+    # but defer the actual exec until we know whether the binary is ELF and
+    # whether we can run it via the Nix glibc loader or steam-run. Running an
+    # ELF directly on NixOS often fails with the "stub-ld" message; prefer the
+    # loader or steam-run when available. This preserves argv forwarding while
+    # avoiding stub-ld failures.
     if [ "$#" -gt 0 ] || [ "''${OPENCODE_DIRECT_RUN:-0}" = "1" ]; then
-      exec "$BIN" "$@"
-    fi
-
-    # Always forward CLI arguments to the underlying binary. Some upstream
-    # scripts (notably the acp server scripts) rely on receiving the same
-    # argv sequence that was passed to the wrapper. The previous logic only
-    # forwarded arguments for interactive subcommands which made these
-    # scripts lose parameters when launched indirectly.
-    #
-    # Preserve the OPENCODE_DIRECT_RUN escape hatch: if it's explicitly set
-    # to 1 we still execute the binary directly (this branch is equivalent
-    # to the original behaviour but we don't special-case subcommand names).
-    if [ "''${OPENCODE_DIRECT_RUN:-0}" = "1" ]; then
-      # Preserve the literal argv sequence when OPENCODE_DIRECT_RUN is set.
-      exec "$BIN" "$@"
+      WANT_ARG_FORWARD=1
+    else
+      WANT_ARG_FORWARD=0
     fi
 
     # Предпочитаем запуск через steam-run (FHS) когда это возможно — многие
@@ -271,25 +265,25 @@ let
 
     if [ "$is_elf" = "1" ]; then
       LOADER=$(ls -d /nix/store/*glibc*/lib/ld-linux-x86-64.so.2 2>/dev/null | head -n1 || true)
-      if [ -n "$LOADER" ]; then
-        # Попытка запустить напрямую через Nix glibc loader — если она
-        # сработает, то исполняемый файл запустится в локальном окружении
-        # без bwrap/steam-run.
-        # When forwarding through the loader, use `--` to ensure all
-        # subsequent arguments are passed verbatim to the target binary.
-        exec "$LOADER" "$BIN" "$@" || true
-      fi
+    else
+      LOADER=""
     fi
 
-    if command -v steam-run >/dev/null 2>&1 && { [ "$can_use_userns" = "1" ] || [ "''${OPENCODE_FORCE_STEAM:-0}" = "1" ]; }; then
-      STEAM_RUN_CMD=$(command -v steam-run)
-      # Передача аргументов через steam-run без изменений; используем '--'
-      # чтобы отделить аргументы steam-run от аргументов исполняемого файла.
-      exec "$STEAM_RUN_CMD" "$BIN" -- "$@"
-    else
-      # Для systemd-run требуется разделитель `--' перед командой, чтобы
-      # отделить опции systemd-run от аргументов запускаемого процесса.
-      exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 -- "$BIN" "$@"
+    # If we were asked to forward argv, pick the safest executor for ELF vs
+    # non-ELF cases: prefer loader for ELF, then steam-run if available, and
+    # finally systemd-run wrapper. This ensures flags like --help reach the
+    # underlying binary instead of triggering stub-ld failures.
+    if [ "${WANT_ARG_FORWARD:-0}" = "1" ]; then
+      if [ "$is_elf" = "1" ] && [ -n "$LOADER" ]; then
+        exec "$LOADER" "$BIN" "$@"
+      fi
+
+      if command -v steam-run >/dev/null 2>&1 && { [ "$can_use_userns" = "1" ] || [ "''${OPENCODE_FORCE_STEAM:-0}" = "1" ]; }; then
+        STEAM_RUN_CMD=$(command -v steam-run)
+        exec "$STEAM_RUN_CMD" "$BIN" -- "$@"
+      else
+        exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 -- "$BIN" "$@"
+      fi
     fi
   '';
   # Примечание: flake/flake.nix может предоставлять opencode_bin; в этом
