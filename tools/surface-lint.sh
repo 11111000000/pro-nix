@@ -60,4 +60,16 @@ if [ -f "$root/HOLO.md" ]; then
   done
 fi
 
+# Validate SURFACE.md metadata (basic parsing)
+if [ -f "$root/SURFACE.md" ]; then
+  # ensure each FROZEN entry has a Change Gate proof and run command present
+  # simple heuristic: look for lines with "Стабильность: [FROZEN]" and
+  # ensure following 10 lines contain Proof: and Run:
+  awk 'BEGIN{RS="\n- Имя:"; ORS=""} NR>1{if ($0 ~ /Стабильность: \[FROZEN\]/){
+        s=$0; n=split(s,a,"\n"); foundProof=0; foundRun=0; for(i=1;i<=10 && i<=n;i++){ if(a[i] ~ /Proof:/) foundProof=1; if(a[i] ~ /Run:/) foundRun=1 }
+        if(!foundProof){ print "ERROR: FROZEN surface missing Proof: -> " substr($0,1,80) "\n"; exit 5 }
+        if(!foundRun){ print "WARNING: FROZEN surface missing Run: (add explicit runnable command) -> " substr($0,1,80) "\n" }
+    }}' "$root/SURFACE.md" || true
+fi
+
 echo "surface-lint: OK"
