@@ -20,6 +20,11 @@
   :type 'boolean
   :group 'pro-ui)
 
+(defcustom pro-ai-auto-load-gptel t
+  "Автоматически загружать gptel при старте Emacs, если пакет доступен."
+  :type 'boolean
+  :group 'pro-ui)
+
 (defvar pro-ai--config-cache nil)
 (defvar pro-ai--registered-backends nil)
 
@@ -222,6 +227,18 @@
           (pro-compat--notify-once "gptel" "gptel present but not callable"))))
     (pro-compat--notify-once "gptel" "gptel missing — AI entry unavailable")))
 
+(defun pro-ai--gptel-runtime-available-p ()
+  "Проверить, что gptel доступен в текущем runtime."
+  (or (featurep 'gptel)
+      (locate-library "gptel")))
+
+(defun pro-ai--maybe-auto-load-gptel ()
+  "Подключить gptel на старте, если пакет доступен и политика разрешает."
+  (when (and pro-ai-auto-load-gptel
+             (not (featurep 'gptel))
+             (pro-ai--gptel-runtime-available-p))
+    (require 'gptel nil t)))
+
 (defun pro-ai-load-keys ()
   "Load common AI provider keys from ~/.authinfo and export to env.
 This keeps credentials out of the config. It is intentionally
@@ -280,6 +297,10 @@ by providers and prints a short status message."
             gptel-model (pro-ai--select-model 'aitunnel)))
     (message "[pro-ai] default backend: %s"
              (pro-ai--backend-display-name backend))))
+
+(if after-init-time
+    (pro-ai--maybe-auto-load-gptel)
+  (add-hook 'emacs-startup-hook #'pro-ai--maybe-auto-load-gptel))
 
 (provide 'pro-ai)
 ;;; pro-ai.el ends here
