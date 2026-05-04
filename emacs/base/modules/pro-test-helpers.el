@@ -18,7 +18,7 @@
 (defun pro-test-load-base (modules-dir)
   "Load base Emacs modules from MODULES-DIR and return errors."
   (setq pro-test--load-errors nil)
-  (dolist (file '("core.el" "ui.el" "keys.el" "nav.el" "ai.el" "agent.el" "chat.el"))
+  (dolist (file '("pro-core.el" "pro-ui.el" "pro-keys.el" "pro-nav.el" "pro-ai.el" "pro-agent.el" "pro-chat.el"))
     (pro-test--safe-load (expand-file-name file modules-dir)))
   (nreverse pro-test--load-errors))
 

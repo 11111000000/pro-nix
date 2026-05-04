@@ -264,44 +264,6 @@ by providers and prints a short status message."
 ;; when the user opens the AI entry via `pro-ai-open-entry'. Eager registration
 ;; at load time can fail if gptel is not yet available on `load-path'.
 
-;; Agent-shell integration
-(with-eval-after-load 'agent-shell
-  ;; Переименование буфера agent-shell для лучшей читаемости
-  (defun pro-ai-agent-shell--pretty-buffer-name (name)
-    "Return NAME with the agent-shell prefix shortened."
-    (replace-regexp-in-string "\\`OpenCode Agent\\s-*" "🤖 " name))
-
-  (defun pro-ai-agent-shell-rename-buffer ()
-    "Normalize the initial agent-shell buffer name safely."
-    (condition-case nil
-        (when (and (derived-mode-p 'agent-shell-mode)
-                   (string-prefix-p "OpenCode Agent" (buffer-name))
-                   (boundp 'shell-maker-config)
-                   shell-maker-config)
-          (let ((short-name (pro-ai-agent-shell--pretty-buffer-name (buffer-name))))
-            (rename-buffer short-name t)))
-      (error nil)))
-
-  ;; Добавляем hook для переименования буфера
-  (add-hook 'agent-shell-mode-hook #'pro-ai-agent-shell-rename-buffer)
-
-  ;; Оптимизация UI - предотвращаем повторную перезагрузку интерфейса
-  (defvar-local pro-ai-agent-shell--ui-restored nil
-    "Non-nil when agent-shell UI was already reasserted in this buffer.")
-
-  (defun pro-ai-agent-shell--reload-after-first-turn (orig-fun &rest args)
-    "Preserve visible agent-shell UI once, without rebuilding it repeatedly."
-    (let ((result (apply orig-fun args)))
-      (when (and (derived-mode-p 'agent-shell-mode)
-                 (not pro-ai-agent-shell--ui-restored))
-        (setq pro-ai-agent-shell--ui-restored t)
-        (agent-shell-ui-mode +1)
-        (agent-shell--update-header-and-mode-line))
-      result))
-
-  ;; Advice для оптимизации обработки
-  (advice-add 'agent-shell--handle :around #'pro-ai-agent-shell--reload-after-first-turn))
-
 ;; Auto-activate default backend when gptel loads. Be defensive: some
 ;; gptel installations raise an error when asking for an unknown backend
 ;; name. Use condition-case to avoid aborting init if a backend is not

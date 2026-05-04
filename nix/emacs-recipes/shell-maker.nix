@@ -8,7 +8,7 @@ in pkgs.stdenv.mkDerivation rec {
     owner = "xenodium";
     repo = "shell-maker";
     rev = "master";
-    sha256 = "0v2iqvr2ywng5d22sw88k90i2jzl3cf2ybp9q6qpqirhvlsbgq19";
+    sha256 = "09lgcvcvnrkfxg47m844177c1cns2qjkjv34lpn1k6pakias6xrn";
   };
   nativeBuildInputs = [ pkgs.emacs ];
   installPhase = ''
