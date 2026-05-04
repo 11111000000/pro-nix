@@ -107,6 +107,31 @@
         cp $src/*.ttf $out/share/fonts/truetype/
       '';
     })
+    # Patched Nerd Font families provided reproducibly from upstream releases.
+    (stdenv.mkDerivation {
+      name = "fira-code-nerd-fonts";
+      src = pkgs.fetchzip {
+        url = "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip";
+        # computed with `nix-prefetch-url --unpack` on 2026-05-05
+        sha256 = "19izxgb3lazlvbcwzk3vnvd68x11n90qk02r05gi1nc8bz6vqgvk";
+      };
+      installPhase = ''
+        mkdir -p $out/share/fonts/truetype
+        find "$src" -type f -iname '*.ttf' -exec cp {} "$out/share/fonts/truetype/" \; || true
+      '';
+    })
+    (stdenv.mkDerivation {
+      name = "hack-nerd-fonts";
+      src = pkgs.fetchzip {
+        url = "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Hack.zip";
+        # computed with `nix-prefetch-url --unpack` on 2026-05-05
+        sha256 = "1zw11qw3vbdp91f1k47vxi6nb8sdsnp81dh4kllm8095nfk9slk6";
+      };
+      installPhase = ''
+        mkdir -p $out/share/fonts/truetype
+        find "$src" -type f -iname '*.ttf' -exec cp {} "$out/share/fonts/truetype/" \; || true
+      '';
+    })
     liberation_ttf
     dejavu_fonts
     cantarell-fonts
