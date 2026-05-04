@@ -5,7 +5,7 @@
 ;;
 ;; Цель: безопасно и предсказуемо поднять site-init и базовые pro-модули в окружении Nix/Home-Manager.
 ;; Контракт: не менять глобальные user-emacs-directory вне явного пользовательского override; записывает custom-file в пользовательскую директорию.
-;; Побочные эффекты: может привести к автоустановке пакетов при вызове pro-packages-ensure-required.
+;; Побочные эффекты: может привести к автоустановке пакетов при первом запуске, если пакеты отсутствуют.
 ;; Proof: headless ERT (emacs/base/tests/*) и ./scripts/emacs-pro-wrapper.sh smoke tests.
 ;; Last reviewed: 2026-05-02
 
@@ -23,6 +23,10 @@
     (load (expand-file-name "pro-compat.el" pro-emacs-base-system-modules-dir) nil t))
   (when (file-readable-p (expand-file-name "pro-packages.el" pro-emacs-base-system-modules-dir))
     (load (expand-file-name "pro-packages.el" pro-emacs-base-system-modules-dir) nil t))
+  (when (fboundp 'pro-packages-configure-archives)
+    (pro-packages-configure-archives))
+  (when (fboundp 'pro-packages-initialize)
+    (pro-packages-initialize))
   ;; Обязательно добавляем каталог модулей в `load-path' — это делает
   ;; локальные вспомогательные пакеты (pro-*) доступными для `require' и
   ;; `locate-library' в ранней стадии загрузки.
