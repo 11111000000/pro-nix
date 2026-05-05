@@ -111,8 +111,7 @@
       liberation_ttf
       dejavu_fonts
       cantarell-fonts
-    ]
-    ++ lib.optionals (builtins.hasAttr "nerd-fonts" pkgs) [ pkgs.nerd-fonts ];
+    ];
 
   # Шрифтовая политика: выбор системных семейств для fontconfig.
   # Примечание: в современных версиях NixOS используются имена семейств
