@@ -19,10 +19,15 @@ Linux (manual):
 
 Home‑Manager snippet (example):
 
+fonts.packages = with pkgs; [ (lib.mkIf (builtins.hasAttr "nerd-fonts-complete" pkgs) pkgs.nerd-fonts-complete) ];
+
+Alternatively you can fetch a single-family archive:
+
+```
 fonts.packages = with pkgs; [ (pkgs.fetchzip {
   url = "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip";
-  # sha256 example computed on 2026-05-05
   sha256 = "19izxgb3lazlvbcwzk3vnvd68x11n90qk02r05gi1nc8bz6vqgvk";
 }) ]
+```
 
 If icons are missing, run `M-x pro-ui-check-icon-fonts` for guidance.
