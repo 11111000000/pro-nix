@@ -1,4 +1,4 @@
-{ config, lib, pkgs, emacsPkg ? pkgs.emacs, ... }:
+{ config, lib, pkgs, emacsPkg ? pkgs.emacs, opencode_from_release ? null, ... }:
 
 let
   cfg = config.pro.emacs;
@@ -206,7 +206,15 @@ in
     {
       programs.home-manager.enable = true;
 
-      home.packages = hmPackages ++ cfg.extraPackages ++ availableProvidedNix ++ lib.optionals cfg.gui.enable guiPackages;
+      # Ensure opencode is available in each user's profile when a
+      # deterministic opencode derivation is provided by the flake via
+      # specialArgs (opencode_from_release). This makes opencode available
+      # under ~/.nix-profile/bin for all users and removes dependency on
+      # session PATH propagation. Keep the change minimal: only add the
+      # opencode derivation when it's present.
+      home.packages = hmPackages
+        ++ (if opencode_from_release != null then [ opencode_from_release ] else [])
+        ++ cfg.extraPackages ++ availableProvidedNix ++ lib.optionals cfg.gui.enable guiPackages;
 
       # Включаем автоустановку пакетов в рантайме (MELPA/ELPA fallback)
       # по явной политике профиля. Это позволяет подтянуть пакеты,
