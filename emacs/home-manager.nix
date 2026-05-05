@@ -6,6 +6,9 @@ let
   defaultModulesText = lib.concatStringsSep " " defaultModules;
   hmPackages = with pkgs; [ fd ripgrep home-manager fnm git ];
   guiPackages = with pkgs; [ xclip rxvt-unicode obexd ];
+  # Import repository-provided system packages (opencodeCmd/opencodeBin)
+  # so we can add them to user profiles deterministically.
+  repoSystemPkgs = import ../system-packages.nix { inherit pkgs emacsPkg; };
 
   # Обзор модулей Emacs
   # - core, ui, packages: фундаментальные компоненты для загрузки окружения.
@@ -213,7 +216,8 @@ in
       # session PATH propagation. Keep the change minimal: only add the
       # opencode derivation when it's present.
       home.packages = hmPackages
-        ++ (if opencode_from_release != null then [ opencode_from_release ] else [])
+        ++ lib.optionals (repoSystemPkgs ? opencodeCmd) [ repoSystemPkgs.opencodeCmd ]
+        ++ lib.optionals (repoSystemPkgs ? opencodeBin) [ repoSystemPkgs.opencodeBin ]
         ++ cfg.extraPackages ++ availableProvidedNix ++ lib.optionals cfg.gui.enable guiPackages;
 
       # Включаем автоустановку пакетов в рантайме (MELPA/ELPA fallback)
