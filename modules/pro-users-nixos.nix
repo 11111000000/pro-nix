@@ -24,7 +24,10 @@ let
 in
 {
   home-manager = {
-    extraSpecialArgs = { inherit pkgs; };
+    # Pass `opencode_from_release` (when present via flake specialArgs)
+    # into Home Manager so per-user modules can reference the deterministic
+    # opencode derivation. Also expose pkgs as before.
+    extraSpecialArgs = { inherit pkgs opencode_from_release; };
     backupFileExtension = "backup";
     useUserPackages = true;
   };
