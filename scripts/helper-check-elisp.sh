@@ -30,36 +30,47 @@ for f in "$MODULE_DIR"/*.el; do
   [ -e "$f" ] || continue
   printf "Checking %s... " "$f"
   # 1) Read-only parse check: read all top-level forms without evaluating them.
-  if "$EMACS" -Q --batch --eval "(progn (with-temp-buffer (insert-file-contents \"$f\") (goto-char (point-min)) (condition-case err (progn (while (< (point) (point-max)) (read (current-buffer))) (princ \"READ_OK\")) (error (princ (format \"READ_ERR: %s\" err))))) )" 2> /tmp/elisp-check-err; then
-    out=$(cat /tmp/elisp-check-err)
+  out_file=$(mktemp)
+  err_file=$(mktemp)
+  # Read until end-of-file is signalled; treat end-of-file as success.
+  elisp_eval="(progn (with-temp-buffer (insert-file-contents \"$f\") (goto-char (point-min)) (condition-case err (progn (while t (read (current-buffer))) (princ \"READ_OK\")) (end-of-file (princ \"READ_OK\")) (error (princ (format \"READ_ERR: %s\" err))))))"
+  if "$EMACS" -Q --batch --eval "$elisp_eval" 1>"$out_file" 2>"$err_file"; then
+    out=$(cat "$out_file")
     if printf "%s" "$out" | grep -q "READ_OK"; then
       echo -n "PARSE OK"
     else
       echo "PARSE FAIL"
-      sed -n '1,200p' /tmp/elisp-check-err || true
+      sed -n '1,200p' "$err_file" || true
+      sed -n '1,200p' "$out_file" || true
       fail=1
+      rm -f "$out_file" "$err_file"
       continue
     fi
   else
     echo "PARSE FAIL"
-    sed -n '1,200p' /tmp/elisp-check-err || true
+    sed -n '1,200p' "$err_file" || true
+    sed -n '1,200p' "$out_file" || true
     fail=1
+    rm -f "$out_file" "$err_file"
     continue
   fi
 
   # 2) Optional byte-compile check (may still succeed despite runtime missing deps).
   if [ "$BYTE_COMPILE" = "1" ]; then
-    if "$EMACS" -Q --batch --eval "(progn (byte-compile-file \"$f\") (princ \"BC_OK\"))" 2> /tmp/elisp-check-err; then
+    bc_out=$(mktemp)
+    bc_err=$(mktemp)
+    if "$EMACS" -Q --batch --eval "(progn (byte-compile-file \"$f\") (princ \"BC_OK\"))" 1>"$bc_out" 2>"$bc_err"; then
       echo " | BYTE-COMPILE OK"
     else
       echo " | BYTE-COMPILE FAIL"
-      sed -n '1,200p' /tmp/elisp-check-err || true
+      sed -n '1,200p' "$bc_err" || true
+      sed -n '1,200p' "$bc_out" || true
       fail=1
     fi
+    rm -f "$bc_out" "$bc_err"
   else
     echo
   fi
 done
-
-rm -f /tmp/elisp-check-err
+rm -f /tmp/elisp-check-err || true
 exit $fail
