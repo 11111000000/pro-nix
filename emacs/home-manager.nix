@@ -1,4 +1,4 @@
-{ config, lib, pkgs, emacsPkg ? pkgs.emacs, opencode_from_release ? null, ... }:
+{ config, lib, pkgs, emacsPkg ? pkgs.emacs, ... }:
 
 let
   cfg = config.pro.emacs;
@@ -6,10 +6,6 @@ let
   defaultModulesText = lib.concatStringsSep " " defaultModules;
   hmPackages = with pkgs; [ fd ripgrep home-manager fnm git ];
   guiPackages = with pkgs; [ xclip rxvt-unicode obexd ];
-  # Import repository-provided system packages (opencodeCmd/opencodeBin)
-  # so we can add them to user profiles deterministically.
-  repoSystemPkgs = import ../system-packages.nix { inherit pkgs emacsPkg; };
-
   # Обзор модулей Emacs
   # - core, ui, packages: фундаментальные компоненты для загрузки окружения.
   # - lisp, python, haskell: языковые интеграции и среды разработки.
@@ -209,16 +205,7 @@ in
     {
       programs.home-manager.enable = true;
 
-      # Ensure opencode is available in each user's profile when a
-      # deterministic opencode derivation is provided by the flake via
-      # specialArgs (opencode_from_release). This makes opencode available
-      # under ~/.nix-profile/bin for all users and removes dependency on
-      # session PATH propagation. Keep the change minimal: only add the
-      # opencode derivation when it's present.
-      home.packages = hmPackages
-        ++ lib.optionals (repoSystemPkgs ? opencodeCmd) [ repoSystemPkgs.opencodeCmd ]
-        ++ lib.optionals (repoSystemPkgs ? opencodeBin) [ repoSystemPkgs.opencodeBin ]
-        ++ cfg.extraPackages ++ availableProvidedNix ++ lib.optionals cfg.gui.enable guiPackages;
+      home.packages = hmPackages ++ cfg.extraPackages ++ availableProvidedNix ++ lib.optionals cfg.gui.enable guiPackages;
 
       # Включаем автоустановку пакетов в рантайме (MELPA/ELPA fallback)
       # по явной политике профиля. Это позволяет подтянуть пакеты,

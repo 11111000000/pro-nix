@@ -325,8 +325,7 @@
     environment.systemPackages = lib.mkDefault (with pkgs;
       []
       ++ [ just jq gh ]
-      ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = true; })
-      ++ [ opencodeCmd opencodeBin ]
+      ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = true; }).packages
     );
 
   # Порядок формирования systemPackages:

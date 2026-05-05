@@ -615,5 +615,11 @@ gh
   pip3Cmd
   ];
 in
-  # Ensure we return a clean list without nulls (conditional includes use null)
-  builtins.filter (x: x != null) rawList
+{
+  # Основной список системных пакетов без `null`.
+  packages = builtins.filter (x: x != null) rawList;
+
+  # Явные экспортируемые артефакты нужны другим модулям, которые хотят
+  # использовать только опенкод-обёртки, не подтягивая весь системный список.
+  inherit opencodeCmd opencodeBin;
+}
