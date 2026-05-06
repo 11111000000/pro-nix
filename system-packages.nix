@@ -219,12 +219,28 @@ let
     fi
 
     if [ "$is_elf" = "1" ]; then
+      # Probe the binary for Bun runtime fingerprint. If the binary reports
+      # Bun help, prefer running it under steam-run (FHS wrapper) first; some
+      # prebuilt releases embed Bun and behave differently when run directly.
+      probe_output=""
+      if "$BIN" --version >/dev/null 2>&1; then
+        probe_output=$("$BIN" --version 2>&1 || true)
+      fi
+
+      if printf "%s" "$probe_output" | grep -qi "Bun is a fast JavaScript runtime"; then
+        if command -v steam-run >/dev/null 2>&1; then
+          exec steam-run "$BIN" "$@"
+        fi
+        # if steam-run unavailable, fall through to loader/direct exec below
+      fi
+
       LOADER="${pkgs.glibc}/lib/ld-linux-x86-64.so.2"
       if [ -x "$LOADER" ]; then
         exec "$LOADER" "$BIN" "$@"
       fi
     fi
 
+    # As a last-resort, try steam-run (non-ELF backends or when loader failed).
     if command -v steam-run >/dev/null 2>&1; then
       exec steam-run "$BIN" "$@"
     fi
