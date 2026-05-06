@@ -59,6 +59,11 @@ with pkgs;
     # in CI proofs (holo-verify expects python3 presence in runtime packages).
     python3
     coreutils
+    # steam-run provides an FHS-compatible runtime wrapper used by some
+    # prebuilt upstream binaries (bubblewrap-based). Include it here so the
+    # opencode wrapper can use steam-run as a fallback executor on hosts that
+    # allow unprivileged user namespaces.
+    steam-run
     procps
     dbus
     opencodePkg
