@@ -27,6 +27,8 @@
 
 let
   emacsPkg = pkgs.emacs30 or pkgs.emacs;
+  # Import opencodeCmd wrapper only; do not import raw backend to avoid
+  # exporting the upstream binary under /bin/opencode.
   opencodePkg = (import ../system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }).opencodeCmd;
 in
 

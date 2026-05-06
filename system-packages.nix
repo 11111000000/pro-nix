@@ -78,9 +78,11 @@ let
       tar xzf "$src" -C $TMPDIR/unpack
     '';
     installPhase = ''
-      mkdir -p $out/bin
-      cp $TMPDIR/unpack/opencode $out/bin/
-      chmod +x $out/bin/opencode
+      # Place the upstream binary out of the public $out/bin so it does not
+      # collide with the wrapper that provides the public `opencode` name.
+      mkdir -p $out/libexec/opencode-system
+      cp $TMPDIR/unpack/opencode $out/libexec/opencode-system/opencode
+      chmod +x $out/libexec/opencode-system/opencode
     '';
   };
 
@@ -130,8 +132,9 @@ let
     CACHED="$HOME/.local/share/opencode/opencode"
 
     # Системный backend строится в Nix store и должен быть привилегированным
-    # вариантом. Пользовательские бинарники остаются только как fallback.
-    BIN="${opencodeBackendPackage}/bin/opencode"
+    # вариантом. Backend размещается в libexec, чтобы не экспортировать
+    # публичное имя `/bin/opencode` напрямую и избежать коллизий в buildEnv.
+    BIN="${opencodeBackendPackage}/libexec/opencode-system/opencode"
 
     if [ ! -x "$BIN" ]; then
       if [ -x "$USER_LOCAL_BIN" ]; then

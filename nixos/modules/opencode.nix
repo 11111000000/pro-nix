@@ -47,8 +47,12 @@ in
   # - Иначе используем репозитарный opencodeBin из system-packages.nix.
   # - Шаблон конфигурации кладём в /etc/skel/pro-templates.
   config = lib.mkIf (config.provisioning.opencode.enable or true) {
-    # Choose package lazily to avoid evaluation-time dependency on specialArgs
-    environment.systemPackages = [ (if opencode_from_release != null then opencode_from_release else (import ../../system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }).opencodeBin) ];
+    # Choose package lazily to avoid evaluation-time dependency on specialArgs.
+    # We must ensure the system exports only the wrapper (opencodeCmd). The
+    # underlying raw backend must not provide `/bin/opencode` to avoid
+    # buildEnv collisions where the raw backend can win the path name.
+    let spkgs = import ../../system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }; in
+    environment.systemPackages = [ (if opencode_from_release != null then opencode_from_release else spkgs.opencodeCmd) ];
 
     environment.etc."skel/pro-templates/.opencode/config.json".source = lib.mkDefault config.provisioning.opencode.userTemplate;
   };
