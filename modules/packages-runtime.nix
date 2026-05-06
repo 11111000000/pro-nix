@@ -2,10 +2,10 @@
 # Кратко: минимальный набор пакетов, необходимых для активации системы и базовых операций.
 #
 # Файловый контракт:
-#   Цель: обеспечить минимальный набор утилит, необходимых для корректной активации
-#     и работы вспомогательных скриптов (`activate`, `ensure-perms`, helpers).
-#   Контракт: environment.systemPackages должен использовать lib.mkDefault в модулях;
-#     финальное решение о наборе пакетов принимается на уровне хоста.
+#   Цель: обеспечить системный набор утилит, необходимых для активации,
+#     shell-доступа и общих пользовательских сценариев.
+#   Контракт: environment.systemPackages собирается композиционно на уровне системы;
+#     модуль не зависит от host-level финализации.
 #   Proof: tests/contract/test_runtime_packages.sh
 #
 # Цель:
@@ -23,46 +23,32 @@
 #   `nix eval .#nixosConfigurations.<host>.config.environment.systemPackages --json | jq -r '.[]' | grep -E '^bash|^openssh'`
 #
 # Last reviewed: 2026-05-03
-{ config, pkgs, lib, ... }:
-
-let
-  emacsPkg = pkgs.emacs30 or pkgs.emacs;
-  opencodePkg = (import ../system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }).opencodeCmd;
-in
-
-# Minimal runtime packages that must be present in the final system profile.
-# Keep this list intentionally small: these packages are required for system
-# activation, shell access, and basic maintenance.
-
-with pkgs;
+{ pkgs, lib, ... }:
 
 /* RU: Файловый контракт:
    Цель: предоставлять минимальный и стабильный набор рантайм-пакетов, необходимых
      для активации и поддержки системы.
-   Контракт: использовать lib.mkDefault для элементов списка, чтобы хосты могли дополнить
-     или переопределить набор пакетов без рекурсивных зависимостей.
-   Побочные эффекты: добавляет базовые утилиты, сетевые клиенты и клиенты транспортив.
+   Контракт: модуль публикует общий список пакетов через additive-композицию.
+   Побочные эффекты: добавляет системные утилиты, Emacs runtime и общие CLI.
    Proof: tests/contract/test_runtime_packages.sh
    Last reviewed: 2026-05-02
 */
 
-# Export as a NixOS module so it can be reliably included via `imports` and
-# also imported directly to read the list (as configuration.nix does).
 {
-  # Модуль экспортирует базовый набор рантайм‑пакетов. Он использует
-  # lib.mkDefault в местах, где другие модули могут дополнять список.
+  # Общая системная поверхность пакетов задаётся здесь: хосты больше не
+  # финализируют общий список и не собирают его вручную.
   environment.systemPackages = lib.mkAfter (with pkgs; [
     bashInteractive
     openssh
-    # Ensure python3 is available in the minimal runtime so verification
-    # scripts and tools that expect `python3` can run during activation and
-    # in CI proofs (holo-verify expects python3 presence in runtime packages).
     python3
     coreutils
     procps
     dbus
-    opencodePkg
-  ]);
+  ] ++ (import ../system-packages.nix {
+    inherit pkgs;
+    emacsPkg = pkgs.emacs30 or pkgs.emacs;
+    enableOptional = false;
+  }).packages);
 
 # Last reviewed: 2026-05-03
 }

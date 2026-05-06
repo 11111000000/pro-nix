@@ -17,13 +17,11 @@
 # Временные эксперименты помещаются в `local.nix` для уменьшения риска
 # нарушить кросс-хостовую совместимость.
 
-{ config, pkgs, lib, emacsPkg ? pkgs.emacs, ... }:
+{ config, pkgs, lib, ... }:
 
   let
   local = if builtins.pathExists ./local.nix then import ./local.nix else { };
   hostName = local.hostName or "nixos";
-  emacsPkg = pkgs.emacs30 or pkgs.emacs;
-  spkgs = import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = true; };
   in
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -128,10 +126,6 @@
   # LAN advertise via mDNS and can receive centrally-managed authorized_keys.
   pro-peer.enable = true;
   pro-peer.enableKeySync = true;
-
-  # Примечание: environment.systemPackages задаётся позже в этом файле, чтобы
-  # modules to contribute packages in a single consolidated place. Do not
-  # redefine it here; see the later definition near the end of this file.
 
   # Старая схема беспроводной сети не используется.
   # networking.wireless.enable = true;
@@ -298,22 +292,6 @@
     # Allow modules to contribute portals additively.
     extraPortals = lib.mkDefault [ pkgs.xdg-desktop-portal-gtk ];
   };
-
-  # By default optional heavy packages are disabled. To enable them set
-  # `enableOptional = true` when importing `system-packages.nix`.
-   # Собираем окончательный список пакетов из базовых вкладов и добавляем
-   # системный wrapper `opencode` в тот же список, чтобы он всегда попадал в PATH.
-    environment.systemPackages = lib.mkDefault (with pkgs;
-      []
-      ++ [ just jq gh ]
-      ++ spkgs.packages
-      ++ [ spkgs.opencodeCmd ]
-    );
-
-  # Порядок формирования systemPackages:
-  # - Модули дополняют environment.systemPackages (lib.mkDefault).
-  # - Здесь собираем вклад модулей, добавляем локальные утилиты и импортируем
-  #   system-packages.nix. Центральная точка консолидирует список перед активацией.
 
   fonts.packages = with pkgs; [
     terminus_font

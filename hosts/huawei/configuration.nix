@@ -1,10 +1,4 @@
-{ config, lib, pkgs, ... }:
-
-let
-  torBrowserLauncher = pkgs.writeShellScriptBin "tor-browser" ''
-    exec ${pkgs.tor-browser}/bin/tor-browser "$@"
-  '';
-in
+{ lib, pkgs, ... }:
 
 {
   # Import modules for this host
@@ -96,10 +90,6 @@ AllowTcpForwarding no
     cpuQuota = "80%";
     ioWeight = 200;
   };
-
-  # Не перезаписываем общий список пакетов — дополняем его в фазе "after",
-  # чтобы не потерять вклады из modules и из top-level `system-packages.nix`.
-  environment.systemPackages = lib.mkAfter ((config.environment.systemPackages or []) ++ [ torBrowserLauncher (pkgs.callPackage ../../nix/emacs-recipes/agent-shell.nix {}) ]);
 
   # Явный DBus hand-off unit для nm-dispatcher: systemd должен видеть
   # валидный unit при активации org.freedesktop.nm_dispatcher.
