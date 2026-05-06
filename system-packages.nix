@@ -100,12 +100,13 @@ let
    # Import the upstream Nix expression via pkgs.callPackage so the standard
    # package set supplies expected arguments. This keeps the import minimal
    # here and allows the upstream nix expression to pull other helpers from pkgs.
-   # Building opencode from upstream source requires the upstream nix/node-modules
-   # layout which is not reliable to import in-tree for flake checks. Defer
-   # enabling a source-built backend until we implement a dedicated, hermetic
-   # derivation. For now prefer external `opencodeBackend` or the prebuilt
-   # release `opencodeBin`.
-   opencodeNpm = null;
+    # Building opencode from upstream source requires the upstream nix/node-modules
+    # layout which is not reliable to import in-tree for flake checks. We provide
+    # a dedicated helper derivation under nix/opencode-npm.nix that imports the
+    # upstream nix expression in an isolated way; prefer that, but fall back to
+    # prebuilt release if the build is not available on this system (e.g., when
+    # the upstream derivation is heavy).
+    opencodeNpm = (import ./nix/opencode-npm.nix { inherit pkgs; }) or null;
 
   # Выбираем backend: внешний параметр opencodeBackend имеет приоритет;
   # иначе используем prebuilt релиз opencodeBin.
