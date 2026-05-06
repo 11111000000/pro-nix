@@ -1,4 +1,4 @@
-{ config, pkgs, lib, opencode_from_release ? null, ... }:
+{ config, pkgs, lib, ... }:
 
 # Назначение: модуль управления доставкой opencode и установкой шаблона.
 # Инварианты:
@@ -9,7 +9,8 @@
 let
   defaultTemplate = ''${toString ./../docs/opencode-default-config.json}'';
   emacsPkg = pkgs.emacs30 or pkgs.emacs;
-  opencodePkg = if opencode_from_release != null then opencode_from_release else (import ../../system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }).opencodeBin;
+  # Try to read opencode_from_release from module args if provided by the caller
+  opencode_from_release = if lib.hasAttr "_module" config && lib.hasAttr "args" config._module && lib.hasAttr "opencode_from_release" config._module.args then config._module.args.opencode_from_release else null;
 in
 {
   #############################
@@ -45,9 +46,12 @@ in
   # - Если flake передал готовую сборку, используем её.
   # - Иначе используем репозитарный opencodeBin из system-packages.nix.
   # - Шаблон конфигурации кладём в /etc/skel/pro-templates.
-  config = lib.mkIf (config.provisioning.opencode.enable or true) {
-    environment.systemPackages = [ opencodePkg ];
+  config = lib.mkIf (config.provisioning.opencode.enable or true) (let
+    spkgs = import ../../system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; };
+  in {
+    # Export only the wrapper into systemPackages
+    environment.systemPackages = [ (if opencode_from_release != null then opencode_from_release else spkgs.opencodeCmd) ];
 
     environment.etc."skel/pro-templates/.opencode/config.json".source = lib.mkDefault config.provisioning.opencode.userTemplate;
-  };
+  });
 }

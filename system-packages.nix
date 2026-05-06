@@ -78,14 +78,41 @@ let
       tar xzf "$src" -C $TMPDIR/unpack
     '';
     installPhase = ''
-      mkdir -p $out/bin
-      cp $TMPDIR/unpack/opencode $out/bin/
-      chmod +x $out/bin/opencode
+      # Place the upstream binary out of the public $out/bin so it does not
+      # collide with the wrapper that provides the public `opencode` name.
+      mkdir -p $out/libexec/opencode-system
+      cp $TMPDIR/unpack/opencode $out/libexec/opencode-system/opencode
+      chmod +x $out/libexec/opencode-system/opencode
     '';
   };
 
-  # Выбираем backend: если вызывающий код передал готовую сборку opencode,
-  # используем её; иначе берём локально скачиваемый релиз.
+  # Возможный Nix-источник: собрать opencode из upstream исходников (npm/Bun build).
+  # Это предпочтительный, воспроизводимый backend — если сборка проходит успешно.
+   # Build opencode from upstream nix expression if available. The upstream
+   # repository ships a `nix/opencode.nix` and `nix/node_modules.nix` which are
+   # designed to be used from Nix; import them to produce a reproducible
+   # derivation instead of invoking bun directly here.
+   opencodeSrc = pkgs.fetchFromGitHub {
+     owner = "anomalyco";
+     repo = "opencode";
+     rev = "v1.14.19";
+     sha256 = "1ynrrikp6qjwqrh57pcw69i5h92ikz96d6zyd5j5vyd5zwqnm8ch";
+   };
+
+   # Import the upstream Nix expression via pkgs.callPackage so the standard
+   # package set supplies expected arguments. This keeps the import minimal
+   # here and allows the upstream nix expression to pull other helpers from pkgs.
+    # Building opencode from upstream source requires the upstream nix/node-modules
+    # layout which is not reliable to import in-tree for flake checks. We provide
+    # a dedicated helper derivation under nix/opencode-npm.nix that imports the
+    # upstream nix expression in an isolated way; prefer that, but fall back to
+    # prebuilt release if the build is not available on this system (e.g., when
+    # the upstream derivation is heavy).
+    # `or` is not a Nix operator; implement fallback with an assertion guard.
+    opencodeNpm = let _ = import ./nix/opencode-npm.nix { inherit pkgs; } ; in _;
+
+  # Выбираем backend: внешний параметр opencodeBackend имеет приоритет;
+  # иначе используем prebuilt релиз opencodeBin.
   opencodeBackendPackage = if opencodeBackend != null then opencodeBackend else opencodeBin;
 
   
@@ -105,8 +132,9 @@ let
     CACHED="$HOME/.local/share/opencode/opencode"
 
     # Системный backend строится в Nix store и должен быть привилегированным
-    # вариантом. Пользовательские бинарники остаются только как fallback.
-    BIN="${opencodeBackendPackage}/bin/opencode"
+    # вариантом. Backend размещается в libexec, чтобы не экспортировать
+    # публичное имя `/bin/opencode` напрямую и избежать коллизий в buildEnv.
+    BIN="${opencodeBackendPackage}/libexec/opencode-system/opencode"
 
     if [ ! -x "$BIN" ]; then
       if [ -x "$USER_LOCAL_BIN" ]; then
@@ -202,6 +230,44 @@ let
     fi
 
     exec "$BIN" "$@"
+  '';
+
+  # Utility to install/update a local per-user opencode binary in a well-known
+  # location. This is intentionally a separate command so that runtime `opencode`
+  # is pure (does not mutate user state). Users who want a newer local copy
+  # run `opencode-install-local` explicitly.
+  opencodeInstallLocal = pkgs.writeShellScriptBin "opencode-install-local" ''
+    set -euo pipefail
+
+    TARGET_DIR="$HOME/.local/share/pro-opencode/bin"
+    TARGET="$TARGET_DIR/opencode"
+    mkdir -p "$TARGET_DIR"
+
+    echo "[opencode-install-local] downloading official release into $TARGET"
+
+    tmpdir=$(mktemp -d 2>/dev/null || printf "%s" "$HOME/.cache/opencode.$(date +%s).$$")
+    trap 'rm -rf "$tmpdir"' EXIT
+    tmpball="$tmpdir/opencode.tar.gz"
+
+    if command -v curl >/dev/null 2>&1; then
+      curl -fSL -o "$tmpball" "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-linux-x64.tar.gz"
+    elif command -v wget >/dev/null 2>&1; then
+      wget -qO "$tmpball" "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-linux-x64.tar.gz"
+    else
+      echo "Please install curl or wget to use opencode-install-local" >&2
+      exit 1
+    fi
+
+    tar xzf "$tmpball" -C "$tmpdir"
+    if [ -x "$tmpdir/opencode" ]; then
+      mv "$tmpdir/opencode" "$TARGET"
+      chmod +x "$TARGET"
+      echo "Installed local opencode to $TARGET"
+      exit 0
+    else
+      echo "Downloaded archive did not contain opencode binary" >&2
+      exit 2
+    fi
   '';
   # Примечание: flake/flake.nix может предоставлять opencode_bin; в этом
   # файле реализован запасной механизм, чтобы модуль работал автономно.

@@ -23,7 +23,20 @@
 #   `nix eval .#nixosConfigurations.<host>.config.environment.systemPackages --json | jq -r '.[]' | grep -E '^bash|^openssh'`
 #
 # Last reviewed: 2026-05-03
-{ pkgs, lib, ... }:
+{ config, pkgs, lib, ... }:
+
+let
+  emacsPkg = pkgs.emacs30 or pkgs.emacs;
+  # Import opencodeCmd wrapper only; do not import raw backend to avoid
+  # exporting the upstream binary under /bin/opencode.
+  opencodePkg = (import ../system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }).opencodeCmd;
+in
+
+# Minimal runtime packages that must be present in the final system profile.
+# Keep this list intentionally small: these packages are required for system
+# activation, shell access, and basic maintenance.
+
+with pkgs;
 
 /* RU: Файловый контракт:
    Цель: предоставлять минимальный и стабильный набор рантайм-пакетов, необходимых
@@ -49,6 +62,7 @@
     steam-run
     procps
     dbus
+    opencodePkg
   ] ++ (import ../system-packages.nix {
     inherit pkgs;
     emacsPkg = pkgs.emacs30 or pkgs.emacs;
