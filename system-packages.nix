@@ -97,12 +97,10 @@ let
      sha256 = "1ynrrikp6qjwqrh57pcw69i5h92ikz96d6zyd5j5vyd5zwqnm8ch";
    };
 
-   # Import the upstream Nix expression and pass our pkgs where needed.
-   opencodeUpstream = import (opencodeSrc + "/nix/opencode.nix") {
-     inherit (pkgs) lib stdenvNoCC callPackage bun nodejs ripgrep installShellFiles makeBinaryWrapper models-dev writableTmpDirAsHomeHook;
-     # Provide node_modules by importing upstream node-modules.nix from the source
-     node_modules = import (opencodeSrc + "/nix/node_modules.nix") { inherit pkgs; };
-   };
+   # Import the upstream Nix expression via pkgs.callPackage so the standard
+   # package set supplies expected arguments. This keeps the import minimal
+   # here and allows the upstream nix expression to pull other helpers from pkgs.
+   opencodeUpstream = pkgs.callPackage (opencodeSrc + "/nix/opencode.nix") { };
 
    opencodeNpm = opencodeUpstream;
 
