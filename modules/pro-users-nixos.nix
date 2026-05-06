@@ -1,3 +1,10 @@
+/* RU: Файловый контракт — Home Manager для стандартных пользователей
+   Цель: подключать общий Emacs-профиль к учётным записям, созданным в `pro-users.nix`.
+   Контракт: для каждого стандартного пользователя импортируется `emacs/home-manager.nix`.
+   Побочные эффекты: на всех пользовательских профилях появляется единый набор HM-настроек.
+   Proof: `nix eval .#nixosConfigurations.<host>.config.home-manager.users`.
+   Last reviewed: 2026-05-06
+*/
 { config, lib, pkgs, ... }:
 
 {
