@@ -81,24 +81,6 @@ AllowTcpForwarding no
     { device = "/dev/disk/by-uuid/422bf68d-025a-4c1b-a3ba-c282ab7d4884"; }
   ];
 
-  # Enable opencode default config installation for users
-  opencode.enable = true;
-
-  # Enable automatic zram setup and opencode slice with conservative defaults
-  services.zramSlice = {
-    enable = true;
-    size = "auto"; # auto = 50% RAM, capped
-  };
-
-  services.opencodeSlice = {
-    enable = true;
-    memoryMax = "4G"; # limit heavy agents to ~4G by default on this laptop
-    cpuQuota = "80%";
-    ioWeight = 200;
-  };
-
-  environment.systemPackages = lib.mkAfter [ torBrowserLauncher (pkgs.callPackage ../../nix/emacs-recipes/agent-shell.nix {}) ];
-
   # Явный DBus hand-off unit для nm-dispatcher: systemd должен видеть
   # валидный unit при активации org.freedesktop.nm_dispatcher.
   systemd.services."dbus-org.freedesktop.nm-dispatcher" = {

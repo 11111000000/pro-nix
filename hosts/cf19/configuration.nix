@@ -84,10 +84,7 @@ experimental-features = nix-command flakes cgroups
     '';
   };
 
-  # Enable automatic opencode user config installation if missing
-  opencode.enable = true;
-  environment.etc."skel/pro-templates/.opencode/config.json".source = ../../templates/.opencode/config.json;
-
+  # Host-specific hardware policy only; shared opencode/runtime policy lives at the top level.
   # SSH hardening: restrict interactive features for remote connections
   services.openssh = {
     extraConfig = ''

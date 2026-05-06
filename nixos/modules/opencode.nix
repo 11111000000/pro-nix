@@ -1,16 +1,15 @@
 { config, pkgs, lib, opencode_from_release ? null, ... }:
 
-# Назначение: модуль управления доставкой и установкой шаблонов/пакетов opencode.
+# Назначение: модуль управления доставкой opencode и установкой шаблона.
 # Инварианты:
-# - Модуль предоставляет опции в пространстве provisioning.opencode и не
-#   финализирует systemPackages (использует lib.mkDefault).
-# - Ответственность за конкретную сборку opencode (derivation) лежит в flake
-#   или system-packages.nix; модуль только добавляет пакет в профиль, если он
-#   предоставлен.
+# - Опция `provisioning.opencode.enable` включает системную доставку opencode.
+# - Конкретный бинарник должен определяться без зависимости от host-файлов.
+# - Шаблон конфигурации новых пользователей должен быть задаваемым декларативно.
 
 let
-  # Путь по умолчанию к шаблону конфигурации для /etc/skel
   defaultTemplate = ''${toString ./../docs/opencode-default-config.json}'';
+  emacsPkg = pkgs.emacs30 or pkgs.emacs;
+  opencodePkg = if opencode_from_release != null then opencode_from_release else (import ../../system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }).opencodeBin;
 in
 {
   #############################
@@ -27,7 +26,7 @@ in
       enable = lib.mkOption {
         type = lib.types.bool;
         default = true;
-        description = "Если true, установить opencode system-wide (через опцию opencode_from_release, если она предоставлена flake).";
+        description = "Если true, установить opencode system-wide.";
       };
 
       # Путь до шаблона конфигурации, который копируется для новых пользователей.
@@ -41,26 +40,14 @@ in
   };
 
   #############################
-  # Реализация
-  #############################
-  # Поведение модуля:
-  # - Если включён (provisioning.opencode.enable = true), то пробуем добавить
-  #   системный пакет opencode_from_release (если flake его предоставляет).
-  # - Не пытаемся самостоятельно доставлять/скачивать бинарь здесь — это
-  #   ответственность пакета/обёртки. Модуль только управляет тем, чтобы
-  #   системный профиль содержал opencode, когда это допускается.
-  # - Устанавливаем шаблон конфигурации в /etc/skel/pro-templates, чтобы при
-  #   создании нового пользователя или при копировании из skel он получил
-  #   базовый файл ~/.opencode/config.json.
+  # Реализация:
+  # - При включении модуля добавляем opencode в системный профиль.
+  # - Если flake передал готовую сборку, используем её.
+  # - Иначе используем репозитарный opencodeBin из system-packages.nix.
+  # - Шаблон конфигурации кладём в /etc/skel/pro-templates.
   config = lib.mkIf (config.provisioning.opencode.enable or true) {
-    # Добавляем системный пакет, если он доступен от flake/flake.nix через
-    # аргумент opencode_from_release. Такой подход даёт флаг управления
-    # версией (flake может предоставить готовую сборку opencode).
-    environment.systemPackages = lib.mkDefault (if opencode_from_release != null then [ opencode_from_release ] else []);
+    environment.systemPackages = [ opencodePkg ];
 
-    # Устанавливаем шаблон в /etc/skel/pro-templates. Помечаем как mkDefault,
-    # чтобы локальные хостовые переопределения (например hosts/*) могли задать
-    # свой шаблон без конфликта опций.
     environment.etc."skel/pro-templates/.opencode/config.json".source = lib.mkDefault config.provisioning.opencode.userTemplate;
   };
 }
