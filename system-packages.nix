@@ -93,8 +93,8 @@ let
       owner = "anomalyco";
       repo = "opencode";
       rev = "v1.14.19";
-      # Updated to match the archive hash observed during local download
-      sha256 = "0cxw6c5n2ckm1m00kypqdkd6bj80kgr2p4v92qyindfb2izw2szz";
+      # SHA256 (base32) computed via `nix-prefetch-url --unpack`.
+      sha256 = "1ynrrikp6qjwqrh57pcw69i5h92ikz96d6zyd5j5vyd5zwqnm8ch";
     };
     nativeBuildInputs = [ pkgs.bun pkgs.nodejs pkgs.ripgrep ];
     buildPhase = ''
