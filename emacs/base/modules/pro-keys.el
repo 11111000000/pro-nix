@@ -271,7 +271,12 @@ KEYS-ALIST is an alist of ("KEY" . command-symbol)."
 (defun pro/export-registered-keys-to-org (&optional out-file)
   "Export registered module key suggestions to OUT-FILE as an Org table." 
   (interactive)
-  (let ((file (or out-file (expand-file-name "emacs-keys.suggestions.org" temporary-file-directory))))
+  ;; Use a user-specific temporary filename to avoid cross-user
+  ;; permission conflicts when multiple users run Emacs on the same host.
+  ;; Fall back to the provided OUT-FILE when specified.
+  (let* ((user (or (and (fboundp 'user-login-name) (user-login-name)) "unknown"))
+         (default-name (format "emacs-keys.suggestions.%s.org" user))
+         (file (or out-file (expand-file-name default-name temporary-file-directory))))
     (with-temp-file file
       (insert (format "# Generated suggestions at %s\n\n" (current-time-string)))
       (insert "| Section | Key | Command | Note |\n")
@@ -283,7 +288,11 @@ KEYS-ALIST is an alist of ("KEY" . command-symbol)."
 (defun pro/keys-import-suggestions (&optional out-file)
   "Merge registered module suggestions into the central emacs-keys.org or OUT-FILE." 
   (interactive)
-  (let ((file (or out-file (expand-file-name "emacs-keys.suggestions.org" temporary-file-directory))))
+  ;; Write suggestions to a user-specific temporary file to avoid
+  ;; permission errors when multiple users export suggestions on the same host.
+  (let* ((user (or (and (fboundp 'user-login-name) (user-login-name)) "unknown"))
+         (default-name (format "emacs-keys.suggestions.%s.org" user))
+         (file (or out-file (expand-file-name default-name temporary-file-directory))))
     (with-temp-file file
       (insert (format "# Generated suggestions at %s\n\n" (current-time-string)))
       (insert "| Section | Key | Command | Note |\n")

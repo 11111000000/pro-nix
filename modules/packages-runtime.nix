@@ -25,6 +25,11 @@
 # Last reviewed: 2026-05-03
 { config, pkgs, lib, ... }:
 
+let
+  emacsPkg = pkgs.emacs30 or pkgs.emacs;
+  opencodePkg = (import ../system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }).opencodeCmd;
+in
+
 # Minimal runtime packages that must be present in the final system profile.
 # Keep this list intentionally small: these packages are required for system
 # activation, shell access, and basic maintenance.
@@ -46,7 +51,7 @@ with pkgs;
 {
   # Модуль экспортирует базовый набор рантайм‑пакетов. Он использует
   # lib.mkDefault в местах, где другие модули могут дополнять список.
-  environment.systemPackages = lib.mkDefault (with pkgs; [
+  environment.systemPackages = lib.mkAfter (with pkgs; [
     bashInteractive
     openssh
     # Ensure python3 is available in the minimal runtime so verification
@@ -56,11 +61,7 @@ with pkgs;
     coreutils
     procps
     dbus
-    # Privacy transports: include transport clients so Tor transports are
-    # available when services.tor.client is enabled by default in pro-privacy.
-    obfs4proxy
-    meek-client
-    snowflake-client
+    opencodePkg
   ]);
 
 # Last reviewed: 2026-05-03

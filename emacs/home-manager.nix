@@ -6,7 +6,6 @@ let
   defaultModulesText = lib.concatStringsSep " " defaultModules;
   hmPackages = with pkgs; [ fd ripgrep home-manager fnm git ];
   guiPackages = with pkgs; [ xclip rxvt-unicode obexd ];
-
   # Обзор модулей Emacs
   # - core, ui, packages: фундаментальные компоненты для загрузки окружения.
   # - lisp, python, haskell: языковые интеграции и среды разработки.

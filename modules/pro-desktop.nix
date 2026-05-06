@@ -94,29 +94,24 @@
   };
 
   # Шрифты размещены рядом с графическим слоем.
-  fonts.packages = with pkgs; [
-    terminus_font
-    noto-fonts
-    noto-fonts-cjk-sans
-    noto-fonts-color-emoji
-    (stdenv.mkDerivation rec {
-      name = "aporetic-fonts";
-      src = ../fonts;
-      installPhase = ''
-        mkdir -p $out/share/fonts/truetype
-        cp $src/*.ttf $out/share/fonts/truetype/
-      '';
-    })
-    # Prefer the packaged nerd-fonts provided by nixpkgs when available.
-    # This keeps font delivery deterministic and avoids ad-hoc fetches.
-    # Use 'nerd-fonts-complete' if present, otherwise fall back to 'nerd-fonts'.
-    (lib.optionalString (builtins.hasAttr "nerd-fonts-complete" pkgs) "")
-    # Add the derivation(s) conditionally via lib.optionals so the list stays valid
-    ] ++ lib.optionals (builtins.hasAttr "nerd-fonts-complete" pkgs) [ pkgs.nerd-fonts-complete ] ++ lib.optionals (builtins.hasAttr "nerd-fonts" pkgs && !builtins.hasAttr "nerd-fonts-complete" pkgs) [ pkgs.nerd-fonts ] ++ [
-    liberation_ttf
-    dejavu_fonts
-    cantarell-fonts
-  ];
+  fonts.packages = with pkgs;
+    [
+      terminus_font
+      noto-fonts
+      noto-fonts-cjk-sans
+      noto-fonts-color-emoji
+      (stdenv.mkDerivation rec {
+        name = "aporetic-fonts";
+        src = ../fonts;
+        installPhase = ''
+          mkdir -p $out/share/fonts/truetype
+          cp $src/*.ttf $out/share/fonts/truetype/
+        '';
+      })
+      liberation_ttf
+      dejavu_fonts
+      cantarell-fonts
+    ];
 
   # Шрифтовая политика: выбор системных семейств для fontconfig.
   # Примечание: в современных версиях NixOS используются имена семейств

@@ -75,8 +75,5 @@
     useUserPackages = true;
   };
 
-  # Импорт вспомогательных NixOS-специфичных определений пользователей.
-  imports = [
-    ./pro-users-nixos.nix
-  ];
+  imports = [ ./pro-users-nixos.nix ];
 }
