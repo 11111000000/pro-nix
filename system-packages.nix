@@ -86,33 +86,25 @@ let
 
   # Возможный Nix-источник: собрать opencode из upstream исходников (npm/Bun build).
   # Это предпочтительный, воспроизводимый backend — если сборка проходит успешно.
-  opencodeNpm = pkgs.stdenv.mkDerivation rec {
-    pname = "opencode-npm";
-    version = "1.14.19";
-    src = pkgs.fetchFromGitHub {
+  # Build opencode from upstream nix expression if available. The upstream
+  # repository ships a `nix/opencode.nix` and `nix/node_modules.nix` which are
+  # designed to be used from Nix; import them to produce a reproducible
+  # derivation instead of invoking bun directly here.
+  let
+    opencodeSrc = pkgs.fetchFromGitHub {
       owner = "anomalyco";
       repo = "opencode";
       rev = "v1.14.19";
-      # SHA256 (base32) computed via `nix-prefetch-url --unpack`.
       sha256 = "1ynrrikp6qjwqrh57pcw69i5h92ikz96d6zyd5j5vyd5zwqnm8ch";
     };
-    nativeBuildInputs = [ pkgs.bun pkgs.nodejs pkgs.ripgrep ];
-    buildPhase = ''
-      cd packages/opencode
-      # upstream build uses bun; invoke bundled bun from Nix package
-      ${pkgs.bun}/bin/bun --bun ./script/build.ts --single --skip-install
-    '';
-    installPhase = ''
-      mkdir -p $out/bin
-      # upstream build places built artifacts under packages/opencode/dist
-      if [ -d "packages/opencode/dist" ]; then
-        cp -r packages/opencode/dist/* $out/ || true
-      fi
-      if [ -x "packages/opencode/dist/opencode-*/bin/opencode" ]; then
-        install -Dm755 packages/opencode/dist/opencode-*/bin/opencode $out/bin/opencode
-      fi
-    '';
-  };
+    # Import the upstream Nix expression and pass our pkgs where needed.
+    opencodeUpstream = import (opencodeSrc + "/nix/opencode.nix") {
+      inherit (pkgs) lib stdenvNoCC callPackage bun nodejs ripgrep installShellFiles makeBinaryWrapper models-dev writableTmpDirAsHomeHook;
+      # Provide node_modules by importing upstream node-modules.nix from the source
+      node_modules = import (opencodeSrc + "/nix/node_modules.nix") { inherit pkgs; };
+    };
+  in
+  opencodeNpm = opencodeUpstream;
 
   # Выбираем backend: внешний параметр opencodeBackend имеет приоритет;
   # затем — воспроизводимая сборка из исходников (opencodeNpm), иначе — prebuilt релиз opencodeBin.
