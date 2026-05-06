@@ -84,9 +84,38 @@ let
     '';
   };
 
-  # Выбираем backend: если вызывающий код передал готовую сборку opencode,
-  # используем её; иначе берём локально скачиваемый релиз.
-  opencodeBackendPackage = if opencodeBackend != null then opencodeBackend else opencodeBin;
+  # Возможный Nix-источник: собрать opencode из upstream исходников (npm/Bun build).
+  # Это предпочтительный, воспроизводимый backend — если сборка проходит успешно.
+  opencodeNpm = pkgs.stdenv.mkDerivation rec {
+    pname = "opencode-npm";
+    version = "1.14.19";
+    src = pkgs.fetchFromGitHub {
+      owner = "anomalyco";
+      repo = "opencode";
+      rev = "v1.14.19";
+      sha256 = "ff6bc17f14cb351b3d1669932bf29b00c965da6cf8fa09400d7532610b33bc33";
+    };
+    nativeBuildInputs = [ pkgs.bun pkgs.nodejs pkgs.ripgrep ];
+    buildPhase = ''
+      cd packages/opencode
+      # upstream build uses bun; invoke bundled bun from Nix package
+      ${pkgs.bun}/bin/bun --bun ./script/build.ts --single --skip-install
+    '';
+    installPhase = ''
+      mkdir -p $out/bin
+      # upstream build places built artifacts under packages/opencode/dist
+      if [ -d "packages/opencode/dist" ]; then
+        cp -r packages/opencode/dist/* $out/ || true
+      fi
+      if [ -x "packages/opencode/dist/opencode-*/bin/opencode" ]; then
+        install -Dm755 packages/opencode/dist/opencode-*/bin/opencode $out/bin/opencode
+      fi
+    '';
+  };
+
+  # Выбираем backend: внешний параметр opencodeBackend имеет приоритет;
+  # затем — воспроизводимая сборка из исходников (opencodeNpm), иначе — prebuilt релиз opencodeBin.
+  opencodeBackendPackage = if opencodeBackend != null then opencodeBackend else opencodeNpm;
 
   
 
