@@ -76,12 +76,30 @@ let
       mkdir -p $out/libexec/$pname $out/bin
       cp -R ./* $out/libexec/$pname/
       chmod +x $out/libexec/$pname/pi
-      cat > $out/bin/pi <<EOF
+      cat > $out/bin/pi <<'EOF'
 #!/bin/sh
-export PI_PACKAGE_DIR="$out/libexec/$pname"
-exec "$out/libexec/$pname/pi" "$@"
+PI_BIN="__PI_BIN__"
+if [ ! -x "$PI_BIN" ]; then
+  echo "[pi] error: binary not found at $PI_BIN" >&2
+  exit 1
+fi
+is_elf=0
+if head -c4 "$PI_BIN" 2>/dev/null | od -An -t x1 | tr -d ' \n' | grep -iq '^7f454c46'; then
+  is_elf=1
+fi
+if [ "$is_elf" = "1" ]; then
+  LOADER="${pkgs.glibc}/lib/ld-linux-x86-64.so.2"
+  if [ -x "$LOADER" ]; then
+    exec "$LOADER" "$PI_BIN" "$@"
+  fi
+fi
+if command -v steam-run >/dev/null 2>&1; then
+  exec steam-run "$PI_BIN" "$@"
+fi
+exec "$PI_BIN" "$@"
 EOF
       chmod +x $out/bin/pi
+      substituteInPlace $out/bin/pi --replace __PI_BIN__ "$out/libexec/$pname/pi"
     '';
   };
 
@@ -628,5 +646,5 @@ in
 
   # Явные экспортируемые артефакты нужны другим модулям, которые хотят
   # использовать только опенкод-обёртки, не подтягивая весь системный список.
-  inherit opencodeCmd opencodeBin;
+  inherit opencodeCmd opencodeBin piCodingAgent;
 }
