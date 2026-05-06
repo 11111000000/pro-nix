@@ -231,6 +231,44 @@ let
 
     exec "$BIN" "$@"
   '';
+
+  # Utility to install/update a local per-user opencode binary in a well-known
+  # location. This is intentionally a separate command so that runtime `opencode`
+  # is pure (does not mutate user state). Users who want a newer local copy
+  # run `opencode-install-local` explicitly.
+  opencodeInstallLocal = pkgs.writeShellScriptBin "opencode-install-local" ''
+    set -euo pipefail
+
+    TARGET_DIR="$HOME/.local/share/pro-opencode/bin"
+    TARGET="$TARGET_DIR/opencode"
+    mkdir -p "$TARGET_DIR"
+
+    echo "[opencode-install-local] downloading official release into $TARGET"
+
+    tmpdir=$(mktemp -d 2>/dev/null || printf "%s" "$HOME/.cache/opencode.$(date +%s).$$")
+    trap 'rm -rf "$tmpdir"' EXIT
+    tmpball="$tmpdir/opencode.tar.gz"
+
+    if command -v curl >/dev/null 2>&1; then
+      curl -fSL -o "$tmpball" "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-linux-x64.tar.gz"
+    elif command -v wget >/dev/null 2>&1; then
+      wget -qO "$tmpball" "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-linux-x64.tar.gz"
+    else
+      echo "Please install curl or wget to use opencode-install-local" >&2
+      exit 1
+    fi
+
+    tar xzf "$tmpball" -C "$tmpdir"
+    if [ -x "$tmpdir/opencode" ]; then
+      mv "$tmpdir/opencode" "$TARGET"
+      chmod +x "$TARGET"
+      echo "Installed local opencode to $TARGET"
+      exit 0
+    else
+      echo "Downloaded archive did not contain opencode binary" >&2
+      exit 2
+    fi
+  '';
   # Примечание: flake/flake.nix может предоставлять opencode_bin; в этом
   # файле реализован запасной механизм, чтобы модуль работал автономно.
 
