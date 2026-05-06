@@ -61,6 +61,30 @@ let
     exec ${llmResearchEnv}/bin/jupyter-lab "$@"
   '';
 
+  # Глобальный `pi` из upstream release: кладём бинарник и его пакетные данные
+  # в store и запускаем с явным `PI_PACKAGE_DIR`, чтобы runtime находил assets,
+  # README, docs и examples независимо от рабочей директории пользователя.
+  piCodingAgent = pkgs.stdenv.mkDerivation rec {
+    pname = "pi-coding-agent";
+    version = "0.73.0";
+    src = pkgs.fetchurl {
+      url = "https://github.com/badlogic/pi-mono/releases/download/v${version}/pi-linux-x64.tar.gz";
+      sha256 = "5ee97ac6aa5ed7258decc416afdebbefbd5bf9e2cd5c814197bd4bf1e4f25f9f";
+    };
+    dontBuild = true;
+    installPhase = ''
+      mkdir -p $out/libexec/$pname $out/bin
+      cp -R ./* $out/libexec/$pname/
+      chmod +x $out/libexec/$pname/pi
+      cat > $out/bin/pi <<EOF
+#!/bin/sh
+export PI_PACKAGE_DIR="$out/libexec/$pname"
+exec "$out/libexec/$pname/pi" "$@"
+EOF
+      chmod +x $out/bin/pi
+    '';
+  };
+
   # Детерминированный пакет: скачивает официальную сборку opencode и помещает
   # её в Nix store. Этот артефакт не должен попадать в системный PATH напрямую:
   # системный `opencode` даёт wrapper, который пробрасывает аргументы и может
@@ -304,6 +328,7 @@ gh
   aiderCmd
   llmLabCmd
    opencodeCmd
+   piCodingAgent
   htop
   neofetch
   feh
