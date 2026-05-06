@@ -23,6 +23,7 @@
   local = if builtins.pathExists ./local.nix then import ./local.nix else { };
   hostName = local.hostName or "nixos";
   emacsPkg = pkgs.emacs30 or pkgs.emacs;
+  spkgs = import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = true; };
   in
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -300,32 +301,13 @@
 
   # By default optional heavy packages are disabled. To enable them set
   # `enableOptional = true` when importing `system-packages.nix`.
-  # Build the final package list and force it as the definitive value. Modules
-  # should use lib.mkDefault when adding packages so the top-level override
-  # here wins without causing recursion.
-  # Консолидация вкладов пакетов: собираем пакеты, предложенные модулями,
-  # и добавляем локальные утилиты. Важное изменение: убираем принудительное
-  # наложение (lib.mkForce) и используем lib.mkDefault — это позволяет модулю
-  # добавлять пакеты через lib.mkDefault и не терять их при финальной сборке.
-  # Собираем вклад модулей (они используют lib.mkDefault) и добавляем локальные
-  # утилиты. Не импортируем модуль packages-runtime вручную здесь — он уже
-  # присутствует в списке imports выше и его вклад доступен через
-  # config.environment.systemPackages.
-    # Build the final package list by starting from module contributions
-    # (which should use lib.mkDefault) and appending local utility packages.
-    # Then apply lib.mkForce at the very end if a host wants to lock the list.
-    # Build the final package list from module contributions and local extras.
-    # Собираем окончательный список пакетов из чистого базового списка.
-    # Ранее здесь использовалась ссылка на config.environment.systemPackages,
-    # что могло вызвать рекурсию/непредсказуемость при активации. Теперь
-    # верхняя точка сборки — этот файл; модули должны добавлять пакеты через
-    # lib.mkDefault. Параметр enableOptional по умолчанию подразумевает false;
-    # здесь явно передаём false, чтобы не включать тяжёлые GUI-пакеты без явного
-    # разрешения в локальной конфигурации.
+   # Собираем окончательный список пакетов из базовых вкладов и добавляем
+   # системный wrapper `opencode` в тот же список, чтобы он всегда попадал в PATH.
     environment.systemPackages = lib.mkDefault (with pkgs;
       []
       ++ [ just jq gh ]
-      ++ (import ./system-packages.nix { inherit pkgs emacsPkg; enableOptional = true; }).packages
+      ++ spkgs.packages
+      ++ [ spkgs.opencodeCmd ]
     );
 
   # Порядок формирования systemPackages:

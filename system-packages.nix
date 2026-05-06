@@ -9,7 +9,7 @@
 # - приватность и сетевые слои (Tor, VPN, overlay сети),
 # - агенты/LLM и вспомогательные инструменты (ollama, pipx-утилиты),
 # - инфраструктурные утилиты для кластеров и операций (headscale, wireguard, yggdrasil).
-{ pkgs, emacsPkg ? pkgs.emacs, enableOptional ? false }:
+{ pkgs, emacsPkg ? pkgs.emacs, enableOptional ? false, opencodeBackend ? null }:
 
 let
   emacsPackages = pkgs.emacsPackagesFor emacsPkg;
@@ -62,8 +62,9 @@ let
   '';
 
   # Детерминированный пакет: скачивает официальную сборку opencode и помещает
-  # её в Nix store. Этот код даёт воспроизводимый бинарный артефакт на случай,
-  # если flake не предоставляет готовую версию.
+  # её в Nix store. Этот артефакт не должен попадать в системный PATH напрямую:
+  # системный `opencode` даёт wrapper, который пробрасывает аргументы и может
+  # выбирать совместимый backend для конкретного пользователя.
   opencodeBin = pkgs.stdenv.mkDerivation rec {
     pname = "opencode";
     version = "1.14.19";
@@ -71,7 +72,6 @@ let
       url = "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-linux-x64.tar.gz";
       sha256 = "8cb11723ce0ec82e2b6ff9a2356b12c2f4c4a95a087ba0a3004b19f167951440";
     };
-    nativeBuildInputs = [ pkgs.patchelf ];
     buildInputs = [];
     unpackPhase = ''
       mkdir -p $TMPDIR/unpack
@@ -81,12 +81,12 @@ let
       mkdir -p $out/bin
       cp $TMPDIR/unpack/opencode $out/bin/
       chmod +x $out/bin/opencode
-      if [ -x "$out/bin/opencode" ]; then
-        patchelf --set-interpreter "${pkgs.glibc}/lib/ld-linux-x86-64.so.2" "$out/bin/opencode" || true
-        patchelf --set-rpath "${pkgs.glibc}/lib" "$out/bin/opencode" || true
-      fi
     '';
   };
+
+  # Выбираем backend: если вызывающий код передал готовую сборку opencode,
+  # используем её; иначе берём локально скачиваемый релиз.
+  opencodeBackendPackage = if opencodeBackend != null then opencodeBackend else opencodeBin;
 
   
 
@@ -104,52 +104,20 @@ let
     OPENCODE_HOME="$HOME/.opencode/bin/opencode"
     CACHED="$HOME/.local/share/opencode/opencode"
 
-    # Предпочитаем бинарник из Nix store, если он совместим. Это снижает риск
-    # выполнения повреждённой версии из пользовательского кеша. Если store-бинарь
-    # отсутствует или не проходит быстрый тест работоспособности — используем
-    # порядок поиска user-local -> home -> cached -> bootstrap.
-    if [ -n "''${OPENCODE_STORE_PATH:-}" ]; then
-      STORE_BIN="''${OPENCODE_STORE_PATH%/}/bin/opencode"
-    else
-      STORE_CAND=$(ls -d /nix/store/*opencode* 2>/dev/null | head -n1 || true)
-      if [ -n "$STORE_CAND" ]; then
-        STORE_BIN="$STORE_CAND/bin/opencode"
+    # Системный backend строится в Nix store и должен быть привилегированным
+    # вариантом. Пользовательские бинарники остаются только как fallback.
+    BIN="${opencodeBackendPackage}/bin/opencode"
+
+    if [ ! -x "$BIN" ]; then
+      if [ -x "$USER_LOCAL_BIN" ]; then
+        BIN="$USER_LOCAL_BIN"
+      elif [ -x "$OPENCODE_HOME" ]; then
+        BIN="$OPENCODE_HOME"
+      elif [ -x "$CACHED" ]; then
+        BIN="$CACHED"
       else
-        STORE_BIN=""
-      fi
-    fi
-    # Быстрая проверка работоспособности store-бинарника: если он падает на
-    # вызове --version, считаем его несовместимым и пропускаем.
-    if [ -x "$STORE_BIN" ]; then
-      if command -v timeout >/dev/null 2>&1; then
-      if timeout 2s "$STORE_BIN" --version >/dev/null 2>&1; then
-           BIN="$STORE_BIN"
-      else
-        echo "[opencode] store binary present but failed quick check, skipping" >&2
         BIN=""
       fi
-      else
-        # No timeout utility; attempt a simple invocation and trust it on success
-        if "$STORE_BIN" --version >/dev/null 2>&1; then
-          BIN="$STORE_BIN"
-        else
-          BIN=""
-        fi
-      fi
-    else
-      choose_exec() {
-        if [ -x "$USER_LOCAL_BIN" ]; then
-          echo "$USER_LOCAL_BIN"
-        elif [ -x "$OPENCODE_HOME" ]; then
-          echo "$OPENCODE_HOME"
-        elif [ -x "$CACHED" ]; then
-          echo "$CACHED"
-        else
-          echo ""
-        fi
-      }
-
-      BIN=$(choose_exec)
     fi
 
     if [ -z "$BIN" ]; then
@@ -217,74 +185,23 @@ let
       fi
     fi
 
-    # Запуск бинарника: учёт особенностей NixOS и upstream-предположений.
-    # - Некоторые предсобранные бинарники ожидают стандартную иерархию FHS и
-    #   падают на NixOS. В таких случаях полезен steam-run (FHS-обёртка).
-    # - Сначала пробуем запустить напрямую с системным динамическим загрузчиком
-    #   (glibc loader). Если это не помогает и доступен steam-run, используем его.
-    # - Если steam-run недоступен, запускаем под systemd-run с ограничением
-    #   ресурсов.
-    # - Для интерактивных команд (acp, acp-shell) и если OPENCODE_DIRECT_RUN=1,
-    #   нужно сохранить stdin/stdout — тогда выполняем бинарник напрямую.
-    # - Для любого CLI-вызова с аргументами тоже выполняем бинарник напрямую:
-    #   это сохраняет argv без промежуточной прослойки и не ломает subcommands.
-    # If caller provided args or explicitly requested direct run, record intent
-    # but defer the actual exec until we know whether the binary is ELF and
-    # whether we can run it via the Nix glibc loader or steam-run. Running an
-    # ELF directly on NixOS often fails with the "stub-ld" message; prefer the
-    # loader or steam-run when available. This preserves argv forwarding while
-    # avoiding stub-ld failures.
-    if [ "$#" -gt 0 ] || [ "''${OPENCODE_DIRECT_RUN:-0}" = "1" ]; then
-      WANT_ARG_FORWARD=1
-    else
-      WANT_ARG_FORWARD=0
-    fi
-
-    # Предпочитаем запуск через steam-run (FHS) когда это возможно — многие
-    # предсобранные бинарники ожидают стандартную FHS-иерархию и работают
-    # корректно только внутри steam-run. Однако steam-run использует bubblewrap
-    # и может не работать в ограниченных окружениях (containers / ограничение
-    # number of user namespaces). Проверяем возможность создания unprivileged
-    # user namespaces перед использованием steam-run.
-    can_use_userns=0
-    if [ -r /proc/sys/kernel/unprivileged_userns_clone ]; then
-      if [ "$(cat /proc/sys/kernel/unprivileged_userns_clone)" = "1" ]; then
-        can_use_userns=1
-      fi
-    fi
-
-    # Если бинарник — ELF (предположительно динамически связанный), попробуем
-    # запустить его через подходящий glibc loader из Nix store. Это часто
-    # решает проблему "stub-ld" без необходимости использования steam-run
-    # (bubblewrap). Только если запуск через loader не сработает — используем
-    # steam-run или systemd-run в зависимости от возможностей хоста.
     is_elf=0
     if [ -x "$BIN" ] && head -c4 "$BIN" 2>/dev/null | od -An -t x1 | tr -d ' \n' | grep -iq '^7f454c46'; then
       is_elf=1
     fi
 
     if [ "$is_elf" = "1" ]; then
-      LOADER=$(ls -d /nix/store/*glibc*/lib/ld-linux-x86-64.so.2 2>/dev/null | head -n1 || true)
-    else
-      LOADER=""
-    fi
-
-    # If we were asked to forward argv, pick the safest executor for ELF vs
-    # non-ELF cases: prefer loader for ELF, then steam-run if available, and
-    # finally systemd-run wrapper. This ensures flags like --help reach the
-    # underlying binary instead of triggering stub-ld failures.
-    if [ "${WANT_ARG_FORWARD:-0}" = "1" ]; then
-      if [ "$is_elf" = "1" ] && [ -n "$LOADER" ]; then
+      LOADER="${pkgs.glibc}/lib/ld-linux-x86-64.so.2"
+      if [ -x "$LOADER" ]; then
         exec "$LOADER" "$BIN" "$@"
       fi
-
-      if command -v steam-run >/dev/null 2>&1 && { [ "$can_use_userns" = "1" ] || [ "''${OPENCODE_FORCE_STEAM:-0}" = "1" ]; }; then
-        STEAM_RUN_CMD=$(command -v steam-run)
-        exec "$STEAM_RUN_CMD" "$BIN" -- "$@"
-      else
-        exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 -- "$BIN" "$@"
-      fi
     fi
+
+    if command -v steam-run >/dev/null 2>&1; then
+      exec steam-run "$BIN" "$@"
+    fi
+
+    exec "$BIN" "$@"
   '';
   # Примечание: flake/flake.nix может предоставлять opencode_bin; в этом
   # файле реализован запасной механизм, чтобы модуль работал автономно.
@@ -386,8 +303,7 @@ gh
   pipxPkg
   aiderCmd
   llmLabCmd
-  opencodeCmd
-  opencodeBin
+   opencodeCmd
   htop
   neofetch
   feh
