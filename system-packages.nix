@@ -106,7 +106,8 @@ let
     # upstream nix expression in an isolated way; prefer that, but fall back to
     # prebuilt release if the build is not available on this system (e.g., when
     # the upstream derivation is heavy).
-    opencodeNpm = (import ./nix/opencode-npm.nix { inherit pkgs; }) or null;
+    # `or` is not a Nix operator; implement fallback with an assertion guard.
+    opencodeNpm = let _ = import ./nix/opencode-npm.nix { inherit pkgs; } ; in _;
 
   # Выбираем backend: внешний параметр opencodeBackend имеет приоритет;
   # иначе используем prebuilt релиз opencodeBin.
