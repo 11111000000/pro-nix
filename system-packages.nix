@@ -86,25 +86,25 @@ let
 
   # Возможный Nix-источник: собрать opencode из upstream исходников (npm/Bun build).
   # Это предпочтительный, воспроизводимый backend — если сборка проходит успешно.
-  # Build opencode from upstream nix expression if available. The upstream
-  # repository ships a `nix/opencode.nix` and `nix/node_modules.nix` which are
-  # designed to be used from Nix; import them to produce a reproducible
-  # derivation instead of invoking bun directly here.
-  let
-    opencodeSrc = pkgs.fetchFromGitHub {
-      owner = "anomalyco";
-      repo = "opencode";
-      rev = "v1.14.19";
-      sha256 = "1ynrrikp6qjwqrh57pcw69i5h92ikz96d6zyd5j5vyd5zwqnm8ch";
-    };
-    # Import the upstream Nix expression and pass our pkgs where needed.
-    opencodeUpstream = import (opencodeSrc + "/nix/opencode.nix") {
-      inherit (pkgs) lib stdenvNoCC callPackage bun nodejs ripgrep installShellFiles makeBinaryWrapper models-dev writableTmpDirAsHomeHook;
-      # Provide node_modules by importing upstream node-modules.nix from the source
-      node_modules = import (opencodeSrc + "/nix/node_modules.nix") { inherit pkgs; };
-    };
-  in
-  opencodeNpm = opencodeUpstream;
+   # Build opencode from upstream nix expression if available. The upstream
+   # repository ships a `nix/opencode.nix` and `nix/node_modules.nix` which are
+   # designed to be used from Nix; import them to produce a reproducible
+   # derivation instead of invoking bun directly here.
+   opencodeSrc = pkgs.fetchFromGitHub {
+     owner = "anomalyco";
+     repo = "opencode";
+     rev = "v1.14.19";
+     sha256 = "1ynrrikp6qjwqrh57pcw69i5h92ikz96d6zyd5j5vyd5zwqnm8ch";
+   };
+
+   # Import the upstream Nix expression and pass our pkgs where needed.
+   opencodeUpstream = import (opencodeSrc + "/nix/opencode.nix") {
+     inherit (pkgs) lib stdenvNoCC callPackage bun nodejs ripgrep installShellFiles makeBinaryWrapper models-dev writableTmpDirAsHomeHook;
+     # Provide node_modules by importing upstream node-modules.nix from the source
+     node_modules = import (opencodeSrc + "/nix/node_modules.nix") { inherit pkgs; };
+   };
+
+   opencodeNpm = opencodeUpstream;
 
   # Выбираем backend: внешний параметр opencodeBackend имеет приоритет;
   # затем — воспроизводимая сборка из исходников (opencodeNpm), иначе — prebuilt релиз opencodeBin.
