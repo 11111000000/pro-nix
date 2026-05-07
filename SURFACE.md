@@ -51,7 +51,7 @@ Proof — конкретную команду или тест, обеспечи�
 
 - Имя: Runtime Packages & Activation
   Стабильность: [FLUID]
-  Спецификация: набор runtime-пакетов, необходимых для корректной активации системы и работы вспомогательных скриптов (activate, ensure-perms, helpers). Документируется в `system-packages.nix`.
+  Спецификация: набор runtime-пакетов, необходимых для корректной активации системы и работы вспомогательных скриптов (activate, ensure-perms, helpers), включая глобальный `pi` для всех пользователей на всех хостах. Документируется в `system-packages.nix`.
   Proof: `tests/contract/test_runtime_packages.sh`, `./scripts/check-nixos-build.sh`
   Run: `./scripts/check-nixos-build.sh`
   Owner: `system-packages.nix`, `modules/*`
@@ -132,6 +132,15 @@ Proof — конкретную команду или тест, обеспечи�
   Owner: `emacs/base/init.el`, `emacs/base/modules/pro-packages.el`, `emacs/base/tests`
   Last reviewed: 2026-05-04
   Risk: medium
+
+- Имя: Emacs Lisp Module Syntax
+  Стабильность: [FLUID]
+  Спецификация: отдельная проверка синтаксиса Emacs Lisp-модулей без запуска общей `holo-verify --quick`; читает верхнеуровневые формы и ловит ошибки чтения.
+  Proof: `./tools/holo-verify.sh elisp`
+  Run: `./tools/holo-verify.sh elisp`
+  Owner: `tools/holo-verify.sh`, `scripts/helper-check-elisp.sh`
+  Last reviewed: 2026-05-06
+  Risk: low
 
 - Имя: Emacs AI / Agent Shell
   Стабильность: [FLUID]

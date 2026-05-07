@@ -14,7 +14,7 @@ export NIXPKGS_ALLOW_UNFREE=1
 
 expr='let
   pkgs = import <nixpkgs> { system = "x86_64-linux"; config.allowUnfree = true; };
-  lst = import ./system-packages.nix { inherit pkgs; emacsPkg = pkgs.emacs; enableOptional = true; };
+  lst = (import ./system-packages.nix { inherit pkgs; emacsPkg = pkgs.emacs; enableOptional = true; }).packages;
 in builtins.map (x: x.name or "<no-name>") lst'
 
 echo -n "Evaluating list shape... "
@@ -28,7 +28,7 @@ echo "ok"
 
 echo "$out" | jq -r '.[]' > /tmp/_spkgs_names.$$ || true
 
-for pkg in gh mc python3 htop; do
+for pkg in gh mc python3 htop pi; do
   echo -n "Checking for $pkg in system-packages list... "
   grep -Ei "$pkg" /tmp/_spkgs_names.$$ >/dev/null 2>&1 || {
     echo "FAILED" >&2

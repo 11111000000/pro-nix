@@ -1,35 +1,44 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Simple holo verify: run contract tests referenced in HOLO.md and all scripts in tests/contract
 root="$(cd "$(dirname "$0")/.." && pwd)"
 echo "Running holo verification from $root"
 
-# Basic Emacs Lisp parse check for repository-provided modules. This ensures
-# syntax/read errors (unbalanced parens, truncated files) in emacs/base/modules
-# are detected early. Use the dev wrapper so Nix-provided site-lisp paths are
-# available when parsing.
-if [ -x "$root/scripts/helper-check-elisp.sh" ]; then
-  echo "Running Emacs Lisp parse checks for repo modules..."
-  EMACS="$root/scripts/dev-emacs-pro-wrapper.sh" MODULE_DIR="$root/emacs/base/modules" \
-    bash "$root/scripts/helper-check-elisp.sh" || { echo "helper-check-elisp failed"; exit 4; }
-fi
+run_elisp_checks() {
+  if [ -x "$root/scripts/helper-check-elisp.sh" ]; then
+    echo "Running Emacs Lisp parse checks for repo modules..."
+    EMACS="$root/scripts/dev-emacs-pro-wrapper.sh" MODULE_DIR="$root/emacs/base/modules" \
+      bash "$root/scripts/helper-check-elisp.sh" || { echo "helper-check-elisp failed"; exit 4; }
+  fi
 
-# Also run parse checks on the user's local Emacs modules if present. This
-# helps catch local init/init.el issues (like truncated files) early when the
-# developer runs holo-verify locally. Skip silently if the directory is absent.
-if [ -d "$HOME/.config/emacs/modules" ]; then
-  echo "Running Emacs Lisp parse checks for user modules in $HOME/.config/emacs/modules..."
-  EMACS="$root/scripts/dev-emacs-pro-wrapper.sh" MODULE_DIR="$HOME/.config/emacs/modules" \
-    bash "$root/scripts/helper-check-elisp.sh" || { echo "helper-check-elisp (user) failed"; exit 5; }
-fi
+  if [ -d "$HOME/.config/emacs/modules" ]; then
+    echo "Running Emacs Lisp parse checks for user modules in $HOME/.config/emacs/modules..."
+    EMACS="$root/scripts/dev-emacs-pro-wrapper.sh" MODULE_DIR="$HOME/.config/emacs/modules" \
+      bash "$root/scripts/helper-check-elisp.sh" || { echo "helper-check-elisp (user) failed"; exit 5; }
+  fi
+}
 
 shopt -s nullglob
 MODE=${1:-unit}
+
+case "$MODE" in
+  quick|--quick) MODE=unit ;;
+  elisp|--elisp) MODE=elisp ;;
+  nixos-fast|--nixos-fast) ;;
+  all|--all|full|--full) ;;
+  unit) ;;
+  *) echo "Unknown mode: $MODE" >&2; exit 1 ;;
+esac
+
+if [ "$MODE" = "elisp" ]; then
+  run_elisp_checks
+  echo "holo-verify: OK"
+  exit 0
+fi
+
 if [ "$MODE" = "unit" ]; then
   pattern="$root/tests/contract/unit/*"
 elif [ "$MODE" = "nixos-fast" ]; then
-  # fast nixos checks: system-packages eval, verify-units, and host toplevel build for primary host
   echo "Running nixos-fast checks"
   set -x
   ./scripts/helper-check-nixos-build.sh huawei || { echo "helper-check-nixos-build failed"; exit 2; }
