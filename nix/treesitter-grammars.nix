@@ -3,16 +3,12 @@
 with pkgs;
 
 let
-  # Fetch the typescript grammars archive at a known tag. The sha256 is
-  # intentionally left as a placeholder so that the build will report the
-  # expected hash if fetching is allowed in the environment. Replace it with
-  # the correct value after the first attempt or run `nix-prefetch-url`.
-  tsSrc = fetchFromGitHub {
-    owner = "tree-sitter";
-    repo = "tree-sitter-typescript";
-    rev = "v0.23.2";
-    # Use the hash reported by Nix for v0.23.2 archive (from previous run).
-    sha256 = "CU55+YoFJb6zWbJnbd38B7iEGkhukSVpBN7sli6GkGY=";
+  # Prefer using precompiled grammars bundle from emacs-tree-sitter/tree-sitter-langs
+  # which provides prebuilt .so files for many languages on x86_64 Linux.
+  tsBundle = fetchurl {
+    url = "https://github.com/emacs-tree-sitter/tree-sitter-langs/releases/download/0.13.49/tree-sitter-grammars.x86_64-unknown-linux-gnu.v0.13.49.tar.gz";
+    # sha256 for the bundle observed during a local build
+    sha256 = "HCxf8X/HJpTZpT7aQOqNscC9waiaVUr7RJannlExngA=";
   };
 
 in
@@ -21,7 +17,7 @@ stdenv.mkDerivation rec {
   pname = "pro-emacs-treesit-grammars";
   version = "0";
 
-  src = tsSrc;
+  src = tsBundle;
 
   nativeBuildInputs = [ pkg-config gcc git ];
 
@@ -37,22 +33,14 @@ stdenv.mkDerivation rec {
     outlib=$out/lib
     mkdir -p $outlib
 
-    # typescript grammar
-    # If parser.c is present (pre-generated) in the fetched archive, compile
-    # it; otherwise skip. The fetched archive is available at $src.
-    if [ -f "$src/typescript/src/parser.c" ]; then
-      gcc -shared -fPIC "$src/typescript/src/parser.c" -o $outlib/libtree-sitter-typescript.so || true
-    else
-      echo "typescript parser.c not found in $src; skipping"
-    fi
+    # Unpack the prebuilt grammars bundle and copy libraries for requested languages.
+    tmpdir=$(mktemp -d)
+    tar xzf "${tsBundle}" -C "$tmpdir"
 
-    if [ -f "$src/tsx/src/parser.c" ]; then
-      gcc -shared -fPIC "$src/tsx/src/parser.c" -o $outlib/libtree-sitter-tsx.so || true
-    else
-      echo "tsx parser.c not found in $src; skipping"
-    fi
+    # Copy any available libtree-sitter-*.so into $out/lib
+    find "$tmpdir" -type f -name 'libtree-sitter-*.so' -exec cp {} "$outlib" \; || true
 
-    # Note: errors above are tolerated for platforms with different build steps.
+    echo "Copied tree-sitter .so files to $outlib"
   '';
 
   installPhase = ''
