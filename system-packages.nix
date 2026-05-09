@@ -434,8 +434,10 @@ gh
   # JavaScript / TypeScript
   nodePackages.typescript-language-server
   nodePackages.typescript
-  # Tree-sitter tooling
-  tree-sitter-cli
+  # Tree-sitter tooling: grammars are provided via a dedicated derivation
+  # (nix/treesitter-grammars.nix). We do not require the CLI in system
+  # packages here to avoid depending on an attribute that may not exist
+  # in the chosen nixpkgs channel.
   # Popular/reliable LSP servers (system-wide)
   # Python
   nodePackages.pyright
