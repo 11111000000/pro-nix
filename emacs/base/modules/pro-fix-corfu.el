@@ -37,13 +37,13 @@ coordinates so child frames appear on the focused monitor."
                      (and (vectorp mon-geom) (>= (length mon-geom) 2)))
                  (numberp (elt mon-geom 0)) (numberp (elt mon-geom 1)))
             (let ((mx (elt mon-geom 0)) (my (elt mon-geom 1)))
-              (apply orig-fun frame (+ mx (or x 0)) (+ my (or y 0)) w h))
-          (apply orig-fun frame x y w h))
+              (funcall orig-fun frame (+ mx (or x 0)) (+ my (or y 0)) w h))
+          (funcall orig-fun frame x y w h))
       (error
        ;; If anything goes wrong, fallback to original behaviour and log
        ;; a debug message to help triage platform-specific monitor attrs.
-       (message "[pro-fix-corfu] monitor-geometry/advice error: %S (mon-geom=%S)" err mon-geom)
-       (apply orig-fun frame x y w h)))))
+        (message "[pro-fix-corfu] monitor-geometry/advice error: %S (mon-geom=%S)" err mon-geom)
+        (funcall orig-fun frame x y w h)))))
 
 ;; Apply advice when corfu--make-frame exists. Guard to avoid errors on
 ;; corfu versions that do not use that function or have different signatures.
