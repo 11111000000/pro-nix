@@ -46,10 +46,12 @@
           home-manager.nixosModules.home-manager
           ./configuration.nix
         ./nixos/modules/opencode-config.nix
-          # Include the generated treesitter grammars as a module input so
-          # the system profile will contain the built .so files when we add
-          # the derivation to systemPackages below.
-          (import ./nix/treesitter-grammars.nix { inherit pkgs; })
+          # NOTE: the treesitter grammars derivation is exposed via
+          # `system-packages.nix` (the derivation itself is added to
+          # environment.systemPackages). Do NOT import the derivation
+          # here as a NixOS module — that would return a derivation
+          # (a store path / string) where a module attribute set is
+          # expected and causes evaluation errors.
         # user-templates is imported directly from configuration.nix to avoid
         # circular evaluation dependencies
         ] ++ globalModules ++ extraModules;
