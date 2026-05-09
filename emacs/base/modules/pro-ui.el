@@ -266,6 +266,83 @@ is set accordingly."
       (set-face-attribute 'corfu-default nil :background "#1c1f26" :foreground "#dcdfe4")
       (set-face-attribute 'corfu-current nil :background "#2a2f36" :foreground "#ffffff" :weight 'bold)))
 
+;; Cursor appearance helpers
+;; Небольшая утилита: менять цвет и тип курсора в зависимости от
+;; текущего метода ввода и режима read-only. Требование: при русском
+;; вводе — оранжевый вертикальный бар; при английском — чёрный бар;
+;; при read-only — чёрный прямоугольник.
+(defcustom pro-ui-cursor-russian-color "#ff8800"
+  "Цвет курсора, когда активен русский метод ввода."
+  :type 'string
+  :group 'pro-ui)
+
+(defcustom pro-ui-cursor-english-color "#000000"
+  "Цвет курсора для стандартного (английского) ввода."
+  :type 'string
+  :group 'pro-ui)
+
+(defcustom pro-ui-cursor-readonly-color "#000000"
+  "Цвет курсора в режиме только чтения."
+  :type 'string
+  :group 'pro-ui)
+
+(defcustom pro-ui-cursor-bar-width 2
+  "Ширина вертикального бар-курсора в пикселях (используется как (bar . N))."
+  :type 'integer
+  :group 'pro-ui)
+
+(defvar-local pro-ui--cursor-last-state nil
+  "Последнее применённое состояние курсора для буфера.")
+
+(defun pro-ui--detect-cursor-state ()
+  "Определить нужное состояние курсора: 'readonly, 'russian или 'english.
+Логика: если буфер в read-only — 'readonly; иначе если активен
+input-method и его имя содержит "russian" или "cyrillic" — 'russian;
+во всех остальных случаях — 'english."
+  (cond
+   (buffer-read-only 'readonly)
+   ((and (boundp 'current-input-method) current-input-method
+         (string-match-p "russian\|cyrill?ic\|ru" current-input-method)) 'russian)
+   (t 'english)))
+
+(defun pro-ui--apply-cursor-for-state (state)
+  "Применить визуальные настройки курсора для STATE.
+STATE — один из: 'readonly, 'russian, 'english." 
+  (pcase state
+    ('readonly
+     ;; Чёрный прямоугольник
+     (setq cursor-type 'box)
+     (when (fboundp 'set-face-attribute)
+       (set-face-attribute 'cursor nil :background pro-ui-cursor-readonly-color)))
+    ('russian
+     ;; Оранжевый вертикальный бар
+     (setq cursor-type `(bar . ,pro-ui-cursor-bar-width))
+     (when (fboundp 'set-face-attribute)
+       (set-face-attribute 'cursor nil :background pro-ui-cursor-russian-color)))
+    ('english
+     ;; Чёрный вертикальный бар
+     (setq cursor-type `(bar . ,pro-ui-cursor-bar-width))
+     (when (fboundp 'set-face-attribute)
+       (set-face-attribute 'cursor nil :background pro-ui-cursor-english-color)))))
+
+(defun pro-ui--maybe-update-cursor (&rest _args)
+  "Обновить курсор в текущем буфере, если состояние изменилось.
+Подходит для хуков переключения input-method, read-only и смены буфера." 
+  (let ((new-state (pro-ui--detect-cursor-state)))
+    (when (not (eq new-state pro-ui--cursor-last-state))
+      (setq pro-ui--cursor-last-state new-state)
+      (pro-ui--apply-cursor-for-state new-state))))
+
+;; Подключаемся к хукам: переключение метода ввода, переключение read-only,
+;; а также обновления списка буферов (включая переключение буфера/окна).
+(when (fboundp 'add-hook)
+  (add-hook 'input-method-activate-hook #'pro-ui--maybe-update-cursor)
+  (add-hook 'input-method-inactivate-hook #'pro-ui--maybe-update-cursor)
+  (add-hook 'read-only-mode-hook #'pro-ui--maybe-update-cursor)
+  (add-hook 'buffer-list-update-hook #'pro-ui--maybe-update-cursor)
+  ;; Применим один раз при инициализации
+  (pro-ui--maybe-update-cursor))
+
     ;; Vertico keybindings: make C-n/C-p behave like minibuffer navigation
     (when (and (boundp 'vertico-map) (keymapp vertico-map))
       (define-key vertico-map (kbd "C-n") #'vertico-next)

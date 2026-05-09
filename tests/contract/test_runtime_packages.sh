@@ -42,4 +42,20 @@ for p in bash ssh; do
   fi
 done
 
+echo -n "Checking that pi starts... "
+pi_bin=$(nix build --no-link --print-out-paths '.#nixosConfigurations.huawei.config.system.build.toplevel' >/dev/null 2>&1 || true)
+if [ -z "$pi_bin" ]; then
+  echo "FAILED" >&2
+  echo "Unable to locate built system profile for pi smoke test" >&2
+  exit 4
+fi
+
+if "$out/sw/bin/pi" --help >/dev/null 2>&1; then
+  echo "ok"
+else
+  echo "FAILED" >&2
+  echo "pi wrapper does not start on NixOS" >&2
+  exit 5
+fi
+
 echo "Runtime package check: OK"
