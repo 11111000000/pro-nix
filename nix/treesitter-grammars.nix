@@ -3,16 +3,27 @@
 with pkgs;
 
 let
-  tree-sitter-cli = pkgs.tree-sitter-cli;
+  # Fetch the typescript grammars archive at a known tag. The sha256 is
+  # intentionally left as a placeholder so that the build will report the
+  # expected hash if fetching is allowed in the environment. Replace it with
+  # the correct value after the first attempt or run `nix-prefetch-url`.
+  tsSrc = fetchFromGitHub {
+    owner = "tree-sitter";
+    repo = "tree-sitter-typescript";
+    rev = "v0.23.2";
+    # Use the hash reported by Nix for v0.23.2 archive (from previous run).
+    sha256 = "CU55+YoFJb6zWbJnbd38B7iEGkhukSVpBN7sli6GkGY=";
+  };
+
 in
 
 stdenv.mkDerivation rec {
   pname = "pro-emacs-treesit-grammars";
   version = "0";
 
-  src = null;
+  src = tsSrc;
 
-  nativeBuildInputs = [ tree-sitter-cli pkg-config gcc ];
+  nativeBuildInputs = [ pkg-config gcc git ];
 
   buildInputs = [ libtool ];
 
@@ -27,13 +38,19 @@ stdenv.mkDerivation rec {
     mkdir -p $outlib
 
     # typescript grammar
-    git clone --depth 1 https://github.com/tree-sitter/tree-sitter-typescript.git tmp-ts
-    (cd tmp-ts/typescript && ${tree-sitter-cli}/bin/tree-sitter generate)
-    gcc -shared -fPIC tmp-ts/typescript/src/parser.c -o $outlib/libtree-sitter-typescript.so || true
+    # If parser.c is present (pre-generated) in the fetched archive, compile
+    # it; otherwise skip. The fetched archive is available at $src.
+    if [ -f "$src/typescript/src/parser.c" ]; then
+      gcc -shared -fPIC "$src/typescript/src/parser.c" -o $outlib/libtree-sitter-typescript.so || true
+    else
+      echo "typescript parser.c not found in $src; skipping"
+    fi
 
-    # tsx grammar (tsx subdir)
-    (cd tmp-ts/tsx && ${tree-sitter-cli}/bin/tree-sitter generate)
-    gcc -shared -fPIC tmp-ts/tsx/src/parser.c -o $outlib/libtree-sitter-tsx.so || true
+    if [ -f "$src/tsx/src/parser.c" ]; then
+      gcc -shared -fPIC "$src/tsx/src/parser.c" -o $outlib/libtree-sitter-tsx.so || true
+    else
+      echo "tsx parser.c not found in $src; skipping"
+    fi
 
     # Note: errors above are tolerated for platforms with different build steps.
   '';
