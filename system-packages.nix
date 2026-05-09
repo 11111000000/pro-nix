@@ -429,30 +429,30 @@ gh
   # so scripts and shebangs can rely on /run/current-system/sw/bin/python and python3.
    python3
   esbuild
-   nodePackages.prettier # Форматирование JS/TS для Apheleia (Emacs).
-   # Language servers and tree-sitter tooling (system-wide)
-   # JavaScript / TypeScript
-   nodePackages.typescript-language-server
-   nodePackages.typescript
-   # Tree-sitter CLI: позволяет пользователю (через Emacs/tree-sitter-langs или
-   # M-x treesit-install-language-grammar) собрать грамматики локально в
-   # ~/.config/emacs/tree-sitter без необходимости system-wide сборки .so.
-   (if builtins.hasAttr "tree-sitter-cli" pkgs then pkgs.tree-sitter-cli else null)
-   # Popular/reliable LSP servers (system-wide)
-   # Python: pyright
-   (if builtins.hasAttr "nodePackages" pkgs && builtins.hasAttr "pyright" pkgs.nodePackages then pkgs.nodePackages.pyright else null)
-   # Java: Eclipse JDT Language Server
-   (if builtins.hasAttr "jdtls" pkgs then pkgs.jdtls else null)
-   (if builtins.hasAttr "jdtls" pkgs && builtins.hasAttr "openjdk" pkgs then pkgs.openjdk else null)
-   # JSON/YAML: language servers extracted from VS Code extensions
-   (if builtins.hasAttr "vscode-langservers-extracted" pkgs then pkgs.vscode-langservers-extracted else null)
-   # Rust: rust-analyzer
-   (if builtins.hasAttr "rust-analyzer" pkgs then pkgs.rust-analyzer else null)
-   # Go: gopls
-   (if builtins.hasAttr "goPackages" pkgs && builtins.hasAttr "gopls" pkgs.goPackages then pkgs.goPackages.gopls else null)
-   # Bash: bash-language-server
-   (if builtins.hasAttr "nodePackages" pkgs && builtins.hasAttr "bash-language-server" pkgs.nodePackages then pkgs.nodePackages."bash-language-server" else null)
-   networkmanagerapplet  # Индикатор Wi-Fi в трее.
+  nodePackages.prettier # Форматирование JS/TS для Apheleia (Emacs).
+  # Language servers and tree-sitter tooling (system-wide)
+  # JavaScript / TypeScript
+  nodePackages.typescript-language-server
+  nodePackages.typescript
+  # Tree-sitter CLI: позволяет пользователю (через Emacs/tree-sitter-langs или
+  # M-x treesit-install-language-grammar) собрать грамматики локально в
+  # ~/.config/emacs/tree-sitter без необходимости system-wide сборки .so.
+  (if builtins.hasAttr "tree-sitter-cli" pkgs then pkgs.tree-sitter-cli else null)
+  # Popular/reliable LSP servers (system-wide)
+  # Python: pyright
+  (if builtins.hasAttr "nodePackages" pkgs && builtins.hasAttr "pyright" pkgs.nodePackages then pkgs.nodePackages.pyright else null)
+  # Java: Eclipse JDT Language Server
+  (if builtins.hasAttr "jdtls" pkgs then pkgs.jdtls else null)
+  (if builtins.hasAttr "jdtls" pkgs && builtins.hasAttr "openjdk" pkgs then pkgs.openjdk else null)
+  # JSON/YAML: language servers extracted from VS Code extensions
+  (if builtins.hasAttr "vscode-langservers-extracted" pkgs then pkgs.vscode-langservers-extracted else null)
+  # Rust: rust-analyzer
+  (if builtins.hasAttr "rust-analyzer" pkgs then pkgs.rust-analyzer else null)
+  # Go: gopls
+  (if builtins.hasAttr "goPackages" pkgs && builtins.hasAttr "gopls" pkgs.goPackages then pkgs.goPackages.gopls else null)
+  # Bash: bash-language-server
+  (if builtins.hasAttr "nodePackages" pkgs && builtins.hasAttr "bash-language-server" pkgs.nodePackages then pkgs.nodePackages."bash-language-server" else null)
+  networkmanagerapplet  # Индикатор Wi-Fi в трее.
   blueman               # Графический интерфейс для Bluetooth.
   obexd                 # Передача файлов по Bluetooth.
   bluez                 # Полный стек Bluetooth.
