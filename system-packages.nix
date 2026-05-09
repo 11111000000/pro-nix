@@ -434,6 +434,10 @@ gh
   # JavaScript / TypeScript
   nodePackages.typescript-language-server
   nodePackages.typescript
+  # Tree-sitter CLI: позволяет пользователю (через Emacs/tree-sitter-langs или
+  # M-x treesit-install-language-grammar) собрать грамматики локально в
+  # ~/.config/emacs/tree-sitter без необходимости system-wide сборки .so.
+  tree-sitter-cli
   # Tree-sitter tooling: grammars are provided via a dedicated derivation
   # (nix/treesitter-grammars.nix). We do not require the CLI in system
   # packages here to avoid depending on an attribute that may not exist
@@ -443,6 +447,8 @@ gh
   (if builtins.hasAttr "nodePackages" pkgs && builtins.hasAttr "pyright" pkgs.nodePackages then pkgs.nodePackages.pyright else null)
   # Java (Eclipse JDT Language Server)
   (if builtins.hasAttr "jdtls" pkgs then pkgs.jdtls else null)
+  # If jdtls is present, ensure a JVM runtime is available for it to run under.
+  (if builtins.hasAttr "jdtls" pkgs && builtins.hasAttr "openjdk" pkgs then pkgs.openjdk else null)
   # JSON/YAML and other VSCode extracted language servers
   (if builtins.hasAttr "vscode-langservers-extracted" pkgs then pkgs.vscode-langservers-extracted else null)
   # Rust
