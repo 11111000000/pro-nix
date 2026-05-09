@@ -253,6 +253,54 @@ EOF
         fi
       '';
 
+      # Install prebuilt tree-sitter-langs release into user's config
+      # This avoids heavy Nix builds while providing precompiled .so files
+      # for Emacs treesit. It is idempotent and will only download when
+      # required files are missing.
+      home.activation.pro-emacs-install-treesitter = ''
+        #!/bin/sh -e
+        TS_DIR="$HOME/.config/emacs/tree-sitter"
+        NEED=0
+        required_libs="libtree-sitter-typescript.so libtree-sitter-tsx.so"
+        if [ -d "$TS_DIR" ]; then
+          for f in $required_libs; do
+            [ -f "$TS_DIR/$f" ] || NEED=1
+          done
+        else
+          NEED=1
+        fi
+
+        if [ "$NEED" -eq 0 ]; then
+          echo "pro-emacs: tree-sitter grammars already present in $TS_DIR"
+          exit 0
+        fi
+
+        tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/pro-treesit.XXXXXX")
+        trap 'rm -rf "$tmpdir"' EXIT
+
+        url="https://github.com/emacs-tree-sitter/tree-sitter-langs/releases/download/0.13.49/tree-sitter-grammars.x86_64-unknown-linux-gnu.v0.13.49.tar.gz"
+
+        echo "pro-emacs: downloading tree-sitter bundle from $url"
+        if command -v curl >/dev/null 2>&1; then
+          curl -fSL -o "$tmpdir/ts.tar.gz" "$url"
+        elif command -v wget >/dev/null 2>&1; then
+          wget -qO "$tmpdir/ts.tar.gz" "$url"
+        else
+          echo "pro-emacs: please install curl or wget to bootstrap tree-sitter grammars" >&2
+          exit 1
+        fi
+
+        mkdir -p "$tmpdir/extract"
+        tar -xzf "$tmpdir/ts.tar.gz" -C "$tmpdir/extract"
+
+        mkdir -p "$TS_DIR"
+        # Copy extracted content into the target directory atomically
+        # Prefer cp -a to preserve permissions; overwrite existing files.
+        cp -a "$tmpdir/extract/." "$TS_DIR/"
+
+        echo "pro-emacs: installed tree-sitter grammars to $TS_DIR"
+      '';
+
       # Генерируем runtime-список только из реально доступных Nix-пакетов,
       # чтобы pro-packages не считал отсутствующие пакеты "гарантированными".
       home.file.".config/emacs/provided-packages.el".text = let
