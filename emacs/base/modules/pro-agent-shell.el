@@ -66,7 +66,7 @@ TAB    -> выбрать агента / режим сессии (agent-shell-set
     ;; В редком случае, если ни один из хуков не существует, переопределим глобально
     ;; при открытии командой agent-shell: поставим after-advice на команду открытия.
     (when (fboundp 'agent-shell)
-      (advice-add #'agent-shell :after (lambda (&rest _) (pro-agent-shell--setup-keys))))))
+      (advice-add #'agent-shell :after (lambda (&rest _) (pro-agent-shell--setup-keys)))))))
 
 (provide 'pro-agent-shell)
 
