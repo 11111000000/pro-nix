@@ -284,7 +284,7 @@ EOF
         fi
 
         # Use a simple, explicit /tmp-based template to avoid Nix string
-        # interpolation of shell-style ${...} sequences when the script is
+        # interpolation of shell-style sequences when the script is
         # rendered during activation. Keep behaviour predictable under
         # systemd services where TMPDIR may be missing.
         tmpdir=$(mktemp -d "/tmp/pro-treesit.XXXXXX")
