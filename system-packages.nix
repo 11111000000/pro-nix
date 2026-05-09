@@ -457,6 +457,9 @@ gh
   (if builtins.hasAttr "goPackages" pkgs && builtins.hasAttr "gopls" pkgs.goPackages then pkgs.goPackages.gopls else null)
   # Bash (bash-language-server)
   (if builtins.hasAttr "nodePackages" pkgs && builtins.hasAttr "bash-language-server" pkgs.nodePackages then pkgs.nodePackages."bash-language-server" else null)
+  # Additional explicit LSPs where available: vscode extracted servers and gopls/pyright already guarded above
+  (if builtins.hasAttr "nodePackages" pkgs && builtins.hasAttr "vscode-langservers-extracted" pkgs.nodePackages then pkgs.nodePackages."vscode-langservers-extracted" else null)
+  (if builtins.hasAttr "nodePackages" pkgs && builtins.hasAttr "pyright" pkgs.nodePackages then pkgs.nodePackages.pyright else null)
   networkmanagerapplet  # Индикатор Wi-Fi в трее.
   blueman               # Графический интерфейс для Bluetooth.
   obexd                 # Передача файлов по Bluetooth.
