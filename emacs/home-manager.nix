@@ -275,7 +275,11 @@ EOF
           exit 0
         fi
 
-        tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/pro-treesit.XXXXXX")
+        # Use a simple, explicit /tmp-based template to avoid Nix string
+        # interpolation of shell-style ${...} sequences when the script is
+        # rendered during activation. Keep behaviour predictable under
+        # systemd services where TMPDIR may be missing.
+        tmpdir=$(mktemp -d "/tmp/pro-treesit.XXXXXX")
         trap 'rm -rf "$tmpdir"' EXIT
 
         url="https://github.com/emacs-tree-sitter/tree-sitter-langs/releases/download/0.13.49/tree-sitter-grammars.x86_64-unknown-linux-gnu.v0.13.49.tar.gz"
