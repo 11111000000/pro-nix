@@ -4,6 +4,14 @@ let
   cfg = config.pro.emacs;
   defaultModules = [ "core" "ui" "packages" "package-bootstrap" "text" "nav" "keys" "org" "lisp" "python" "c" "java" "haskell" "project" "git" "ai" "feeds" "chat" "agent" "exwm" ];
   defaultModulesText = lib.concatStringsSep " " defaultModules;
+  treeSitterBundle = pkgs.runCommand "pro-emacs-tree-sitter-langs" { nativeBuildInputs = [ pkgs.gnutar ]; } ''
+    set -euo pipefail
+    mkdir -p "$out"
+    tar -xzf ${pkgs.fetchurl {
+      url = "https://github.com/emacs-tree-sitter/tree-sitter-langs/releases/download/0.13.49/tree-sitter-grammars.x86_64-unknown-linux-gnu.v0.13.49.tar.gz";
+      sha256 = "HCxf8X/HJpTZpT7aQOqNscC9waiaVUr7RJannlExngA=";
+    }} -C "$out"
+  '';
   hmPackages = with pkgs; [ fd ripgrep home-manager fnm git ];
   guiPackages = with pkgs; [ xclip rxvt-unicode obexd ];
   # Обзор модулей Emacs
@@ -253,54 +261,38 @@ EOF
         fi
       '';
 
-      # Install prebuilt tree-sitter-langs release into user's config
-      # This avoids heavy Nix builds while providing precompiled .so files
-      # for Emacs treesit. It is idempotent and will only download when
-      # required files are missing.
       home.activation.pro-emacs-install-treesitter = ''
         #!/bin/sh -e
         TS_DIR="$HOME/.config/emacs/tree-sitter"
-        NEED=0
         required_libs="libtree-sitter-typescript.so libtree-sitter-tsx.so"
-        if [ -d "$TS_DIR" ]; then
-          for f in $required_libs; do
-            [ -f "$TS_DIR/$f" ] || NEED=1
-          done
-        else
-          NEED=1
-        fi
-
-        if [ "$NEED" -eq 0 ]; then
-          echo "pro-emacs: tree-sitter grammars already present in $TS_DIR"
-          exit 0
-        fi
-
-        # Use a simple, explicit /tmp-based template to avoid Nix string
-        # interpolation of shell-style sequences when the script is
-        # rendered during activation. Keep behaviour predictable under
-        # systemd services where TMPDIR may be missing.
-        tmpdir=$(mktemp -d "/tmp/pro-treesit.XXXXXX")
-        trap 'rm -rf "$tmpdir"' EXIT
-
-        url="https://github.com/emacs-tree-sitter/tree-sitter-langs/releases/download/0.13.49/tree-sitter-grammars.x86_64-unknown-linux-gnu.v0.13.49.tar.gz"
-
-        echo "pro-emacs: downloading tree-sitter bundle from $url"
-        if command -v curl >/dev/null 2>&1; then
-          curl -fSL -o "$tmpdir/ts.tar.gz" "$url"
-        elif command -v wget >/dev/null 2>&1; then
-          wget -qO "$tmpdir/ts.tar.gz" "$url"
-        else
-          echo "pro-emacs: please install curl or wget to bootstrap tree-sitter grammars" >&2
-          exit 1
-        fi
-
-        mkdir -p "$tmpdir/extract"
-        tar -xzf "$tmpdir/ts.tar.gz" -C "$tmpdir/extract"
 
         mkdir -p "$TS_DIR"
-        # Copy extracted content into the target directory atomically
-        # Prefer cp -a to preserve permissions; overwrite existing files.
-        cp -a "$tmpdir/extract/." "$TS_DIR/"
+
+        for f in $required_libs; do
+          if [ -f "$TS_DIR/$f" ]; then
+            continue
+          fi
+
+          if [ -f "${treeSitterBundle}/$f" ]; then
+            cp -f "${treeSitterBundle}/$f" "$TS_DIR/$f"
+            continue
+          fi
+
+          found=$(find "${treeSitterBundle}" -type f -name "$f" -print -quit)
+          if [ -n "$found" ]; then
+            cp -f "$found" "$TS_DIR/$f"
+            continue
+          fi
+
+          echo "pro-emacs: missing required tree-sitter grammar: $f" >&2
+        done
+
+        for f in $required_libs; do
+          if [ ! -f "$TS_DIR/$f" ]; then
+            echo "pro-emacs: tree-sitter bootstrap finished without $f; Emacs may keep using fallback parsing" >&2
+            exit 0
+          fi
+        done
 
         echo "pro-emacs: installed tree-sitter grammars to $TS_DIR"
       '';

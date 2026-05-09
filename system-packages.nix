@@ -438,28 +438,20 @@ gh
   # M-x treesit-install-language-grammar) собрать грамматики локально в
   # ~/.config/emacs/tree-sitter без необходимости system-wide сборки .so.
   (if builtins.hasAttr "tree-sitter-cli" pkgs then pkgs.tree-sitter-cli else null)
-  # Tree-sitter tooling: grammars are provided via a dedicated derivation
-  # (nix/treesitter-grammars.nix). We do not require the CLI in system
-  # packages here to avoid depending on an attribute that may not exist
-  # in the chosen nixpkgs channel.
   # Popular/reliable LSP servers (system-wide)
-  # Python (pyright)
+  # Python: pyright
   (if builtins.hasAttr "nodePackages" pkgs && builtins.hasAttr "pyright" pkgs.nodePackages then pkgs.nodePackages.pyright else null)
-  # Java (Eclipse JDT Language Server)
+  # Java: Eclipse JDT Language Server
   (if builtins.hasAttr "jdtls" pkgs then pkgs.jdtls else null)
-  # If jdtls is present, ensure a JVM runtime is available for it to run under.
   (if builtins.hasAttr "jdtls" pkgs && builtins.hasAttr "openjdk" pkgs then pkgs.openjdk else null)
-  # JSON/YAML and other VSCode extracted language servers
+  # JSON/YAML: language servers extracted from VS Code extensions
   (if builtins.hasAttr "vscode-langservers-extracted" pkgs then pkgs.vscode-langservers-extracted else null)
-  # Rust
+  # Rust: rust-analyzer
   (if builtins.hasAttr "rust-analyzer" pkgs then pkgs.rust-analyzer else null)
-  # Go (gopls)
+  # Go: gopls
   (if builtins.hasAttr "goPackages" pkgs && builtins.hasAttr "gopls" pkgs.goPackages then pkgs.goPackages.gopls else null)
-  # Bash (bash-language-server)
+  # Bash: bash-language-server
   (if builtins.hasAttr "nodePackages" pkgs && builtins.hasAttr "bash-language-server" pkgs.nodePackages then pkgs.nodePackages."bash-language-server" else null)
-  # Additional explicit LSPs where available: vscode extracted servers and gopls/pyright already guarded above
-  (if builtins.hasAttr "nodePackages" pkgs && builtins.hasAttr "vscode-langservers-extracted" pkgs.nodePackages then pkgs.nodePackages."vscode-langservers-extracted" else null)
-  (if builtins.hasAttr "nodePackages" pkgs && builtins.hasAttr "pyright" pkgs.nodePackages then pkgs.nodePackages.pyright else null)
   networkmanagerapplet  # Индикатор Wi-Fi в трее.
   blueman               # Графический интерфейс для Bluetooth.
   obexd                 # Передача файлов по Bluetooth.
@@ -668,13 +660,9 @@ gh
   pip3Cmd
   ];
 in
-
-let
-  treesitterGrammars = import ./nix/treesitter-grammars.nix { inherit pkgs; };
-in
 {
   # Основной список системных пакетов без `null`.
-  packages = builtins.filter (x: x != null) (rawList ++ [ treesitterGrammars ]);
+  packages = builtins.filter (x: x != null) rawList;
 
   # Явные экспортируемые артефакты нужны другим модулям, которые хотят
   # использовать только опенкод-обёртки, не подтягивая весь системный список.
