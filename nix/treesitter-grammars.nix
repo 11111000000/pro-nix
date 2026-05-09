@@ -10,7 +10,6 @@ let
     # sha256 for the bundle observed during a local build
     sha256 = "HCxf8X/HJpTZpT7aQOqNscC9waiaVUr7RJannlExngA=";
   };
-
 in
 
 stdenv.mkDerivation rec {

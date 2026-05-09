@@ -45,15 +45,15 @@
         modules = [
           home-manager.nixosModules.home-manager
           ./configuration.nix
-        ./nixos/modules/opencode-config.nix
+          ./nixos/modules/opencode-config.nix
           # NOTE: the treesitter grammars derivation is exposed via
           # `system-packages.nix` (the derivation itself is added to
           # environment.systemPackages). Do NOT import the derivation
           # here as a NixOS module — that would return a derivation
           # (a store path / string) where a module attribute set is
           # expected and causes evaluation errors.
-        # user-templates is imported directly from configuration.nix to avoid
-        # circular evaluation dependencies
+          # user-templates is imported directly from configuration.nix to avoid
+          # circular evaluation dependencies
         ] ++ globalModules ++ extraModules;
       };
 
