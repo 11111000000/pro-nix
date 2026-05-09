@@ -46,6 +46,10 @@
           home-manager.nixosModules.home-manager
           ./configuration.nix
         ./nixos/modules/opencode-config.nix
+          # Include the generated treesitter grammars as a module input so
+          # the system profile will contain the built .so files when we add
+          # the derivation to systemPackages below.
+          (import ./nix/treesitter-grammars.nix { inherit pkgs; })
         # user-templates is imported directly from configuration.nix to avoid
         # circular evaluation dependencies
         ] ++ globalModules ++ extraModules;
@@ -179,7 +183,7 @@ EOF
         };
       };
 
-        devShells.${system}.default = pkgs.mkShell {
+      devShells.${system}.default = pkgs.mkShell {
         name = "pro-nix-dev";
         buildInputs = [ emacsPkg pkgs.ripgrep pkgs.fd pkgs.findutils pkgs.stress-ng pkgs.fio pkgs.powertop pkgs.iotop pkgs.lm_sensors pkgs.time pkgs.shellcheck pkgs.direnv pkgs.gh ];
         shellHook = let
@@ -212,5 +216,7 @@ SH
           echo "Created emacs wrapper at $PWD/.pro-emacs-wrapper/emacs-pro"
         '';
       };
+      # Expose the treesitter-grammars derivation in the flake for easy reference
+      treesitterGrammars = import ./nix/treesitter-grammars.nix { inherit pkgs; };
     };
 }

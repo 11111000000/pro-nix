@@ -430,6 +430,10 @@ gh
    python3
   esbuild
   nodePackages.prettier # Форматирование JS/TS для Apheleia (Emacs).
+  # Language servers and tree-sitter tooling (system-wide)
+  nodePackages.typescript-language-server
+  nodePackages.typescript
+  tree-sitter-cli
   networkmanagerapplet  # Индикатор Wi-Fi в трее.
   blueman               # Графический интерфейс для Bluetooth.
   obexd                 # Передача файлов по Bluetooth.
@@ -638,9 +642,13 @@ gh
   pip3Cmd
   ];
 in
+
+let
+  treesitterGrammars = import ./nix/treesitter-grammars.nix { inherit pkgs; };
+in
 {
   # Основной список системных пакетов без `null`.
-  packages = builtins.filter (x: x != null) rawList;
+  packages = builtins.filter (x: x != null) (rawList ++ [ treesitterGrammars ]);
 
   # Явные экспортируемые артефакты нужны другим модулям, которые хотят
   # использовать только опенкод-обёртки, не подтягивая весь системный список.
