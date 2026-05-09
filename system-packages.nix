@@ -431,9 +431,24 @@ gh
   esbuild
   nodePackages.prettier # Форматирование JS/TS для Apheleia (Emacs).
   # Language servers and tree-sitter tooling (system-wide)
+  # JavaScript / TypeScript
   nodePackages.typescript-language-server
   nodePackages.typescript
+  # Tree-sitter tooling
   tree-sitter-cli
+  # Popular/reliable LSP servers (system-wide)
+  # Python
+  nodePackages.pyright
+  # Java
+  jdtls
+  # JSON/YAML and other VSCode extracted language servers
+  vscode-langservers-extracted
+  # Rust
+  rust-analyzer
+  # Go
+  goPackages.gopls
+  # Bash
+  nodePackages.bash-language-server
   networkmanagerapplet  # Индикатор Wi-Fi в трее.
   blueman               # Графический интерфейс для Bluetooth.
   obexd                 # Передача файлов по Bluetooth.
