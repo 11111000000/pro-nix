@@ -79,7 +79,7 @@ let
       cat > $out/bin/pi <<EOF
 #!/bin/sh
 export PI_PACKAGE_DIR="$out/libexec/$pname"
-exec "$out/libexec/$pname/pi" "$@"
+exec "${pkgs.glibc}/lib/ld-linux-x86-64.so.2" "$out/libexec/$pname/pi" "\$@"
 EOF
       chmod +x $out/bin/pi
     '';
