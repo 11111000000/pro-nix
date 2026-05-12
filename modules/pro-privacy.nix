@@ -44,7 +44,7 @@ let
       [ -d /var/lib/tor/ssh_hidden_service ] && chmod 700 /var/lib/tor/ssh_hidden_service || true
     '';
   };
-in
+in {
 
   # Module options exported to NixOS option tree
   options = {
