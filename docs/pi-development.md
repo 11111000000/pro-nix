@@ -15,14 +15,20 @@
 ------
 - `pi` — запускает `~/Code/pi/pi-test.sh`.
 - `pi --help` — показывает краткую справку по wrapper-у.
-- `pi-dev` — запускает `npm --prefix "$PI_SOURCE_DIR/packages/coding-agent" run dev`.
+- `pi-dev` — запускает `npm --prefix "$PI_SOURCE_DIR" run dev`.
 
 Поведение wrapper-ов
 --------------------
 - Если в checkout нет `node_modules/.bin/tsx`, wrapper `pi` выполняет
   `npm install` в `PI_SOURCE_DIR`.
+- Если нет собранных `dist/` у `ai`, `agent`, `tui` или `coding-agent`, wrapper
+  `pi` выполняет `npm run build` в `PI_SOURCE_DIR`.
 - Если в checkout нет `node_modules/.bin/tsgo`, wrapper `pi-dev` выполняет
   `npm install` в `PI_SOURCE_DIR`.
+
+Справка
+-------
+- `pi --help` и `pi-dev --help` показывают краткую справку wrapper-ов.
 - Переменная `PI_SOURCE_DIR` имеет приоритет над значением по умолчанию
   `$HOME/Code/pi`.
 

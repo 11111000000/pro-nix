@@ -32,13 +32,22 @@ if [ -z "$pi_dev_pkg" ]; then
 fi
 echo "found"
 
+echo -n "Checking that pi-dev starts... "
+if "$pi_dev_pkg/bin/pi-dev" --help >/dev/null 2>&1; then
+  echo "ok"
+else
+  echo "FAILED" >&2
+  echo "pi-dev wrapper does not start on NixOS" >&2
+  exit 5
+fi
+
 echo -n "Checking that pi starts... "
 if "$pi_pkg/bin/pi" --help >/dev/null 2>&1; then
   echo "ok"
 else
   echo "FAILED" >&2
   echo "pi wrapper does not start on NixOS" >&2
-  exit 5
+  exit 6
 fi
 
 echo "Runtime package check: OK"

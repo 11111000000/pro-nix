@@ -97,11 +97,38 @@ EOF
       fi
     fi
 
+    if [ ! -f "$PI_SOURCE_DIR/packages/ai/dist/index.js" ] || \
+       [ ! -f "$PI_SOURCE_DIR/packages/agent/dist/index.js" ] || \
+       [ ! -f "$PI_SOURCE_DIR/packages/tui/dist/index.js" ] || \
+       [ ! -f "$PI_SOURCE_DIR/packages/coding-agent/dist/cli.js" ]; then
+      if command -v npm >/dev/null 2>&1; then
+        (cd "$PI_SOURCE_DIR" && npm run build)
+      else
+        echo "[pi] не найден npm для сборки workspace-пакетов" >&2
+        exit 4
+      fi
+    fi
+
     exec "$PI_SOURCE_DIR/pi-test.sh" "$@"
   '';
 
   piDevCmd = pkgs.writeShellScriptBin "pi-dev" ''
     set -euo pipefail
+
+    case "''${1:-}" in
+      -h|--help)
+        cat <<'EOF'
+pi-dev запускает root dev-цикл checkout `~/Code/pi`.
+
+Использование:
+  pi-dev
+
+Переменные:
+  PI_SOURCE_DIR  Путь к checkout pi (по умолчанию: $HOME/Code/pi)
+EOF
+        exit 0
+        ;;
+    esac
 
     PI_SOURCE_DIR="''${PI_SOURCE_DIR:-$HOME/Code/pi}"
     if [ ! -d "$PI_SOURCE_DIR/packages/coding-agent" ]; then
@@ -119,7 +146,7 @@ EOF
       fi
     fi
 
-    exec npm --prefix "$PI_SOURCE_DIR/packages/coding-agent" run dev
+    exec npm --prefix "$PI_SOURCE_DIR" run dev
   '';
 
   # Детерминированный пакет: скачивает официальную сборку opencode и помещает
