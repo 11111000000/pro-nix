@@ -91,11 +91,6 @@ in
       # `services.tor.bridges` to a non-empty list, enable UseBridges by
       # default so the operator doesn't need to remember flipping it.
       bridges = lib.mkDefault [];
-      # When services.tor.bridges is populated we prefer to enable UseBridges by
-      # default. Some host configurations or upstream modules may already set
-      # `services.tor.settings.UseBridges`; guard against redefinition by only
-      # providing this default when the option is not already defined.
-      UseBridges = lib.mkIf (! builtins.hasAttr "UseBridges" config.services.tor.settings) (lib.mkDefault (if lib.length config.services.tor.bridges > 0 then 1 else 0));
       # ClientTransportPlugin lists executables that must exist at runtime.
       # Keep this as a forced list because Tor expects the directive lines to be
       # present exactly as specified; we point at /run/current-system/sw to use
