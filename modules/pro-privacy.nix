@@ -46,15 +46,6 @@ let
   };
 in {
 
-  # Module options exported to NixOS option tree
-  options = {
-    services.tor.enableSnowflake = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "When true, enable the snowflake-client systemd helper service.";
-    };
-  };
-
 config = {
   # Суть раздела:
   # Приводится конфигурация клиентских средств приватности: Tor и сопутствующие
@@ -166,9 +157,9 @@ config = {
 
   # Systemd service to run snowflake-client as a helper. Running snowflake-client
   # as a service makes it easier to debug and ensures the binary is available
-  # for Tor's ClientTransportPlugin. This service is optional and will only be
-  # enabled by hosts that set `services.tor.enableSnowflake = true`.
-  systemd.services."snowflake-client" = lib.mkIf (lib.hasAttr "enableSnowflake" config.services.tor && config.services.tor.enable && lib.getAttrOr false "enableSnowflake" config.services.tor) {
+  # for Tor's ClientTransportPlugin. Enable the helper when Tor client is enabled
+  # on the host (services.tor.enable).
+  systemd.services."snowflake-client" = lib.mkIf config.services.tor.enable {
     description = "Snowflake client (WebRTC broker)";
     after = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
