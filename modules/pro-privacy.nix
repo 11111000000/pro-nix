@@ -179,3 +179,5 @@ config = {
   # Dynamic runtime reloading can be implemented later with a carefully
   # tested systemd.path/service that avoids triggering during activation.
 };
+
+}
