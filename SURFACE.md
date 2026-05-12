@@ -35,11 +35,12 @@ Proof — конкретную команду или тест, обеспечи�
   Стабильность: [FROZEN]
   Спецификация: опция `pro.emacs.softReload.enable` обеспечивает безопасную подгрузку UI, ключевых модулей и конфигурации Emacs без полного перезапуска; поведение покрывается headless ERT тестами.
   Proof: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el`
-  Proof (доп.): headless ERT: `emacs/base/tests/test-ui-duplicates.el` — статический тест уникальности provide в `pro-ui` модулях.
+  Proof (доп.): headless ERT наборы для UI: `emacs/base/tests/test-ui-duplicates.el`, `emacs/base/tests/test-ui.el`, `emacs/base/tests/test-pro-clipboard.el` — статические и динамические проверки уникальности provide, font/icon availability и clipboard adapter.
   Run: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-run-tests.el`
-  Run (алтернатива): `./scripts/test-emacs-headless.sh tty` (запускает набор headless ERT включая проверки UI-субмодулей).
+  Run (алтернатива): `PRO_PACKAGES_AUTO_INSTALL=0 ./scripts/test-emacs-headless.sh tty` (запускает набор headless ERT включая проверки UI-субмодулей); или запустить явно:
+  `PRO_PACKAGES_AUTO_INSTALL=0 emacs --batch -l emacs/base/tests/test-ui-duplicates.el -l emacs/base/tests/test-ui.el -l emacs/base/tests/test-pro-clipboard.el -f ert-run-tests-batch-and-exit`
   Owner: `emacs/base`, `scripts/emacs-*`, `tests/contract`
-  Last reviewed: 2026-05-04
+  Last reviewed: 2026-05-13
   Risk: high
 
 - Имя: Git Worktree Policy
