@@ -10,6 +10,7 @@ Analysis artifacts
 - analyse/03-analysis.md — dialectical analysis
 - analyse/04-recommendations.md — prioritized improvements and steps
 - analyse/05-enumerated-functions.md — scripts and entrypoints list
+- pi-development.md — запуск `pi` и `pi-dev` из исходников
 
 Используйте `tools/holo-verify.sh` для запуска контрактных тестов, указанных в
 `HOLO.md`. Используйте `tools/surface-lint.sh`, чтобы проверить наличие

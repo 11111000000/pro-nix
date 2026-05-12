@@ -61,29 +61,66 @@ let
     exec ${llmResearchEnv}/bin/jupyter-lab "$@"
   '';
 
-  # Глобальный `pi` из upstream release: кладём бинарник и его пакетные данные
-  # в store и запускаем с явным `PI_PACKAGE_DIR`, чтобы runtime находил assets,
-  # README, docs и examples независимо от рабочей директории пользователя.
-  piCodingAgent = pkgs.stdenv.mkDerivation rec {
-    pname = "pi-coding-agent";
-    version = "0.73.0";
-    src = pkgs.fetchurl {
-      url = "https://github.com/badlogic/pi-mono/releases/download/v${version}/pi-linux-x64.tar.gz";
-      sha256 = "5ee97ac6aa5ed7258decc416afdebbefbd5bf9e2cd5c814197bd4bf1e4f25f9f";
-    };
-    dontBuild = true;
-    installPhase = ''
-      mkdir -p $out/libexec/$pname $out/bin
-      cp -R ./* $out/libexec/$pname/
-      chmod +x $out/libexec/$pname/pi
-      cat > $out/bin/pi <<EOF
-#!/bin/sh
-export PI_PACKAGE_DIR="$out/libexec/$pname"
-exec "${pkgs.glibc}/lib/ld-linux-x86-64.so.2" "$out/libexec/$pname/pi" "\$@"
+  # `pi` запускает локальный checkout `~/Code/pi` из исходников.
+  # Это сохраняет глобальное имя команды, но исключает релизный бинарник.
+  piCmd = pkgs.writeShellScriptBin "pi" ''
+    set -euo pipefail
+
+    case "''${1:-}" in
+      -h|--help)
+        cat <<'EOF'
+pi запускает локальный checkout `~/Code/pi`.
+
+Использование:
+  pi [аргументы pi]
+
+Переменные:
+  PI_SOURCE_DIR  Путь к checkout pi (по умолчанию: $HOME/Code/pi)
 EOF
-      chmod +x $out/bin/pi
-    '';
-  };
+        exit 0
+        ;;
+    esac
+
+    PI_SOURCE_DIR="''${PI_SOURCE_DIR:-$HOME/Code/pi}"
+    if [ ! -x "$PI_SOURCE_DIR/pi-test.sh" ]; then
+      echo "[pi] не найден исполняемый $PI_SOURCE_DIR/pi-test.sh" >&2
+      echo "[pi] укажи PI_SOURCE_DIR на локальный checkout pi" >&2
+      exit 2
+    fi
+
+    if [ ! -x "$PI_SOURCE_DIR/node_modules/.bin/tsx" ]; then
+      if command -v npm >/dev/null 2>&1; then
+        (cd "$PI_SOURCE_DIR" && npm install)
+      else
+        echo "[pi] не найден npm для первичной установки зависимостей" >&2
+        exit 3
+      fi
+    fi
+
+    exec "$PI_SOURCE_DIR/pi-test.sh" "$@"
+  '';
+
+  piDevCmd = pkgs.writeShellScriptBin "pi-dev" ''
+    set -euo pipefail
+
+    PI_SOURCE_DIR="''${PI_SOURCE_DIR:-$HOME/Code/pi}"
+    if [ ! -d "$PI_SOURCE_DIR/packages/coding-agent" ]; then
+      echo "[pi-dev] не найден checkout $PI_SOURCE_DIR/packages/coding-agent" >&2
+      echo "[pi-dev] укажи PI_SOURCE_DIR на локальный checkout pi" >&2
+      exit 2
+    fi
+
+    if [ ! -x "$PI_SOURCE_DIR/node_modules/.bin/tsgo" ]; then
+      if command -v npm >/dev/null 2>&1; then
+        (cd "$PI_SOURCE_DIR" && npm install)
+      else
+        echo "[pi-dev] не найден npm для первичной установки зависимостей" >&2
+        exit 3
+      fi
+    fi
+
+    exec npm --prefix "$PI_SOURCE_DIR/packages/coding-agent" run dev
+  '';
 
   # Детерминированный пакет: скачивает официальную сборку opencode и помещает
   # её в Nix store. Этот артефакт не должен попадать в системный PATH напрямую:
@@ -133,7 +170,7 @@ EOF
     # prebuilt release if the build is not available on this system (e.g., when
     # the upstream derivation is heavy).
     # `or` is not a Nix operator; implement fallback with an assertion guard.
-    opencodeNpm = let _ = import ./nix/opencode-npm.nix { inherit pkgs; } ; in _;
+   opencodeNpm = let _ = import ./nix/opencode-npm.nix { inherit pkgs; } ; in _;
 
   # Выбираем backend: внешний параметр opencodeBackend имеет приоритет;
   # иначе используем prebuilt релиз opencodeBin.
@@ -409,8 +446,9 @@ gh
   pipxPkg
   aiderCmd
   llmLabCmd
-   opencodeCmd
-   piCodingAgent
+    opencodeCmd
+    piCmd
+    piDevCmd
   htop
   neofetch
   feh

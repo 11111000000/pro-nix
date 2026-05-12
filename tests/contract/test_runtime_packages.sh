@@ -16,9 +16,17 @@ if [ -z "$out" ]; then
 fi
 
 echo "Toplevel derivation path: $out"
-echo -n "Checking that pi is present in the evaluated package list... "
-pi_pkg=$(nix eval --json ".#nixosConfigurations.$HOST.config.environment.systemPackages" 2>/dev/null | jq -r '.[] | select(test("pi-coding-agent"))' | head -n1)
+echo -n "Checking that pi wrapper is present in the evaluated package list... "
+pi_pkg=$(nix eval --json ".#nixosConfigurations.$HOST.config.environment.systemPackages" 2>/dev/null | jq -r '.[] | select(test("-pi$"))' | head -n1)
 if [ -z "$pi_pkg" ]; then
+  echo "MISSING" >&2
+  exit 4
+fi
+echo "found"
+
+echo -n "Checking that pi-dev helper is present... "
+pi_dev_pkg=$(nix eval --json ".#nixosConfigurations.$HOST.config.environment.systemPackages" 2>/dev/null | jq -r '.[] | select(test("-pi-dev$"))' | head -n1)
+if [ -z "$pi_dev_pkg" ]; then
   echo "MISSING" >&2
   exit 4
 fi
@@ -26,22 +34,6 @@ echo "found"
 
 echo -n "Checking that pi starts... "
 if "$pi_pkg/bin/pi" --help >/dev/null 2>&1; then
-  echo "ok"
-else
-  echo "FAILED" >&2
-  echo "pi wrapper does not start on NixOS" >&2
-  exit 5
-fi
-
-echo -n "Checking that pi starts... "
-pi_bin=$(nix build --no-link --print-out-paths '.#nixosConfigurations.huawei.config.system.build.toplevel' >/dev/null 2>&1 || true)
-if [ -z "$pi_bin" ]; then
-  echo "FAILED" >&2
-  echo "Unable to locate built system profile for pi smoke test" >&2
-  exit 4
-fi
-
-if "$out/sw/bin/pi" --help >/dev/null 2>&1; then
   echo "ok"
 else
   echo "FAILED" >&2
