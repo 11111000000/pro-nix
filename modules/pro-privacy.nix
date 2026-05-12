@@ -87,20 +87,25 @@ in
   # as Bridge lines. This avoids relying on `Include` while still allowing
   # declarative bridge management.
 
-  # Default: no bridges declared in Nix; operators may set services.tor.bridges
-  # in host configuration to inject Bridge lines.
-  bridges = lib.mkDefault [];
+      # Default: no bridges declared in Nix; operators may set services.tor.bridges
+      # in host configuration to inject Bridge lines. If the host sets
+      # `services.tor.bridges` to a non-empty list, enable UseBridges by
+      # default so the operator doesn't need to remember flipping it.
+      bridges = lib.mkDefault [];
+      UseBridges = lib.mkDefault (if lib.length config.services.tor.bridges > 0 then 1 else 0);
       # ClientTransportPlugin lists executables that must exist at runtime.
       # Keep this as a forced list because Tor expects the directive lines to be
       # present exactly as specified; we point at /run/current-system/sw to use
       # whatever versions the system provides.
       # Tor expects explicit ClientTransportPlugin lines; keep as mkForce to
       # ensure Tor configuration gets the exact directives it requires.
-      ClientTransportPlugin = lib.mkForce [
-        "obfs4 exec /run/current-system/sw/bin/obfs4proxy"
-        "meek exec /run/current-system/sw/bin/meek-client"
-        "snowflake exec /run/current-system/sw/bin/snowflake-client"
-      ];
+       # Use wrapper paths under /usr/local/bin when present to allow
+       # runtime-provided transports (lyrebird -> obfs4proxy wrapper).
+       ClientTransportPlugin = lib.mkForce [
+         "obfs4 exec /usr/local/bin/obfs4proxy"
+         "meek exec /run/current-system/sw/bin/meek-client"
+         "snowflake exec /run/current-system/sw/bin/snowflake-client"
+       ];
       DNSPort = [ 9053 ];
       AutomapHostsOnResolve = true;
       AutomapHostsSuffixes = [ ".onion" ".exit" ];
