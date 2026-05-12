@@ -55,7 +55,7 @@ in
     };
   };
 
-{
+config = {
   # Суть раздела:
   # Приводится конфигурация клиентских средств приватности: Tor и сопутствующие
   # транспорты (obfs4, snowflake, meek). Комментарии поясняют роль ControlPort,
@@ -187,4 +187,4 @@ in
   # Примечание: автоматическая перезагрузка при изменении bridges намеренно опущена.
   # Dynamic runtime reloading can be implemented later with a carefully
   # tested systemd.path/service that avoids triggering during activation.
-}
+};
