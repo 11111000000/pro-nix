@@ -35,7 +35,9 @@ Proof — конкретную команду или тест, обеспечи�
   Стабильность: [FROZEN]
   Спецификация: опция `pro.emacs.softReload.enable` обеспечивает безопасную подгрузку UI, ключевых модулей и конфигурации Emacs без полного перезапуска; поведение покрывается headless ERT тестами.
   Proof: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el`
+  Proof (доп.): headless ERT: `emacs/base/tests/test-ui-duplicates.el` — статический тест уникальности provide в `pro-ui` модулях.
   Run: `./scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-run-tests.el`
+  Run (алтернатива): `./scripts/test-emacs-headless.sh tty` (запускает набор headless ERT включая проверки UI-субмодулей).
   Owner: `emacs/base`, `scripts/emacs-*`, `tests/contract`
   Last reviewed: 2026-05-04
   Risk: high
