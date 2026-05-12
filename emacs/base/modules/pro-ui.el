@@ -194,7 +194,7 @@ is set accordingly."
               (when (fboundp 'pro/register-module-keys)
                 (pro/register-module-keys 'embark
                                           '(("C-." . embark-act))))
-            (error (message "pro-ui: failed to register embark suggestion"))))))
+            (error (message "pro-ui: failed to register embark suggestion")))))))
 
 ;; Embark-Consult: configure default actions and mappings for common types
 (when (pro-ui--try-require 'embark-consult)
