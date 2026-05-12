@@ -156,7 +156,7 @@ in
   # as a service makes it easier to debug and ensures the binary is available
   # for Tor's ClientTransportPlugin. This service is optional and will only be
   # enabled by hosts that set `services.tor.enableSnowflake = true`.
-  systemd.services."snowflake-client" = lib.mkIf (config.services.tor.enable and lib.getAttrOr false "enableSnowflake" config.services.tor) {
+  systemd.services."snowflake-client" = lib.mkIf (lib.hasAttr "enableSnowflake" config.services.tor && config.services.tor.enable && lib.getAttrOr false "enableSnowflake" config.services.tor) {
     description = "Snowflake client (WebRTC broker)";
     after = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
