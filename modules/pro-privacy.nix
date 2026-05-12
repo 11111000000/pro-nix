@@ -72,7 +72,6 @@ in
       # Default to no bridges so Tor can bootstrap in unconstrained networks.
       # To enable bridges on a host, set `services.tor.settings.UseBridges = 1` and
       # populate /etc/tor/bridges.conf (the module deploys a template example).
-      UseBridges = lib.mkDefault 0;
   # Operators maintain /etc/tor/bridges.conf manually (or via the provided
   # template). We avoid emitting an `Include` directive into torrc because
   # some tor builds do not accept that directive during `--verify-config`.
@@ -92,7 +91,11 @@ in
       # `services.tor.bridges` to a non-empty list, enable UseBridges by
       # default so the operator doesn't need to remember flipping it.
       bridges = lib.mkDefault [];
-      UseBridges = lib.mkDefault (if lib.length config.services.tor.bridges > 0 then 1 else 0);
+      # When services.tor.bridges is populated we prefer to enable UseBridges by
+      # default. Some host configurations or upstream modules may already set
+      # `services.tor.settings.UseBridges`; guard against redefinition by only
+      # providing this default when the option is not already defined.
+      UseBridges = lib.mkIf (lib.not (builtins.hasAttr "UseBridges" config.services.tor.settings)) (lib.mkDefault (if lib.length config.services.tor.bridges > 0 then 1 else 0));
       # ClientTransportPlugin lists executables that must exist at runtime.
       # Keep this as a forced list because Tor expects the directive lines to be
       # present exactly as specified; we point at /run/current-system/sw to use
