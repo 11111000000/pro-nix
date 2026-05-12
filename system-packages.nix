@@ -598,6 +598,10 @@ gh
   torsocks                # Проксирование приложений через Tor (torify)
   torBrowserCmd           # Системный launcher для Tor Browser.
   obfs4                   # obfs4 transport для обхода DPI
+  # OpenSSL: необходим для отладки TLS (openssl s_client) и других
+  # низкоуровневых операций с сертификатами. Добавляем в systemPackages
+  # чтобы инструмент был доступен в PATH для локальной диагностики Tor.
+  openssl
   snowflake               # Snowflake мосты (WebRTC-маскировка)
   nyx                     # Мониторинг Tor в реальном времени (htop-подобный интерфейс)
   onionshare              # Анонимный файлообмен через Tor
