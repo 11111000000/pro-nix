@@ -46,6 +46,15 @@ let
   };
 in
 
+  # Module options exported to NixOS option tree
+  options = {
+    services.tor.enableSnowflake = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "When true, enable the snowflake-client systemd helper service.";
+    };
+  };
+
 {
   # Суть раздела:
   # Приводится конфигурация клиентских средств приватности: Tor и сопутствующие
@@ -63,11 +72,8 @@ in
     client.enable = true;
     torsocks.enable = true;
     # Optional: enable Snowflake helper service when set by host
-    enableSnowflake = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "When true, enable the snowflake-client systemd helper service.";
-    };
+    # The actual option is declared in the module-level `options` above as
+    # `services.tor.enableSnowflake`.
   # Provide sane defaults but allow hosts to override in their host config.
     # Почему lib.mkDefault для UseBridges: по умолчанию мосты выключены, чтобы Tor
     # мог запуститься в "открытых" сетях без необходимости настраивать bridges.
