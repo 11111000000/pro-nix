@@ -105,4 +105,8 @@ AllowTcpForwarding no
 
   # GitHub CLI is provided from the top-level packages (configuration.nix).
   # Avoid referencing config.environment.systemPackages here to prevent recursion.
+  # Enable Tor Snowflake transport helper
+  services.tor.enable = true;
+  services.tor.enableSnowflake = true;
+
 }

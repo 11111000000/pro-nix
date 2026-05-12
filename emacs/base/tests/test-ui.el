@@ -8,7 +8,7 @@
 (ert-deftest pro-ui-fonts-fallback ()
   "pro-ui-apply-fonts should not error and should set default face." 
   (progn
-    (ignore-errors (require 'ui-fonts))
+    (ignore-errors (require 'pro-ui-fonts))
     (when (fboundp 'pro-ui-apply-fonts)
       (pro-ui-apply-fonts)
       (should (facep 'default)))))
@@ -16,7 +16,7 @@
 (ert-deftest pro-ui-tty-cleanup-disables-prettify ()
   "pro-ui-tty-setup disables prettify in TTY emulation." 
   (progn
-    (ignore-errors (require 'ui-tty))
+    (ignore-errors (require 'pro-ui-tty))
     (when (fboundp 'pro-ui-tty-setup)
       (let ((display-graphic-p nil))
         (pro-ui-tty-setup)

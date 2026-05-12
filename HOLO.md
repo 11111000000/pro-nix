@@ -103,6 +103,7 @@ Decisions
 
 - [Draft] Emacs profile
   Provide a default portable Emacs + EXWM profile. Exit criteria: migration plan and headless ERT Proof.
+  Proof additions: headless ERT `emacs/base/tests/test-ui-duplicates.el` ensures UI module feature names are unique; headless smoke `./scripts/test-emacs-headless.sh tty` verifies basic ERT suite in TTY mode.
 
 - [FROZEN] Soft Reload
   Safe opt-in механизм обновления UI/модулей Emacs без полного перезапуска. Proof: headless ERT suite listed in SURFACE.md.

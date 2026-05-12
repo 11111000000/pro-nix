@@ -39,7 +39,7 @@
   ;; installation/compilation of one package (eg. nix-mode) requires another
   ;; package (eg. mmm-mode) to be present during compilation. Install the
   ;; defaults noninteractively when possible.
-  (when (require 'pro-packages nil t)
+(when (require 'pro-packages nil t)
     (ignore-errors (when (fboundp 'pro-packages-ensure-required)
                      (pro-packages-ensure-required))))
   (pro-emacs-base-start))
@@ -47,8 +47,8 @@
 (provide 'pro-init)
 
 ;; After core init: load optional completion keys and external org key loader
-(when (require 'completion-keys nil t)
-  ;; completion-keys binds useful C-c o <letter> keys for CAPE and consult-yasnippet
+(when (require 'pro-completion-keys nil t)
+  ;; pro-completion-keys binds useful C-c o <letter> keys for CAPE and consult-yasnippet
   )
 
 ;; External references to other personal repositories (like ~/pro) are

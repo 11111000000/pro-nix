@@ -44,9 +44,9 @@ let
       [ -d /var/lib/tor/ssh_hidden_service ] && chmod 700 /var/lib/tor/ssh_hidden_service || true
     '';
   };
-in
+in {
 
-{
+config = {
   # Суть раздела:
   # Приводится конфигурация клиентских средств приватности: Tor и сопутствующие
   # транспорты (obfs4, snowflake, meek). Комментарии поясняют роль ControlPort,
@@ -62,7 +62,10 @@ in
     enable = true;
     client.enable = true;
     torsocks.enable = true;
-    # Provide sane defaults but allow hosts to override in their host config.
+    # Optional: enable Snowflake helper service when set by host
+    # The actual option is declared in the module-level `options` above as
+    # `services.tor.enableSnowflake`.
+  # Provide sane defaults but allow hosts to override in their host config.
     # Почему lib.mkDefault для UseBridges: по умолчанию мосты выключены, чтобы Tor
     # мог запуститься в "открытых" сетях без необходимости настраивать bridges.
     # Как проверить (отключить): в хост-конфиге `services.tor.settings.UseBridges = 1`.
@@ -72,7 +75,6 @@ in
       # Default to no bridges so Tor can bootstrap in unconstrained networks.
       # To enable bridges on a host, set `services.tor.settings.UseBridges = 1` and
       # populate /etc/tor/bridges.conf (the module deploys a template example).
-      UseBridges = lib.mkDefault 0;
   # Operators maintain /etc/tor/bridges.conf manually (or via the provided
   # template). We avoid emitting an `Include` directive into torrc because
   # some tor builds do not accept that directive during `--verify-config`.
@@ -87,20 +89,24 @@ in
   # as Bridge lines. This avoids relying on `Include` while still allowing
   # declarative bridge management.
 
-  # Default: no bridges declared in Nix; operators may set services.tor.bridges
-  # in host configuration to inject Bridge lines.
-  bridges = lib.mkDefault [];
+      # Default: no bridges declared in Nix; operators may set services.tor.bridges
+      # in host configuration to inject Bridge lines. If the host sets
+      # `services.tor.bridges` to a non-empty list, enable UseBridges by
+      # default so the operator doesn't need to remember flipping it.
+      bridges = lib.mkDefault [];
       # ClientTransportPlugin lists executables that must exist at runtime.
       # Keep this as a forced list because Tor expects the directive lines to be
       # present exactly as specified; we point at /run/current-system/sw to use
       # whatever versions the system provides.
       # Tor expects explicit ClientTransportPlugin lines; keep as mkForce to
       # ensure Tor configuration gets the exact directives it requires.
-      ClientTransportPlugin = lib.mkForce [
-        "obfs4 exec /run/current-system/sw/bin/obfs4proxy"
-        "meek exec /run/current-system/sw/bin/meek-client"
-        "snowflake exec /run/current-system/sw/bin/snowflake-client"
-      ];
+       # Use wrapper paths under /usr/local/bin when present to allow
+       # runtime-provided transports (lyrebird -> obfs4proxy wrapper).
+       ClientTransportPlugin = lib.mkForce [
+         "obfs4 exec /usr/local/bin/obfs4proxy"
+         "meek exec /run/current-system/sw/bin/meek-client"
+         "snowflake exec /run/current-system/sw/bin/snowflake-client"
+       ];
       DNSPort = [ 9053 ];
       AutomapHostsOnResolve = true;
       AutomapHostsSuffixes = [ ".onion" ".exit" ];
@@ -149,6 +155,20 @@ in
   # the final authoritative set.
   environment.systemPackages = lib.mkDefault (with pkgs; [ gawk obfs4proxy meek-client snowflake-client ]);
 
+  # Systemd service to run snowflake-client as a helper. Running snowflake-client
+  # as a service makes it easier to debug and ensures the binary is available
+  # for Tor's ClientTransportPlugin. Enable the helper when Tor client is enabled
+  # on the host (services.tor.enable).
+  systemd.services."snowflake-client" = lib.mkIf config.services.tor.enable {
+    description = "Snowflake client (WebRTC broker)";
+    after = [ "network-online.target" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig.Type = "simple";
+    serviceConfig.ExecStart = lib.mkForce "${pkgs.snowflake-client}/bin/snowflake-client --log=info";
+    serviceConfig.Restart = "on-failure";
+    serviceConfig.RestartSec = 5;
+  };
+
   # Открытые порты для служб приватности — доступны локально/для роутинга.
   networking.firewall = {
     allowedTCPPorts = [ 9050 9051 9052 9053 7657 4444 4445 ];
@@ -158,4 +178,4 @@ in
   # Примечание: автоматическая перезагрузка при изменении bridges намеренно опущена.
   # Dynamic runtime reloading can be implemented later with a carefully
   # tested systemd.path/service that avoids triggering during activation.
-}
+};

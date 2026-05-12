@@ -26,6 +26,11 @@
           ;; issues during early init; load returns non-nil on success.
           (should (load (expand-file-name bn mods-dir) nil t))))))
 
+(ert-deftest pro-smoke/clipboard-helper-available ()
+  "Ensure clipboard helper provides `pro/clipboard-yank-pop' and that it is callable." 
+  (should (or (fboundp 'pro/clipboard-yank-pop)
+              (require 'pro-clipboard nil t))))
+
 ;;; additionally: try loading our new pro-history module if present
 (ert-deftest pro-smoke/load-pro-history-if-present ()
   "Load pro-history if available without error." 

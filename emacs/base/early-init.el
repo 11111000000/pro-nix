@@ -48,6 +48,8 @@
 ;; This reduces a white/black flash when Emacs starts in GUI. Loading is
 ;; safe and guarded inside ui-theme module.
 (ignore-errors
-  (when (require 'ui-theme nil t)
+  ;; Prefer the pro-* canonical module name. Use non-fatal `require' so
+  ;; early-init remains safe in minimal/headless runs.
+  (when (require 'pro-ui-theme nil t)
     (when (fboundp 'pro-ui-load-default-theme-if-set)
       (pro-ui-load-default-theme-if-set))))

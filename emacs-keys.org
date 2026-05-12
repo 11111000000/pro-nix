@@ -54,3 +54,4 @@
 | Suggested | C-c v y | pro/vterm-yank | suggested from terminals |
 | Suggested | C-c v i | pro/vterm-interrupt | suggested from terminals |
 | Suggested | C-c v c | vterm-copy-mode | suggested from terminals |
+| Suggested | C-x y   | pro/clipboard-yank-pop | suggested from clipboard |
