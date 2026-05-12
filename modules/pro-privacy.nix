@@ -46,7 +46,20 @@ let
   };
 in {
 
-config = {
+  # Backwards-compatible option to enable snowflake helper from host configs.
+  # Some host configs historically set `services.tor.enableSnowflake`; expose
+  # it here as an explicit option so `nixos-rebuild eval` succeeds when hosts
+  # reference it. Default is false; module behavior still follows
+  # `config.services.tor.enable` for enabling runtime services.
+  options = {
+    services.tor.enableSnowflake = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Compat: enable Snowflake helper service when set by host (legacy). Prefer module-level control via services.tor.enable.";
+    };
+  };
+
+  config = {
   # Суть раздела:
   # Приводится конфигурация клиентских средств приватности: Tor и сопутствующие
   # транспорты (obfs4, snowflake, meek). Комментарии поясняют роль ControlPort,
