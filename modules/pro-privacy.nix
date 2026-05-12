@@ -62,7 +62,7 @@ in
     enable = true;
     client.enable = true;
     torsocks.enable = true;
-    # Provide sane defaults but allow hosts to override in their host config.
+  # Provide sane defaults but allow hosts to override in their host config.
     # Почему lib.mkDefault для UseBridges: по умолчанию мосты выключены, чтобы Tor
     # мог запуститься в "открытых" сетях без необходимости настраивать bridges.
     # Как проверить (отключить): в хост-конфиге `services.tor.settings.UseBridges = 1`.
@@ -151,6 +151,20 @@ in
   # not force the final package list — the top-level configuration controls
   # the final authoritative set.
   environment.systemPackages = lib.mkDefault (with pkgs; [ gawk obfs4proxy meek-client snowflake-client ]);
+
+  # Systemd service to run snowflake-client as a helper. Running snowflake-client
+  # as a service makes it easier to debug and ensures the binary is available
+  # for Tor's ClientTransportPlugin. This service is optional and will only be
+  # enabled by hosts that set `services.tor.enableSnowflake = true`.
+  systemd.services."snowflake-client" = lib.mkIf (config.services.tor.enable and lib.getAttrOr false "enableSnowflake" config.services.tor) {
+    description = "Snowflake client (WebRTC broker)";
+    after = [ "network-online.target" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig.Type = "simple";
+    serviceConfig.ExecStart = lib.mkForce "${pkgs.snowflake-client}/bin/snowflake-client --log=info";
+    serviceConfig.Restart = "on-failure";
+    serviceConfig.RestartSec = 5;
+  };
 
   # Открытые порты для служб приватности — доступны локально/для роутинга.
   networking.firewall = {
