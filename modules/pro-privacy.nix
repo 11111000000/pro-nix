@@ -95,7 +95,7 @@ in
       # default. Some host configurations or upstream modules may already set
       # `services.tor.settings.UseBridges`; guard against redefinition by only
       # providing this default when the option is not already defined.
-      UseBridges = lib.mkIf (not (builtins.hasAttr "UseBridges" config.services.tor.settings)) (lib.mkDefault (if lib.length config.services.tor.bridges > 0 then 1 else 0));
+      UseBridges = lib.mkIf (builtins.not (builtins.hasAttr "UseBridges" config.services.tor.settings)) (lib.mkDefault (if lib.length config.services.tor.bridges > 0 then 1 else 0));
       # ClientTransportPlugin lists executables that must exist at runtime.
       # Keep this as a forced list because Tor expects the directive lines to be
       # present exactly as specified; we point at /run/current-system/sw to use
