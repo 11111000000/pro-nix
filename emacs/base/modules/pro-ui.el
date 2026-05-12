@@ -141,9 +141,8 @@ is set accordingly."
       (unless pro--minibuffer-hint-shown
         (message "TAB/C-i: next • S-TAB: prev • C-n/C-p/C-j/C-k: navigate • C-.: actions • M-.: preview")
         (setq pro--minibuffer-hint-shown t)))
-(add-hook 'minibuffer-setup-hook #'pro--show-minibuffer-hint-once))
-
-)
+    (add-hook 'minibuffer-setup-hook #'pro--show-minibuffer-hint-once)
+    ))
 
 ;; Wire ui subsystems implemented in separate files (pro-nix style).
 (when (file-readable-p (expand-file-name "ui-fonts.el" (file-name-directory (or load-file-name buffer-file-name))))
@@ -180,13 +179,22 @@ is set accordingly."
         (when (fboundp 'embark-consult-export)
           (ignore-errors (embark-consult-export)))))
 
-  ;; Ensure a convenient binding for embark-act is available in minibuffer
-  (when (pro-ui--try-require 'embark)
-    (define-key minibuffer-local-map (kbd "C-.") #'embark-act)
-    (define-key minibuffer-local-completion-map (kbd "C-.") #'embark-act)
-    ;; Provide a global convenience binding when which-key is present
-    (when (pro-ui--try-require 'which-key)
-      (global-set-key (kbd "C-.") #'embark-act))))
+    ;; Ensure a convenient binding for embark-act is available in minibuffer.
+    ;; Note: global keybindings belong to emacs-keys.org; here we set only
+    ;; local/minibuffer maps to ensure discoverability in the minibuffer.
+    (when (pro-ui--try-require 'embark)
+      (define-key minibuffer-local-map (kbd "C-.") #'embark-act)
+      (define-key minibuffer-local-completion-map (kbd "C-.") #'embark-act)
+      ;; Register suggestion for a global convenience binding for embark-act
+      ;; rather than applying it here. Modules should not set global keys
+      ;; directly — use pro/register-module-keys and emacs-keys.org.
+      (when (pro-ui--try-require 'which-key)
+        (with-eval-after-load 'pro-keys
+          (condition-case _err
+              (when (fboundp 'pro/register-module-keys)
+                (pro/register-module-keys 'embark
+                                          '(("C-." . embark-act))))
+            (error (message "pro-ui: failed to register embark suggestion"))))))
 
 ;; Embark-Consult: configure default actions and mappings for common types
 (when (pro-ui--try-require 'embark-consult)
