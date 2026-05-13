@@ -127,6 +127,18 @@
   pro-peer.enable = true;
   pro-peer.enableKeySync = true;
 
+  # Hermes agent: enable globally by default (hosts may opt-out).
+  # Use lib.mkDefault so host-specific configs can disable or override.
+  services.hermes-agent = lib.mkDefault {
+    enable = true;
+    # Secrets must not be stored in the Nix store; operator should provide
+    # an environment file (example: /run/secrets/hermes-env) containing
+    # API keys and tokens. Hosts may override this path.
+    environmentFiles = [ "/run/secrets/hermes-env" ];
+    # Minimal runtime tools exposed on PATH for Hermes skills and integrations.
+    extraPackages = lib.mkDefault [ pkgs.jq pkgs.ripgrep pkgs.curl ];
+  };
+
   # Старая схема беспроводной сети не используется.
   # networking.wireless.enable = true;
 
