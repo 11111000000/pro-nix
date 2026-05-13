@@ -110,10 +110,9 @@ AllowTcpForwarding no
   # Force UseBridges and include operator-managed bridges file in generated torrc.
   services.tor.settings = {
     UseBridges = 1;
+    # Include operator-managed bridges file at runtime
+    Include = "/etc/tor/bridges.conf";
   };
-  services.tor.extraConfig = ''
-Include /etc/tor/bridges.conf
-'';
   services.tor.enableSnowflake = true;
 
 }
