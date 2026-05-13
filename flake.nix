@@ -6,9 +6,11 @@
     nixpkgs.url = "nixpkgs/nixos-25.11";
     home-manager.url = "github:nix-community/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    # Hermes agent (fork provided by user). Use SSH URL so private/forked repo works.
+    nix-hermes.url = "git+ssh://git@github.com/11111000000/nix-hermes-agent.git";
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, ... }:
+  outputs = inputs@{ self, nixpkgs, home-manager, nix-hermes, ... }:
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
@@ -71,6 +73,11 @@
       # Deterministic opencode derivation used by apps and made available
       # via specialArgs to system modules for reproducible installs.
       opencode_from_release = spkgs.opencodeCmd;
+
+      # Expose nix-hermes overlay & modules if available. We don't enable
+      # the service by default; hosts opt-in via modules in their host config.
+      hermesOverlay = if builtins.hasAttr "overlays" nix-hermes then nix-hermes.overlays.default else null;
+      hermesModules = if builtins.hasAttr "nixosModules" nix-hermes then nix-hermes.nixosModules else null;
 
       # Package the TUI sources into a small derivation and provide a
       # wrapper that uses a python interpreter with textual available.
@@ -221,4 +228,5 @@ SH
       # Expose the treesitter-grammars derivation in the flake for easy reference
       treesitterGrammars = import ./nix/treesitter-grammars.nix { inherit pkgs; };
     };
+
 }
