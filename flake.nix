@@ -38,7 +38,11 @@
 
       # Global modules to apply to all hosts
       # Temporarily disable adb-udev global module to avoid etc.drv build permission issues.
-      globalModules = [  ];
+      # If the nix-hermes input provides a NixOS module, enable it globally so
+      # Hermes is available on all hosts (hosts may still opt-out).
+      globalModules = (
+        if hermesModules != null && builtins.hasAttr "hermes-agent" hermesModules then [ hermesModules.hermes-agent ] else []
+      );
 
       mkHost = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;
