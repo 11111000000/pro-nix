@@ -151,11 +151,11 @@
     };
     # Secrets must not be stored in the Nix store. We look for secrets in an
     # operator-provided file (/run/secrets/hermes-env) and also support reading
-    # an authinfo-style token from a local ~/.athinfo or /root/.athinfo by
+    # an authinfo-style token from a local ~/.authinfo or /root/.authinfo by
     # generating a small env file under the hermes state directory.
-    environmentFiles = lib.mkDefault [ "/run/secrets/hermes-env" "/var/lib/hermes/.hermes/.env" ];
+    environmentFiles = [ "/run/secrets/hermes-env" "/var/lib/hermes/.hermes/.env" ];
     # Minimal runtime tools exposed on PATH for Hermes skills and integrations.
-    extraPackages = lib.mkDefault [ pkgs.jq pkgs.ripgrep pkgs.curl ];
+    extraPackages = [ pkgs.jq pkgs.ripgrep pkgs.curl ];
   };
 
   # Activation helper: if a local authinfo-style file contains an entry for
