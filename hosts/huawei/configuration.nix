@@ -107,6 +107,11 @@ AllowTcpForwarding no
   # Avoid referencing config.environment.systemPackages here to prevent recursion.
   # Enable Tor client and ensure bridges from /etc/tor/bridges.conf are included at runtime.
   services.tor.enable = true;
+  # Declarative Bridge lines so generated torrc contains them directly
+  services.tor.bridges = [
+    "obfs4 176.123.7.245:1790 C4A4913604C2DAE506A5B2E873EC94651B8F91D4 cert=R4PMGkCgTupeG8TOO9aKCMbZPA38bapGIjIUYlR3jOV9d41QJdpSlsdpx/gA1YVRpCO2LA iat-mode=0"
+    "obfs4 152.53.184.244:4433 1B180961057F12C8D11943C566A388E14FD53E56 cert=y6AiE71HA32cRzDTtJ6weIEadN4e3SPmcVbGXIne549cKHRdBw5Q1DU/ZoPAy2CXcYg8LA iat-mode=0"
+  ];
   # Force UseBridges and include operator-managed bridges file in generated torrc.
   services.tor.settings = {
     UseBridges = 1;
