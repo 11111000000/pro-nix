@@ -131,12 +131,23 @@
   # Use lib.mkDefault so host-specific configs can disable or override.
   services.hermes-agent = lib.mkDefault {
     enable = true;
-    # Declarative Hermes config: prefer aitunnel provider and a sensible default model.
+    # Declarative Hermes config: provide an explicit providers map similar to
+    # ~/.config/opencode/config.json so tools expecting aitunnel entries can
+    # reuse the same semantics. Token is intentionally empty here; it will be
+    # provided from the authinfo-derived env file at activation.
     config = lib.mkDefault {
-      model = {
-        provider = "aitunnel";
-        default = "gpt-5.4-mini"; # sensible default; operators may change
+      providers = {
+        aitunnel = {
+          host = "api.aitunnel.ru";
+          token = ""; # filled from ~/.authinfo -> /var/lib/hermes/.hermes/.env at activation
+          preferred_model = "gpt-5.4-mini";
+        };
       };
+      settings = {
+        telemetry = false;
+      };
+      # Backwards-compatible top-level model shortcut
+      model = { provider = "aitunnel"; default = "gpt-5.4-mini"; };
     };
     # Secrets must not be stored in the Nix store. We look for secrets in an
     # operator-provided file (/run/secrets/hermes-env) and also support reading
