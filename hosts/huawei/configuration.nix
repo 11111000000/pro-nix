@@ -105,17 +105,15 @@ AllowTcpForwarding no
 
   # GitHub CLI is provided from the top-level packages (configuration.nix).
   # Avoid referencing config.environment.systemPackages here to prevent recursion.
-  # Enable Tor client and ensure bridges from /etc/tor/bridges.conf are included
+  # Enable Tor client and ensure bridges from /etc/tor/bridges.conf are included at runtime.
   services.tor.enable = true;
-  # Force UseBridges at runtime and include operator-managed bridges file.
-  # This makes sure the active torrc reads /etc/tor/bridges.conf so we can
-  # update bridges at runtime without a full Nix rebuild.
-  services.tor.settings = lib.mkMerge (config.services.tor.settings or {}) {
+  # Force UseBridges and include operator-managed bridges file in generated torrc.
+  services.tor.settings = {
     UseBridges = 1;
   };
-  services.tor.extraConfig = lib.mkDefault (''
+  services.tor.extraConfig = ''
 Include /etc/tor/bridges.conf
-'');
+'';
   services.tor.enableSnowflake = true;
 
 }
