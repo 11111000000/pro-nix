@@ -33,11 +33,7 @@ let
   xvfbRun = pkgs."xvfb-run";
   pipxPkg = pkgs.pipx;
 
-  aiderCmd = pkgs.writeShellScriptBin "aider" ''
-    # Запуск в пользовательской transient-сессии, чтобы ограничить потребление CPU
-    # у потенциально долгоживущих агентов.
-    exec systemd-run --user --scope -p CPUQuota=60% -p CPUWeight=150 "${pipxPkg}/bin/pipx" run aider-chat -- "$@"
-  '';
+  # aider removed
 
   llmResearchEnv = pkgs.python3.withPackages (ps: with ps; [
     jupyterlab
@@ -61,93 +57,7 @@ let
     exec ${llmResearchEnv}/bin/jupyter-lab "$@"
   '';
 
-  # `pi` запускает локальный checkout `~/Code/pi` из исходников.
-  # Это сохраняет глобальное имя команды, но исключает релизный бинарник.
-  piCmd = pkgs.writeShellScriptBin "pi" ''
-    set -euo pipefail
-
-    case "''${1:-}" in
-      -h|--help)
-        cat <<'EOF'
-pi запускает локальный checkout `~/Code/pi`.
-
-Использование:
-  pi [аргументы pi]
-
-Переменные:
-  PI_SOURCE_DIR  Путь к checkout pi (по умолчанию: $HOME/Code/pi)
-EOF
-        exit 0
-        ;;
-    esac
-
-    PI_SOURCE_DIR="''${PI_SOURCE_DIR:-$HOME/Code/pi}"
-    if [ ! -x "$PI_SOURCE_DIR/pi-test.sh" ]; then
-      echo "[pi] не найден исполняемый $PI_SOURCE_DIR/pi-test.sh" >&2
-      echo "[pi] укажи PI_SOURCE_DIR на локальный checkout pi" >&2
-      exit 2
-    fi
-
-    if [ ! -x "$PI_SOURCE_DIR/node_modules/.bin/tsx" ]; then
-      if command -v npm >/dev/null 2>&1; then
-        (cd "$PI_SOURCE_DIR" && npm install)
-      else
-        echo "[pi] не найден npm для первичной установки зависимостей" >&2
-        exit 3
-      fi
-    fi
-
-    if [ ! -f "$PI_SOURCE_DIR/packages/ai/dist/index.js" ] || \
-       [ ! -f "$PI_SOURCE_DIR/packages/agent/dist/index.js" ] || \
-       [ ! -f "$PI_SOURCE_DIR/packages/tui/dist/index.js" ] || \
-       [ ! -f "$PI_SOURCE_DIR/packages/coding-agent/dist/cli.js" ]; then
-      if command -v npm >/dev/null 2>&1; then
-        (cd "$PI_SOURCE_DIR" && npm run build)
-      else
-        echo "[pi] не найден npm для сборки workspace-пакетов" >&2
-        exit 4
-      fi
-    fi
-
-    exec "$PI_SOURCE_DIR/pi-test.sh" "$@"
-  '';
-
-  piDevCmd = pkgs.writeShellScriptBin "pi-dev" ''
-    set -euo pipefail
-
-    case "''${1:-}" in
-      -h|--help)
-        cat <<'EOF'
-pi-dev запускает root dev-цикл checkout `~/Code/pi`.
-
-Использование:
-  pi-dev
-
-Переменные:
-  PI_SOURCE_DIR  Путь к checkout pi (по умолчанию: $HOME/Code/pi)
-EOF
-        exit 0
-        ;;
-    esac
-
-    PI_SOURCE_DIR="''${PI_SOURCE_DIR:-$HOME/Code/pi}"
-    if [ ! -d "$PI_SOURCE_DIR/packages/coding-agent" ]; then
-      echo "[pi-dev] не найден checkout $PI_SOURCE_DIR/packages/coding-agent" >&2
-      echo "[pi-dev] укажи PI_SOURCE_DIR на локальный checkout pi" >&2
-      exit 2
-    fi
-
-    if [ ! -x "$PI_SOURCE_DIR/node_modules/.bin/tsgo" ]; then
-      if command -v npm >/dev/null 2>&1; then
-        (cd "$PI_SOURCE_DIR" && npm install)
-      else
-        echo "[pi-dev] не найден npm для первичной установки зависимостей" >&2
-        exit 3
-      fi
-    fi
-
-    exec npm --prefix "$PI_SOURCE_DIR" run dev
-  '';
+  # pi and pi-dev wrappers removed
 
   # Детерминированный пакет: скачивает официальную сборку opencode и помещает
   # её в Nix store. Этот артефакт не должен попадать в системный PATH напрямую:
@@ -469,13 +379,11 @@ gh
   shfmt
   bat
   tldr
-  goose
+   # goose removed
   pipxPkg
-  aiderCmd
+   # aider removed
   llmLabCmd
-    opencodeCmd
-    piCmd
-    piDevCmd
+    # opencode and pi wrappers removed
   htop
   neofetch
   feh
@@ -744,7 +652,5 @@ in
   # Основной список системных пакетов без `null`.
   packages = builtins.filter (x: x != null) (rawList ++ [ treesitterGrammars ]);
 
-  # Явные экспортируемые артефакты нужны другим модулям, которые хотят
-  # использовать только опенкод-обёртки, не подтягивая весь системный список.
-  inherit opencodeCmd opencodeBin;
+  # opencode artifacts removed
 }

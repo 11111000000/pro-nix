@@ -13,19 +13,13 @@ build_one() {
     return 2
   fi
   if ! nix build ".#nixosConfigurations.${host}.config.system.build.toplevel"; then
-    echo "Warning: building host ${host} failed. This may be due to config conflicts; continuing with opencode app build." >&2
+    echo "Warning: building host ${host} failed. This may be due to config conflicts; continuing." >&2
     return 1
   fi
 }
 
-build_opencode_app() {
-  echo "Building flake app: .#apps.x86_64-linux.opencode-release"
-  if ! command -v nix >/dev/null 2>&1; then
-    echo "nix command not found in PATH" >&2
-    return 2
-  fi
-  nix build .#apps.x86_64-linux.opencode-release
-}
+## opencode app build removed
+
 
 case "$target" in
   cf19)

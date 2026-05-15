@@ -18,12 +18,7 @@ in
     };
   };
 
-  options.services.opencodeSlice = {
-    enable = lib.mkEnableOption "Install opencode.slice unit to limit agent resources";
-    memoryMax = lib.mkOption { type = lib.types.str; default = "4G"; description = "MemoryMax for opencode.slice"; };
-    cpuQuota = lib.mkOption { type = lib.types.str; default = "80%"; description = "CPUQuota for opencode.slice"; };
-    ioWeight = lib.mkOption { type = lib.types.int; default = 200; description = "IOWeight for opencode.slice"; };
-  };
+  # opencodeSlice option removed
 
   config = lib.mkMerge [
     (lib.mkIf config.services.zramSlice.enable {
@@ -94,15 +89,7 @@ exit 0
       };
     })
 
-    (lib.mkIf config.services.opencodeSlice.enable {
-      environment.etc."systemd/opencode.slice".text = ''
-[Slice]
-Description=Slice for opencode and heavy agent processes
-MemoryMax=${config.services.opencodeSlice.memoryMax}
-CPUQuota=${config.services.opencodeSlice.cpuQuota}
-IOWeight=${toString config.services.opencodeSlice.ioWeight}
-'' ;
-    })
+    # opencode.slice generation removed
 
     {}
   ];

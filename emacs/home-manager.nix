@@ -120,7 +120,7 @@ let
       executable = true;
     };
 
-    # opencode integration removed. See docs/opencode-integration.md.
+    # opencode integration removed.
 
     home.file.".config/pro/exwm-session" = {
       text = ''

@@ -1,17 +1,16 @@
 { lib, pkgs, ... }:
 
-/* RU: Файловый контракт — nix/modules/pro-user-automount.nix
-   Кратко: systemd user-level templates и обёртки для автоматического монтирования SMB
-   под $HOME/mnt/hosts/<host>.
+# RU: Файловый контракт — nix/modules/pro-user-automount.nix
+#    Кратко: systemd user-level templates и обёртки для автоматического монтирования SMB
+#    под $HOME/mnt/hosts/<host>.
 
-   Цель: предоставить проверяемые user-level unit-шаблоны, где ExecStart ссылается
-     на store-путь, чтобы `systemd-analyze verify` мог разрешить путь.
+#    Цель: предоставить проверяемые user-level unit-шаблоны, где ExecStart ссылается
+#      на store-путь, чтобы `systemd-analyze verify` мог разрешить путь.
 
-   Контракт: экспорт environment.etc."systemd/user/smb-mount-user@.service" и
-     соответствующий automount, а также helper script в /usr/local/bin.
+#    Контракт: экспорт environment.etc."systemd/user/smb-mount-user@.service" и
+#      соответствующий automount, а также helper script в /usr/local/bin.
 
-   Proof: `systemd-analyze verify --user /run/user/$(id -u)/system/smb-mount-user@.service`
-*/
+#    Proof: `systemd-analyze verify --user /run/user/$(id -u)/system/smb-mount-user@.service`
 
 let
   helpers = {

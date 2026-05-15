@@ -78,8 +78,9 @@ NixOS‑ориентированные инварианты (конфигура�
 22. INV-Emacs-Package-Availability
     Пакеты, объявленные Nix-ом, должны быть доступны на `load-path`; interactive installs допускаются только по allowlist. Proof: `emacs/base/modules/pro-packages.el` + headless ERT.
 
-23. INV-Opencode-Isolated
-    Opencode/runtime сервисы запускаются в выделенных slices и имеют reproducible build entrypoints. Proof: `nixos/modules/opencode.nix`, `tests/contract/unit/04-opencode-options.sh`.
+ 23. INV-Opencode-Isolated (removed)
+    Ранее: Opencode/runtime сервисы запускались в выделенных slices и имели reproducible build entrypoints. Компонент opencode удалён из репозитория.
+    Proof: none
 
 24. INV-Activation-Preflight
     Перед `nixos-rebuild switch`/`just switch` выполняются preflight проверки: вычислимость профиля пакетов, unit verify, quick smoke tests. Proof: `scripts/helper-check-nixos-build.sh`, `tests/contract/test_live_activation_smoke.sh`.

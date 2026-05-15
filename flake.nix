@@ -7,10 +7,10 @@
     home-manager.url = "github:nix-community/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     # Hermes agent (fork provided by user). Use SSH URL so private/forked repo works.
-    nix-hermes.url = "git+ssh://git@github.com/11111000000/nix-hermes-agent.git";
+    # nix-hermes removed
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, nix-hermes, ... }:
+  outputs = inputs@{ self, nixpkgs, home-manager, ... }:
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
@@ -40,18 +40,15 @@
       # Temporarily disable adb-udev global module to avoid etc.drv build permission issues.
       # If the nix-hermes input provides a NixOS module, enable it globally so
       # Hermes is available on all hosts (hosts may still opt-out).
-      globalModules = (
-        if hermesModules != null && builtins.hasAttr "hermes-agent" hermesModules then [ hermesModules.hermes-agent ] else []
-      );
+       globalModules = [];
 
       mkHost = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;
         pkgs = pkgs;
-        specialArgs = { inherit emacsPkg opencode_from_release; };
+        specialArgs = { inherit emacsPkg; };
         modules = [
           home-manager.nixosModules.home-manager
           ./configuration.nix
-          ./nixos/modules/opencode-config.nix
           # NOTE: the treesitter grammars derivation is exposed via
           # `system-packages.nix` (the derivation itself is added to
           # environment.systemPackages). Do NOT import the derivation
@@ -67,7 +64,7 @@
       mkVmHost = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;
         pkgs = pkgs;
-        specialArgs = { inherit emacsPkg opencode_from_release; };
+         specialArgs = { inherit emacsPkg; };
         modules = [
           home-manager.nixosModules.home-manager
           ./nixos/modules/opencode-config.nix
@@ -76,12 +73,11 @@
 
       # Deterministic opencode derivation used by apps and made available
       # via specialArgs to system modules for reproducible installs.
-      opencode_from_release = spkgs.opencodeCmd;
+       # opencode_from_release removed
 
       # Expose nix-hermes overlay & modules if available. We don't enable
       # the service by default; hosts opt-in via modules in their host config.
-      hermesOverlay = if builtins.hasAttr "overlays" nix-hermes then nix-hermes.overlays.default else null;
-      hermesModules = if builtins.hasAttr "nixosModules" nix-hermes then nix-hermes.nixosModules else null;
+       # hermes overlay/modules removed
 
       # Package the TUI sources into a small derivation and provide a
       # wrapper that uses a python interpreter with textual available.

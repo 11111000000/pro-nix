@@ -190,14 +190,14 @@ Proof — конкретную команду или тест, обеспечи�
   Last reviewed: 2026-05-04
   Risk: low
 
-- Имя: Opencode Delivery & Agent Resource Controls
-  Стабильность: [FLUID]
-  Спецификация: delivery pipeline для opencode, ограничение ресурсов (systemd slices, opencode.slice) для изолированных задач агентов/сборок.
-  Proof: `nix build .#packages.x86_64-linux.opencode`, `systemd-analyze verify` на unit-файлах, smoke-tests
-  Run: `nix build .#packages.x86_64-linux.opencode`
-  Owner: `modules/opencode.nix`, `systemd-user-services.nix`
-  Last reviewed: 2026-05-04
-  Risk: medium
+ - Имя: Opencode Delivery & Agent Resource Controls (removed)
+  Стабильность: [REMOVED]
+  Спецификация: удалён — функциональность opencode удалена из репозитория по инициативе владельца.
+  Proof: none
+  Run: none
+  Owner: n/a
+  Last reviewed: 2026-05-15
+  Risk: none
 
 - Имя: zram / Swap Policy
   Стабильность: [FLUID]

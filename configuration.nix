@@ -127,66 +127,7 @@
   pro-peer.enable = true;
   pro-peer.enableKeySync = true;
 
-  # Hermes agent: enable globally by default (hosts may opt-out).
-  # Use lib.mkDefault so host-specific configs can disable or override.
-  services.hermes-agent = lib.mkDefault {
-    enable = true;
-    # Declarative Hermes config: provide an explicit providers map similar to
-    # ~/.config/opencode/config.json so tools expecting aitunnel entries can
-    # reuse the same semantics. Token is intentionally empty here; it will be
-    # provided from the authinfo-derived env file at activation.
-    config = lib.mkDefault {
-      providers = {
-        aitunnel = {
-          host = "api.aitunnel.ru";
-          token = ""; # filled from ~/.authinfo -> /var/lib/hermes/.hermes/.env at activation
-          preferred_model = "gpt-5.4-mini";
-        };
-      };
-      settings = {
-        telemetry = false;
-      };
-      # Backwards-compatible top-level model shortcut
-      model = { provider = "aitunnel"; default = "gpt-5.4-mini"; };
-    };
-    # Secrets must not be stored in the Nix store. We look for secrets in an
-    # operator-provided file (/run/secrets/hermes-env) and also support reading
-    # an authinfo-style token from a local ~/.authinfo or /root/.authinfo by
-    # generating a small env file under the hermes state directory.
-    environmentFiles = [ "/run/secrets/hermes-env" "/var/lib/hermes/.hermes/.env" ];
-    # Minimal runtime tools exposed on PATH for Hermes skills and integrations.
-    extraPackages = [ pkgs.jq pkgs.ripgrep pkgs.curl ];
-  };
-
-  # Activation helper: if a local authinfo-style file contains an entry for
-  # api.aitunnel.ru with login "token" we extract the password and write a
-  # small env file consumed by Hermes: /var/lib/hermes/.hermes/.env
-  system.activationScripts."hermes-extract-athinfo" = {
-    text = ''
-      set -euo pipefail
-
-      OUT="/var/lib/hermes/.hermes/.env"
-      TOKEN=""
-
-      for f in /root/.athinfo /root/.authinfo $HOME/.athinfo $HOME/.authinfo; do
-        if [ -f "$f" ]; then
-          # Look for authinfo-style line matching: machine api.aitunnel.ru login token password <secret>
-          line=$(grep -E "machine[[:space:]]+api.aitunnel.ru" "$f" | head -n1 || true)
-          if [ -n "$line" ]; then
-            TOKEN=$(printf "%s\n" "$line" | sed -n "s/.*password[[:space:]]\+\([^[:space:]]\+\).*/\1/p")
-            if [ -n "$TOKEN" ]; then break; fi
-          fi
-        fi
-      done
-
-      if [ -n "$TOKEN" ]; then
-        mkdir -p "$(dirname "$OUT")"
-        printf "AITUNNEL_KEY=%s\n" "$TOKEN" > "$OUT"
-        chown hermes:hermes "$OUT" >/dev/null 2>&1 || true
-        chmod 0600 "$OUT" || true
-      fi
-    '';
-  };
+  # hermes removed
 
   # Старая схема беспроводной сети не используется.
   # networking.wireless.enable = true;

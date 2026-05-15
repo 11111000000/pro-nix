@@ -39,25 +39,7 @@
         "type": "github"
       }
     },
-    "nix-hermes": {
-      "inputs": {
-        "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs"
-      },
-      "locked": {
-        "lastModified": 1774846737,
-        "narHash": "sha256-cjPONly0eeuOO2uR8H2UbkoDdyy/oahMdXF+L48y0b4=",
-        "ref": "refs/heads/main",
-        "rev": "4f3060ea08b041dd8656e1be07b8d5ff23f7652d",
-        "revCount": 37,
-        "type": "git",
-        "url": "ssh://git@github.com/11111000000/nix-hermes-agent.git"
-      },
-      "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/11111000000/nix-hermes-agent.git"
-      }
-    },
+    /* nix-hermes entry removed */
     "nixpkgs": {
       "locked": {
         "lastModified": 1773389992,

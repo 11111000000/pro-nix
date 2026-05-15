@@ -27,9 +27,7 @@
 
 let
   emacsPkg = pkgs.emacs30 or pkgs.emacs;
-  # Import opencodeCmd wrapper only; do not import raw backend to avoid
-  # exporting the upstream binary under /bin/opencode.
-  opencodePkg = (import ../system-packages.nix { inherit pkgs emacsPkg; enableOptional = false; }).opencodeCmd;
+   # opencode removed
 in
 
 # Minimal runtime packages that must be present in the final system profile.
@@ -50,10 +48,10 @@ with pkgs;
     # prebuilt upstream binaries (bubblewrap-based). Include it here so the
     # opencode wrapper can use steam-run as a fallback executor on hosts that
     # allow unprivileged user namespaces.
-    steam-run
+     steam-run
     procps
     dbus
-    opencodePkg
+    # opencode removed
   ] ++ (import ../system-packages.nix {
     inherit pkgs;
     emacsPkg = pkgs.emacs30 or pkgs.emacs;

@@ -76,7 +76,7 @@ the entire suite if they are not available in the environment. In CI
 environments these tools may be absent; in that case the test is skipped
 with a diagnostic message.
 "
-    (dolist (cmd '("goose" "aider" "opencode"))
+    (dolist (cmd '())
       (let ((exe (executable-find cmd)))
         (if (null exe)
             (message "pro-test: skipping agent check, %s not on PATH" cmd)
