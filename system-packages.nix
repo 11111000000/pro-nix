@@ -33,7 +33,7 @@ let
   xvfbRun = pkgs."xvfb-run";
   pipxPkg = pkgs.pipx;
 
-  # aider removed
+  
 
   llmResearchEnv = pkgs.python3.withPackages (ps: with ps; [
     jupyterlab
@@ -57,232 +57,15 @@ let
     exec ${llmResearchEnv}/bin/jupyter-lab "$@"
   '';
 
-  # pi and pi-dev wrappers removed
-
-  # Детерминированный пакет: скачивает официальную сборку opencode и помещает
-  # её в Nix store. Этот артефакт не должен попадать в системный PATH напрямую:
-  # системный `opencode` даёт wrapper, который пробрасывает аргументы и может
-  # выбирать совместимый backend для конкретного пользователя.
-  opencodeBin = pkgs.stdenv.mkDerivation rec {
-    pname = "opencode";
-    version = "1.14.19";
-    src = pkgs.fetchurl {
-      url = "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-linux-x64.tar.gz";
-      sha256 = "8cb11723ce0ec82e2b6ff9a2356b12c2f4c4a95a087ba0a3004b19f167951440";
-    };
-    buildInputs = [];
-    unpackPhase = ''
-      mkdir -p $TMPDIR/unpack
-      tar xzf "$src" -C $TMPDIR/unpack
-    '';
-    installPhase = ''
-      # Place the upstream binary out of the public $out/bin so it does not
-      # collide with the wrapper that provides the public `opencode` name.
-      mkdir -p $out/libexec/opencode-system
-      cp $TMPDIR/unpack/opencode $out/libexec/opencode-system/opencode
-      chmod +x $out/libexec/opencode-system/opencode
-    '';
-  };
-
-  # Возможный Nix-источник: собрать opencode из upstream исходников (npm/Bun build).
-  # Это предпочтительный, воспроизводимый backend — если сборка проходит успешно.
-   # Build opencode from upstream nix expression if available. The upstream
-   # repository ships a `nix/opencode.nix` and `nix/node_modules.nix` which are
-   # designed to be used from Nix; import them to produce a reproducible
-   # derivation instead of invoking bun directly here.
-   opencodeSrc = pkgs.fetchFromGitHub {
-     owner = "anomalyco";
-     repo = "opencode";
-     rev = "v1.14.19";
-     sha256 = "1ynrrikp6qjwqrh57pcw69i5h92ikz96d6zyd5j5vyd5zwqnm8ch";
-   };
-
-   # Import the upstream Nix expression via pkgs.callPackage so the standard
-   # package set supplies expected arguments. This keeps the import minimal
-   # here and allows the upstream nix expression to pull other helpers from pkgs.
-    # Building opencode from upstream source requires the upstream nix/node-modules
-    # layout which is not reliable to import in-tree for flake checks. We provide
-    # a dedicated helper derivation under nix/opencode-npm.nix that imports the
-    # upstream nix expression in an isolated way; prefer that, but fall back to
-    # prebuilt release if the build is not available on this system (e.g., when
-    # the upstream derivation is heavy).
-    # `or` is not a Nix operator; implement fallback with an assertion guard.
-   opencodeNpm = let _ = import ./nix/opencode-npm.nix { inherit pkgs; } ; in _;
-
-  # Выбираем backend: внешний параметр opencodeBackend имеет приоритет;
-  # иначе используем prebuilt релиз opencodeBin.
-  opencodeBackendPackage = if opencodeBackend != null then opencodeBackend else opencodeBin;
-
   
 
-  # Обёртка для CLI opencode — учебное пояснение
-  # В некоторых окружениях upstream npm-пакет `@opencode/cli` может быть недоступен.
-  # Обёртка реализует детерминированное поведение в рантайме по следующему порядку:
-  # 1) Использовать пользовательский бинарник, если он присутствует (~/.local/bin или ~/.opencode/bin).
-  # 2) Если его нет — попробовать загрузить официальный релиз для linux x64 и закешировать его в ~/.local/share/opencode/opencode.
-  # 3) Запускать бинарник под user transient systemd scope с ограничением ресурсов.
-  opencodeCmd = pkgs.writeShellScriptBin "opencode" ''
-    set -euo pipefail
-
-    # Пути, в которых ищем существующий бинарник
-    USER_LOCAL_BIN="$HOME/.local/bin/opencode"
-    OPENCODE_HOME="$HOME/.opencode/bin/opencode"
-    CACHED="$HOME/.local/share/opencode/opencode"
-
-    # Системный backend строится в Nix store и должен быть привилегированным
-    # вариантом. Backend размещается в libexec, чтобы не экспортировать
-    # публичное имя `/bin/opencode` напрямую и избежать коллизий в buildEnv.
-    BIN="${opencodeBackendPackage}/libexec/opencode-system/opencode"
-
-    if [ ! -x "$BIN" ]; then
-      if [ -x "$USER_LOCAL_BIN" ]; then
-        BIN="$USER_LOCAL_BIN"
-      elif [ -x "$OPENCODE_HOME" ]; then
-        BIN="$OPENCODE_HOME"
-      elif [ -x "$CACHED" ]; then
-        BIN="$CACHED"
-      else
-        BIN=""
-      fi
-    fi
-
-    if [ -z "$BIN" ]; then
-      # Попытка загрузить официальный релиз для linux x64. Это запасной,
-      # best-effort метод; при неудаче скрипт завершится с ошибкой и оператор
-      # установит бинарник вручную.
-      mkdir -p "$(dirname "$CACHED")"
-      echo "[opencode] bootstrap: downloading official release to $CACHED"
-
-      # Quick guard: only attempt bootstrap for supported architecture.
-      arch=$(uname -m)
-      if [ "$arch" != "x86_64" ]; then
-        echo "[opencode] no prebuilt release available for architecture: $arch" >&2
-        echo "Please install opencode via Nix (system package) or ask the administrator to provide a compatible binary." >&2
-        exit 1
-      fi
-
-      # Надёжное создание временной директории: предпочтение TMPDIR, затем /tmp,
-      # затем $HOME/.cache/tmp.
-      # Prefer TMPDIR if set, otherwise fall back to /tmp. Use plain $VAR
-      # expansions. Avoid embedding the four-character sequence that looks like
-      # a Nix interpolation token; write it in parts ("$" "{" "..." "}") if
-      # you need to document it, because including the four-character sequence
-      # made of dollar, left-brace, dots, right-brace verbatim inside this
-      # multiline string would make Nix try to interpolate it.
-      TMPBASE="$TMPDIR"
-      if [ -z "$TMPBASE" ]; then
-        TMPBASE="/tmp"
-      fi
-      if [ ! -d "$TMPBASE" ]; then
-        TMPBASE="$HOME/.cache/tmp"
-      fi
-      mkdir -p "$TMPBASE" 2>/dev/null || true
-
-      tmpdir=$(mktemp -d "$TMPBASE/opencode.XXXXXX" 2>/dev/null || mktemp -d 2>/dev/null || printf "%s" "$TMPBASE/opencode.$(date +%s).$$")
-      mkdir -p "$tmpdir" 2>/dev/null || true
-      if [ ! -d "$tmpdir" ]; then
-        echo "[opencode] cannot create temporary directory (TMPBASE=$TMPBASE)" >&2
-        ls -ld "$TMPBASE" || true
-        exit 1
-      fi
-
-      tmpball="$tmpdir/opencode.tar.gz"
-      trap 'rm -rf "$tmpdir"' EXIT
-
-      if command -v curl >/dev/null 2>&1; then
-        curl -fSL -o "$tmpball" "https://github.com/anomalyco/opencode/releases/latest/download/opencode-linux-x64.tar.gz"
-      elif command -v wget >/dev/null 2>&1; then
-        wget -qO "$tmpball" "https://github.com/anomalyco/opencode/releases/latest/download/opencode-linux-x64.tar.gz"
-      else
-        echo "[opencode] cannot bootstrap: install curl or wget, or place opencode in $USER_LOCAL_BIN" >&2
-        exit 1
-      fi
-
-      # Извлечь архив во временную папку и переместить атомарно, чтобы не оставить
-      # частичный бинарник в кеше.
-      tar xzf "$tmpball" -C "$tmpdir"
-      if [ -x "$tmpdir/opencode" ]; then
-        mv "$tmpdir/opencode" "$CACHED"
-        chmod +x "$CACHED"
-        BIN="$CACHED"
-      else
-        echo "[opencode] bootstrap failed: archive did not contain opencode binary" >&2
-        exit 1
-      fi
-    fi
-
-    is_elf=0
-    if [ -x "$BIN" ] && head -c4 "$BIN" 2>/dev/null | od -An -t x1 | tr -d ' \n' | grep -iq '^7f454c46'; then
-      is_elf=1
-    fi
-
-    if [ "$is_elf" = "1" ]; then
-      # Probe the binary for Bun runtime fingerprint. If the binary reports
-      # Bun help, prefer running it under steam-run (FHS wrapper) first; some
-      # prebuilt releases embed Bun and behave differently when run directly.
-      probe_output=""
-      if "$BIN" --version >/dev/null 2>&1; then
-        probe_output=$("$BIN" --version 2>&1 || true)
-      fi
-
-      if printf "%s" "$probe_output" | grep -qi "Bun is a fast JavaScript runtime"; then
-        if command -v steam-run >/dev/null 2>&1; then
-          exec steam-run "$BIN" "$@"
-        fi
-        # if steam-run unavailable, fall through to loader/direct exec below
-      fi
-
-      LOADER="${pkgs.glibc}/lib/ld-linux-x86-64.so.2"
-      if [ -x "$LOADER" ]; then
-        exec "$LOADER" "$BIN" "$@"
-      fi
-    fi
-
-    # As a last-resort, try steam-run (non-ELF backends or when loader failed).
-    if command -v steam-run >/dev/null 2>&1; then
-      exec steam-run "$BIN" "$@"
-    fi
-
-    exec "$BIN" "$@"
-  '';
+  
 
   # Utility to install/update a local per-user opencode binary in a well-known
   # location. This is intentionally a separate command so that runtime `opencode`
   # is pure (does not mutate user state). Users who want a newer local copy
   # run `opencode-install-local` explicitly.
-  opencodeInstallLocal = pkgs.writeShellScriptBin "opencode-install-local" ''
-    set -euo pipefail
-
-    TARGET_DIR="$HOME/.local/share/pro-opencode/bin"
-    TARGET="$TARGET_DIR/opencode"
-    mkdir -p "$TARGET_DIR"
-
-    echo "[opencode-install-local] downloading official release into $TARGET"
-
-    tmpdir=$(mktemp -d 2>/dev/null || printf "%s" "$HOME/.cache/opencode.$(date +%s).$$")
-    trap 'rm -rf "$tmpdir"' EXIT
-    tmpball="$tmpdir/opencode.tar.gz"
-
-    if command -v curl >/dev/null 2>&1; then
-      curl -fSL -o "$tmpball" "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-linux-x64.tar.gz"
-    elif command -v wget >/dev/null 2>&1; then
-      wget -qO "$tmpball" "https://github.com/anomalyco/opencode/releases/download/v1.14.19/opencode-linux-x64.tar.gz"
-    else
-      echo "Please install curl or wget to use opencode-install-local" >&2
-      exit 1
-    fi
-
-    tar xzf "$tmpball" -C "$tmpdir"
-    if [ -x "$tmpdir/opencode" ]; then
-      mv "$tmpdir/opencode" "$TARGET"
-      chmod +x "$TARGET"
-      echo "Installed local opencode to $TARGET"
-      exit 0
-    else
-      echo "Downloaded archive did not contain opencode binary" >&2
-      exit 2
-    fi
-  '';
+  
   # Примечание: flake/flake.nix может предоставлять opencode_bin; в этом
   # файле реализован запасной механизм, чтобы модуль работал автономно.
 
@@ -379,11 +162,11 @@ gh
   shfmt
   bat
   tldr
-   # goose removed
+  
   pipxPkg
-   # aider removed
+    
   llmLabCmd
-    # opencode and pi wrappers removed
+    
   htop
   neofetch
   feh
@@ -652,5 +435,5 @@ in
   # Основной список системных пакетов без `null`.
   packages = builtins.filter (x: x != null) (rawList ++ [ treesitterGrammars ]);
 
-  # opencode artifacts removed
+  
 }

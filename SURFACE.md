@@ -145,14 +145,14 @@ Proof — конкретную команду или тест, обеспечи�
   Last reviewed: 2026-05-06
   Risk: low
 
-- Имя: Emacs AI / Agent Shell
-  Стабильность: [FLUID]
-  Спецификация: портированная интеграция для агентной работы внутри Emacs (pro-agent-shell, pro-ai), entrypoints и helper-скрипты.
-  Proof: локальные модульные тесты `emacs/base/tests`, smoke scripts
-  Run: `emacs --batch -l emacs/base/tests/test-agent-shell.el`
-  Owner: `emacs/base/modules/pro-ai.el`, `emacs/base/modules/pro-agent-shell.el`
-  Last reviewed: 2026-05-04
-  Risk: low
+ - Имя: Emacs AI / Agent Shell (removed)
+  Стабильность: [REMOVED]
+  Спецификация: удалено — интеграция ai-агентов/agent-shell/skills удалена из репозитория по инициативе владельца.
+  Proof: none
+  Run: none
+  Owner: n/a
+  Last reviewed: 2026-05-15
+  Risk: none
 
 - Имя: Pro-peer Key Sync
   Стабильность: [FLUID]

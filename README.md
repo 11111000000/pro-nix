@@ -30,9 +30,9 @@ entrypoint-ов для агентных/LLM-экспериментов. Прое
 - flake.nix — внешний интерфейс: hosts, apps, checks, devShells.
 - configuration.nix — кросс-хостовая база политики NixOS.
 - hosts/* — host-specific конфигурации (huawei, cf19, vm).
-- modules/*, nixos/modules/* — составные NixOS-модули (network, peer, privacy, desktop, opencode, zram и т.д.).
+-- modules/*, nixos/modules/* — составные NixOS-модули (network, peer, privacy, desktop, zram и т.д.).
 - emacs/home-manager.nix, emacs/base/* — переносимый Emacs-профиль, site-lisp, soft-reload helpers.
-- system-packages.nix / packages-runtime.nix — системные и runtime-пакеты (включая emacsRuntime, llm-lab, opencode).
+-- system-packages.nix / packages-runtime.nix — системные и runtime-пакеты (включая emacsRuntime, llm-lab).
 - scripts/*, tools/*, tests/* — проверочные скрипты, smoke и contract tests, утилиты верификации.
 - SURFACE.md / HOLO.md / CONTRIBUTING.md — публичные контракты, инварианты и процесс изменений.
 
@@ -41,12 +41,12 @@ entrypoint-ов для агентных/LLM-экспериментов. Прое
 - NixOS: загрузчик, сеть, пользователи, сервисы, приложения, security-hardening.
 - Emacs: переносимый runtime, модули, soft-reload, session-serialization.
 - Peer & Privacy: avahi/mdns, pro-peer key sync, Tor client/hidden-service, Yggdrasil, WireGuard helper.
-- Ops & Runtimes: opencode delivery, headscale, systemd services, resource limits (zram/opencode slice).
+-- Ops & Runtimes: headscale, systemd services, resource limits (zram slice).
 - Agents & LLM: llm-lab, proctl, model-client — reproducible entrypoints for experiments.
 
 Хостовая матрица (кратко)
 
-- huawei — primary laptop/workstation; systemd-boot, zram/opencode limits.
+-- huawei — primary laptop/workstation; systemd-boot, zram limits.
 - cf19 — field/ops profile; GRUB/BIOS, pro-peer key sync, Tor hidden service for SSH.
 - vm — lightweight virtual image used for CI and fast iteration.
 

@@ -134,21 +134,7 @@ EOF
           '');
         };
 
-        # Публикуем reproducible-обёртку opencode, а не raw upstream binary.
-        # Это сохраняет одинаковую CLI-семантику для всех пользователей и не
-        # раскрывает внутренний backend как публичную команду.
-        opencode-release = {
-          type = "app";
-          # Пробрасываем все аргументы в wrapper, чтобы `nix run .#opencode-release -- <args>`
-          # работал как прозрачный proxy.
-          program = toString (pkgs.writeShellScriptBin "opencode-release" ''
-            set -eu
-            exec ${toString spkgs.opencodeCmd}/bin/opencode "$@"
-          '');
-          meta.description = "Reproducible opencode wrapper";
-        };
-
-        # (opencode-store removed — using system-packages.nix opencodeBin instead)
+        # opencode app removed
         # Утилита: добавляем удобное приложение для запуска TUI (Textual pro-nix manager)
         pro-nix = {
           type = "app";
