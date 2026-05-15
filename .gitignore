@@ -1,40 +1,16 @@
-/.agent-shell/
-...*
-.context
-logs/
-result
-.tao/
-docs/analyse/
-result-cf19/
-logs/
-local.nix
-local-nix
-bootstrap/local.nix
-.org
-*.swp
-*.swo
-*.tmp
-*~
+.agent-shell/
+.org/
+.pro-emacs-wrapper/
 *.elc
-*.eln
-*#
-.#*
-*.bak
-*.orig
-*.rej
-auto-save-list/
-.direnv/
-tmp/
-temp/
-backup
-missing
-running
-/emacs/home/
-/home/
-result-devshell
+.DS_Store
 
-# Temporary files generated during testing
-switch-*.log
-validate-units-*.log
-result-*/
-nixos-result*/
+# nix / build
+.cache/
+result
+
+# Emacs temp
+*~
+.#*
+
+# worktree dirs produced by scripts/setup-worktree.sh
+worktree-*
