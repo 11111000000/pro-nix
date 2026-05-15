@@ -11,10 +11,6 @@
 #   После `termux-login-emacs` — запускается в терминале.
 # Last reviewed: 2026-05-03
 # Файл: автосгенерированная шапка — комментарии рефакторятся
-/* RU: Rationale: Termux environment requires terminal-only Emacs configuration.
-   Keep GUI disabled and ensure home-manager sets portable profile that works in Android.
-   Proof: start Emacs under Termux and run headless ERT for Emacs profile.
-*/
 { config, lib, pkgs, ... }:
 
 {

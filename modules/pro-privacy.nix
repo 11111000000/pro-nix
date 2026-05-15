@@ -1,8 +1,5 @@
 # Название: modules/pro-privacy.nix — Конфигурация приватных сетей (Tor, obfs4, Snowflake)
 # Summary (EN): Tor and pluggable transports configuration for client anonymity
-/* RU: Модуль управления Tor и вспомогательными транспортами для обеспечения анонимности клиента.
-   Комментарии внутри файла — на русском языке и описывают опции, побочные эффекты и проверки.
-*/
 # Цель:
 #   Обеспечить безопасные и проверяемые дефолты для Tor и вспомогательных
 #   транспортив (obfs4, meek, snowflake). Комментарии объясняют, какие опции
@@ -115,11 +112,11 @@ in {
       # ensure Tor configuration gets the exact directives it requires.
        # Use wrapper paths under /usr/local/bin when present to allow
        # runtime-provided transports (lyrebird -> obfs4proxy wrapper).
-       ClientTransportPlugin = lib.mkForce [
-         "obfs4 exec /usr/local/bin/obfs4proxy"
-         "meek exec /run/current-system/sw/bin/meek-client"
-         "snowflake exec /run/current-system/sw/bin/snowflake-client"
-       ];
+        ClientTransportPlugin = lib.mkForce [
+          "obfs4 exec ${pkgs.obfs4}/bin/lyrebird"
+          "meek exec ${pkgs.meek}/bin/meek-client"
+          "snowflake exec ${pkgs.snowflake}/bin/client"
+        ];
       DNSPort = [ 9053 ];
       AutomapHostsOnResolve = true;
       AutomapHostsSuffixes = [ ".onion" ".exit" ];
@@ -166,21 +163,13 @@ in {
   # Add privacy transport packages as low-priority contributions; modules should
   # not force the final package list — the top-level configuration controls
   # the final authoritative set.
-  environment.systemPackages = lib.mkDefault (with pkgs; [ gawk obfs4proxy meek-client snowflake-client ]);
+  environment.systemPackages = lib.mkDefault (with pkgs; [ gawk obfs4 meek-client snowflake ]);
 
-  # Systemd service to run snowflake-client as a helper. Running snowflake-client
-  # as a service makes it easier to debug and ensures the binary is available
-  # for Tor's ClientTransportPlugin. Enable the helper when Tor client is enabled
-  # on the host (services.tor.enable).
-  systemd.services."snowflake-client" = lib.mkIf config.services.tor.enable {
-    description = "Snowflake client (WebRTC broker)";
-    after = [ "network-online.target" ];
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig.Type = "simple";
-    serviceConfig.ExecStart = lib.mkForce "${pkgs.snowflake-client}/bin/snowflake-client --log=info";
-    serviceConfig.Restart = "on-failure";
-    serviceConfig.RestartSec = 5;
-  };
+  # Note: we do not provide a standalone snowflake-client service here. Tor
+  # should exec the managed transport binary via ClientTransportPlugin so that
+  # transport environment variables are set correctly. Hosts may add a helper
+  # service locally for debugging, but the module avoids shipping one to keep
+  # behavior predictable across systems.
 
   # Открытые порты для служб приватности — доступны локально/для роутинга.
   networking.firewall = {
