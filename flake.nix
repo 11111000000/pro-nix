@@ -4,13 +4,17 @@
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-25.11";
+    systems.url = "github:nix-systems/default";
     home-manager.url = "github:nix-community/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    pi.url = "github:lukasl-dev/pi.nix";
+    pi.inputs.nixpkgs.follows = "nixpkgs";
+    pi.inputs.systems.follows = "systems";
     # Hermes agent (fork provided by user). Use SSH URL so private/forked repo works.
     # nix-hermes removed
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, ... }:
+  outputs = inputs@{ self, nixpkgs, home-manager, pi, ... }:
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
@@ -29,7 +33,8 @@
         overlays = [ (import ./nix/overlays/emacs-extra.nix) ];
       };
       emacsPkg = pkgs.emacs30 or pkgs.emacs;
-      spkgs = import ./system-packages.nix { inherit pkgs emacsPkg; };
+      piPkg = pi.packages.${system}.coding-agent;
+      spkgs = import ./system-packages.nix { inherit pkgs emacsPkg piPkg; };
       pythonWithTextual = pkgs.python3.withPackages (ps: with ps; [ textual psutil ]);
       # Python environment for agent apps (coordinator/worker)
       pythonAgentEnv = pkgs.python3.withPackages (ps: with ps; [ flask requests ]);
@@ -45,7 +50,7 @@
       mkHost = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;
         pkgs = pkgs;
-        specialArgs = { inherit emacsPkg; };
+        specialArgs = { inherit emacsPkg piPkg; };
         modules = [
           home-manager.nixosModules.home-manager
           ./configuration.nix
@@ -64,10 +69,9 @@
       mkVmHost = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;
         pkgs = pkgs;
-         specialArgs = { inherit emacsPkg; };
+          specialArgs = { inherit emacsPkg piPkg; };
         modules = [
           home-manager.nixosModules.home-manager
-          ./nixos/modules/opencode-config.nix
         ] ++ extraModules;
       };
 

@@ -37,7 +37,9 @@ let
     home.file.".config/pro/emacs-headless-report.sh".source = ../scripts/emacs-headless-report.sh;
     home.file.".config/pro/justfile".source = ../justfile;
     home.file.".config/pro/ENVIRONMENT.md".source = ../ENVIRONMENT.md;
-    home.file.".config/pro/README.agent.md".source = ../docs/plans/repo-agent-guide.md;
+    home.file.".config/pro/README.agent.md" = lib.mkIf (builtins.pathExists ../docs/plans/repo-agent-guide.md) {
+      source = ../docs/plans/repo-agent-guide.md;
+    };
 
     # NOTE: We provide only the example template `keys.org.example`.
     # The actual user file `~/.config/emacs/keys.org` is intentionally

@@ -26,6 +26,7 @@
 { config, pkgs, lib, ... }:
 
 let
+  piPkg = config._module.args.piPkg or null;
   emacsPkg = pkgs.emacs30 or pkgs.emacs;
    # opencode removed
 in
@@ -56,6 +57,7 @@ with pkgs;
     inherit pkgs;
     emacsPkg = pkgs.emacs30 or pkgs.emacs;
     enableOptional = false;
+    inherit piPkg;
   }).packages);
 
 # Last reviewed: 2026-05-03
