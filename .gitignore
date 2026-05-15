@@ -14,3 +14,13 @@ result
 
 # worktree dirs produced by scripts/setup-worktree.sh
 worktree-*
+
+# logs and generated artifacts
+logs/
+result-devshell
+.tmp
+backup
+logs
+result-devshell
+.context
+docs
