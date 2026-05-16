@@ -44,8 +44,8 @@
      ./modules/pro-privacy.nix
      ./modules/pro-peer.nix
      ./modules/headscale.nix
-     ./modules/pro-desktop.nix
-     ./modules/nix-cuda-compat.nix
+      ./modules/pro-desktop.nix
+      ./modules/nix-cuda-compat.nix
       ./nixos/modules/zram-slice.nix
 
      # Локальные переопределения конкретного хоста остаются в файле local.nix.

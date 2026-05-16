@@ -35,14 +35,11 @@
       members = lib.mapAttrsToList (name: value: name) (config.users.users or {});
     };
 
-    # Make GitHub CLI (gh) available system-wide on all hosts by default.
-    # Use mkDefault so other modules may extend/override systemPackages if needed.
-    environment.systemPackages = lib.mkDefault ((config.environment.systemPackages or []) ++ [ pkgs.gh ]);
-
-    # Optional: install android platform-tools system-wide via Nix. Left
-    # commented because platform-tools may be unfree in some nixpkgs
-    # channel/configurations and users may prefer installing via distro or
-    # using the local ./tools download already provided in this repo.
-    # environment.systemPackages = with pkgs; [ androidsdkplatformtools ];
+    # Make GitHub CLI (gh) and Android platform-tools (adb) available
+    # system-wide on all hosts by default. Use mkDefault so other modules may
+    # extend/override systemPackages if needed.
+    environment.systemPackages = lib.mkDefault (
+      (config.environment.systemPackages or []) ++ [ pkgs.gh pkgs.androidsdkplatformtools ]
+    );
   };
 }

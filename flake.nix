@@ -45,7 +45,16 @@
       # Temporarily disable adb-udev global module to avoid etc.drv build permission issues.
       # If the nix-hermes input provides a NixOS module, enable it globally so
       # Hermes is available on all hosts (hosts may still opt-out).
-       globalModules = [];
+      # Integrate pi (terminal coding agent) as a global optional module and
+      # enable it by default so the `pi` CLI is available system-wide.
+      globalModules = [
+        # Import the upstream pi NixOS module so its options are available
+        pi.nixosModules.default
+
+        # Small module to enable the agent globally and set the package
+        # to the flake-provided build for the current system.
+        (import (builtins.toString ./) { }) // "";
+      ];
 
       mkHost = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;
@@ -69,7 +78,7 @@
       mkVmHost = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;
         pkgs = pkgs;
-          specialArgs = { inherit emacsPkg piPkg; };
+        specialArgs = { inherit emacsPkg piPkg; };
         modules = [
           home-manager.nixosModules.home-manager
         ] ++ extraModules;
