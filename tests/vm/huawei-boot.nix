@@ -1,11 +1,14 @@
-{ testers, home-manager, ... }:
+{ testers, home-manager, piModule, ... }:
 
 testers.nixosTest {
   name = "huawei-boot";
 
   nodes.machine = { ... }: {
+    _module.args.piPkg = null;
+
     imports = [
       home-manager
+      piModule
       ../../configuration.nix
       ../../hosts/huawei/vm-boot.nix
     ];
