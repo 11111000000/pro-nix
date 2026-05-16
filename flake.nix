@@ -34,7 +34,7 @@
       };
       emacsPkg = pkgs.emacs30 or pkgs.emacs;
       piPkg = pi.packages.${system}.coding-agent;
-      spkgs = import ./system-packages.nix { inherit pkgs emacsPkg piPkg; };
+      spkgs = import ./system-packages.nix { inherit pkgs emacsPkg; };
       pythonWithTextual = pkgs.python3.withPackages (ps: with ps; [ textual psutil ]);
       # Python environment for agent apps (coordinator/worker)
       pythonAgentEnv = pkgs.python3.withPackages (ps: with ps; [ flask requests ]);

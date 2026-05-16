@@ -9,7 +9,7 @@
 # - приватность и сетевые слои (Tor, VPN, overlay сети),
 # - агенты/LLM и вспомогательные инструменты (ollama, pipx-утилиты),
 # - инфраструктурные утилиты для кластеров и операций (headscale, wireguard, yggdrasil).
-{ pkgs, emacsPkg ? pkgs.emacs, enableOptional ? false, opencodeBackend ? null, piPkg ? null }:
+{ pkgs, emacsPkg ? pkgs.emacs, enableOptional ? false, opencodeBackend ? null }:
 
 let
   emacsPackages = pkgs.emacsPackagesFor emacsPkg;
@@ -111,12 +111,8 @@ let
     pkill -INT -u "$USER" -x emacs >/dev/null 2>&1 || pkill -INT -u "$USER" -f 'emacs.*daemon' >/dev/null 2>&1 || true
   '';
 
-  piCmd = if piPkg == null then null else pkgs.writeShellScriptBin "pi" ''
-    exec ${piPkg}/bin/pi "$@"
-  '';
-
-  piDevCmd = if piPkg == null then null else pkgs.writeShellScriptBin "pi-dev" ''
-    exec ${piPkg}/bin/pi "$@"
+  piDevCmd = pkgs.writeShellScriptBin "pi-dev" ''
+    exec pi "$@"
   '';
 in
 
@@ -170,8 +166,7 @@ gh
   shfmt
   bat
   tldr
-  piCmd
-  piDevCmd
+   piDevCmd
   
   pipxPkg
     

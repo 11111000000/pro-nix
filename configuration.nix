@@ -17,7 +17,7 @@
 # Временные эксперименты помещаются в `local.nix` для уменьшения риска
 # нарушить кросс-хостовую совместимость.
 
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, piPkg ? null, ... }:
 
   let
   local = if builtins.pathExists ./local.nix then import ./local.nix else { };
@@ -31,6 +31,14 @@
 
   {
   environment.etc."pro/emacs-keys.org".source = ./emacs-keys.org;
+
+  # Каноничная интеграция pi: upstream-модуль управляет `pi`, а локальный профиль
+  # оставляет только совместимый alias `pi-dev`.
+  programs.pi.coding-agent = lib.mkIf (piPkg != null) {
+    enable = lib.mkDefault true;
+    package = lib.mkDefault piPkg;
+    rules = lib.mkDefault "";
+  };
 
    imports = [
      ./modules/system-boot.nix

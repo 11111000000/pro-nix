@@ -56,7 +56,6 @@ with pkgs;
     inherit pkgs;
     emacsPkg = pkgs.emacs30 or pkgs.emacs;
     enableOptional = false;
-    inherit piPkg;
   }).packages);
 
 # Last reviewed: 2026-05-03
