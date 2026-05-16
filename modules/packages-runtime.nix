@@ -23,10 +23,9 @@
 #   `nix eval .#nixosConfigurations.<host>.config.environment.systemPackages --json | jq -r '.[]' | grep -E '^bash|^openssh'`
 #
 # Last reviewed: 2026-05-03
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, piPkg ? null, ... }:
 
 let
-  piPkg = config._module.args.piPkg or null;
   emacsPkg = pkgs.emacs30 or pkgs.emacs;
    # opencode removed
 in
