@@ -18,6 +18,9 @@ jobs:
       - name: Run holo-verify (unit)
         run: |
           bash ./tools/holo-verify.sh unit
+      - name: Run opencode smoke
+        run: |
+          bash ./scripts/opencode-smoke.sh
       - name: Run headless ERT
         run: |
           # Run headless ERT in CI; failures should fail the job so regressions are visible

@@ -6,17 +6,16 @@ NIX="nix"
 
 echo "04: opencode options checks"
 
-val=$($NIX eval --json .#nixosConfigurations.huawei.config.provisioning.opencode.enable 2>/dev/null || true)
+val=$($NIX eval --json .#nixosConfigurations.huawei.config.home-manager.users.az.programs.opencode-bwrap.enable 2>/dev/null || true)
 if [ "$val" != "true" ]; then
-  echo "provisioning.opencode.enable is not true or not configured for this host: $val" >&2
-  echo "04: SKIP (not enabled)"
-  exit 0
+  echo "programs.opencode-bwrap.enable is not true for az: $val" >&2
+  exit 3
 fi
 
-tmpl=$($NIX eval --raw .#nixosConfigurations.huawei.config.provisioning.opencode.userTemplate 2>/dev/null || true)
-if [ -z "$tmpl" ]; then
-  echo "provisioning.opencode.userTemplate missing" >&2
-  exit 3
+pkg=$($NIX eval --raw .#nixosConfigurations.huawei.config.home-manager.users.az.programs.opencode-bwrap.package 2>/dev/null || true)
+if [ -z "$pkg" ]; then
+  echo "programs.opencode-bwrap.package missing" >&2
+  exit 4
 fi
 
 echo "04: OK"

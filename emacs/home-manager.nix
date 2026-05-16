@@ -122,8 +122,6 @@ let
       executable = true;
     };
 
-    # opencode integration removed.
-
     home.file.".config/pro/exwm-session" = {
       text = ''
         #!/usr/bin/env bash

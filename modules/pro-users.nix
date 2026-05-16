@@ -14,7 +14,7 @@
 #   Проверить наличие пользователей: `id az` на хосте или `nix eval .#...`;
 #   Поведение sudo: `sudo -l -U az` после сборки.
 # Last reviewed: 2026-05-03
-{ config, pkgs, lib, emacsPkg ? pkgs.emacs, ... }:
+{ config, pkgs, lib, emacsPkg ? pkgs.emacs, opencodeBwrapModule ? null, ... }:
 
 {
   # Создаём стандартные пользовательские учётные записи для этого коллектива.
@@ -62,7 +62,7 @@
   # Настройки home-manager, передаём инъекции аргументов и включаем
   # использование пользовательских пакетов.
   home-manager = {
-    extraSpecialArgs = { inherit pkgs emacsPkg; };
+    extraSpecialArgs = { inherit pkgs emacsPkg; } // lib.optionalAttrs (opencodeBwrapModule != null) { inherit opencodeBwrapModule; };
     backupFileExtension = "backup";
     useUserPackages = true;
   };

@@ -1,13 +1,14 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, opencodeBwrapModule ? null, ... }:
 
 {
   home-manager.users = builtins.listToAttrs (map (name: {
     inherit name;
     value = {
-      imports = [ ../emacs/home-manager.nix ];
+      imports = [ ../emacs/home-manager.nix ] ++ lib.optionals (opencodeBwrapModule != null) [ opencodeBwrapModule ];
       home.username = name;
       home.homeDirectory = "/home/${name}";
       home.stateVersion = "23.11";
+      programs.opencode-bwrap.enable = lib.mkDefault true;
       pro.emacs = {
         enable = true;
         gui.enable = false;

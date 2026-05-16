@@ -190,14 +190,14 @@ Proof — конкретную команду или тест, обеспечи�
   Last reviewed: 2026-05-04
   Risk: low
 
- - Имя: Opencode Delivery & Agent Resource Controls (removed)
-  Стабильность: [REMOVED]
-  Спецификация: удалён — функциональность opencode удалена из репозитория по инициативе владельца.
-  Proof: none
-  Run: none
-  Owner: n/a
-  Last reviewed: 2026-05-15
-  Risk: none
+ - Имя: Opencode Sandbox Runtime
+  Стабильность: [FLUID]
+  Спецификация: Home Manager модуль `programs.opencode-bwrap` подключается ко всем пользователям NixOS-профиля и даёт воспроизводимый sandboxed wrapper `opencode-bwrap` с пользовательскими настройками, импортированными из upstream `opencode-bwrap-nix`.
+  Proof: `./scripts/opencode-smoke.sh`, `tests/contract/unit/04-opencode-options.sh`
+  Run: `./scripts/opencode-smoke.sh`
+  Owner: `modules/pro-users.nix`, `modules/pro-users-nixos.nix`, `scripts/opencode-smoke.sh`
+  Last reviewed: 2026-05-16
+  Risk: medium
 
 - Имя: zram / Swap Policy
   Стабильность: [FLUID]

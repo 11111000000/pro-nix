@@ -7,6 +7,8 @@
     systems.url = "github:nix-systems/default";
     home-manager.url = "github:nix-community/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    opencodeBwrap.url = "github:michalrus/opencode-bwrap-nix";
+    opencodeBwrap.inputs.nixpkgs.follows = "nixpkgs";
     pi.url = "github:lukasl-dev/pi.nix";
     pi.inputs.nixpkgs.follows = "nixpkgs";
     pi.inputs.systems.follows = "systems";
@@ -14,7 +16,7 @@
     # nix-hermes removed
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, pi, ... }:
+  outputs = inputs@{ self, nixpkgs, home-manager, opencodeBwrap, pi, ... }:
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
@@ -34,6 +36,7 @@
       };
       emacsPkg = pkgs.emacs30 or pkgs.emacs;
       piPkg = pi.packages.${system}.coding-agent;
+      opencodeBwrapModule = opencodeBwrap.homeManagerModules.default;
       spkgs = import ./system-packages.nix { inherit pkgs emacsPkg; };
       pythonWithTextual = pkgs.python3.withPackages (ps: with ps; [ textual psutil ]);
       # Python environment for agent apps (coordinator/worker)
@@ -52,7 +55,7 @@
       mkHost = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;
         pkgs = pkgs;
-        specialArgs = { inherit emacsPkg piPkg; };
+        specialArgs = { inherit emacsPkg piPkg opencodeBwrapModule; };
         modules = [
           home-manager.nixosModules.home-manager
           ./configuration.nix
@@ -71,7 +74,7 @@
       mkVmHost = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;
         pkgs = pkgs;
-        specialArgs = { inherit emacsPkg piPkg; };
+        specialArgs = { inherit emacsPkg piPkg opencodeBwrapModule; };
         modules = [
           home-manager.nixosModules.home-manager
         ] ++ extraModules;
