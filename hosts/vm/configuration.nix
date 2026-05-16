@@ -1,10 +1,9 @@
-{ config, lib, pkgs, ... }:
+{ lib, ... }:
 
 {
   networking.hostName = "vm";
-  system.stateVersion = "25.11";
 
-fileSystems."/" = {
+  fileSystems."/" = {
     device = "/dev/sda1";
     fsType = "ext4";
   };
@@ -15,9 +14,6 @@ fileSystems."/" = {
 
   services.xserver.enable = lib.mkForce false;
   services.displayManager.enable = lib.mkForce false;
-
-  services.openssh.enable = true;
-
   security.sudo.enable = true;
   security.sudo.wheelNeedsPassword = lib.mkForce false;
 

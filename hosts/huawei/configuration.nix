@@ -7,11 +7,8 @@
   ];
 
   networking.hostName = "huawei";
-  system.stateVersion = "25.11";
 
-  hardware.enableAllFirmware = true;
   hardware.cpu.intel.updateMicrocode = true;
-  hardware.uinput.enable = true;
   hardware.firmware = [ pkgs.sof-firmware ];
 
   boot.kernelParams = [
@@ -37,33 +34,6 @@
     fsType = "ext4";
   };
 
-  # Pro-peer configuration: enable LAN discovery, key sync only (no Tor by default on laptop)
-  pro-peer.enable = true;
-  pro-peer.enableKeySync = true;
-  pro-peer.keysGpgPath = "/etc/pro-peer/authorized_keys.gpg";
-  pro-peer.keySyncInterval = "1h";
-  pro-peer.allowTorHiddenService = false;
-
-  # SSH hardening
-  services.openssh.extraConfig = ''
-PermitEmptyPasswords no
-MaxAuthTries 3
-X11Forwarding no
-AllowTcpForwarding no
-'';
-
-  # Firewall: restrict SSH to LAN only (declarative)
-  networking.firewall.enable = true;
-  # Preserve and extend global defaults rather than overwrite them so Tor
-  # ports (9050/9051/9053) added globally remain available on all hosts.
-  networking.firewall.extraCommands = lib.mkAfter ''
-    # allow SSH from RFC1918 ranges and loopback
-    iptables -I INPUT -p tcp -s 10.0.0.0/8 --dport 22 -j ACCEPT || true
-    iptables -I INPUT -p tcp -s 172.16.0.0/12 --dport 22 -j ACCEPT || true
-    iptables -I INPUT -p tcp -s 192.168.0.0/16 --dport 22 -j ACCEPT || true
-    iptables -I INPUT -p tcp -s 127.0.0.0/8 --dport 22 -j ACCEPT || true
-    iptables -I INPUT -p tcp --dport 22 -j DROP || true
-  '';
   fileSystems."/boot" = lib.mkForce {
     device = "/dev/disk/by-uuid/6DD0-A9CB";
     fsType = "vfat";
@@ -78,32 +48,5 @@ AllowTcpForwarding no
     enable = true;
     size = "auto"; # auto = 50% RAM, capped
   };
-
-  # Явный DBus hand-off unit для nm-dispatcher: systemd должен видеть
-  # валидный unit при активации org.freedesktop.nm_dispatcher.
-  systemd.services."dbus-org.freedesktop.nm-dispatcher" = {
-    description = "DBus hand-off unit for NetworkManager dispatcher";
-    serviceConfig = {
-      Type = "simple";
-      ExecStart = "${pkgs.networkmanager}/libexec/nm-dispatcher";
-      Restart = "on-failure";
-      RestartSec = "5s";
-    };
-  };
-
-  # GitHub CLI is provided from the top-level packages (configuration.nix).
-  # Avoid referencing config.environment.systemPackages here to prevent recursion.
-  # Enable Tor client and render bridge lines declaratively.
-  services.tor.enable = true;
-  # Bridge lines are rendered into generated torrc; avoid Include in torrc.
-  services.tor.settings.bridges = [
-    "obfs4 176.123.7.245:1790 C4A4913604C2DAE506A5B2E873EC94651B8F91D4 cert=R4PMGkCgTupeG8TOO9aKCMbZPA38bapGIjIUYlR3jOV9d41QJdpSlsdpx/gA1YVRpCO2LA iat-mode=0"
-    "obfs4 152.53.184.244:4433 1B180961057F12C8D11943C566A388E14FD53E56 cert=y6AiE71HA32cRzDTtJ6weIEadN4e3SPmcVbGXIne549cKHRdBw5Q1DU/ZoPAy2CXcYg8LA iat-mode=0"
-  ];
-  # Force UseBridges for the declared Bridge lines.
-  services.tor.settings = {
-    UseBridges = 1;
-  };
-  services.tor.enableSnowflake = true;
 
 }
