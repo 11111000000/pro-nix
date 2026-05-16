@@ -50,8 +50,9 @@
      ./modules/pro-services.nix
      ./modules/pro-storage.nix
      ./modules/pro-privacy.nix
-     ./modules/pro-peer.nix
-     ./modules/headscale.nix
+      ./modules/pro-peer.nix
+      ./modules/host-policies.nix
+      ./modules/headscale.nix
       ./modules/pro-desktop.nix
       ./modules/nix-cuda-compat.nix
       ./nixos/modules/zram-slice.nix
@@ -125,11 +126,8 @@
   # ADB нужен как системный инструмент на всех хостах этого профиля.
   programs.adb.enable = true;
 
-  # Ensure Tor-related ports are allowed by default across hosts. Use mkDefault
-  # concatenation so existing host lists are preserved and extended rather than
-  # overwritten.
-  networking.firewall.allowedTCPPorts = lib.mkDefault ((config.networking.firewall.allowedTCPPorts or []) ++ [ 9050 9051 9053 ]);
-  networking.firewall.allowedUDPPorts = lib.mkDefault ((config.networking.firewall.allowedUDPPorts or []) ++ [ 9564 ]);
+  hardware.enableAllFirmware = true;
+  hardware.uinput.enable = true;
 
   # Enable pro-peer discovery and key sync by default so hosts in the same
   # LAN advertise via mDNS and can receive centrally-managed authorized_keys.

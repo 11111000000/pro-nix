@@ -125,6 +125,7 @@ EOF
           # inherit `home-manager` from `pkgs` which produced the wrong
           # value/type and caused flake evaluation errors in the VM test.
           home-manager = home-manager.nixosModules.home-manager;
+          piModule = pi.nixosModules.default;
         };
         basic-activation-test = import ./tests/vm/test-basic-activation.nix { inherit (pkgs) testers; };
       };
