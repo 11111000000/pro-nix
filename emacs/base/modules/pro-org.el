@@ -1,7 +1,9 @@
-;; Русский: комментарии и пояснения оформлены в учебном стиле (пояснения и примеры)
 ;;; pro-org.el --- орг-работа и таблицы -*- lexical-binding: t; -*-
 
 ;; Этот модуль делает Org удобным для заметок, таблиц, задач и ТЗ.
+
+(declare-function org-redisplay-inline-images "org")
+(declare-function org-modern-mode "org-modern")
 
 (when (or (pro--package-provided-p 'org) (pro-packages--maybe-install 'org t) (require 'org nil t))
   (setq org-startup-indented t
@@ -15,7 +17,46 @@
         org-table-auto-blank-field t
         org-return-follows-link t
         org-image-actual-width nil
-        org-table-formula-use-constants nil))
+        org-table-formula-use-constants nil
+        org-src-window-setup 'current-window
+        org-confirm-babel-evaluate nil
+        org-support-shift-select nil)
+  (with-eval-after-load 'org
+    (add-hook 'org-babel-after-execute-hook #'org-redisplay-inline-images))
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (shell . t)
+     (dot . t)
+     (ditaa . t)
+     (plantuml . t)
+     (mermaid . t)))
+  (setq org-babel-default-header-args '((:results . "value")))
+  (when (or (pro--package-provided-p 'org-modern)
+            (pro-packages--maybe-install 'org-modern t)
+            (require 'org-modern nil t))
+    (setq org-auto-align-tags nil
+          org-tags-column 0
+          org-fold-catch-invisible-edits 'show-and-error
+          org-special-ctrl-a/e t
+          org-insert-heading-respect-content t)
+    (setq org-ellipsis (if (display-graphic-p) "…" "..."))
+    (unless (display-graphic-p)
+      (setq org-hide-emphasis-markers nil))
+    (add-hook 'org-mode-hook #'org-modern-mode))
+  (when (or (pro--package-provided-p 'plantuml-mode)
+            (pro-packages--maybe-install 'plantuml-mode t)
+            (require 'plantuml-mode nil t))
+    (setq plantuml-default-exec-mode 'jar
+          plantuml-jar-path "/usr/share/plantuml/plantuml.jar"
+          org-plantuml-jar-path (expand-file-name "/usr/share/plantuml/plantuml.jar"))
+    (add-to-list 'org-src-lang-modes '("plantuml" . plantuml))
+    (add-to-list 'org-structure-template-alist '("uml" . "src plantuml :file ./diagram.svg")))
+  (when (or (pro--package-provided-p 'ob-mermaid)
+            (pro-packages--maybe-install 'ob-mermaid t)
+            (require 'ob-mermaid nil t))
+    (ignore-errors
+      (add-to-list 'org-src-lang-modes '("mermaid" . mermaid)))))
 
 (when (or (pro--package-provided-p 'org-tempo) (pro-packages--maybe-install 'org-tempo t) (require 'org-tempo nil t))
   ;; org-tempo registers templates; ensure functions exist before setting the alist.

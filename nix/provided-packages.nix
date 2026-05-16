@@ -32,6 +32,10 @@ let
     pkgs.emacsPackages.nix-mode
     pkgs.emacsPackages.mmm-mode
     pkgs.emacsPackages.org
+    pkgs.emacsPackages.org-modern
+    pkgs.emacsPackages.org-tempo
+    pkgs.emacsPackages.plantuml-mode
+    pkgs.emacsPackages.ob-mermaid
     pkgs.emacsPackages.vterm
     pkgs.emacsPackages.ace-window
     pkgs.emacsPackages.undo-tree
