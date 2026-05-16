@@ -43,19 +43,17 @@
         (let ((icon-candidates '("FiraCode Nerd Font" "Fira Code Nerd Font" "Hack Nerd Font"
                                   "DejaVu Sans Mono Nerd Font" "Nerd Font" "Symbols Nerd Font")))
           (when-let ((icon-font (pro-ui--first-available-font icon-candidates)))
-            (when (fboundp 'set-fontset-font)
-              ;; apply to unicode and symbol charsets and prepend to give
-              ;; these families priority for icon glyphs
-              (set-fontset-font "fontset-default" 'unicode icon-font nil 'prepend)
-              (set-fontset-font "fontset-default" 'symbol icon-font nil 'prepend))))))
+            ;; Apply the icon font to unicode and symbol charsets and
+            ;; prepend it so icon glyphs prefer patched families.
+            (set-fontset-font "fontset-default" 'unicode icon-font nil 'prepend)
+            (set-fontset-font "fontset-default" 'symbol icon-font nil 'prepend))))
       ;; Mixed-pitch opt-in
       (when pro-ui-enable-mixed-pitch
         (when (pro-ui--try-require 'mixed-pitch)
           (add-hook 'org-mode-hook #'mixed-pitch-mode)
           (add-hook 'help-mode-hook #'mixed-pitch-mode)))
       ;; Prettify symbols in GUI
-      (when (display-graphic-p)
-        (global-prettify-symbols-mode +1)
-        (setq prettify-symbols-unprettify-at-point t)))))
+      (global-prettify-symbols-mode +1)
+      (setq prettify-symbols-unprettify-at-point t))))
 
 (provide 'pro-ui-fonts)

@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install Nix
+        uses: cachix/install-nix-action@v17
       - name: Run surface-lint
         run: |
           bash ./tools/surface-lint.sh --check-style
