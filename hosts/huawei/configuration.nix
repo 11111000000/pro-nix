@@ -4,8 +4,6 @@
   # Import modules for this host
   imports = [
     ../../modules/pro-users.nix
-    # adb-udev intentionally not imported here to avoid permission issues during build
-    # ../../nixos/modules/adb-udev.nix
   ];
 
   networking.hostName = "huawei";

@@ -114,6 +114,9 @@
     };
   };
 
+  # ADB нужен как системный инструмент на всех хостах этого профиля.
+  programs.adb.enable = true;
+
   # Ensure Tor-related ports are allowed by default across hosts. Use mkDefault
   # concatenation so existing host lists are preserved and extended rather than
   # overwritten.
