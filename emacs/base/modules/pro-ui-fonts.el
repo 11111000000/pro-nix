@@ -36,7 +36,18 @@
       (push `(font . ,(format "%s-%d" code-font (/ pro-ui-font-height 10))) initial-frame-alist)
       ;; Emoji support
       (when (and (display-graphic-p) (fboundp 'set-fontset-font))
-        (set-fontset-font "fontset-default" 'unicode "Noto Emoji" nil 'prepend))
+        (set-fontset-font "fontset-default" 'unicode "Noto Emoji" nil 'prepend)
+        ;; Prefer an icon / nerd font for symbol/private-use ranges so
+        ;; packages like `nerd-icons' and `all-the-icons' render using a
+        ;; patched icon font instead of falling back to an unrelated family.
+        (let ((icon-candidates '("FiraCode Nerd Font" "Fira Code Nerd Font" "Hack Nerd Font"
+                                  "DejaVu Sans Mono Nerd Font" "Nerd Font" "Symbols Nerd Font")))
+          (when-let ((icon-font (pro-ui--first-available-font icon-candidates)))
+            (when (fboundp 'set-fontset-font)
+              ;; apply to unicode and symbol charsets and prepend to give
+              ;; these families priority for icon glyphs
+              (set-fontset-font "fontset-default" 'unicode icon-font nil 'prepend)
+              (set-fontset-font "fontset-default" 'symbol icon-font nil 'prepend))))))
       ;; Mixed-pitch opt-in
       (when pro-ui-enable-mixed-pitch
         (when (pro-ui--try-require 'mixed-pitch)
