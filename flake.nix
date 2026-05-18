@@ -57,7 +57,8 @@
 
       mkHost = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;
-        pkgs = pkgs;
+        # Use the overlayed pkgs so our opencode-stub overlay takes effect
+        pkgs = pkgsOverlay;
         specialArgs = { inherit emacsPkg piPkg opencodeBwrapModule; };
         modules = [
           home-manager.nixosModules.home-manager
@@ -76,7 +77,7 @@
       # Minimal VM host for testing without full configuration.nix (which brings in pro-peer, etc)
       mkVmHost = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;
-        pkgs = pkgs;
+        pkgs = pkgsOverlay;
         specialArgs = { inherit emacsPkg piPkg opencodeBwrapModule; };
         modules = [
           home-manager.nixosModules.home-manager
