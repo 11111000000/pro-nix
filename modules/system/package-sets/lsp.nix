@@ -4,9 +4,8 @@ let
   maybe = pkg: if pkg == null then [ ] else [ pkg ];
 in
 {
-  # Language servers are part of the developer experience, not the system
-  # runtime. Keep them isolated so a host can choose development depth without
-  # accidentally inheriting every backend.
+  # Every entry here is optional: the set composes only the servers that are
+  # actually present in the chosen nixpkgs closure.
   lspPackages =
     maybe (if builtins.hasAttr "nodePackages" pkgs && builtins.hasAttr "pyright" pkgs.nodePackages then pkgs.nodePackages.pyright else null)
     ++ maybe (if builtins.hasAttr "jdtls" pkgs then pkgs.jdtls else null)

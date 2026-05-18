@@ -116,8 +116,8 @@ EOF
       };
 
       hosts = {
-        cf19 = mkHost [ ./hosts/cf19/configuration.nix ];
-        huawei = mkHost [ ./hosts/huawei/configuration.nix ];
+        cf19 = mkHost [ ./hosts/cf19/configuration.nix ./hosts/cf19/composition.nix ];
+        huawei = mkHost [ ./hosts/huawei/configuration.nix ./hosts/huawei/composition.nix ];
         vm = mkVmHost [ ./hosts/vm/configuration.nix ];
       };
     in {

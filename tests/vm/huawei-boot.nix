@@ -5,6 +5,7 @@ testers.nixosTest {
 
   nodes.machine = { ... }: {
     _module.args.piPkg = null;
+    _module.args.opencodeBwrapModule = null;
 
     imports = [
       home-manager
