@@ -8,6 +8,9 @@
       home.username = name;
       home.homeDirectory = "/home/${name}";
       home.stateVersion = "23.11";
+      # Keep opencode-bwrap enabled by default — this is the supported and
+      # reproducible backend (bubblewrap). We intentionally do NOT enable or
+      # package opencode plugins or the full opencode TUI here.
       programs.opencode-bwrap.enable = lib.mkDefault true;
       pro.emacs = {
         enable = true;

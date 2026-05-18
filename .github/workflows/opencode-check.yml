@@ -22,6 +22,7 @@ jobs:
           bash ./tools/holo-verify.sh unit
       - name: Run opencode smoke
         run: |
+          # Smoke test verifies HM module wiring for opencode-bwrap only.
           bash ./scripts/opencode-smoke.sh
       - name: Run headless ERT
         run: |

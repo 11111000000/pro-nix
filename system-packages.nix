@@ -62,12 +62,12 @@ let
   
 
   # Utility to install/update a local per-user opencode binary in a well-known
-  # location. This is intentionally a separate command so that runtime `opencode`
-  # is pure (does not mutate user state). Users who want a newer local copy
-  # run `opencode-install-local` explicitly.
-  
-  # Примечание: flake/flake.nix может предоставлять opencode_bin; в этом
-  # файле реализован запасной механизм, чтобы модуль работал автономно.
+  # location. The repository previously included a local `.opencode/` checkout
+  # and node_modules which caused builds to attempt packaging opencode plugins.
+  # Those sources are removed from the flake; the supported runtime is the
+  # Home Manager `programs.opencode-bwrap` wrapper which runs opencode in a
+  # bubblewrap sandbox. Keep this helper for users who explicitly want to
+  # install a local copy via `opencode-install-local` at runtime.
 
   # Python-слой здесь держит минимальную воспроизводимость: `requests` уже есть, а `pip` остаётся доступным для локальных окружений и одноразовых установок.
   myPython = pkgs.python3.withPackages (ps: [ ps.requests ps.pip ]);

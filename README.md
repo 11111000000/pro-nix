@@ -92,6 +92,11 @@ nix develop .#devShells.x86_64-linux.default
 ./scripts/emacs-pro-wrapper.sh
 ```
 
+Note: opencode plugin sources were removed from the repository; the supported
+opencode runtime is the bubblewrap-backed `programs.opencode-bwrap` Home Manager
+module. If you relied on the local `.opencode/` checkout, use the runtime
+installer or `opencode-install-local` to populate a user-local copy.
+
 6. Запустить полный набор проверок (entrypoint):
 
 ```bash

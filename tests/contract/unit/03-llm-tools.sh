@@ -10,7 +10,7 @@ if ! rg -n "llm-lab|jupyterlab|transformers|datasets|sentencepiece|tokenizers" "
   exit 2
 fi
 
-if ! rg -n "llm-lab|aider|opencode" "$root/system-packages.nix" >/dev/null 2>&1; then
+if ! rg -n "llm-lab|aider" "$root/system-packages.nix" >/dev/null 2>&1; then
   echo "tool matrix incomplete in system-packages.nix" >&2
   exit 3
 fi

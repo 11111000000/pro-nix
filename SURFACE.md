@@ -190,7 +190,7 @@ Proof — конкретную команду или тест, обеспечи�
   Last reviewed: 2026-05-04
   Risk: low
 
- - Имя: Opencode Sandbox Runtime
+- Имя: Opencode Sandbox Runtime
   Стабильность: [FLUID]
   Спецификация: Home Manager модуль `programs.opencode-bwrap` подключается ко всем пользователям NixOS-профиля и даёт воспроизводимый sandboxed wrapper `opencode-bwrap` с пользовательскими настройками, импортированными из upstream `opencode-bwrap-nix`.
   Proof: `./scripts/opencode-smoke.sh`, `tests/contract/unit/04-opencode-options.sh`
@@ -198,6 +198,11 @@ Proof — конкретную команду или тест, обеспечи�
   Owner: `modules/pro-users.nix`, `modules/pro-users-nixos.nix`, `scripts/opencode-smoke.sh`
   Last reviewed: 2026-05-16
   Risk: medium
+
+Note: repository-local opencode plugin sources were removed due to build
+failures. The public contract above refers only to the bubblewrap-backed
+Home Manager wrapper; packaging or shipping opencode plugins in the flake is
+no longer supported.
 
 - Имя: zram / Swap Policy
   Стабильность: [FLUID]

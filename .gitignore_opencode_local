@@ -1,0 +1,4 @@
+# Temporary ignore list for local opencode artifacts
+.opencode/
+
+Note: This file is added to keep a record of removed local opencode artifacts.

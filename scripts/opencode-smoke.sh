@@ -7,6 +7,9 @@ cd "$root"
 
 echo "opencode smoke: checking HM module wiring"
 
+# Verify the Home Manager opencode-bwrap module is enabled. We intentionally
+# do not ship opencode plugin sources in the repository; the supported runtime
+# is the bubblewrap-backed `programs.opencode-bwrap` module.
 enabled="$(nix eval --json .#nixosConfigurations.huawei.config.home-manager.users.az.programs.opencode-bwrap.enable)"
 if [ "$enabled" != "true" ]; then
   echo "programs.opencode-bwrap.enable is not true: $enabled" >&2

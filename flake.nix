@@ -36,6 +36,9 @@
       };
       emacsPkg = pkgs.emacs30 or pkgs.emacs;
       piPkg = pi.packages.${system}.coding-agent;
+      # Keep the Home Manager module reference so HM users still get the
+      # opencode-bwrap sandbox wrapper. We do not build or ship opencode
+      # plugins or the opencode app sources in this flake.
       opencodeBwrapModule = opencodeBwrap.homeManagerModules.default;
       spkgs = import ./system-packages.nix { inherit pkgs emacsPkg; };
       pythonWithTextual = pkgs.python3.withPackages (ps: with ps; [ textual psutil ]);
