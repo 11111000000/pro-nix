@@ -24,3 +24,6 @@ logs
 result-devshell
 .context
 docs
+
+# Ignore local opencode artifacts (local development copies, node_modules, etc.)
+.opencode/
