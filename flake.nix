@@ -32,7 +32,7 @@
       pkgsOverlay = import nixpkgs {
         inherit system;
         config = nixpkgsConfig;
-        overlays = [ (import ./nix/overlays/emacs-extra.nix) ];
+        overlays = [ (import ./nix/overlays/emacs-extra.nix) (import ./nix/overlays/opencode-stub.nix) ];
       };
       emacsPkg = pkgs.emacs30 or pkgs.emacs;
       piPkg = pi.packages.${system}.coding-agent;
