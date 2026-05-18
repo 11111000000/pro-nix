@@ -40,7 +40,8 @@
       # opencode-bwrap sandbox wrapper. We do not build or ship opencode
       # plugins or the opencode app sources in this flake.
       opencodeBwrapModule = opencodeBwrap.homeManagerModules.default;
-      spkgs = import ./system-packages.nix { inherit pkgs emacsPkg; };
+      # Pass the overlayed pkgs to system-packages so opencode stubs take effect
+      spkgs = import ./system-packages.nix { inherit emacsPkg; pkgs = pkgsOverlay; };
       pythonWithTextual = pkgs.python3.withPackages (ps: with ps; [ textual psutil ]);
       # Python environment for agent apps (coordinator/worker)
       pythonAgentEnv = pkgs.python3.withPackages (ps: with ps; [ flask requests ]);
