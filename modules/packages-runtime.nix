@@ -1,11 +1,13 @@
-# Название: modules/packages-runtime.nix — Базовые рантайм-пакеты
-# Кратко: минимальный набор пакетов, необходимых для активации системы и базовых операций.
+# Название: modules/packages-runtime.nix — Базовый системный runtime
+# Кратко: минимальный набор пакетов, который нужен, чтобы система жила и
+# можно было войти в shell, поднять сеть и выполнить первичное обслуживание.
 #
 # Файловый контракт:
-#   Цель: обеспечить системный набор утилит, необходимых для активации,
-#     shell-доступа и общих пользовательских сценариев.
-#   Контракт: environment.systemPackages собирается композиционно на уровне системы;
-#     модуль не зависит от host-level финализации.
+#   Цель: обеспечить системный набор утилит для старта, shell-доступа и
+#     базового обслуживания.
+#   Контракт: environment.systemPackages здесь остаётся маленьким и не
+#     финализирует workstation-слой; более тяжёлые пакеты должны приходить из
+#     host composition или отдельного рабочего слоя.
 #   Proof: tests/contract/test_runtime_packages.sh
 #
 # Цель:
@@ -13,41 +15,30 @@
 #   и базового обслуживания системы. Остальные пакеты добавляются через environment.systemPackages или отдельные модули.
 #
 # Контракт:
-#   Опции: environment.systemPackages (базовый список, может быть дополнен)
-#   Побочные эффекты: добавляет bashInteractive, openssh, coreutils, procps, dbus.
+#   Опции: environment.systemPackages (базовый список, может быть дополнен).
+#   Побочные эффекты: добавляет только минимальный runtime: bashInteractive,
+#   openssh, python3, coreutils, procps, dbus и gawk.
 #
 # Предпосылки:
 #   Используется в NixOS-конфигурации; пакеты должны присутствовать в pkgs.
 #
 # Как проверить (Proof):
-#   `nix eval .#nixosConfigurations.<host>.config.environment.systemPackages --json | jq -r '.[]' | grep -E '^bash|^openssh'`
+#   `nix eval .#nixosConfigurations.<host>.config.environment.systemPackages --json`
+#   и проверка наличия runtime-утилит в выводе.
 #
 # Last reviewed: 2026-05-03
-{ config, pkgs, lib, piPkg ? null, ... }:
-
-let
-  emacsPkg = pkgs.emacs30 or pkgs.emacs;
-   # opencode removed
-in
-
-# Minimal runtime packages that must be present in the final system profile.
-# Keep this list intentionally small: these packages are required for system
-# activation, shell access, and basic maintenance.
-
-with pkgs;
+{ pkgs, ... }:
 
 {
-  # Общая системная поверхность пакетов задаётся здесь: хосты больше не
-  # финализируют общий список и не собирают его вручную.
-  # Compose environment.systemPackages from smaller sets to make it easy to
-  # select minimal subsets for host compositions.
-  let
-    baseSets = import ./package-sets/runtime.nix { inherit pkgs; };
-    devSets = import ./package-sets/dev.nix { inherit pkgs; };
-    exwmSets = import ./package-sets/exwm.nix { inherit pkgs; };
-    other = import ../system-packages.nix { inherit pkgs; emacsPkg = pkgs.emacs30 or pkgs.emacs; enableOptional = false; };
-  in
-  environment.systemPackages = lib.mkAfter (with pkgs; baseSets.runtimePackages ++ devSets.devPackages ++ exwmSets.exwmPackages ++ other.packages);
-
-# Last reviewed: 2026-05-03
+  # Мы намеренно держим этот слой узким: это не рабочая станция и не desktop,
+  # а только та опорная точка, без которой система не оживает.
+  environment.systemPackages = with pkgs; [
+    bashInteractive
+    openssh
+    python3
+    coreutils
+    procps
+    dbus
+    gawk
+  ];
 }

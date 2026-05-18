@@ -1,11 +1,8 @@
 { pkgs, ... }:
 
-with pkgs;
-
 {
-  agentPackages = [
-    # Local agent/LLM tooling kept as opt-in
-    pi.packages.x86_64-linux.coding-agent or null
-    # ollama and other local model tooling may be included via this set
-  ];
+  # Agent tooling is reserved as a separate boundary, but not populated yet.
+  # This keeps the composition honest: the minimal host does not inherit any
+  # hidden agent runtime until we wire it explicitly at host level.
+  agentPackages = [ ];
 }
