@@ -39,24 +39,15 @@ with pkgs;
 {
   # Общая системная поверхность пакетов задаётся здесь: хосты больше не
   # финализируют общий список и не собирают его вручную.
-  environment.systemPackages = lib.mkAfter (with pkgs; [
-    bashInteractive
-    openssh
-    python3
-    coreutils
-    # steam-run provides an FHS-compatible runtime wrapper used by some
-    # prebuilt upstream binaries (bubblewrap-based). Include it here so the
-    # opencode wrapper can use steam-run as a fallback executor on hosts that
-    # allow unprivileged user namespaces.
-     steam-run
-    procps
-    dbus
-    # opencode removed
-  ] ++ (import ../system-packages.nix {
-    inherit pkgs;
-    emacsPkg = pkgs.emacs30 or pkgs.emacs;
-    enableOptional = false;
-  }).packages);
+  # Compose environment.systemPackages from smaller sets to make it easy to
+  # select minimal subsets for host compositions.
+  let
+    baseSets = import ./package-sets/runtime.nix { inherit pkgs; };
+    devSets = import ./package-sets/dev.nix { inherit pkgs; };
+    exwmSets = import ./package-sets/exwm.nix { inherit pkgs; };
+    other = import ../system-packages.nix { inherit pkgs; emacsPkg = pkgs.emacs30 or pkgs.emacs; enableOptional = false; };
+  in
+  environment.systemPackages = lib.mkAfter (with pkgs; baseSets.runtimePackages ++ devSets.devPackages ++ exwmSets.exwmPackages ++ other.packages);
 
 # Last reviewed: 2026-05-03
 }
