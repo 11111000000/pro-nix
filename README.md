@@ -62,10 +62,15 @@ cd pro-nix
 Перед любой правкой агент обязан перейти в linked worktree:
 
 ```bash
-./scripts/check-worktree.sh
-./scripts/setup-worktree.sh fix/example
+ROOT="$(git rev-parse --show-toplevel)"
+"$ROOT/scripts/check-worktree.sh"
+"$ROOT/scripts/setup-worktree.sh" fix/example
 cd ../worktree-fix-example
 ```
+
+Если `check-worktree.sh` сообщает о primary worktree, агент не продолжает
+редактирование до создания linked worktree. Работа в primary допустима
+только при явном согласии юзера. Подробный алгоритм описан в `AGENTS.md`.
 
 2. Быстрая проверка flake и контрактов:
 
