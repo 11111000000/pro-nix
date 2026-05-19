@@ -31,9 +31,9 @@ in
 #!/bin/sh
 # Try to read SSH_AUTH_SOCK from systemd --user environment if possible.
 if command -v systemctl >/dev/null 2>&1 && systemctl --user show-environment >/dev/null 2>&1; then
-  _val=$(systemctl --user show-environment 2>/dev/null | awk -F'=' "/^SSH_AUTH_SOCK=/{print substr(\$0,index(\$0,\"=\")+1)}" | sed -n 1p) || _val=""
-  if [ -n "${'$'}_val" ]; then
-    export SSH_AUTH_SOCK="${'$'}_val"
+  _val=$(systemctl --user show-environment 2>/dev/null | sed -n 's/^SSH_AUTH_SOCK=//p' | sed -n '1p') || _val=""
+  if [ -n "$_val" ]; then
+    export SSH_AUTH_SOCK="$_val"
   fi
 fi
 
