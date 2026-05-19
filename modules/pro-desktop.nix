@@ -19,11 +19,11 @@
 
 {
   imports = [
-    ./session/base.nix
-    ./session/exwm.nix
-    ./session/fonts.nix
-    ./session/audio.nix
-    ./session/cinnamon.nix
+    ./session-base.nix
+    ./session-exwm.nix
+    ./session-fonts.nix
+    ./session-audio.nix
+    ./session-cinnamon.nix
   ];
 
   programs.firefox.enable = true;
