@@ -32,7 +32,7 @@ in
 
     providedPackages = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [ "magit" "consult" "vertico" "orderless" "marginalia" "gptel" "consult-dash" "dash-docs" "consult-eglot" "consult-yasnippet" "corfu" "cape" "kind-icon" "avy" "expand-region" "yasnippet" "projectile" "treemacs" "consult-projectile" "elfeed" "eglot" "rainbow-delimiters" "nix-mode" "mmm-mode" "org" "vterm" "ace-window" ];
+      default = [ "magit" "consult" "vertico" "orderless" "marginalia" "gptel" "consult-dash" "dash-docs" "consult-eglot" "consult-yasnippet" "corfu" "cape" "kind-icon" "avy" "expand-region" "yasnippet" "projectile" "treemacs" "consult-projectile" "elfeed" "eglot" "rainbow-delimiters" "nix-mode" "mmm-mode" "org" "ob-mermaid" "vterm" "ace-window" ];
       description = "List of Emacs package names (symbols) provided by Nix and exposed to the runtime as pro-packages-provided-by-nix.";
     };
 
