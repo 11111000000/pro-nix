@@ -33,6 +33,15 @@ if [ -n "$XDG_RUNTIME_DIR" ] && [ -S "$XDG_RUNTIME_DIR/ssh-agent.socket" ]; then
 fi
 '';
 
+    # Ensure interactive bash shells also source the profile.d snippet so
+    # non-login terminals (common in GUI terminals) get SSH_AUTH_SOCK set.
+    environment.etc."bash.bashrc".text = ''
+# Global bashrc: source profile.d ssh-agent helper for interactive shells
+if [ -n "${PS1-}" ] && [ -f /etc/profile.d/ssh-agent.sh ]; then
+  . /etc/profile.d/ssh-agent.sh
+fi
+'';
+
     # Also provide a systemd user environment generator to ensure variable is visible
     # for GUI-launched processes; we set the env at ExecStartPost above but ensure the
     # socket is reachable by child processes via profile.d as well.
