@@ -64,6 +64,7 @@
         modules = [
           home-manager.nixosModules.home-manager
           ./configuration.nix
+          ./nix/modules/searxng.nix
           # NOTE: the treesitter grammars derivation is exposed via
           # `system-packages.nix` (the derivation itself is added to
           # environment.systemPackages). Do NOT import the derivation
@@ -84,6 +85,7 @@
           home-manager.nixosModules.home-manager
           ./modules/packages-runtime.nix
           ./modules/tty-console.nix
+          ./nix/modules/searxng.nix
         ] ++ extraModules;
       };
 

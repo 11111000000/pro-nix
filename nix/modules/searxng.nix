@@ -1,61 +1,63 @@
 { lib, pkgs, config, ... }:
 
-# Минимальная интеграция SearXNG как systemd-сервиса.
-# - Использует пакет searxng из nixpkgs (если отсутствует можно поставить override в local.nix)
-# - Размещает конфиг в /etc/searxng/settings.yml (operator может заменить файл)
-# - Предоставляет простой systemd service, совместимый с `systemd-analyze verify`.
+# Интеграция SearXNG как systemd-сервиса.
+# - Пакет searxng берётся из nixpkgs.
+# - Конфиг задаётся через /etc/searxng/settings.yml.
+# - Сервис привязывается к loopback по умолчанию.
 
 let
-  searxPkg = pkgs.searxng;
-  runWrapper = pkgs.writeShellScriptBin "searxng-run" ''
-    #!/usr/bin/env bash
-    set -euo pipefail
-    exec ${searxPkg}/bin/searxng "$@"
-  '';
+  cfg = config.services.searxng;
+  listenParts = lib.splitString ":" cfg.listen;
+  host = builtins.elemAt listenParts 0;
+  port = builtins.elemAt listenParts 1;
 in
-
 {
-  options = {
-    services.searxng = {
-      enable = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Enable SearXNG service";
-      };
-      settingsFile = lib.mkOption {
-        type = lib.types.str;
-        default = "/etc/searxng/settings.yml";
-        description = "Path to SearXNG settings.yml (managed by operator).";
-      };
-      listen = lib.mkOption {
-        type = lib.types.str;
-        default = "127.0.0.1:8888";
-        description = "Address:port for SearXNG to bind to.";
-      };
+  options.services.searxng = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Включить SearXNG.";
+    };
+
+    package = lib.mkOption {
+      type = lib.types.package;
+      default = pkgs.searxng;
+      description = "Пакет SearXNG.";
+    };
+
+    listen = lib.mkOption {
+      type = lib.types.str;
+      default = "127.0.0.1:8888";
+      description = "Адрес и порт для привязки.";
+    };
+
+    settingsFile = lib.mkOption {
+      type = lib.types.str;
+      default = "/etc/searxng/settings.yml";
+      description = "Путь к settings.yml.";
     };
   };
 
-  config = lib.mkIf config.services.searxng.enable {
-    environment.systemPackages = [ searxPkg ];
-
-    # Install an example settings template if operator didn't provide one.
-    environment.etc."searxng/settings.yml".source = lib.optionalString (builtins.pathExists ./../../searxng/settings.yml) ./searxng/settings.yml;
+  config = lib.mkIf cfg.enable {
+    environment.systemPackages = [ cfg.package ];
 
     systemd.services.searxng = {
-      description = "SearXNG search engine";
+      description = "SearXNG - metasearch engine";
       wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ];
       serviceConfig = {
         Type = "simple";
-        EnvironmentFile = "${config.services.searxng.settingsFile}";
-        ExecStart = "${runWrapper}/bin/searxng --host ${lib.escapeShellArg (lib.splitString ":" config.services.searxng.listen | builtins.head)} --port ${lib.escapeShellArg (lib.splitString ":" config.services.searxng.listen | builtins.elemAt 1)}";
+        ExecStart = lib.escapeShellArgs [
+          "${cfg.package}/bin/searxng-run"
+          "--config" cfg.settingsFile
+          "--host" host
+          "--port" port
+        ];
         Restart = "on-failure";
         RestartSec = "5s";
+        CPUQuota = "50%";
+        MemoryMax = "512M";
       };
     };
   };
-
-  # Return module
-  {
-    inherit options config;
-  }
 }

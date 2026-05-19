@@ -11,5 +11,6 @@ in
   environment.systemPackages = with pkgs;
     runtime.runtimePackages
     ++ dev.devPackages
-    ++ exwm.exwmPackages;
+    ++ exwm.exwmPackages
+    ++ [ gh ];
 }
