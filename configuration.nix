@@ -62,6 +62,16 @@
      # Локальные переопределения конкретного хоста остаются в файле local.nix.
    ] ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ];
 
+  services.searxng = {
+    enable = lib.mkDefault true;
+    listen = lib.mkDefault "127.0.0.1:8888";
+  };
+
+  environment.etc."searxng/settings.yml".text = ''
+server:
+  secret_key: "changeme-replace-with-secure-random"
+  base_url: "http://127.0.0.1:8888"
+'';
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 2: Загрузчик системы и параметры ядра — пояснительный блок

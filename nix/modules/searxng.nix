@@ -41,18 +41,17 @@ in
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [ cfg.package ];
 
+    networking.firewall.allowedTCPPorts = lib.mkDefault [
+      (lib.strings.toInt port)
+    ];
+
     systemd.services.searxng = {
       description = "SearXNG - metasearch engine";
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" ];
       serviceConfig = {
         Type = "simple";
-        ExecStart = lib.escapeShellArgs [
-          "${cfg.package}/bin/searxng-run"
-          "--config" cfg.settingsFile
-          "--host" host
-          "--port" port
-        ];
+        ExecStart = "${cfg.package}/bin/searxng-run --config ${cfg.settingsFile} --host ${host} --port ${port}";
         Restart = "on-failure";
         RestartSec = "5s";
         CPUQuota = "50%";
