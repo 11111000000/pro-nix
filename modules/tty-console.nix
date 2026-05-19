@@ -41,7 +41,7 @@ in
     after = [ "load-tty-keymap.service" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${pkgs.kbd}/bin/kbdrate -d 900 -r 7";
+      ExecStart = "${pkgs.kbd}/bin/kbdrate -d 250 -r 30";
     };
   };
 }
