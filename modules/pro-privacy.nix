@@ -43,11 +43,6 @@ let
   };
 in {
 
-  # Backwards-compatible option to enable snowflake helper from host configs.
-  # Some host configs historically set `services.tor.enableSnowflake`; expose
-  # it here as an explicit option so `nixos-rebuild eval` succeeds when hosts
-  # reference it. Default is false; module behavior still follows
-  # `config.services.tor.enable` for enabling runtime services.
   options = {
     services.tor.enableSnowflake = lib.mkOption {
       type = lib.types.bool;
@@ -57,129 +52,71 @@ in {
   };
 
   config = {
-  # Суть раздела:
-  # Приводится конфигурация клиентских средств приватности: Tor и сопутствующие
-  # транспорты (obfs4, snowflake, meek). Комментарии поясняют роль ControlPort,
-  # SOCKSPort и шаблоны управления bridges. Это демонстрация практической
-  # интеграции анонимных сетей на хосте.
-  #
-  # Rationale:
-  # - Keep defaults minimal and safe: do not enable bridges by default to allow
-  #   Tor to bootstrap in open networks. Hosts that require bridges opt-in.
-  # - Use writeShellScriptBin helpers for unit ExecStart to keep systemd unit
-  #   files verifiable by systemd-analyze and to avoid quoting pitfalls.
   services.tor = {
     enable = true;
     client.enable = true;
     torsocks.enable = true;
-    # Optional: enable Snowflake helper service when set by host
-    # The actual option is declared in the module-level `options` above as
-    # `services.tor.enableSnowflake`.
-  # Provide sane defaults but allow hosts to override in their host config.
-    # Почему lib.mkDefault для UseBridges: по умолчанию мосты выключены, чтобы Tor
-    # мог запуститься в "открытых" сетях без необходимости настраивать bridges.
-    # Как проверить (отключить): в хост-конфиге `services.tor.settings.UseBridges = 1`.
     settings = {
       ControlPort = [ 9051 ];
       CookieAuthentication = true;
-      # Default to no bridges so Tor can bootstrap in unconstrained networks.
-      # To enable bridges on a host, set `services.tor.settings.UseBridges = 1` and
-      # populate /etc/tor/bridges.conf (the module deploys a template example).
-  # Operators maintain /etc/tor/bridges.conf manually (or via the provided
-  # template). We avoid emitting an `Include` directive into torrc because
-  # some tor builds do not accept that directive during `--verify-config`.
-  # Примечание: bridges.conf управляется оператором вручную — это намеренное
-  # ограничение модели; декларативное управление bridges может сломать tor --verify-config.
-  # The systemd service `tor-ensure-bridges` will create a default
-  # /etc/tor/bridges.conf if it does not exist.
-  #
-  # To support hosts that want bridges managed declaratively, we expose a
-  # configuration option `services.tor.bridges` (list of strings). When set,
-  # the module will render the contents of this list into the generated torrc
-  # as Bridge lines. This avoids relying on `Include` while still allowing
-  # declarative bridge management.
-
-      # Default: no bridges declared in Nix; operators may set services.tor.bridges
-      # in host configuration to inject Bridge lines. If the host sets
-      # `services.tor.bridges` to a non-empty list, enable UseBridges by
-      # default so the operator doesn't need to remember flipping it.
       bridges = lib.mkDefault [];
-      # ClientTransportPlugin lists executables that must exist at runtime.
-      # Keep this as a forced list because Tor expects the directive lines to be
-      # present exactly as specified; we point at /run/current-system/sw to use
-      # whatever versions the system provides.
-      # Tor expects explicit ClientTransportPlugin lines; keep as mkForce to
-      # ensure Tor configuration gets the exact directives it requires.
-       # Use wrapper paths under /usr/local/bin when present to allow
-       # runtime-provided transports (lyrebird -> obfs4proxy wrapper).
-        ClientTransportPlugin = lib.mkForce [
-          "obfs4 exec ${pkgs.obfs4}/bin/lyrebird"
-          "meek exec ${pkgs.meek}/bin/meek-client"
-          "snowflake exec ${pkgs.snowflake}/bin/client"
-        ];
+      ClientTransportPlugin = lib.mkForce [
+        "obfs4 exec ${pkgs.obfs4}/bin/lyrebird"
+        "meek exec ${pkgs.meek}/bin/meek-client"
+        "snowflake exec ${pkgs.snowflake}/bin/client"
+      ];
       DNSPort = [ 9053 ];
       AutomapHostsOnResolve = true;
       AutomapHostsSuffixes = [ ".onion" ".exit" ];
     };
   };
 
-  # I2P — дополнительный стек приватной сети (опция).
   services.i2p.enable = true;
 
-  # Развёртывание шаблона bridges.conf
-  # Шаблон помещается в /etc/tor/bridges.conf.example и копируется в
-  # /etc/tor/bridges.conf при отсутствии последнего. Файл /etc/tor/bridges.conf
-  # должен быть редактируем оператором, поэтому мы не управляем им полностью
-  # декларативно.
   environment.etc."tor/bridges.conf.example".source = ../conf/tor-bridges.conf;
 
   systemd.services."tor-ensure-bridges" = {
     description = "Ensure /etc/tor/bridges.conf exists (create from template)";
     wantedBy = [ "multi-user.target" ];
-    # Ensure this runs before tor.service so the bridges file exists when Tor starts
     before = [ "tor.service" ];
-    # Install a small helper to create the bridges file. Using a writeShellScriptBin
-    # inline here avoids unbalanced quoting in ExecStart and allows systemd
-    # to reference a concrete path that `systemd-analyze verify` can validate.
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "${helpers.ensureBridges}/bin/ensure-tor-bridges";
     };
   };
 
-  # Ensure /var/lib/tor exists with correct ownership/modes before tor.service
   systemd.services."tor-ensure-perms" = {
     description = "Ensure /var/lib/tor ownership and modes for Tor";
     before = [ "tor.service" ];
     serviceConfig = {
       Type = "oneshot";
-      # Install a small helper to set permissions safely and avoid complex inline quoting.
       ExecStart = "${helpers.ensurePerms}/bin/ensure-tor-perms";
     };
     wantedBy = [ "multi-user.target" ];
   };
 
-  # Ensure awk is available during activation scripts (used by activate).
-  # Add privacy transport packages as low-priority contributions; modules should
-  # not force the final package list — the top-level configuration controls
-  # the final authoritative set.
-  environment.systemPackages = lib.mkDefault (with pkgs; [ gawk obfs4 meek-client snowflake ]);
+  environment.systemPackages = lib.mkDefault (with pkgs; [
+    gawk
+    obfs4
+    meek-client
+    snowflake
+    tor
+    torsocks
+    tor-browser
+    nyx
+    onionshare
+    i2p
+    dnscrypt-proxy
+    proxychains
+    mullvad-vpn
+    wireguard-tools
+    yggdrasil
+  ]);
 
-  # Note: we do not provide a standalone snowflake-client service here. Tor
-  # should exec the managed transport binary via ClientTransportPlugin so that
-  # transport environment variables are set correctly. Hosts may add a helper
-  # service locally for debugging, but the module avoids shipping one to keep
-  # behavior predictable across systems.
-
-  # Открытые порты для служб приватности — доступны локально/для роутинга.
   networking.firewall = {
     allowedTCPPorts = [ 9050 9051 9052 9053 7657 4444 4445 ];
     allowedUDPPorts = [ 9564 ];
   };
-
-  # Примечание: автоматическая перезагрузка при изменении bridges намеренно опущена.
-  # Dynamic runtime reloading can be implemented later with a carefully
-  # tested systemd.path/service that avoids triggering during activation.
 };
 
 }

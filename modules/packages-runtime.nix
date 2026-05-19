@@ -16,8 +16,8 @@
 #
 # Контракт:
 #   Опции: environment.systemPackages (базовый список, может быть дополнен).
-#   Побочные эффекты: добавляет только минимальный runtime: bashInteractive,
-#   openssh, python3, coreutils, procps, dbus, gawk, mc и Emacs.
+#   Побочные эффекты: добавляет только минимальный runtime: shell, базовые
+#   утилиты, диагностику и операторские CLI.
 #
 # Предпосылки:
 #   Используется в NixOS-конфигурации; пакеты должны присутствовать в pkgs.
@@ -43,6 +43,20 @@
     kbd
     mc
     emacsPkg
-    torBrowserCmd
+    curl
+    wget
+    jq
+    just
+    git
+    gh
+    ripgrep
+    fd
+    findutils
+    tmux
+    tree
+    htop
+    lsof
+    ncdu
+    time
   ];
 }

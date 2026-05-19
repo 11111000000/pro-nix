@@ -27,3 +27,9 @@ docs
 
 # Ignore local opencode artifacts (local development copies, node_modules, etc.)
 .opencode/
+
+# pi-crew runtime state
+.crew/state/
+.crew/artifacts/
+.crew/worktrees/
+.crew/imports/

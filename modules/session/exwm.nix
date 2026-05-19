@@ -30,6 +30,16 @@
     gawk
     qt5ct
     qt6ct
+    xorg.xset
+    xorg.xhost
+    xorg.setxkbmap
+    xorg.xsetroot
+    wmname
+    xbindkeys
+    xdotool
+    xclip
+    xauth
+    xvfb-run
     (runCommand "pro-exwm-xsession" {} ''
       mkdir -p $out/share/xsessions
       cat > $out/share/xsessions/exwm.desktop <<'EOF'

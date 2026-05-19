@@ -1,5 +1,6 @@
 { lib, ... }:
 
+
 {
   networking.hostName = "vm";
 
@@ -18,4 +19,6 @@
   security.sudo.wheelNeedsPassword = lib.mkForce false;
 
   users.users.root.password = "";
+
+  # VM follows the same shared package policy, including Tor Browser.
 }

@@ -1,5 +1,6 @@
 # Название: modules/pro-services.nix — Базовые сетевые службы и политики доступа
-# Кратко: конфигурация NetworkManager, SSH, auditd, AppArmor и fail2ban с безопасными дефолтами.
+# Кратко: конфигурация NetworkManager, SSH, auditd, AppArmor, fail2ban и
+# системные операторские сетевые/дисковые утилиты.
 #
 # Цель:
 #   Предоставить набор проверяемых, безопасных дефолтов для сетевых служб и механизмов контроля
@@ -16,7 +17,7 @@
 #   `systemctl status fail2ban` и `ss -tlnp | grep 22`.
 #
 # Last reviewed: 2026-05-03
-{ ... }:
+{ pkgs, ... }:
 
 {
   networking.networkmanager.enable = true;
@@ -46,6 +47,23 @@
   };
 
   security.apparmor.enable = true;
+
+  environment.systemPackages = with pkgs; [
+    iftop
+    iotop
+    iperf3
+    iputils
+    dnsutils
+    sysstat
+    pciutils
+    usbutils
+    smartmontools
+    parted
+    dosfstools
+    exfatprogs
+    ntfs3g
+    openssl
+  ];
 
   networking.firewall = {
     enable = true;

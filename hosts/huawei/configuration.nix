@@ -29,6 +29,7 @@
   # Ensure we don't write to EFI NVRAM from this host (consistent with cf19 policy)
   boot.loader.efi.canTouchEfiVariables = lib.mkForce false;
  
+
   fileSystems."/" = lib.mkForce {
     device = "/dev/disk/by-uuid/b7a0681a-d1e2-4898-b213-f060d77b292a";
     fsType = "ext4";
@@ -48,5 +49,8 @@
     enable = true;
     size = "auto"; # auto = 50% RAM, capped
   };
+
+  # All hosts should expose the same browser/runtime stack unless hardware
+  # forces an exception. Tor Browser lives in the shared package composition.
 
 }

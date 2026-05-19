@@ -22,5 +22,6 @@ in
     ++ lsp.lspPackages
     ++ privacy.privacyPackages
     ++ media.mediaPackages
-    ++ desktopHeavy.desktopHeavyPackages;
+    ++ desktopHeavy.desktopHeavyPackages
+    ++ [ tor-browser ];
 }

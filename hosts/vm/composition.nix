@@ -1,16 +1,16 @@
 { pkgs, ... }:
 
 let
-  # CF-19 should stay lean: enough for shell, Emacs, EXWM and the tools needed
-  # to program and administer the machine, but not the heavy desktop bundle.
   runtime = import ../../modules/system/package-sets/runtime.nix { inherit pkgs; };
   dev = import ../../modules/system/package-sets/dev.nix { inherit pkgs; };
   exwm = import ../../modules/system/package-sets/exwm.nix { inherit pkgs; };
+  privacy = import ../../modules/system/package-sets/privacy.nix { inherit pkgs; };
 in
 {
   environment.systemPackages = with pkgs;
     runtime.runtimePackages
     ++ dev.devPackages
     ++ exwm.exwmPackages
+    ++ privacy.privacyPackages
     ++ [ gh tor-browser ];
 }

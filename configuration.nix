@@ -51,6 +51,7 @@
      ./modules/pro-services.nix
      ./modules/pro-storage.nix
      ./modules/pro-privacy.nix
+     ./modules/pro-dev.nix
       ./modules/pro-peer.nix
       ./modules/host-policies.nix
       ./modules/headscale.nix
