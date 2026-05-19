@@ -22,6 +22,6 @@ in
     ++ lsp.lspPackages
     ++ privacy.privacyPackages
     ++ media.mediaPackages
-    ++ (import ../../modules/system-package-sets-desktop-heavy.nix { inherit pkgs; })
+    ++ (import ../../modules/system-package-sets-desktop-heavy.nix { inherit pkgs; }).desktopHeavyPackages
     ++ [ tor-browser ];
 }

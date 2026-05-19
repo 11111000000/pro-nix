@@ -8,14 +8,8 @@
     noto-fonts
     noto-fonts-cjk-sans
     noto-fonts-color-emoji
-    (stdenv.mkDerivation rec {
-      name = "aporetic-fonts";
-      src = ../../fonts;
-      installPhase = ''
-        mkdir -p $out/share/fonts/truetype
-        cp $src/*.ttf $out/share/fonts/truetype/
-      '';
-    })
+    # aporetic-fonts removed to avoid impure local path during eval
+    # If needed, package fonts via a derivation in the flake inputs or use --impure eval
     liberation_ttf
     dejavu_fonts
     cantarell-fonts
