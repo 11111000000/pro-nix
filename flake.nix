@@ -54,7 +54,7 @@
       # Hermes is available on all hosts (hosts may still opt-out).
       # Import the upstream pi NixOS module so its options are available.
       # The CLI itself is exposed via system-packages.nix.
-      globalModules = [ pi.nixosModules.default ];
+      globalModules = [ pi.nixosModules.default ./modules/ssh-agent.nix ];
 
       mkHost = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;
