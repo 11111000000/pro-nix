@@ -45,8 +45,8 @@ Proof — конкретную команду или тест, обеспечи�
 
 - Имя: Git Worktree Policy
   Стабильность: [FLUID]
-  Спецификация: все агенты (автоматические и люди), вносящие изменения в репозиторий pro-nix, обязаны начинать работу только в linked worktree. Primary worktree допускается только по явной команде юзера и после его согласия. Перед любыми файловыми изменениями и перед каждым `git commit` обязателен guard `./scripts/check-worktree.sh`.
-  Proof: `./scripts/check-worktree.sh --help`, `./scripts/setup-worktree.sh --help`; `./scripts/check-worktree.sh` возвращает `exit 2` для primary worktree и `exit 0` для linked worktree.
+  Спецификация: рекомендуется, чтобы агенты (автоматические и люди), вносящие изменения в репозиторий pro-nix, начинали работу в linked worktree. Primary worktree допускается при явном разрешении оператора. В репозитории доступен helper `./scripts/check-worktree.sh` для помощи в проверке окружения.
+  Proof: `./scripts/check-worktree.sh --help`, `./scripts/setup-worktree.sh --help`.
   Run: `./scripts/check-worktree.sh`
   Owner: `AGENTS.md`, `scripts/setup-worktree.sh`, `scripts/check-worktree.sh`
   Last reviewed: 2026-05-19

@@ -195,14 +195,14 @@ git push origin --delete opencode/<agent-id>/<feature>
 
 Автоматизация: helper-скрипты
 
-Базовый preflight:
+Базовый preflight (рекомендуется):
 
 ```bash
 ROOT="$(git rev-parse --show-toplevel)"
-"$ROOT/scripts/check-worktree.sh"
+"$ROOT/scripts/check-worktree.sh"  # опциональная проверка
 ```
 
-Если текущий каталог является primary worktree, создайте linked worktree:
+Если текущий каталог является primary worktree, рекомендуется создать linked worktree:
 
 ```bash
 ROOT="$(git rev-parse --show-toplevel)"

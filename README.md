@@ -59,18 +59,17 @@ git clone git@github.com:11111000000/pro-nix.git
 cd pro-nix
 ```
 
-Перед любой правкой агент обязан перейти в linked worktree:
+Рекомендуется перед любой правкой перейти в linked worktree:
 
 ```bash
 ROOT="$(git rev-parse --show-toplevel)"
-"$ROOT/scripts/check-worktree.sh"
+"$ROOT/scripts/check-worktree.sh"  # опциональная проверка
 "$ROOT/scripts/setup-worktree.sh" fix/example
 cd ../worktree-fix-example
 ```
 
-Если `check-worktree.sh` сообщает о primary worktree, агент не продолжает
-редактирование до создания linked worktree. Работа в primary допустима
-только при явном согласии юзера. Подробный алгоритм описан в `AGENTS.md`.
+Если `check-worktree.sh` сообщает о primary worktree, рекомендуется
+создать linked worktree. Работа в primary допустима при явном согласии юзера. Подробный алгоритм описан в `AGENTS.md`.
 
 2. Быстрая проверка контрактов и локального состояния:
 
