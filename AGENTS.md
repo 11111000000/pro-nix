@@ -96,25 +96,42 @@
 
 ## Политика: обязательное использование git worktree
 
-- Цель: избежать одновременной работы агентов (людей и ботов) в одном рабочем дереве, уменьшить конфликты и упростить локальные контексты разработки.
-- Правило: агент (человек или автомат), вносящий изменения в репозиторий pro-nix, обязан работать не в первичной рабочей папке репозитория, а в отдельной git worktree.
-- Почему: primary worktree (где `.git` — директория) считается «операционной площадкой» CI/операций; использование отдельных worktree даёт изоляцию веток, упрощает parallel work и совместимость с инструментами (sparse-checkout, worktree per task).
+- Цель: исключить правки в primary worktree и изолировать изменения каждого агента в отдельном рабочем дереве.
+- Правило: агент (человек или автомат) **никогда не вносит правки в primary worktree**. Все изменения, коммиты и push выполняются только в linked worktree.
+- Исключение: primary worktree допускается только по явной команде юзера и после его согласия.
 
-Рекомендации и команды:
+### Обязательный guard
 
-- Быстрая проверка перед работой (ручной вызов или в preflight):
-  - `./scripts/check-worktree.sh` — проверяет, что текущая директория является worktree (файл `.git` указывает на gitdir). Если нет — скрипт выдаёт инструкцию и завершает с ошибкой.
-- Быстро создать рабочую директорию (сценарий для агентов):
-  - `./scripts/setup-worktree.sh <branch> [<dest>]` — создаёт ветку если нужно и добавляет worktree. Пример:
-    - `./scripts/setup-worktree.sh feature/agent-john` -> создаст `../worktree-agent-john-feature-agent-john` и переключится туда.
+Перед любыми файловыми изменениями агент обязан выполнить:
 
-Интеграция в рабочий процесс агента:
+```bash
+ROOT="$(git rev-parse --show-toplevel)"
+"$ROOT/scripts/check-worktree.sh"
+```
 
-1. В корне репозитория выполните `./scripts/check-worktree.sh`. Если скрипт завершился с ошибкой — создайте worktree:
-   - `./scripts/setup-worktree.sh <branch-name>`
-2. Перейдите в созданную директорию и работайте там (commit, push, open PR).
+Интерпретация результата:
 
-Автоматизация и CI:
+- `exit 0` — текущий каталог находится в linked worktree; можно продолжать.
+- `exit 2` — обнаружен primary worktree; немедленно создать linked worktree и перейти туда.
+- `exit 1` — текущий каталог не находится внутри git worktree; сначала перейти в репозиторий.
 
-- Рекомендуется добавить вызов `./scripts/check-worktree.sh` в локальные pre-commit/pre-push хуки или CI preflight для агентов, чтобы предотвратить случайные коммиты в primary worktree.
-- Изменение этой политики требует Intent/Change Gate и обновления SURFACE.md, если это меняет публичное поведение.
+Если обнаружен primary worktree, агент обязан выполнить:
+
+```bash
+ROOT="$(git rev-parse --show-toplevel)"
+"$ROOT/scripts/setup-worktree.sh" <branch-name>
+cd ../worktree-<branch-name>
+```
+
+### Повторная проверка
+
+Перед каждым `git commit` guard повторяется. Если проверка не проходит, коммит запрещён.
+
+### Команда создания worktree
+
+- `ROOT="$(git rev-parse --show-toplevel)"; "$ROOT/scripts/setup-worktree.sh" <branch> [<dest>]` — создаёт linked worktree и ветку, если она отсутствует.
+- Пример: `ROOT="$(git rev-parse --show-toplevel)"; "$ROOT/scripts/setup-worktree.sh" feature/agent-john` создаёт `../worktree-agent-john-feature-agent-john`.
+
+### Политика обхода
+
+Если юзер явно просит работать в primary worktree, агент должен подтвердить это текстом, дождаться согласия и только затем продолжать.

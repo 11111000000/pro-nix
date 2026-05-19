@@ -144,9 +144,11 @@ Change Gate и Migration; добавьте контактную информац
 
 Работа с opencode — ветки и git worktree
 
-Если агент вносит изменения в репозиторий, linked worktree обязателен. Правило
-`one agent = one branch = one linked worktree` считается базовым режимом работы,
-а primary worktree не используется для правок, коммитов и push.
+Основа правила о worktree описана в `AGENTS.md` (раздел «Политика:
+обязательное использование git worktree») и применяется ко всем агентам
+без исключения. `one agent = one branch = one linked worktree` считается
+базовым режимом работы, а primary worktree не используется для правок,
+коммитов и push, кроме явной команды юзера.
 
 Конвенция имён веток
 
@@ -193,13 +195,15 @@ git push origin --delete opencode/<agent-id>/<feature>
 Базовый preflight:
 
 ```bash
-./scripts/check-worktree.sh
+ROOT="$(git rev-parse --show-toplevel)"
+"$ROOT/scripts/check-worktree.sh"
 ```
 
 Если текущий каталог является primary worktree, создайте linked worktree:
 
 ```bash
-./scripts/setup-worktree.sh opencode/<agent-id>/<feature-slug>
+ROOT="$(git rev-parse --show-toplevel)"
+"$ROOT/scripts/setup-worktree.sh" opencode/<agent-id>/<feature-slug>
 cd ../worktree-opencode-<agent-id>-<feature-slug>
 ```
 
