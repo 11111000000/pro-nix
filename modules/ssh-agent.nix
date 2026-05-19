@@ -15,8 +15,10 @@ in
       wantedBy = [ "default.target" ];
       serviceConfig = {
         Type = "simple";
-        ExecStart = "${pkgs.openssh}/bin/ssh-agent -a $XDG_RUNTIME_DIR/ssh-agent.socket";
-        ExecStartPost = "${pkgs.systemd}/bin/systemctl --user set-environment SSH_AUTH_SOCK=$XDG_RUNTIME_DIR/ssh-agent.socket";
+        # Use systemd specifier %t for per-user runtime directory so the
+        # path is expanded by systemd correctly when starting the unit.
+        ExecStart = "${pkgs.openssh}/bin/ssh-agent -a %t/ssh-agent.socket";
+        ExecStartPost = "${pkgs.systemd}/bin/systemctl --user set-environment SSH_AUTH_SOCK=%t/ssh-agent.socket";
         Restart = "on-failure";
         KillMode = "process";
       };
