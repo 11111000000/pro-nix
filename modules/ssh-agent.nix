@@ -40,7 +40,7 @@ fi
     # and a runtime check inside the generated file.
     environment.etc."bash.bashrc".text = ''
 # Global bashrc: source profile.d ssh-agent helper for interactive shells
-if [ -n "${PS1-}" ] || [ -n "${PS1}" ]; then
+if [ -n "$PS1" ]; then
   if [ -f /etc/profile.d/ssh-agent.sh ]; then
     . /etc/profile.d/ssh-agent.sh
   fi
