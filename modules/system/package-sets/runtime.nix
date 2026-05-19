@@ -12,5 +12,8 @@ with pkgs;
     procps
     dbus
     gawk
+    kbd
+    mc
+    emacs
   ];
 }

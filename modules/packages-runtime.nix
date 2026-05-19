@@ -17,7 +17,7 @@
 # Контракт:
 #   Опции: environment.systemPackages (базовый список, может быть дополнен).
 #   Побочные эффекты: добавляет только минимальный runtime: bashInteractive,
-#   openssh, python3, coreutils, procps, dbus и gawk.
+#   openssh, python3, coreutils, procps, dbus, gawk, mc и Emacs.
 #
 # Предпосылки:
 #   Используется в NixOS-конфигурации; пакеты должны присутствовать в pkgs.
@@ -27,7 +27,7 @@
 #   и проверка наличия runtime-утилит в выводе.
 #
 # Last reviewed: 2026-05-03
-{ pkgs, ... }:
+{ pkgs, emacsPkg ? pkgs.emacs, ... }:
 
 {
   # Мы намеренно держим этот слой узким: это не рабочая станция и не desktop,
@@ -40,5 +40,8 @@
     procps
     dbus
     gawk
+    kbd
+    mc
+    emacsPkg
   ];
 }

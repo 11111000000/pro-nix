@@ -82,6 +82,8 @@
         specialArgs = { inherit emacsPkg piPkg opencodeBwrapModule; };
         modules = [
           home-manager.nixosModules.home-manager
+          ./modules/packages-runtime.nix
+          ./modules/tty-console.nix
         ] ++ extraModules;
       };
 
