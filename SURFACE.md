@@ -46,9 +46,9 @@ Proof — конкретную команду или тест, обеспечи�
 - Имя: Git Worktree Policy
   Стабильность: [FLUID]
   Спецификация: рекомендуется, чтобы агенты (автоматические и люди), вносящие изменения в репозиторий pro-nix, начинали работу в linked worktree. Primary worktree допускается при явном разрешении оператора. В репозитории доступен helper `./scripts/check-worktree.sh` для помощи в проверке окружения.
-  Proof: `./scripts/check-worktree.sh --help`, `./scripts/setup-worktree.sh --help`.
-  Run: `./scripts/check-worktree.sh`
-  Owner: `AGENTS.md`, `scripts/setup-worktree.sh`, `scripts/check-worktree.sh`
+  Proof: `./scripts/setup-worktree.sh --help`.
+  Run: `./scripts/setup-worktree.sh`
+  Owner: `AGENTS.md`, `scripts/setup-worktree.sh`
   Last reviewed: 2026-05-19
   Risk: medium
 
@@ -272,7 +272,7 @@ no longer supported.
   Спецификация: обязательные preflight-проверки перед `nixos-rebuild switch`/`just switch`: вычислимость профиля пакетов и тесты system-packages.
   Proof: `nix --extra-experimental-features 'nix-command flakes' eval --json .#nixosConfigurations.<host>.config.environment.systemPackages`, `tests/contract/unit/09-system-packages-eval.sh`
   Run: `./scripts/helper-check-nixos-build.sh huawei`
-  Owner: `scripts/check-worktree.sh`, `tests/contract`
+  Owner: `tests/contract`
   Last reviewed: 2026-05-04
   Risk: high
 

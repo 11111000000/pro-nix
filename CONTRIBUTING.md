@@ -199,7 +199,8 @@ git push origin --delete opencode/<agent-id>/<feature>
 
 ```bash
 ROOT="$(git rev-parse --show-toplevel)"
-"$ROOT/scripts/check-worktree.sh"  # опциональная проверка
+"$ROOT/scripts/setup-worktree.sh" opencode/<agent-id>/<feature-slug>
+cd ../worktree-opencode-<agent-id>-<feature-slug>
 ```
 
 Если текущий каталог является primary worktree, рекомендуется создать linked worktree:

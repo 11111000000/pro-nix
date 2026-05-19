@@ -140,7 +140,7 @@
 
 ```bash
 ROOT="$(git rev-parse --show-toplevel)"
-"$ROOT/scripts/check-worktree.sh"  # опциональная проверка
+"$ROOT/scripts/setup-worktree.sh"  # helper to create linked worktree
 ```
 
 Интерпретация результата:

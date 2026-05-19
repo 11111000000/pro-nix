@@ -63,13 +63,13 @@ cd pro-nix
 
 ```bash
 ROOT="$(git rev-parse --show-toplevel)"
-"$ROOT/scripts/check-worktree.sh"  # опциональная проверка
+"$ROOT/scripts/setup-worktree.sh"  # helper to create linked worktree
 "$ROOT/scripts/setup-worktree.sh" fix/example
 cd ../worktree-fix-example
 ```
 
-Если `check-worktree.sh` сообщает о primary worktree, рекомендуется
-создать linked worktree. Работа в primary допустима при явном согласии юзера. Подробный алгоритм описан в `AGENTS.md`.
+Если текущий каталог является primary worktree, рекомендуется
+создать linked worktree. Работа в primary допустима при явном согласия юзера. Подробный алгоритм описан в `AGENTS.md`.
 
 2. Быстрая проверка контрактов и локального состояния:
 
