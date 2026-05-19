@@ -64,20 +64,10 @@ in
     # for GUI-launched processes; we set the env at ExecStartPost above but ensure the
     # socket is reachable by child processes via profile.d as well.
 
-    # Enable lingering for declared users so user systemd instances can run without
-    # an active login session. This makes the ssh-agent unit startable for users
-    # even when no interactive session exists. We iterate over config.users.users
-    # to enable linger for all declared users.
-    system.activationScripts.ssh-agent-enable-linger = {
-      text = let
-        users = builtins.concatStringsSep " " (builtins.attrNames config.users.users or []);
-      in ''
-        echo "pro-nix: enabling linger for users: ${users}"
-        for u in ${users}; do
-          echo "pro-nix: loginctl enable-linger $u" || true
-          loginctl enable-linger "$u" || true
-        done
-      '';
-    };
+    # Note: enabling lingering is intentionally left to operators. If you need
+    # linger enabled for users so user units run without interactive login,
+    # run `sudo loginctl enable-linger <user>` on the host. This avoids
+    # evaluation-time coupling with users definitions which can cause
+    # module composition errors during `nix eval`.
   };
 }
