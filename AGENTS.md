@@ -8,9 +8,51 @@
 ## Канонический порядок работы
 1. Прочитать `AGENTS.md`, `SURFACE.md`, `HOLO.md`, `README.md`.
 2. Определить Intent — одна доминирующая цель.
-3. Оценить влияние на публичное поведение (SURFACE). Если влияет — обновить `SURFACE.md` и указать Proof.
-4. Внести минимальные изменения в код/конфигурацию.
-5. Прогнать Verify (локальные проверки и тесты).
+3. Определить зону ответственности: файл должен меняться там, где живёт политика, а не там, где проще сделать обход.
+4. Оценить влияние на публичное поведение (SURFACE). Если влияет — обновить `SURFACE.md` и указать Proof.
+5. Внести минимальные изменения в код/конфигурацию.
+6. Запустить минимальный достаточный Verify для затронутой зоны. Полный host build не является проверкой по умолчанию.
+
+## Карта ответственности
+- `SURFACE.md` — публичные контракты и Proof. Менять только при изменении наблюдаемого поведения.
+- `HOLO.md` — инварианты и решения. Менять только для правил, которые должны пережить одну задачу.
+- `README.md` — карта репозитория для человека. Не дублировать подробный процесс агентов.
+- `AGENTS.md` — рабочий протокол агентов: куда вносить правки и как их проверять.
+- `flake.nix` — публичные flake outputs, overlays, apps, checks и передача specialArgs.
+- `configuration.nix` — кросс-хостовая политика NixOS и импорт общих модулей.
+- `modules/*`, `nixos/modules/*` — переиспользуемые NixOS-модули. Они добавляют вклад, но не финализируют хост.
+- `hosts/*` — host-specific финализация и осознанные переопределения.
+- `system-packages.nix` — workstation/runtime package set; не использовать для узкой user-only интеграции.
+- `modules/packages-runtime.nix` — минимальный bootstrap runtime, не рабочая станция.
+- `modules/pro-users*.nix` — пользователи, Home Manager wiring и user-level пакеты для всех пользователей.
+- `emacs/home-manager.nix`, `emacs/core.nix` — декларативная доставка Emacs-профиля.
+- `emacs/base/modules/*.el` — поведение Emacs. Одна функция — одна задача, поведение покрывается ERT.
+- `nix/node-packages/*`, `nix/emacs-recipes/*`, `nix/overlays/*` — упаковка и overlays; package-only правки проверяются сборкой пакета.
+- `scripts/*` — runtime/ops entrypoints. Проверять `--help` или короткий smoke.
+- `tools/*` — проверочные инструменты. Быстрый режим должен быть дефолтным, полный — явным.
+- `tests/contract/*` — Proof для контрактов. Один тест подтверждает один контракт.
+
+## Минимальный Verify
+Правило: сначала проверяется самый маленький затронутый артефакт. Если проверка начинает строить несвязанные closures или host-профили, остановитесь и сузьте команду.
+
+- Документация без изменения поведения: `./tools/surface-lint.sh`.
+- `SURFACE.md` или Proof-реестр: `./tools/surface-lint.sh` и только затронутый Proof.
+- `HOLO.md` или процессные правила: `./tools/surface-lint.sh`.
+- Emacs Lisp синтаксис: `./tools/holo-verify.sh elisp`.
+- Emacs Lisp поведение: целевой ERT-файл или `PRO_PACKAGES_AUTO_INSTALL=0 ./scripts/test-emacs-headless.sh tty`.
+- Nix package derivation: `nix build` только этого derivation.
+- Overlay: `nix eval` наличия атрибута и `nix build` затронутого пакета.
+- Home Manager user package: `nix eval --json .#nixosConfigurations.<host>.config.home-manager.users.<user>.home.packages`.
+- `system-packages.nix`: `tests/contract/unit/09-system-packages-eval.sh` и eval `environment.systemPackages`.
+- NixOS module option/config: `nix eval --json .#nixosConfigurations.<host>.config.<точный.attr>`.
+- systemd unit generation: `./scripts/verify-units.sh` или targeted `systemd-analyze verify`.
+- Host config: сначала `nix eval` точного host-атрибута; host build только если изменена host-level финализация.
+- `flake.nix` outputs/checks/apps: `nix flake show` или targeted `nix eval`; `nix flake check` только если менялись публичные outputs/checks.
+- `scripts/*`: `<script> --help` или минимальный smoke.
+- `tools/*`: запустить изменённый tool в самом дешёвом режиме.
+- Контрактный тест: запустить только изменённый `tests/contract/...` test.
+
+Эскалация к `nix build .#nixosConfigurations.<host>.config.system.build.toplevel`, `nix flake check` или `nix run .#check-all` допустима только когда локальный Proof не покрывает риск, меняется публичный flake output, меняется host finalization, или пользователь явно просит полную проверку.
 
 ## Change Gate
 Любое изменение оформляется через Change Gate.
@@ -62,24 +104,16 @@
 - Агент должен уметь объяснить, почему правка безопасна и как она проверяется.
 
 ## Управление проектом
- - Большие изменения делятся на этапы: Surface, Proof, Code, Verify.
- - Если изменение затрагивает несколько подсистем, сначала сократите Intent.
- - Если правка требует миграции, опишите rollback заранее.
- - Если изменения можно выразить меньшим количеством файлов, так и делайте.
-
-
-## Управление проектом
 - Большие изменения делятся на этапы: Surface, Proof, Code, Verify.
 - Если изменение затрагивает несколько подсистем, сначала сократите Intent.
 - Если правка требует миграции, опишите rollback заранее.
 - Если изменения можно выразить меньшим количеством файлов, так и делайте.
 
 ## Проверки
-- `./tools/surface-lint.sh`
-- `./tools/holo-verify.sh`
-- `nix fmt`
-- `nix flake check`
-- headless ERT для Emacs-изменений
+- Проверки выбираются по разделу «Минимальный Verify».
+- `nix fmt`, `nix flake check` и full host build не являются обязательным дефолтом.
+- Перед коммитом достаточно запустить Proof из Change Gate и быстрый lint для изменённых контрактных документов.
+- Полная матрица запускается перед release, при изменении flake outputs или по явной просьбе пользователя.
 
 ### Обязательный preflight перед `just switch` / `nixos-rebuild switch`
 - Перед live-активацией агент обязан проверить вычислимость профиля пакетов:

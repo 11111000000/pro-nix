@@ -4,6 +4,20 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 echo "Running holo verification from $root"
 
+usage() {
+  cat <<'EOF'
+Usage: tools/holo-verify.sh [unit|--quick|elisp|nixos-fast|full]
+
+Modes:
+  unit, --quick  Быстрые contract/unit проверки. Режим по умолчанию.
+  elisp          Только синтаксис Emacs Lisp модулей.
+  nixos-fast     Явная NixOS-эскалация: build/eval helpers и unit verify.
+  full           Полный набор tests/contract.
+
+Правило: сначала запускайте самый узкий режим, который доказывает изменение.
+EOF
+}
+
 run_elisp_checks() {
   if [ -x "$root/scripts/helper-check-elisp.sh" ]; then
     echo "Running Emacs Lisp parse checks for repo modules..."
@@ -26,6 +40,7 @@ case "$MODE" in
   elisp|--elisp) MODE=elisp ;;
   nixos-fast|--nixos-fast) ;;
   all|--all|full|--full) ;;
+  help|--help|-h) usage; exit 0 ;;
   unit) ;;
   *) echo "Unknown mode: $MODE" >&2; exit 1 ;;
 esac

@@ -35,10 +35,8 @@ Proof: <команды, тесты или файлы, которые подтв�
 ## Checks
 - [ ] Обновлён SURFACE.md, если менялось публичное поведение
 - [ ] Proof для `[FROZEN]` поверхностей добавлен/обновлён
-- [ ] Запущен `nix fmt`
-- [ ] Запущен `nix flake check`
-- [ ] Запущен `./tools/surface-lint.sh`
-- [ ] Запущен `./tools/holo-verify.sh`
+- [ ] Запущен минимальный Proof для затронутой зоны по `AGENTS.md`
+- [ ] Full host build / `nix flake check` запускались только если этого требует риск изменения
 
 ## Migration (только для `[FROZEN]`)
 - Impact: <что меняется>
@@ -89,17 +87,21 @@ Emacs-лисп правила
 
 Проверки и CI
 
-Минимальный набор локальных проверок:
+Локальный цикл начинается с минимального Proof для затронутой зоны. Каноническая таблица выбора проверки находится в `AGENTS.md`, раздел «Минимальный Verify».
+
+Частые быстрые проверки:
 
 ```bash
-./tools/surface-lint.sh
-./tools/holo-verify.sh
-nix flake check
+./tools/surface-lint.sh                 # документы и реестр Proof
+./tools/holo-verify.sh elisp            # синтаксис Emacs Lisp
+nix eval --json .#<точный-атрибут>      # NixOS/Home Manager атрибут
+nix build .#<точный-derivation>         # отдельный пакет или app
 ```
 
-Для полного набора:
+Тяжёлые проверки запускаются только перед release, при изменении публичных flake outputs, host-level финализации или по явной просьбе ревьюера:
 
 ```bash
+nix flake check
 nix run .#check-all
 ```
 
@@ -111,6 +113,7 @@ Pull Request checklist
 4. Для FROZEN есть Migration и Proof
 5. Секреты и machine-local state не попали в коммит
 6. Релевантные Proof-команды запущены
+7. Проверки не шире риска изменения
 
 Безопасная практика разработки
 

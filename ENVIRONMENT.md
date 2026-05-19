@@ -15,10 +15,8 @@
 
 ```bash
 ./bootstrap/install.sh
-just build
-just test
+just check-fast
 just flake-check
-just check-all
 just headless
 just headless-report
 ./scripts/emacs-sync.sh ~/.emacs.d
@@ -33,7 +31,7 @@ just headless-report
 - `headless:*` - Emacs verification entrypoints
 - `emacs:*` - portable Emacs helpers
 
-Prefer `just` targets for routine work. Use `just flake-check` or `just check-huawei` instead of raw `nix` commands unless a lower-level command is explicitly required.
+Prefer the smallest command that proves the change. Use raw `nix eval`/`nix build` for targeted checks when a `just` target would evaluate a broader system profile.
 
 `scripts/emacs-sync.sh` always preserves an existing target tree by moving it aside to `*.backup.<timestamp>` before writing a fresh copy.
 
@@ -51,15 +49,15 @@ When you edit Emacs or Nix, prefer this order:
 
 1. inspect the relevant file
 2. patch the smallest possible area
-3. run `just flake-check`
-4. if the change touches Emacs, run the headless Emacs test
-5. read the latest logs
+3. run the minimal Proof from `AGENTS.md`
+4. escalate only if the local Proof does not cover the risk
+5. read logs only for commands that failed
 
-For routine work, use `just` targets first; avoid typing raw `nix`/`nixos-rebuild` commands unless the task explicitly requires them.
+For routine agent work, avoid full host builds and `nix flake check` unless the task changes flake outputs, host finalization or activation behavior.
 
-If the change touches Emacs UI, test both `tty` and `xorg`.
+If the change touches Emacs UI, test `tty` first. Add `xorg` only for display-manager, EXWM, font, icon or clipboard behavior.
 
-If you need to validate every machine profile, run `just check-all` explicitly. Default checks should stay scoped to `huawei` and should be used only before commit or on explicit request.
+If you need to validate every machine profile, run `just check-all` explicitly. Matrix checks are release/review checks, not the default development loop.
 
 If Nix keeps re-fetching inputs, make sure `flake.lock` is present and that `flake.nix` does not point to drifting branch URLs without a lockfile.
 

@@ -85,16 +85,19 @@ NixOS‑ориентированные инварианты (конфигура�
 24. INV-Activation-Preflight
     Перед `nixos-rebuild switch`/`just switch` выполняются preflight проверки: вычислимость профиля пакетов, unit verify, quick smoke tests. Proof: `scripts/helper-check-nixos-build.sh`, `tests/contract/test_live_activation_smoke.sh`.
 
-25. INV-Host-Matrix-Coverage
+25. INV-Minimal-Verify-First
+    Проверка изменения начинается с минимального затронутого артефакта: отдельный пакет, отдельный модуль или отдельный eval. Полный host build допускается только если правка затрагивает системную сборку целиком или локальная проверка не покрывает риск. Proof: review + целевые `nix build`/`nix eval` команды для изменённого файла.
+
+26. INV-Host-Matrix-Coverage
     Для поддерживаемых хостов (huawei, cf19, vm, ...) определён набор Proofs и smoke tests; изменения в общих модулях требуют проверки в host matrix. Proof: `tests/vm/*`, host-specific `nix build` checks.
 
-26. INV-StateVersion-IsIntentional
+27. INV-StateVersion-IsIntentional
     `system.stateVersion` фиксируется и изменение требует migration plan. Proof: review + CI check for stateVersion drift.
 
-27. INV-Generated-Files-Declarative
+28. INV-Generated-Files-Declarative
     Все /etc/файлы, tmpfiles rules и wrappers должны задаваться декларативно в Nix (environment.etc / systemd.tmpfiles.rules). Proof: `nix eval` and `tests/contract/validate-units.sh`.
 
-28. INV-Options-Versioning
+29. INV-Options-Versioning
     Публичные Nix module options имеют версионирование и migration notes when changed. Proof: `tools/generate-options-md.sh` and CHANGELOG/UPGRADING notes.
 
 

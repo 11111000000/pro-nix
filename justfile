@@ -26,6 +26,16 @@ test HOST:
 
 flake-check:
 	nix flake check
+check-fast:
+	./tools/surface-lint.sh
+	./tools/holo-verify.sh --help >/dev/null
+
+check-docs:
+	./tools/surface-lint.sh
+
+check-elisp:
+	./tools/holo-verify.sh elisp
+
 check-all:
 	nix run .#check-all
 

@@ -72,14 +72,13 @@ cd ../worktree-fix-example
 редактирование до создания linked worktree. Работа в primary допустима
 только при явном согласии юзера. Подробный алгоритм описан в `AGENTS.md`.
 
-2. Быстрая проверка flake и контрактов:
+2. Быстрая проверка контрактов и локального состояния:
 
 ```bash
-nix flake check
-./tools/surface-lint.sh
+just check-fast
 ```
 
-3. Собрать профиль хоста (пример для huawei):
+3. Собрать профиль хоста только при изменении host-level политики или перед активацией:
 
 ```bash
 nix build .#nixosConfigurations.huawei.config.system.build.toplevel
@@ -102,11 +101,13 @@ opencode runtime is the bubblewrap-backed `programs.opencode-bwrap` Home Manager
 module. If you relied on the local `.opencode/` checkout, use the runtime
 installer or `opencode-install-local` to populate a user-local copy.
 
-6. Запустить полный набор проверок (entrypoint):
+6. Запустить полный набор проверок только перед release или по явной просьбе ревьюера:
 
 ```bash
 nix run .#check-all
 ```
+
+Для ускорения цикла разработки сначала проверяйте минимальный затронутый артефакт: отдельный пакет, отдельный модуль или отдельный `nix eval`. Таблица выбора Proof находится в `AGENTS.md`, раздел «Минимальный Verify».
 
 Контракты, Proof и верификация
 
