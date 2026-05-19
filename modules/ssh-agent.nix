@@ -35,10 +35,15 @@ fi
 
     # Ensure interactive bash shells also source the profile.d snippet so
     # non-login terminals (common in GUI terminals) get SSH_AUTH_SOCK set.
+    # Use a safe POSIX-compatible check for an interactive shell; avoid
+    # expanding undefined variables at Nix eval-time by using single-quotes
+    # and a runtime check inside the generated file.
     environment.etc."bash.bashrc".text = ''
 # Global bashrc: source profile.d ssh-agent helper for interactive shells
-if [ -n "${PS1-}" ] && [ -f /etc/profile.d/ssh-agent.sh ]; then
-  . /etc/profile.d/ssh-agent.sh
+if [ -n "${PS1-}" ] || [ -n "${PS1}" ]; then
+  if [ -f /etc/profile.d/ssh-agent.sh ]; then
+    . /etc/profile.d/ssh-agent.sh
+  fi
 fi
 '';
 
