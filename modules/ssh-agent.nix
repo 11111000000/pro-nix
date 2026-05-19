@@ -24,13 +24,26 @@ in
       };
     };
 
-    # Export a small profile.d snippet so that legacy shells and TTYs pick up SSH_AUTH_SOCK
+    # Export a small profile.d snippet so that legacy shells and TTYs pick up SSH_AUTH_SOCK.
+    # Prefer systemd --user environment (set by the ssh-agent unit) when available,
+    # otherwise fall back to the socket under $XDG_RUNTIME_DIR.
     environment.etc."profile.d/ssh-agent.sh".text = ''
 #!/bin/sh
-# Export SSH_AUTH_SOCK if the per-user ssh-agent socket exists
-if [ -n "$XDG_RUNTIME_DIR" ] && [ -S "$XDG_RUNTIME_DIR/ssh-agent.socket" ]; then
+# Try to read SSH_AUTH_SOCK from systemd --user environment if possible.
+if command -v systemctl >/dev/null 2>&1 && systemctl --user show-environment >/dev/null 2>&1; then
+  _val=$(systemctl --user show-environment 2>/dev/null | awk -F'=' '/^SSH_AUTH_SOCK=/{print substr($0,index($0,"=")+1)}' | sed -n '1p') || _val=''
+  if [ -n "${_val}" ]; then
+    export SSH_AUTH_SOCK="${_val}"
+  fi
+fi
+
+# Fallback: if no env var set, use XDG_RUNTIME_DIR socket if present.
+if [ -z "${SSH_AUTH_SOCK-}" ] && [ -n "$XDG_RUNTIME_DIR" ] && [ -S "$XDG_RUNTIME_DIR/ssh-agent.socket" ]; then
   export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 fi
+
+# Clean temporary var
+unset _val
 '';
 
     # Ensure interactive bash shells also source the profile.d snippet so
