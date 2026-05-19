@@ -140,7 +140,7 @@
 
 ```bash
 ROOT="$(git rev-parse --show-toplevel)"
-"$ROOT/scripts/check-worktree.sh"
+"$ROOT/scripts/check-worktree.sh"  # опциональная проверка
 ```
 
 Интерпретация результата:
