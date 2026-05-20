@@ -273,12 +273,15 @@ server:
     # Set to 2 for interactive responsiveness on typical desktop machines.
     settings.max-jobs = 2;
     # Сначала используем публичный кэш и его Fastly-зеркало, чтобы сборка быстрее уходила в готовые бинарники.
+    # pi-crew cache switch branch: pi-crew/cache-switch-20260520152216
+    # Временно предпочитаем fastly mirror; cache.nixos.org остаётся запасным.
     settings.substituters = lib.mkForce [
       "https://nix-mirror.freetls.fastly.net"
       "https://cache.nixos.org"
     ];
     settings.trusted-public-keys = [
-      # TODO: заменить на фактический public key зеркала, если он известен.
+      # NOTE: реальный public key для nix-mirror.freetls.fastly.net неизвестен в этом окружении.
+      # Если известен, заменить REPLACE_WITH_ACTUAL_KEY на фактический ключ.
       "nix-mirror.freetls.fastly.net-1:REPLACE_WITH_ACTUAL_KEY"
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     ];
