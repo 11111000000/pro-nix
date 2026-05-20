@@ -45,14 +45,14 @@
 
 (defcustom pro-ui-default-theme 'tao-yang
   "Default theme to attempt to load early. Set to nil to disable.
-By default pro-nix will attempt to load tao-yang theme if available." 
+By default pro-nix will attempt to load tao-yang theme if available."
   :type '(choice (const :tag "none" nil) symbol)
   :group 'pro-ui)
 
 (defcustom pro-ui-modeline-style 'shaoline
   "Modeline style: 'minimal, 'shaoline or 'doom. Defaults to 'shaoline.
 Modeline packages are only enabled if available and if this value
-is set accordingly." 
+is set accordingly."
   :type '(choice (const minimal) (const shaoline) (const doom))
   :group 'pro-ui)
 
@@ -100,9 +100,6 @@ is set accordingly."
 (defun pro-ui-apply-icons ()
   "Подключить полезные иконки без обязательной зависимости."
   (when (and pro-ui-enable-icons (display-graphic-p))
-    ;; Try preferred icon libraries in order of quality/availability.
-    ;; all-the-icons: classic emacs icon set; nerd-icons / nerd-icons-ibuffer if available;
-    ;; kind-icon used for completion margins.
     (cond
      ((pro-ui--try-require 'nerd-icons)
       (when (pro-ui--try-require 'nerd-icons-ibuffer)
@@ -112,15 +109,10 @@ is set accordingly."
      ((pro-ui--try-require 'all-the-icons)
       (setq all-the-icons-scale-factor 1.0)))
 
-    ;; Completion margin icons (non-fatal)
     (when (pro-ui--try-require 'kind-icon)
       (when (boundp 'corfu-margin-formatters)
         (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)))
 
-    ;; Try to enable icons inside minibuffer completion lists (consult/vertico)
-    ;; Prefer `nerd-icons' integration on NixOS where available; fallback to
-    ;; `all-the-icons' if present. Load these integrations lazily when consult
-    ;; or vertico is loaded to avoid startup cost.
     (with-eval-after-load 'consult
       (cond
        ((pro-ui--try-require 'nerd-icons)
@@ -132,17 +124,13 @@ is set accordingly."
           (when (fboundp 'all-the-icons-completion-mode)
             (all-the-icons-completion-mode 1))))))
 
-    ;; Provide a small minibuffer hint about navigation and actions to help
-    ;; discoverability. This message is non-intrusive and displays in the echo
-    ;; area when minibuffer is entered for the first time in a session.
     (defvar pro--minibuffer-hint-shown nil "Whether the minibuffer hint was shown this session.")
     (defun pro--show-minibuffer-hint-once ()
       "Show a short help line for minibuffer navigation the first time only."
       (unless pro--minibuffer-hint-shown
         (message "TAB/C-i: next • S-TAB: prev • C-n/C-p/C-j/C-k: navigate • C-.: actions • M-.: preview")
         (setq pro--minibuffer-hint-shown t)))
-    (add-hook 'minibuffer-setup-hook #'pro--show-minibuffer-hint-once)
-    ))
+    (add-hook 'minibuffer-setup-hook #'pro--show-minibuffer-hint-once)))
 
 ;; Wire ui subsystems implemented in separate files (pro-nix style).
 (when (file-readable-p (expand-file-name "ui-fonts.el" (file-name-directory (or load-file-name buffer-file-name))))
@@ -160,34 +148,26 @@ is set accordingly."
 (when (file-readable-p (expand-file-name "ui-tty.el" (file-name-directory (or load-file-name buffer-file-name))))
   (ignore-errors (load (expand-file-name "ui-tty.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
 
+(when (fboundp 'add-hook)
   ;; Embark: enable if available to provide quick-actions for candidates
   (when (pro-ui--try-require 'embark)
     (with-eval-after-load 'embark
-      ;; Provide a concise keymap for common actions to be discoverable.
       (let ((map (make-sparse-keymap)))
-        (define-key map (kbd "o") #'embark-act) ;; open/default
-        (define-key map (kbd "d") #'embark-dwim) ;; reveal / dired / default
-        (define-key map (kbd "y") #'embark-copy) ;; copy
-        (define-key map (kbd "g") #'embark-collect) ;; collect for further ops
-        ;; Attach this map as a summary for which-key if available
+        (define-key map (kbd "o") #'embark-act)
+        (define-key map (kbd "d") #'embark-dwim)
+        (define-key map (kbd "y") #'embark-copy)
+        (define-key map (kbd "g") #'embark-collect)
         (when (pro-ui--try-require 'which-key)
           (with-eval-after-load 'which-key
             (which-key-add-key-based-replacements "C-." "Embark actions")))))
-    ;; Register embark-consult integration when available
     (when (pro-ui--try-require 'embark-consult)
       (with-eval-after-load 'embark-consult
         (when (fboundp 'embark-consult-export)
           (ignore-errors (embark-consult-export)))))
 
-    ;; Ensure a convenient binding for embark-act is available in minibuffer.
-    ;; Note: global keybindings belong to emacs-keys.org; here we set only
-    ;; local/minibuffer maps to ensure discoverability in the minibuffer.
     (when (pro-ui--try-require 'embark)
       (define-key minibuffer-local-map (kbd "C-.") #'embark-act)
       (define-key minibuffer-local-completion-map (kbd "C-.") #'embark-act)
-      ;; Register suggestion for a global convenience binding for embark-act
-      ;; rather than applying it here. Modules should not set global keys
-      ;; directly — use pro/register-module-keys and emacs-keys.org.
       (when (pro-ui--try-require 'which-key)
         (with-eval-after-load 'pro-keys
           (condition-case _err
@@ -199,16 +179,10 @@ is set accordingly."
 ;; Embark-Consult: configure default actions and mappings for common types
 (when (pro-ui--try-require 'embark-consult)
   (with-eval-after-load 'embark-consult
-    ;; Ensure embark-consult registers useful collectors.
-    ;; Guard against the variable not being defined yet to avoid "symbol's
-    ;; value as variable is void" during init when packages load in different
-    ;; orders.
     (ignore-errors
       (unless (boundp 'embark-consult-sources)
         (defvar embark-consult-sources nil))
       (add-to-list 'embark-consult-sources 'consult--source-project-buffer))))
-
-    
 
 (defun pro-ui-apply-tabs ()
   "Подключить pro-tabs, если пакет доступен."
@@ -221,10 +195,7 @@ is set accordingly."
 (defun pro-ui-apply-completion ()
   "Подключить полезные подсказки для завершения."
   (when (display-graphic-p)
-    ;; Configure Corfu (in-buffer completion UI) with sane defaults.
     (when (pro-ui--try-require 'corfu)
-      ;; Prefer automatic completion but keep it conservative when needed.
-      ;; Conservative defaults tuned for responsiveness and minimal noise.
       (setq corfu-auto t
             corfu-auto-prefix 2
             corfu-auto-delay 0.12
@@ -238,13 +209,10 @@ is set accordingly."
       (when (fboundp 'global-corfu-mode) (global-corfu-mode 1))
       (when (fboundp 'corfu-history-mode) (corfu-history-mode 1)))
 
-    ;; Integrate Cape (completion at point extensions) if available.
     (when (pro-ui--try-require 'cape)
-      ;; Common useful CAPF backends. Order matters: more specific first.
       (dolist (fn '(cape-file cape-keyword cape-dabbrev))
         (unless (member fn completion-at-point-functions)
           (add-to-list 'completion-at-point-functions fn)))
-      ;; Provide a helper to disable slow ispell capf in programming/text modes.
       (defun pro-ui--disable-ispell-capf ()
         "Remove `ispell-completion-at-point' from `completion-at-point-functions'."
         (setq-local completion-at-point-functions
@@ -252,27 +220,22 @@ is set accordingly."
       (add-hook 'prog-mode-hook #'pro-ui--disable-ispell-capf)
       (add-hook 'text-mode-hook #'pro-ui--disable-ispell-capf))
 
-    ;; Enable Corfu in the minibuffer when Vertico/MCT are not active.
     (defun pro-ui--maybe-enable-corfu-in-minibuffer ()
-      "Enable `corfu-mode' in minibuffer unless Vertico/MCT is active." 
+      "Enable `corfu-mode' in minibuffer unless Vertico/MCT is active."
       (unless (or (bound-and-true-p vertico--input) (bound-and-true-p mct--active))
-        (setq-local corfu-auto nil) ; prefer manual completion in minibuffer
+        (setq-local corfu-auto nil)
         (when (fboundp 'corfu-mode) (corfu-mode 1))))
     (add-hook 'minibuffer-setup-hook #'pro-ui--maybe-enable-corfu-in-minibuffer)
 
-    ;; Improve corfu margin formatting experience if kind-icon present.
-    ;; Guard with `fboundp' in case the package is partially loaded and the
-    ;; formatter symbol is not yet defined.
     (when (and (pro-ui--try-require 'kind-icon)
                (boundp 'corfu-margin-formatters)
                (fboundp 'kind-icon-margin-formatter))
-      (setq kind-icon-default-face 'corfu-default) ;; integrate with corfu theme
+      (setq kind-icon-default-face 'corfu-default)
       (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
-    ;; Gentle corfu face polish for better contrast in common themes.
     (when (fboundp 'set-face-attribute)
       (set-face-attribute 'corfu-default nil :background "#1c1f26" :foreground "#dcdfe4")
-      (set-face-attribute 'corfu-current nil :background "#2a2f36" :foreground "#ffffff" :weight 'bold)))
+      (set-face-attribute 'corfu-current nil :background "#2a2f36" :foreground "#ffffff" :weight 'bold))))
 
 ;; Cursor appearance helpers
 ;; Небольшая утилита: менять цвет и тип курсора в зависимости от
@@ -302,70 +265,68 @@ is set accordingly."
 (defvar-local pro-ui--cursor-last-state nil
   "Последнее применённое состояние курсора для буфера.")
 
+(defun pro-ui--cursor-state-from-input-method (input-method)
+  "Вернуть состояние курсора для INPUT-METHOD.
+Русские методы ввода дают состояние 'russian; пустое или неизвестное
+значение даёт 'english."
+  (if (and input-method
+           (string-match-p "russian\\|cyrill?ic\\|ru" input-method))
+      'russian
+    'english))
+
 (defun pro-ui--detect-cursor-state ()
   "Определить нужное состояние курсора: 'readonly, 'russian или 'english.
-Логика: если буфер в read-only — 'readonly; иначе если активен
-input-method и его имя содержит "russian" или "cyrillic" — 'russian;
-во всех остальных случаях — 'english."
+Если буфер в read-only — 'readonly; иначе состояние берётся из
+`current-input-method'."
   (cond
    (buffer-read-only 'readonly)
-   ((and (boundp 'current-input-method) current-input-method
-         (string-match-p "russian\|cyrill?ic\|ru" current-input-method)) 'russian)
-   (t 'english)))
+   (t (pro-ui--cursor-state-from-input-method
+       (and (boundp 'current-input-method) current-input-method)))))
 
 (defun pro-ui--apply-cursor-for-state (state)
   "Применить визуальные настройки курсора для STATE.
-STATE — один из: 'readonly, 'russian, 'english." 
+STATE — один из: 'readonly, 'russian, 'english."
   (pcase state
     ('readonly
-     ;; Чёрный прямоугольник
      (setq cursor-type 'box)
      (when (fboundp 'set-face-attribute)
        (set-face-attribute 'cursor nil :background pro-ui-cursor-readonly-color)))
     ('russian
-     ;; Оранжевый вертикальный бар
      (setq cursor-type `(bar . ,pro-ui-cursor-bar-width))
      (when (fboundp 'set-face-attribute)
        (set-face-attribute 'cursor nil :background pro-ui-cursor-russian-color)))
     ('english
-     ;; Чёрный вертикальный бар
      (setq cursor-type `(bar . ,pro-ui-cursor-bar-width))
      (when (fboundp 'set-face-attribute)
        (set-face-attribute 'cursor nil :background pro-ui-cursor-english-color)))))
 
 (defun pro-ui--maybe-update-cursor (&rest _args)
-  "Обновить курсор в текущем буфере, если состояние изменилось.
-Подходит для хуков переключения input-method, read-only и смены буфера." 
+  "Обновить курсор в текущем буфере, если состояние изменилось."
   (let ((new-state (pro-ui--detect-cursor-state)))
     (when (not (eq new-state pro-ui--cursor-last-state))
       (setq pro-ui--cursor-last-state new-state)
       (pro-ui--apply-cursor-for-state new-state))))
 
-;; Подключаемся к хукам: переключение метода ввода, переключение read-only,
-;; а также обновления списка буферов (включая переключение буфера/окна).
 (when (fboundp 'add-hook)
   (add-hook 'input-method-activate-hook #'pro-ui--maybe-update-cursor)
   (add-hook 'input-method-inactivate-hook #'pro-ui--maybe-update-cursor)
   (add-hook 'read-only-mode-hook #'pro-ui--maybe-update-cursor)
   (add-hook 'buffer-list-update-hook #'pro-ui--maybe-update-cursor)
-  ;; Применим один раз при инициализации
   (pro-ui--maybe-update-cursor))
 
-    ;; Vertico keybindings: make C-n/C-p behave like minibuffer navigation
-    (when (and (boundp 'vertico-map) (keymapp vertico-map))
-      (define-key vertico-map (kbd "C-n") #'vertico-next)
-      (define-key vertico-map (kbd "C-p") #'vertico-previous)
-      (define-key vertico-map (kbd "M-n") #'vertico-next)
-      (define-key vertico-map (kbd "M-p") #'vertico-previous))
+(when (fboundp 'add-hook)
+  (when (and (boundp 'vertico-map) (keymapp vertico-map))
+    (define-key vertico-map (kbd "C-n") #'vertico-next)
+    (define-key vertico-map (kbd "C-p") #'vertico-previous)
+    (define-key vertico-map (kbd "M-n") #'vertico-next)
+    (define-key vertico-map (kbd "M-p") #'vertico-previous))
 
-    ;; Corfu for terminal sessions.
-    (unless (display-graphic-p)
-      (when (pro-ui--try-require 'corfu-terminal)
-        (when (fboundp 'corfu-terminal-mode) (corfu-terminal-mode 1))))
+  (unless (display-graphic-p)
+    (when (pro-ui--try-require 'corfu-terminal)
+      (when (fboundp 'corfu-terminal-mode) (corfu-terminal-mode 1))))
 
-    ;; Optional cosmetics: candidate icons in the margin.
-    (when (and (pro-ui--try-require 'kind-icon) (boundp 'corfu-margin-formatters) (fboundp 'kind-icon-margin-formatter))
-      (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)))
+  (when (and (pro-ui--try-require 'kind-icon) (boundp 'corfu-margin-formatters) (fboundp 'kind-icon-margin-formatter))
+    (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)))
 
 (provide 'pro-ui)
 
