@@ -196,7 +196,7 @@ gh
   # Tree-sitter CLI: позволяет пользователю (через Emacs/tree-sitter-langs или
   # M-x treesit-install-language-grammar) собрать грамматики локально в
   # ~/.config/emacs/tree-sitter без необходимости system-wide сборки .so.
-  (if builtins.hasAttr "tree-sitter-cli" pkgs then pkgs.tree-sitter-cli else null)
+  pkgs.tree-sitter-cli
   # Tree-sitter tooling: grammars are provided via a dedicated derivation
   # (nix/treesitter-grammars.nix). We do not require the CLI in system
   # packages here to avoid depending on an attribute that may not exist
@@ -344,6 +344,7 @@ gh
    # требуется для локальной сборки пакетов, разработки и отладки зависимостей.
   cmake
   gcc
+  clang
   binutils
   gnumake
   pkg-config
