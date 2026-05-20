@@ -195,23 +195,19 @@ git push origin --delete opencode/<agent-id>/<feature>
 
 Автоматизация: helper-скрипты
 
-Базовый preflight (рекомендуется):
+Ранее в репозитории был helper-скрипт для автоматического создания linked worktree;
+скрипт удалён. Рекомендуемая ручная последовательность для создания worktree:
 
 ```bash
-ROOT="$(git rev-parse --show-toplevel)"
-"$ROOT/scripts/setup-worktree.sh" opencode/<agent-id>/<feature-slug>
-cd ../worktree-opencode-<agent-id>-<feature-slug>
+# создать ветку от origin/main
+git fetch origin
+git checkout -b opencode/<agent-id>/<feature> origin/main
+# добавить отдельный worktree и перейти туда
+git worktree add ../pro-nix-<agent-id>-<feature> opencode/<agent-id>/<feature>
+cd ../pro-nix-<agent-id>-<feature>
 ```
 
-Если текущий каталог является primary worktree, рекомендуется создать linked worktree:
-
-```bash
-ROOT="$(git rev-parse --show-toplevel)"
-"$ROOT/scripts/setup-worktree.sh" opencode/<agent-id>/<feature-slug>
-cd ../worktree-opencode-<agent-id>-<feature-slug>
-```
-
-Дополнительный helper:
+Дополнительный helper (остался):
 
 В репозитории есть `scripts/create-opencode-branch.sh` — он создаёт ветку,
 пишет шаблон метаданных `.opencode/opencode-<agent>.json.template` и пушит ветку.

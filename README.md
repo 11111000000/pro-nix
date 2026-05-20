@@ -59,17 +59,21 @@ git clone git@github.com:11111000000/pro-nix.git
 cd pro-nix
 ```
 
-Рекомендуется перед любой правкой перейти в linked worktree:
+Ранее в репозитории был helper-скрипт для автоматического создания linked worktree; он удалён.
+
+Рекомендация: по возможности работайте в отдельной ветке и (при необходимости)
+используйте ручные возможности git worktree. Пример ручного сценария:
 
 ```bash
-ROOT="$(git rev-parse --show-toplevel)"
-"$ROOT/scripts/setup-worktree.sh"  # helper to create linked worktree
-"$ROOT/scripts/setup-worktree.sh" fix/example
-cd ../worktree-fix-example
+git fetch origin
+git checkout -b opencode/<agent-id>/<feature> origin/main
+git worktree add ../pro-nix-<agent-id>-<feature> opencode/<agent-id>/<feature>
+cd ../pro-nix-<agent-id>-<feature>
 ```
 
-Если текущий каталог является primary worktree, рекомендуется
-создать linked worktree. Работа в primary допустима при явном согласия юзера. Подробный алгоритм описан в `AGENTS.md`.
+Если текущий каталог — primary worktree, допустимо работать в нём при явном
+согласии оператора; в этом случае указывайте в PR/коммите, что правки сделаны
+в primary worktree. Подробные рекомендации по работе с ветками и worktree — в CONTRIBUTING.md.
 
 2. Быстрая проверка контрактов и локального состояния:
 
