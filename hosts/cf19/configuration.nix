@@ -66,6 +66,16 @@
     device = "/dev/disk/by-uuid/c3ff38e8-0de3-427a-983f-86871ed38d32";
     fsType = "ext4";
   };
+
+  # Ensure data partition /dev/sda4 is mounted on this host. UUID discovered during inspection: f422300d-3217-4bb8-b611-e88491c6901d
+  # Используем /mnt/sda4 как точку монтирования; если хотите другое имя — скажите.
+  fileSystems."/mnt/sda4" = lib.mkForce {
+    device = "/dev/disk/by-uuid/f422300d-3217-4bb8-b611-e88491c6901d";
+    fsType = "ext4";
+    # уменьшает запись на диск для больших медиа-хранилищ
+    options = [ "noatime" ];
+  };
+
   swapDevices = [
     { device = "/dev/disk/by-uuid/68ade83c-1e5b-4f37-a13f-2c386be87be6"; }
   ];
