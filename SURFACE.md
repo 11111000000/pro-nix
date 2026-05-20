@@ -45,11 +45,11 @@ Proof — конкретную команду или тест, обеспечи�
 
 - Имя: Git Worktree Policy
   Стабильность: [FLUID]
-  Спецификация: рекомендуется, чтобы агенты (автоматические и люди), вносящие изменения в репозиторий pro-nix, начинали работу в linked worktree. Primary worktree допускается при явном разрешении оператора. В репозитории доступен helper `./scripts/check-worktree.sh` для помощи в проверке окружения.
-  Proof: `./scripts/setup-worktree.sh --help`.
-  Run: `./scripts/setup-worktree.sh`
-  Owner: `AGENTS.md`, `scripts/setup-worktree.sh`
-  Last reviewed: 2026-05-19
+  Спецификация: рекомендуется, чтобы агенты (автоматические и люди), вносящие изменения в репозиторий pro-nix, по возможности использовали linked worktree; primary worktree допускается при явном разрешении оператора. Ранее в репозитории был helper-скрипт для создания linked worktree — он удалён.
+  Proof: none (helper removed)
+  Run: (manual) рекомендация — см. CONTRIBUTING.md
+  Owner: `AGENTS.md`, `CONTRIBUTING.md`
+  Last reviewed: 2026-05-20
   Risk: medium
 
 - Имя: Runtime Packages & Activation
