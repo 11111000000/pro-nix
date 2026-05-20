@@ -29,7 +29,8 @@ docs
 .opencode/
 
 # pi-crew runtime state
-.crew/
+.crew
+.crew/*
 # pi-crew runtime state (ignored entirely)
 # (previously ignored specific subpaths)
 # .crew/state/
