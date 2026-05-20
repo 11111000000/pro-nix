@@ -274,10 +274,12 @@ server:
     settings.max-jobs = 2;
     # Сначала используем публичный кэш и его Fastly-зеркало, чтобы сборка быстрее уходила в готовые бинарники.
     settings.substituters = lib.mkForce [
-      "https://cache.nixos.org"
       "https://nix-mirror.freetls.fastly.net"
+      "https://cache.nixos.org"
     ];
     settings.trusted-public-keys = [
+      # TODO: заменить на фактический public key зеркала, если он известен.
+      "nix-mirror.freetls.fastly.net-1:REPLACE_WITH_ACTUAL_KEY"
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     ];
     gc = {
