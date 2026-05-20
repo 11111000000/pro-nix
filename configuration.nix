@@ -279,10 +279,22 @@ server:
       "https://nix-mirror.freetls.fastly.net"
       "https://cache.nixos.org"
     ];
-    settings.trusted-public-keys = [
-      # NOTE: реальный public key для nix-mirror.freetls.fastly.net неизвестен в этом окружении.
-      # Если известен, заменить REPLACE_WITH_ACTUAL_KEY на фактический ключ.
-      "nix-mirror.freetls.fastly.net-1:REPLACE_WITH_ACTUAL_KEY"
+
+    # Prefer the Fastly mirror as primary substituter and make cache.nixos.org
+    # a fallback by ordering. Also set trusted-substituters so Nix will prefer
+    # verified substitutes from the mirror. The public key for the mirror is
+    # unknown in this environment; the mirror advertises that it serves
+    # pre-signed cache.nixos.org binaries, so no extra key is strictly
+    # necessary. If you have a mirror public key, add it to
+    # settings.trusted-public-keys.
+    settings.trusted-substituters = lib.mkForce [
+      "https://nix-mirror.freetls.fastly.net"
+      "https://cache.nixos.org"
+    ];
+
+    settings.trusted-public-keys = lib.mkForce [
+      # If you have the mirror's public key, place it here (format: name:key)
+      # Example placeholder removed for safety; leaving only cache.nixos.org key.
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     ];
     gc = {
