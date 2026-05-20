@@ -30,6 +30,7 @@ docs
 
 # pi-crew runtime state
 .crew/
+.crew/audit/prune.jsonl
 # pi-crew runtime state (ignored entirely)
 # (previously ignored specific subpaths)
 # .crew/state/
