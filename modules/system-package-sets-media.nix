@@ -7,7 +7,6 @@ with pkgs;
   # not belong to a minimal workstation profile.
   mediaPackages = [
     ffmpeg-full
-    vlc
     mpv
     # thumbnails and helpers
     ffmpegthumbnailer

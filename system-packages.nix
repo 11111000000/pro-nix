@@ -176,8 +176,6 @@ gh
   neofetch
   feh
    xterm
-  pcmanfm
-  xfce.thunar
   ffmpegthumbnailer      # Видео-миниатюры для tumbler
   lm_sensors            # Мониторинг датчиков (температура/вентиляторы).
   stress-ng             # CPU/memory stress testing tool
@@ -388,7 +386,6 @@ gh
    # Медиа: аудио и видео
    # Пакеты для воспроизведения и обработки мультимедиа.
   ffmpeg-full
-  vlc
   mpv
   jami
 

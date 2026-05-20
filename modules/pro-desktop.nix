@@ -37,8 +37,6 @@
     weechat
     feh
     xterm
-    pcmanfm
-    xfce.thunar
     ffmpegthumbnailer
     pavucontrol
     copyq
@@ -59,7 +57,6 @@
     blueman
     obexd
     bluez
-    vlc
     mpv
     deluge
     evince

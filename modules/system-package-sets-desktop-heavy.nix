@@ -16,8 +16,6 @@ with pkgs;
     deluge
     steam
     steam-run
-    pcmanfm
-    xfce.thunar
     pavucontrol
     copyq
     dunst
