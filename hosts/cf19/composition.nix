@@ -14,6 +14,6 @@ in
     runtime.runtimePackages
     ++ dev.devPackages
     ++ exwm.exwmPackages
-    ++ [ gh ]
+    ++ [ gh steam-run ]
   );
 }
