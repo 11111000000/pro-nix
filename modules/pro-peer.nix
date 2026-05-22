@@ -30,13 +30,13 @@ let
     proPeerSync = pkgs.writeShellScriptBin "pro-peer-sync" ''
       #!/usr/bin/env bash
       set -euo pipefail
-      exec /run/current-system/sw/bin/bash /etc/pro-peer-sync-keys.sh --input ${config.pro-peer.keysGpgPath} --out /var/lib/pro-peer/authorized_keys
+      exec ${pkgs.bash}/bin/bash /etc/pro-peer-sync-keys.sh --input ${config.pro-peer.keysGpgPath} --out /var/lib/pro-peer/authorized_keys
     '';
 
     proPeerBackupHidden = pkgs.writeShellScriptBin "pro-peer-backup-hiddenservice" ''
       #!/usr/bin/env bash
       set -euo pipefail
-      exec /run/current-system/sw/bin/bash /etc/pro-peer-backup-hiddenservice.sh --hidden-dir /var/lib/tor/ssh_hidden_service --recipient ${config.pro-peer.torBackupRecipient} --out-dir /var/lib/pro-peer
+      exec ${pkgs.bash}/bin/bash /etc/pro-peer-backup-hiddenservice.sh --hidden-dir /var/lib/tor/ssh_hidden_service --recipient ${config.pro-peer.torBackupRecipient} --out-dir /var/lib/pro-peer
     '';
 
     proPeerEnsureTorPerms = pkgs.writeShellScriptBin "pro-peer-ensure-tor-perms" ''
@@ -53,7 +53,7 @@ let
       #!/usr/bin/env bash
       set -euo pipefail
       WG_PATH="${if config.pro-peer.wireguardConfigPath != null then config.pro-peer.wireguardConfigPath else "wg0"}"
-      exec /run/current-system/sw/bin/bash /etc/pro-peer-wg-quick-wrapper "$WG_PATH"
+      exec ${pkgs.bash}/bin/bash /etc/pro-peer-wg-quick-wrapper "$WG_PATH"
     '');
   };
 
@@ -206,6 +206,7 @@ in
       systemd.services."pro-peer-sync-keys" = {
         description = "Pro‑peer: sync authorized_keys from encrypted file";
         wantedBy = [ "multi-user.target" ];
+<<<<<<< HEAD
         # Ограничиваем CPU: oneshot-задача не должна блокировать интерактивные сессии.
         # Как проверить: `systemctl show pro-peer-sync-keys | grep CPUQuota`
         # CPUAccounting и CPUQuota — защитная мера, не функциональная зависимость.
@@ -215,17 +216,30 @@ in
           # unit does not depend on PATH during activation. This makes the
           # unit reproducible and avoids errors like "env: 'bash': No such
           # file or directory" during `nixos-rebuild switch`.
+=======
+        serviceConfig = {
+          Type = "oneshot";
+>>>>>>> d3c0b56 (Fix dbus reload path around netdev policy)
           ExecStart = "${helpers.proPeerSync}/bin/pro-peer-sync";
           CPUQuota = "30%";
         };
       };
 
+<<<<<<< HEAD
         systemd.timers."pro-peer-sync-keys.timer" = {
           description = "Periodic pro-peer key sync";
           timerConfig = { OnUnitActiveSec = config.pro-peer.keySyncInterval; };
           wantedBy = [ "timers.target" ];
         };
       })
+=======
+      systemd.timers."pro-peer-sync-keys" = {
+        description = "Periodic pro-peer key sync";
+        timerConfig = { OnUnitActiveSec = config.pro-peer.keySyncInterval; };
+        wantedBy = [ "timers.target" ];
+      };
+    })
+>>>>>>> d3c0b56 (Fix dbus reload path around netdev policy)
 
     (lib.mkIf (config.pro-peer.allowTorHiddenService && (config.pro-peer.torBackupRecipient != null)) {
       environment.systemPackages = lib.mkDefault (with pkgs; [ gnupg tar ]);

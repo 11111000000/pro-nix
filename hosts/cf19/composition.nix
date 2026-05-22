@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 let
   # CF-19 should stay lean: enough for shell, Emacs, EXWM and the tools needed
@@ -8,9 +8,12 @@ let
   exwm = import ../../modules/system-package-sets-exwm.nix { inherit pkgs; };
 in
 {
-  environment.systemPackages = with pkgs;
+  # cf19 держит минимальный EXWM-набор; тяжёлые графические пакеты
+  # собираются только в других профилях.
+  environment.systemPackages = lib.mkForce (with pkgs;
     runtime.runtimePackages
     ++ dev.devPackages
     ++ exwm.exwmPackages
-    ++ [ gh tor-browser ];
+    ++ [ gh ]
+  );
 }

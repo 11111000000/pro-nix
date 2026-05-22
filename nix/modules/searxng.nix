@@ -36,10 +36,21 @@ in
       default = "/etc/searxng/settings.yml";
       description = "Путь к settings.yml.";
     };
+
+    settingsText = lib.mkOption {
+      type = lib.types.str;
+      default = ''
+        server:
+          secret_key: "changeme-replace-with-secure-random"
+          base_url: "http://127.0.0.1:8888"
+      '';
+      description = "Текст settings.yml, записываемый в /etc/searxng/settings.yml.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [ cfg.package ];
+    environment.etc."searxng/settings.yml".text = cfg.settingsText;
 
     networking.firewall.allowedTCPPorts = lib.mkDefault [
       (lib.strings.toInt port)

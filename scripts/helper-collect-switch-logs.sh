@@ -44,6 +44,7 @@ env | sort >"$OUTDIR/env.txt" || true
 # Journals for relevant units
 run journal-dbus-broker "$SUDO journalctl -u dbus-broker.service -b --no-pager -n 1000"
 run journal-dbus "$SUDO journalctl -u dbus.service -b --no-pager -n 1000"
+run journal-avahi "$SUDO journalctl -u avahi-daemon.service -b --no-pager -n 800"
 run journal-polkit "$SUDO journalctl -u polkit.service -b --no-pager -n 800"
 run journal-apparmor "$SUDO journalctl -u apparmor.service -b --no-pager -n 400"
 run journal-switch-unit "$SUDO journalctl -u nixos-rebuild-switch-to-configuration -b --no-pager -n 1200 || true"

@@ -28,6 +28,9 @@ testers.nixosTest {
     if "Failed to activate service 'org.freedesktop.systemd1'" in journal:
         raise Exception("system bus failed to activate org.freedesktop.systemd1")
 
+    if "Unknown group \"netdev\"" in journal:
+        raise Exception("dbus policy group netdev is missing")
+
     if "parse failure" in journal:
         raise Exception("avahi service parse failure detected")
 

@@ -23,19 +23,16 @@ let
   hostName = config.networking.hostName;
 in
 {
-  # Samba is useful on LANs but can cause boot/start failures on machines
-  # without a non-loopback IPv4 interface available (nmbd waits for an
-  # interface). Disable by default here to keep `nixos-rebuild switch`
-  # reliable. Hosts that need Samba should enable it in their local
-  # Почему lib.mkDefault: хосты могут отключить; отключение после включения —
-  # ошибка запуска nmbd на машинах без non-loopback IPv4. Хосты переопределят в local.nix.
-  # Enable Samba by default; allow hosts to override. Open firewall via NixOS option.
-  services.samba.enable = lib.mkDefault true;
-  services.samba.openFirewall = lib.mkDefault true;
+  # Samba полезна в LAN, но nmbd может зависать на старте, если нет готового
+  # non-loopback IPv4 интерфейса. Поэтому общий модуль только описывает
+  # конфигурацию, а не включает службу. Хост, которому нужен SMB, включает её
+  # явно в host/local конфигурации.
+  services.samba.enable = lib.mkDefault false;
+  services.samba.openFirewall = lib.mkDefault false;
   # Avahi can fail early during boot if /run/avahi-daemon is missing; ensure
   # tmpfiles create expected runtime directories. Keep avahi enabled for discovery.
-  services.avahi.enable = true;
-  services.avahi.publish.enable = true;
+  services.avahi.enable = lib.mkDefault true;
+  services.avahi.publish.enable = lib.mkDefault true;
   # Configure Samba to be reachable on the local network only and advertise via mDNS
   # Use the declarative settings sections: "global" + per-share sections
   # Gobal Samba parameters are security-sensitive. Prefer them to be applied
@@ -109,7 +106,7 @@ in
   ];
 
   services.syncthing = {
-    enable = true;
+    enable = lib.mkDefault false;
     guiAddress = "127.0.0.1:8384";
     openDefaultPorts = false;
   };

@@ -63,16 +63,10 @@
      # Локальные переопределения конкретного хоста остаются в файле local.nix.
    ] ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ];
 
-  services.searxng = {
-    enable = lib.mkDefault true;
-    listen = lib.mkDefault "127.0.0.1:8888";
-  };
-
-  environment.etc."searxng/settings.yml".text = ''
-server:
-  secret_key: "changeme-replace-with-secure-random"
-  base_url: "http://127.0.0.1:8888"
-'';
+  # TEMP: SearXNG отключён до исправления схемы settings.yml. Невалидный
+  # settings.yml вызывал restart loop searxng.service и усиливал boot/switch
+  # таймауты D-Bus/systemd на cf19.
+  services.searxng.enable = lib.mkForce false;
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 2: Загрузчик системы и параметры ядра — пояснительный блок
@@ -379,9 +373,15 @@ server:
 
   systemd.oomd = {
     enable = true;
+<<<<<<< HEAD
     enableRootSlice = true;
     enableSystemSlice = true;
     enableUserSlices = true;
+=======
+    enableRootSlice = lib.mkDefault false;
+    enableSystemSlice = lib.mkDefault true;
+    enableUserSlices = lib.mkDefault true;
+>>>>>>> d3c0b56 (Fix dbus reload path around netdev policy)
   };
   # Prevent individual services (notably the nix daemon) from taking all CPU.
   # Limit the nix-daemon service and enable default CPU accounting so user processes

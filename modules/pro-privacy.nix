@@ -71,7 +71,9 @@ in {
     };
   };
 
-  services.i2p.enable = true;
+  # I2P — тяжёлый runtime-сервис. Общий privacy-модуль доставляет пакеты и
+  # Tor-клиент, но не должен безусловно запускать I2P на каждом хосте.
+  services.i2p.enable = lib.mkDefault false;
 
   environment.etc."tor/bridges.conf.example".source = ../conf/tor-bridges.conf;
 

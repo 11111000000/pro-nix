@@ -40,6 +40,26 @@
   systemd.services."getty@tty2".enable = true;
   systemd.services."getty@tty3".enable = true;
 
+  # На cf19 live reload системной и пользовательской D-Bus шины во время
+  # switch может приводить к отказам org.freedesktop.systemd1.Manager.
+  # Источник риска — policy avahi с `group="netdev"`, которую dbus перечитывает
+  # в ходе активации. Гарантируем, что группа существует, и запрещаем live
+  # reload/restart dbus в процессе switch.
+  users.groups.netdev = lib.mkForce { };
+
+  systemd.services.dbus = {
+    reloadIfChanged = lib.mkForce false;
+    restartIfChanged = lib.mkForce false;
+    restartTriggers = lib.mkForce [ ];
+    stopIfChanged = lib.mkForce false;
+  };
+
+  systemd.user.services.dbus = {
+    reloadIfChanged = lib.mkForce false;
+    restartIfChanged = lib.mkForce false;
+    restartTriggers = lib.mkForce [ ];
+    stopIfChanged = lib.mkForce false;
+  };
   powerManagement.resumeCommands = lib.mkAfter ''
     for n in XHCI RP05; do
       if ${pkgs.gawk}/bin/gawk -v d="$n" '$1==d && $3 ~ /\*enabled/' /proc/acpi/wakeup >/dev/null 2>&1; then
@@ -80,6 +100,13 @@
     { device = "/dev/disk/by-uuid/68ade83c-1e5b-4f37-a13f-2c386be87be6"; }
   ];
 
+<<<<<<< HEAD
+=======
+  # Cinnamon не нужен на cf19: оставляем GDM + EXWM, но убираем тяжёлый
+  # desktop branch. TTY-login сохраняется через tty1/tty2/tty3 и getty.
+  services.xserver.desktopManager.cinnamon.enable = lib.mkForce false;
+
+>>>>>>> d3c0b56 (Fix dbus reload path around netdev policy)
   # Enable fbterm service on tty2 for improved font rendering/color in a
   # framebuffer terminal. This is experimental; disable if it causes issues.
   systemd.services."fbterm-tty2".enable = true;

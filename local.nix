@@ -2,9 +2,10 @@
 { config, pkgs, ... }:
 
 {
-  # Per-host overrides for this machine (cf19). Enable Samba for local LAN use.
-  services.samba.enable = true;
-  services.samba.openFirewall = true;
+  # TEMP: Samba отключена на cf19 до отдельной диагностики nmbd. В проблемной
+  # сборке samba-nmbd зависал на старте и усиливал boot/switch timeout cascade.
+  services.samba.enable = false;
+  services.samba.openFirewall = false;
 
   # Let Samba bind to available interfaces so it works on any Wi‑Fi network
   # without hardcoding a CIDR at evaluation time. This makes Samba come up
