@@ -57,10 +57,6 @@ let
     exec ${llmResearchEnv}/bin/jupyter-lab "$@"
   '';
 
-  
-
-  
-
   # Utility to install/update a local per-user opencode binary in a well-known
   # location. The repository previously included a local `.opencode/` checkout
   # and node_modules which caused builds to attempt packaging opencode plugins.
