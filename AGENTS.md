@@ -115,6 +115,34 @@
 - Перед коммитом достаточно запустить Proof из Change Gate и быстрый lint для изменённых контрактных документов.
 - Полная матрица запускается перед release, при изменении flake outputs или по явной просьбе пользователя.
 
+### Как тестировать этот репозиторий
+- Базовый lint для документов контракта и процессов:
+  - `./tools/surface-lint.sh`
+- Проверка Emacs Lisp:
+  - синтаксис: `./tools/holo-verify.sh elisp`
+  - поведение: целевой ERT-файл или `PRO_PACKAGES_AUTO_INSTALL=0 ./scripts/test-emacs-headless.sh tty`
+- Проверка systemd unit-ов:
+  - `./scripts/verify-units.sh`
+  - либо targeted `systemd-analyze verify` для конкретного unit-файла
+- Проверка скриптов:
+  - `<script> --help` или минимальный smoke-run
+- Проверка Nix package/overlay:
+  - `nix build` только затронутого derivation
+  - `nix eval` наличия нужного атрибута
+- Проверка NixOS module/host config:
+  - `nix eval --json .#nixosConfigurations.<host>.config.<точный.attr>`
+  - host build только если изменена host-level финализация
+- Проверка flake outputs/checks/apps:
+  - `nix flake show` или targeted `nix eval`
+  - `nix flake check` только при изменении публичных outputs/checks
+- Проверка VM/контрактных регрессий:
+  - запуск только изменённого `tests/vm/*` или `tests/contract/*`
+  - для VM-тестов используйте `nix build .#checks.x86_64-linux.<имя>`
+- Проверка live-активации перед `just switch` / `nixos-rebuild switch`:
+  - сначала `nix --extra-experimental-features 'nix-command flakes' eval --json .#nixosConfigurations.<host>.config.environment.systemPackages`
+  - для изменений в `system-packages.nix` дополнительно `tests/contract/unit/09-system-packages-eval.sh`
+  - если preflight/eval падает, live-активация запрещена
+
 ### Обязательный preflight перед `just switch` / `nixos-rebuild switch`
 - Перед live-активацией агент обязан проверить вычислимость профиля пакетов:
   - `nix --extra-experimental-features 'nix-command flakes' eval --json .#nixosConfigurations.<host>.config.environment.systemPackages`
