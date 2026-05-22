@@ -206,40 +206,19 @@ in
       systemd.services."pro-peer-sync-keys" = {
         description = "Pro‑peer: sync authorized_keys from encrypted file";
         wantedBy = [ "multi-user.target" ];
-<<<<<<< HEAD
-        # Ограничиваем CPU: oneshot-задача не должна блокировать интерактивные сессии.
-        # Как проверить: `systemctl show pro-peer-sync-keys | grep CPUQuota`
-        # CPUAccounting и CPUQuota — защитная мера, не функциональная зависимость.
         serviceConfig = {
           Type = "oneshot";
-          # Use absolute path to bash from the current system profile so the
-          # unit does not depend on PATH during activation. This makes the
-          # unit reproducible and avoids errors like "env: 'bash': No such
-          # file or directory" during `nixos-rebuild switch`.
-=======
-        serviceConfig = {
-          Type = "oneshot";
->>>>>>> d3c0b56 (Fix dbus reload path around netdev policy)
           ExecStart = "${helpers.proPeerSync}/bin/pro-peer-sync";
           CPUQuota = "30%";
         };
       };
 
-<<<<<<< HEAD
-        systemd.timers."pro-peer-sync-keys.timer" = {
-          description = "Periodic pro-peer key sync";
-          timerConfig = { OnUnitActiveSec = config.pro-peer.keySyncInterval; };
-          wantedBy = [ "timers.target" ];
-        };
-      })
-=======
       systemd.timers."pro-peer-sync-keys" = {
         description = "Periodic pro-peer key sync";
         timerConfig = { OnUnitActiveSec = config.pro-peer.keySyncInterval; };
         wantedBy = [ "timers.target" ];
       };
     })
->>>>>>> d3c0b56 (Fix dbus reload path around netdev policy)
 
     (lib.mkIf (config.pro-peer.allowTorHiddenService && (config.pro-peer.torBackupRecipient != null)) {
       environment.systemPackages = lib.mkDefault (with pkgs; [ gnupg tar ]);

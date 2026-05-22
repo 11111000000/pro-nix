@@ -373,15 +373,9 @@
 
   systemd.oomd = {
     enable = true;
-<<<<<<< HEAD
-    enableRootSlice = true;
-    enableSystemSlice = true;
-    enableUserSlices = true;
-=======
     enableRootSlice = lib.mkDefault false;
     enableSystemSlice = lib.mkDefault true;
     enableUserSlices = lib.mkDefault true;
->>>>>>> d3c0b56 (Fix dbus reload path around netdev policy)
   };
   # Prevent individual services (notably the nix daemon) from taking all CPU.
   # Limit the nix-daemon service and enable default CPU accounting so user processes

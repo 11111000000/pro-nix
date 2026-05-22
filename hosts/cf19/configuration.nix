@@ -100,13 +100,9 @@
     { device = "/dev/disk/by-uuid/68ade83c-1e5b-4f37-a13f-2c386be87be6"; }
   ];
 
-<<<<<<< HEAD
-=======
   # Cinnamon не нужен на cf19: оставляем GDM + EXWM, но убираем тяжёлый
   # desktop branch. TTY-login сохраняется через tty1/tty2/tty3 и getty.
   services.xserver.desktopManager.cinnamon.enable = lib.mkForce false;
-
->>>>>>> d3c0b56 (Fix dbus reload path around netdev policy)
   # Enable fbterm service on tty2 for improved font rendering/color in a
   # framebuffer terminal. This is experimental; disable if it causes issues.
   systemd.services."fbterm-tty2".enable = true;
