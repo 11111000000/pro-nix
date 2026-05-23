@@ -56,6 +56,7 @@
       ./modules/host-policies.nix
       ./modules/headscale.nix
       ./modules/pro-desktop.nix
+      ./modules/pro-profiles.nix
       ./modules/nix-cuda-compat.nix
       ./nixos/modules/zram-slice.nix
       ./nix/modules/searxng.nix

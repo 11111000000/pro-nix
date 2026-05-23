@@ -1,7 +1,13 @@
 { lib, pkgs, ... }:
 
 {
-  imports = [ ../../modules/pro-users.nix ];
+  # CF-19: host-конфигурация описывает только железо и специфические
+  # переопределения. Профиль окружения (минимальный EXWM и базовые пакеты)
+  # задаётся через общие модули и hosts/cf19/composition.nix.
+  imports = [
+    ../../modules/pro-users.nix
+    ./composition.nix
+  ];
 
   # CF-19: Panasonic Let's Note CF-MX — BIOS-загрузка через GRUB без EFI-слоя.
   networking.hostName = "cf19";
