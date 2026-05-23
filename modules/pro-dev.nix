@@ -47,7 +47,6 @@
     graphviz
     plantuml
     nodePackages.mermaid-cli
-    haskellPackages.haskell-language-server
     emacsPackages.eldev
     emacsPackages.cask
   ];
