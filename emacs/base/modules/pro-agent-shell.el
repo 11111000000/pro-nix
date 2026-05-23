@@ -19,7 +19,10 @@
       (if (fboundp 'agent-shell)
           (call-interactively #'agent-shell)
         (message "[pro-agent-shell] пакет agent-shell загружен, но команда agent-shell недоступна"))
-    (message "[pro-agent-shell] пакет agent-shell не найден (MELPA/Nix). Проверьте package archives и load-path")))
+    (let ((declared (and (boundp 'pro-packages-provided-by-nix) (memq 'agent-shell pro-packages-provided-by-nix))))
+      (if declared
+          (message "[pro-agent-shell] пакет agent-shell объявлен в Nix, но не найден в runtime. Проверьте ваш Nix-профиль / home-manager и перезапустите Emacs. Временно: M-x pro-packages-install RET agent-shell")
+        (message "[pro-agent-shell] пакет agent-shell не найден (MELPA/Nix). Проверьте package archives и load-path; можно установить временно: M-x pro-packages-install RET agent-shell"))))
 
 (ignore-errors
   ;; Подгружаем пакет без жёсткой зависимости, чтобы модуль оставался безопасным
