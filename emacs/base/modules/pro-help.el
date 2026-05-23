@@ -28,13 +28,16 @@
   ;; Which-key (idle 3s)
   (when (pro-ui--try-require 'which-key)
     (setq which-key-idle-delay 3.0)
-    (which-key-mode 1)
+    (when (fboundp 'which-key-mode)
+      (which-key-mode 1))
     
-    (when (and (display-graphic-p) (pro-ui--try-require 'which-key-posframe))
+    (when (and (display-graphic-p) (pro-ui--try-require 'which-key-posframe)
+               (fboundp 'which-key-posframe-mode))
       (which-key-posframe-mode 1)))
 
   ;; Eldoc-box (GUI только)
-  (when (and (display-graphic-p) (pro-ui--try-require 'eldoc-box))
+  (when (and (display-graphic-p) (pro-ui--try-require 'eldoc-box)
+             (fboundp 'eldoc-box-hover-mode))
     (add-hook 'eldoc-mode-hook #'eldoc-box-hover-mode))
 
   ;; Keyfreq

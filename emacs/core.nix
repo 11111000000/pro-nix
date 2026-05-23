@@ -62,7 +62,10 @@ in
     home.sessionVariables = {
       QUOTING_STYLE = "literal";
       LANG = "ru_RU.UTF-8";
-      EMACSLOADPATH = "${lib.concatStringsSep ":" (map (pkg: "${pkg}/share/emacs/site-lisp") availableProvidedNix)}:${config.home.homeDirectory}/.config/emacs/modules:";
+      EMACSLOADPATH = lib.concatStringsSep ":" (lib.filter (s: s != "") ([
+        (lib.concatStringsSep ":" (map (pkg: "${pkg}/share/emacs/site-lisp") availableProvidedNix))
+        "${config.home.homeDirectory}/.config/emacs/modules"
+      ]));
       PRO_PACKAGES_AUTO_INSTALL = "1";
     };
 

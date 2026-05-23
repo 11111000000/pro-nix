@@ -310,13 +310,6 @@ is set accordingly."
 
 (defun pro-ui-apply-cursor-chg ()
   "Инициализировать динамический курсор."
-  (defun pro-ui--maybe-update-cursor (&rest _args)
-    "Обновить курсор в текущем буфере, если состояние изменилось."
-    (let ((new-state (pro-ui--detect-cursor-state)))
-      (when (not (eq new-state pro-ui--cursor-last-state))
-        (setq pro-ui--cursor-last-state new-state)
-        (pro-ui--apply-cursor-for-state new-state))))
-
   (add-hook 'input-method-activate-hook #'pro-ui--maybe-update-cursor)
   (add-hook 'input-method-inactivate-hook #'pro-ui--maybe-update-cursor)
   (add-hook 'read-only-mode-hook #'pro-ui--maybe-update-cursor)
@@ -337,10 +330,6 @@ is set accordingly."
   (when (and (pro-ui--try-require 'kind-icon) (boundp 'corfu-margin-formatters) (fboundp 'kind-icon-margin-formatter))
     (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)))
 
-(provide 'pro-ui)
-
-;;; pro-ui.el ends here
-
 ;; Helper: check icon fonts availability and print install guidance
 (defun pro-ui-check-icon-fonts ()
   "Check for common icon fonts (Nerd Fonts / all-the-icons) and print guidance.
@@ -358,3 +347,7 @@ message with recommendations (manual and Home-Manager snippets).
     (if found
         (message "Icon fonts available: %s" (string-join (nreverse found) ", "))
       (message "No Nerd / icon fonts found. See docs/ICON-FONTS.md for installation instructions."))))
+
+(provide 'pro-ui)
+
+;;; pro-ui.el ends here
