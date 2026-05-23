@@ -4,19 +4,35 @@
 |------------+---------+---------------------------------------+----------------------------------|
 | Навигация  | C-s     | consult-line                          | Поиск по текущему буферу         |
 | Навигация  | C-x b   | pro/consult-buffer                    | Смена буфера (helper)            |
-| Навигация  | C-x C-b | pro/consult-buffer                    | Смена буфера                     |
+| Навигация  | C-x C-b | pro/consult-buffer-other-window       | Смена буфера в другом окне       |
+| Навигация  | M-s s   | consult-line                          | Поиск по буферу (alias)          |
+| Навигация  | M-s M-s | consult-line-multi                    | Поиск по нескольким буферам      |
+| Навигация  | C-x y   | consult-yank-from-kill-ring           | Вставка из истории kill-ring     |
 | Навигация  | M-g i   | consult-imenu                         | Символы файла                    |
 | Навигация  | M-g g   | consult-goto-line                     | Переход к строке                 |
 | Поиск      | C-c s   | consult-ripgrep                       | Поиск по проекту                 |
 | Поиск      | C-c f   | pro/consult-find                      | Поиск файла (project-aware)      |
+| Поиск      | M-s d   | consult-dash                          | Поиск по документации            |
 | Поиск      | C-c p s | pro-project-ripgrep                   | Поиск в проекте                  |
 | Поиск      | C-c p f | pro-project-find-file                 | Файл проекта                     |
+| Поиск      | C-c C-f | consult-find                          | Поиск файла (consult)            |
 | UI         | C-=     | pro-ui-zoom-in                        | Увеличить шрифт                  |
 | UI         | C--     | pro-ui-zoom-out                       | Уменьшить шрифт                  |
 | UI         | C-0     | pro-ui-zoom-reset                     | Сбросить масштаб                 |
+| UI         | C-c u   | undo-tree-visualize                   | Визуализировать историю отмен   |
 | UI         | M-/     | eldoc-box-help-at-point               | Подсказка под курсором           |
 | EXWM       | s-r     | exwm-reset                            | Сброс окна EXWM                  |
 | EXWM       | s-w     | exwm-workspace-switch                 | Переключить рабочее пространство |
+| EXWM       | s-t     | pro-tabs-open-new-tab                 | Новая вкладка                    |
+| EXWM       | s-T     | tab-bar-undo-close-tab                | Восстановить вкладку             |
+| EXWM       | s-h     | windmove-left                         | Переместить фокус влево         |
+| EXWM       | s-j     | windmove-down                         | Переместить фокус вниз          |
+| EXWM       | s-k     | windmove-up                            | Переместить фокус вверх         |
+| EXWM       | s-l     | windmove-right                        | Переместить фокус вправо        |
+| EXWM       | s-H     | buf-move-left                         | Переместить буфер влево         |
+| EXWM       | s-J     | buf-move-down                         | Переместить буфер вниз          |
+| EXWM       | s-K     | buf-move-up                           | Переместить буфер вверх         |
+| EXWM       | s-L     | buf-move-right                        | Переместить буфер вправо        |
 | EXWM       | s-&     | async-shell-command                   | Запуск команды                   |
 | ORG        | C-c K   | pro-org-open-keys-file                | Открыть файл клавиш              |
 | Completion | C-c o f | cape-file                             | Источник файлов для CAPF         |
@@ -26,12 +42,19 @@
 | Completion | C-c o s | cape-symbol                           | Символы                          |
 | Completion | C-c o a | cape-abbrev                           | Аббревиатуры                     |
 | Completion | C-c o . | completion-at-point                   | Вызвать CAPF                     |
+| Completion | C-c o p | completion-at-point                   | CAPF (alias из pro)              |
+| Completion | C-c o t | complete-tag                          | Дополнить тег                    |
+| Completion | C-c o i | cape-ispell                           | Орфография                       |
+| Completion | C-c o l | cape-line                             | Строка из буфера                 |
+| Completion | C-c o w | cape-wrap-prefix                     | Обёртка префикса                 |
 | Snippet    | C-c y y | consult-yasnippet                     | Выбор сниппета                   |
 | LSP        | C-c C-. | consult-eglot-symbols                 | Поиск символов LSP               |
 | Навигация  | M-g g   | avy-goto-char                         | Прыжок к символу                 |
 | Выделение  | M-SPC   | er/expand-region                      | Расширение выделения             |
 | Проекты    | C-c p p | projectile-switch-project             | Сменить проект                   |
 | Проекты    | C-c p f | projectile-find-file                  | Файл в проекте                   |
+| Проекты    | C-c C-p | projectile-switch-project             | Сменить проект (alias)          |
+| Проекты    | C-c pa  | projectile-add-known-project          | Добавить проект                  |
 | Дерево     | s-d     | treemacs                              | Открыть дерево                   |
 | AI         | C-c a   | pro-ai-open-entry                     | Вход в AI                        |
 | AI         | C-c A   | pro-agent-open                        | agent-shell                      |
@@ -49,6 +72,7 @@
 | Git        | C-c g   | pro-git-status                        | Magit status                     |
 | Org        | C-c o   | org-agenda                            | Повестка                         |
 | Ключи      | C-c k   | pro-keys-reload                       | Перезагрузить клавиши            |
+| Ключи      | C-c M-k | pro-keys-reload                       | Перезагрузить клавиши (alias)    |
 | Suggested  | C-c v y | pro/vterm-yank                        | suggested from terminals         |
 | Suggested  | C-c v i | pro/vterm-interrupt                   | suggested from terminals         |
 | Suggested  | C-c v c | vterm-copy-mode                       | suggested from terminals         |

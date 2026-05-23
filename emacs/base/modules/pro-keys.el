@@ -171,8 +171,12 @@
                 ((memq sym '(cape-keyword cape-symbol cape-file cape-dabbrev cape-history)) (ignore-errors (require 'cape nil t) (ignore-errors (require 'cape-keyword nil t))))
                 ((memq sym '(projectile-find-file projectile-switch-project)) (ignore-errors (require 'projectile nil t)))
                 ((memq sym '(treemacs)) (ignore-errors (require 'treemacs nil t)))
-                ((memq sym '(consult-imenu consult-ripgrep consult-goto-line consult-yasnippet consult-eglot-symbols)) (ignore-errors (require 'consult nil t)))
+                ((memq sym '(consult-imenu consult-ripgrep consult-goto-line consult-yasnippet consult-eglot-symbols consult-line-multi consult-yank-from-kill-ring consult-find)) (ignore-errors (require 'consult nil t)))
+                ((memq sym '(consult-dash)) (ignore-errors (require 'consult-dash nil t)))
                 ((memq sym '(eldoc-box-help-at-point)) (ignore-errors (require 'eldoc-box nil t)))
+                ((memq sym '(undo-tree-visualize)) (ignore-errors (require 'undo-tree nil t)))
+                ((memq sym '(buf-move-left buf-move-right buf-move-up buf-move-down)) (ignore-errors (require 'buffer-move nil t)))
+                ((memq sym '(cape-ispell cape-line cape-wrap-prefix)) (ignore-errors (require 'cape nil t)))
                 ((memq sym '(exwm-reset exwm-workspace-switch)) (when (display-graphic-p) (ignore-errors (require 'exwm nil t)))))
              ;; If symbol contains a slash (eg. er/expand-region), try requiring
              ;; both parts as packages: before and after the slash.
