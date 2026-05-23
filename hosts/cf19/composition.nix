@@ -1,8 +1,8 @@
 { lib, ... }:
 
 {
-  # CF-19 больше не собирает systemPackages вручную. Этот модуль только
-  # включает профиль минимального EXWM-окружения, а базовый набор пакетов
-  # формируется общими модулями (packages-runtime.nix, system-packages.nix).
+  # CF-19 использует EXWM как минимальную графическую среду и отдельно
+  # получает компактный прикладной desktop-слой без тяжёлого desktop branch.
   pro.profiles.exwmMinimal.enable = lib.mkDefault true;
+  pro.profiles.exwmDesktop.enable = lib.mkDefault true;
 }

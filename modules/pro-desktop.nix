@@ -26,43 +26,10 @@
     ./session-cinnamon.nix
   ];
 
+  # Базовая desktop-настройка по-прежнему включает EXWM-сессию, шрифты и
+  # аудиостек. Тяжёлый прикладной GUI-слой (браузеры, мессенджеры и пр.)
+  # вынесен в отдельный модуль pro-exwm-desktop.nix, который может
+  # подключаться только на тех хостах, где он действительно нужен.
   programs.firefox.enable = true;
   programs.firefox.package = pkgs.firefox;
-
-  environment.systemPackages = with pkgs; [
-    chromium
-    telegram-desktop
-    element-desktop
-    jami
-    weechat
-    feh
-    xterm
-    ffmpegthumbnailer
-    pavucontrol
-    copyq
-    scrot
-    udiskie
-    dunst
-    pasystray
-    libnotify
-    volumeicon
-    caffeine-ng
-    redshift
-    flameshot
-    batsignal
-    playerctl
-    baobab
-    duc
-    networkmanagerapplet
-    blueman
-    obexd
-    bluez
-    mpv
-    deluge
-    evince
-    zathura
-    lm_sensors
-    powertop
-    acpi
-  ];
 }
