@@ -21,35 +21,20 @@
 
 {
   environment.systemPackages = lib.mkDefault (with pkgs; [
-    chromium
-    telegram-desktop
-    element-desktop
-    jami
-    weechat
     feh
     xterm
-    ffmpegthumbnailer
-    pavucontrol
-    copyq
     scrot
-    udiskie
-    dunst
     pasystray
     libnotify
     volumeicon
     caffeine-ng
     redshift
-    flameshot
     batsignal
     playerctl
-    baobab
-    duc
     networkmanagerapplet
     blueman
     obexd
     bluez
-    mpv
-    deluge
     evince
     zathura
     lm_sensors
