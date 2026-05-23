@@ -141,6 +141,7 @@ EOF
         };
         basic-activation-test = import ./tests/vm/test-basic-activation.nix { inherit (pkgs) testers; };
         cf19-switch-dbus-regression = import ./tests/vm/cf19-switch-dbus-regression.nix { inherit (pkgs) testers; };
+        cf19-vm = import ./tests/vm/cf19-vm.nix { inherit (pkgs) testers; };
       };
 
       apps.${system} = {

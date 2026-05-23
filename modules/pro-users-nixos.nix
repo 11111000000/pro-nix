@@ -18,8 +18,9 @@
           "treemacs" "vertico" "vterm" "yasnippet" "embark-consult" "dash-docs" "consult-dash"
         ];
 
-        extraPackages = [
-          pkgs.piAcp
+        extraPackages = let
+          piAcp = if builtins.hasAttr "piAcp" pkgs then [ pkgs.piAcp ] else [ ];
+        in piAcp ++ [
           pkgs.emacsPackages.ace-window pkgs.emacsPackages.avy pkgs.emacsPackages.cape pkgs.emacsPackages.consult
           pkgs.emacsPackages.consult-dash pkgs.emacsPackages.consult-eglot pkgs.emacsPackages.consult-projectile pkgs.emacsPackages.consult-yasnippet
           pkgs.emacsPackages.corfu pkgs.emacsPackages.dash-docs pkgs.emacsPackages.consult-dash pkgs.emacsPackages.embark-consult

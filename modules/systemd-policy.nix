@@ -35,19 +35,8 @@
     };
   };
 
-  config = lib.mkMerge [
-    {
-      # D-Bus является транспортом для switch-to-configuration и systemd Manager API.
-      # Его live reload/restart во время `nixos-rebuild switch` может разорвать
-      # последующие вызовы StartUnit/RestartUnit/ListUnits. Изменения конфигурации
-      # D-Bus применяются на следующей загрузке, а не внутри текущей активации.
-      systemd.services.dbus.reloadIfChanged = false;
-      systemd.services.dbus.restartIfChanged = false;
-      systemd.services.dbus.stopIfChanged = false;
-    }
-    (lib.mkIf config.systemdPolicy.example {
-      # По умолчанию ничего не меняем; опция служит для тестирования и примера.
-    })
-  ];
+  config = lib.mkIf config.systemdPolicy.example {
+    # По умолчанию ничего не меняем; опция служит для тестирования и примера.
+  };
 
 }

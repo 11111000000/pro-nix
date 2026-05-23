@@ -107,6 +107,8 @@ let
     pkill -INT -u "$USER" -x emacs >/dev/null 2>&1 || pkill -INT -u "$USER" -f 'emacs.*daemon' >/dev/null 2>&1 || true
   '';
 
+  piPkg = if builtins.hasAttr "pi" pkgs then pkgs.pi else null;
+
   piDevCmd = pkgs.writeShellScriptBin "pi-dev" ''
     exec pi "$@"
   '';
@@ -162,7 +164,8 @@ gh
   shfmt
   bat
   tldr
-   piDevCmd
+   piPkg
+  piDevCmd
   
   pipxPkg
     
