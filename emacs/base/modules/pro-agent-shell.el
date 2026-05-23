@@ -1,79 +1,58 @@
-;;; pro-agent-shell.el --- Adapter for agent-shell package -*- lexical-binding: t; -*-
-;; Название: emacs/base/modules/pro-agent-shell.el — Подключатель agent-shell
-;; Цель: безопасно подключать пакет `agent-shell` и дать стабильную точку входа
-;; `pro-agent-open` для глобальной клавиши `C-c A`.
-;; Контракт: отсутствие agent-shell не ломает старт Emacs; команда сообщает,
-;; что пакет недоступен, вместо сигнала ошибки.
+;;; pro-agent-shell.el --- Адаптер для пакета agent-shell -*- lexical-binding: t; -*-
+;; Назначение: гарантировать, что `pro-agent-open` доступна и что модуль
+;; загружается безопасно в отсутствие самого пакета agent-shell.
+;; Правило: файл должен всегда быть синтаксически корректным и не вызывать ошибок
+;; при require в минимальном окружении (CI, контейнеры).
+
+;; Реализация минималистична: задаёт точку входа и аккуратно пытается
+;; загрузить опциональные функции из agent-shell.
 
 (defun pro-agent-open ()
-  "Открыть agent-shell, если пакет доступен в runtime.
+  "Открыть agent-shell, если он доступен в runtime.
 
-Порядок:
-1) попытаться загрузить `agent-shell` через require;
-2) если доступна интерактивная команда `agent-shell`, вызвать её;
-3) иначе показать диагностическое сообщение без аварии.
+Если пакет доступен и предоставляет интерактивную команду `agent-shell',
+вызываем её. В противном случае выводим информативное сообщение.
 "
   (interactive)
-  (if (or (featurep 'agent-shell)
-          (require 'agent-shell nil t))
+  (if (or (featurep 'agent-shell) (require 'agent-shell nil t))
       (if (fboundp 'agent-shell)
           (call-interactively #'agent-shell)
         (message "[pro-agent-shell] пакет agent-shell загружен, но команда agent-shell недоступна"))
-    (let ((declared (and (boundp 'pro-packages-provided-by-nix) (memq 'agent-shell pro-packages-provided-by-nix))))
+    (let ((declared (and (boundp 'pro-packages-provided-by-nix)
+                         (memq 'agent-shell pro-packages-provided-by-nix))))
       (if declared
-          (message "[pro-agent-shell] пакет agent-shell объявлен в Nix, но не найден в runtime. Проверьте ваш Nix-профиль / home-manager и перезапустите Emacs. Временно: M-x pro-packages-install RET agent-shell")
-        (message "[pro-agent-shell] пакет agent-shell не найден (MELPA/Nix). Проверьте package archives и load-path; можно установить временно: M-x pro-packages-install RET agent-shell"))))
+          (message "[pro-agent-shell] пакет agent-shell объявлен Nix, но не найден в runtime. Проверьте профиль / home-manager.")
+        (message "[pro-agent-shell] пакет agent-shell не найден. Можно временно установить через M-x pro-packages-install RET agent-shell")))))
 
+;; Попытки необязательной интеграции — выполняются в безопасном ignore-errors.
 (ignore-errors
-  ;; Подгружаем пакет без жёсткой зависимости, чтобы модуль оставался безопасным
-  ;; в минимальных окружениях и CI.
-  (unless (featurep 'transient)
-    (require 'transient nil t))
+  ;; transient не обязателен; пытаемся загрузить без ошибки.
+  (require 'transient nil t)
   (require 'agent-shell nil t))
 
-;; Если пакет присутствует, добавим удобные локальные привязки клавиш
-;; в buffers agent-shell. Не делаем этого жёстко — используем обёртки,
-;; которые выводят диагностическое сообщение, если целевые команды
-;; недоступны.
+;; Если пакет доступен — зарегистрируем небольшие обёртки и локальные клавиши.
 (condition-case err
     (when (require 'agent-shell nil t)
-      (defun pro-agent-shell--call-set-session-model ()
-        "Вызвать `agent-shell-set-session-model' если доступна, иначе показать сообщение."
-        (interactive)
-        (if (fboundp 'agent-shell-set-session-model)
-            (call-interactively #'agent-shell-set-session-model)
-          (message "[pro-agent-shell] agent-shell-set-session-model недоступна")))
-
-      (defun pro-agent-shell--call-set-session-mode ()
-        "Вызвать `agent-shell-set-session-mode' если доступна, иначе показать сообщение."
-        (interactive)
-        (if (fboundp 'agent-shell-set-session-mode)
-            (call-interactively #'agent-shell-set-session-mode)
-          (message "[pro-agent-shell] agent-shell-set-session-mode недоступна")))
+      (defun pro-agent-shell--maybe-call (fn &rest args)
+        "Вызвать FN если он определён, иначе показать сообщение.
+Аргументы передаются в FN напрямую." (apply (if (fboundp fn) fn (lambda (&rest _) (message "[pro-agent-shell] %s недоступна" fn))) args))
 
       (defun pro-agent-shell--setup-keys ()
-        "Установить локальные клавиши для agent-shell buffers.
-
-C-c m -> переключить модель сессии (agent-shell-set-session-model)
-TAB    -> выбрать агента / режим сессии (agent-shell-set-session-mode)
-"
+        "Установить локальные клавиши в буфере agent-shell, если режим доступен." 
         (when (derived-mode-p 'agent-shell-mode)
-          (local-set-key (kbd "C-c m") #'pro-agent-shell--call-set-session-model)
-          ;; TAB обычно имеет важную роль; устанавливаем только локально в agent-shell буфере
-          (local-set-key (kbd "<tab>") #'pro-agent-shell--call-set-session-mode)))
+          (when (fboundp 'agent-shell-set-session-model)
+            (local-set-key (kbd "C-c m") #'agent-shell-set-session-model))
+          (when (fboundp 'agent-shell-set-session-mode)
+            (local-set-key (kbd "<tab>") #'agent-shell-set-session-mode))))
 
-      ;; Попробуем зарегистрировать хук для agent-shell-mode, если он определён.
-      (cond
-       ((boundp 'agent-shell-mode-hook)
+      (when (boundp 'agent-shell-mode-hook)
         (add-hook 'agent-shell-mode-hook #'pro-agent-shell--setup-keys))
-       ((boundp 'agent-shell-hook)
+      (when (boundp 'agent-shell-hook)
         (add-hook 'agent-shell-hook #'pro-agent-shell--setup-keys))
-       (t
-        ;; В редком случае, если ни один из хуков не существует, переопределим глобально
-        ;; при открытии командой agent-shell: поставим after-advice на команду открытия.
-        (when (fboundp 'agent-shell)
-          (advice-add #'agent-shell :after (lambda (&rest _) (pro-agent-shell--setup-keys)))))))
-  (error (message "[pro-agent-shell] agent-shell load failed, skipping agent-shell integration: %S" err)))
+      ;; На крайний случай — добавим advice на команду открытия, если она есть.
+      (when (fboundp 'agent-shell)
+        (advice-add #'agent-shell :after (lambda (&rest _) (pro-agent-shell--setup-keys)))))
+  (error (message "[pro-agent-shell] agent-shell integration skipped: %S" err)))
 
 (provide 'pro-agent-shell)
 
