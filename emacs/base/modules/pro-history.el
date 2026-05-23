@@ -199,7 +199,7 @@ Returns list of removed files."
   (setq auto-save-timeout 20)
   (setq auto-save-interval 200)
   (setq auto-save-file-name-transforms
-        `((".*" ,(concat (file-name-as-directory pro-history-auto-save-directory) "\1") t)))
+        `((".*" ,(expand-file-name "\\1" (file-name-as-directory pro-history-auto-save-directory)) t)))
   (setq auto-save-list-file-prefix
         (expand-file-name ".saves-" pro-history-auto-save-list-directory)))
 
@@ -220,6 +220,46 @@ Returns list of removed files."
   "If non-nil, enable persistent undo via undo-tree when available." 
   :type 'boolean
   :group 'pro-history)
+
+(defvar pro-history-kill-ring-snapshot-file
+  (pro-history-state-file "kill-ring.el")
+  "File used to persist a snapshot of `kill-ring'.")
+
+(defun pro-history--kill-ring-file-content (ring)
+  "Return a Lisp expression string that stores RING.
+RING is serialised as a plain list of strings to keep the file readable and
+loadable without extra dependencies."
+  (format "(setq kill-ring %S)\n" ring))
+
+(defun pro-history-save-kill-ring-snapshot (&optional file)
+  "Persist the current `kill-ring' to FILE.
+If FILE is nil, use `pro-history-kill-ring-snapshot-file'.
+Returns the written file name."
+  (interactive)
+  (let ((target (or file pro-history-kill-ring-snapshot-file)))
+    (pro-history-ensure-directories)
+    (with-temp-file target
+      (insert (pro-history--kill-ring-file-content kill-ring)))
+    target))
+
+(defun pro-history-load-kill-ring-snapshot (&optional file)
+  "Load `kill-ring' from FILE.
+If FILE is nil, use `pro-history-kill-ring-snapshot-file'.
+Returns non-nil when a snapshot was loaded."
+  (interactive)
+  (let ((target (or file pro-history-kill-ring-snapshot-file)))
+    (when (file-readable-p target)
+      (load-file target)
+      t)))
+
+(defun pro-history-clear-kill-ring-snapshot (&optional file)
+  "Delete FILE used for the `kill-ring' snapshot.
+If FILE is nil, use `pro-history-kill-ring-snapshot-file'."
+  (interactive)
+  (let ((target (or file pro-history-kill-ring-snapshot-file)))
+    (when (file-exists-p target)
+      (delete-file target)
+      t)))
 
 ;; Configure recentf
 (defun pro-history-configure-recentf ()
@@ -285,6 +325,8 @@ Returns list of removed files."
     (setq load-path (remove pro-history-state-directory load-path)))
   (when (member pro-history-cache-directory load-path)
     (setq load-path (remove pro-history-cache-directory load-path)))
+  (when (file-readable-p pro-history-kill-ring-snapshot-file)
+    (ignore-errors (pro-history-load-kill-ring-snapshot)))
   (message "pro-history: initialized (state=%s cache=%s)" pro-history-state-directory pro-history-cache-directory))
 
 ;; Initialize at load

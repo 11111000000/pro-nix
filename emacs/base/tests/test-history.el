@@ -1,6 +1,7 @@
 ;;; test-history.el --- Tests for pro-history layout and policies -*- lexical-binding: t; -*-
 
 (require 'ert)
+(require 'cl-lib)
 (require 'pro-history)
 
 (ert-deftest pro-history/directories-exist ()
@@ -35,6 +36,18 @@
 (ert-deftest pro-history/recentf-file ()
   "recentf-save-file is placed in state dir." 
   (should (string-prefix-p (file-name-as-directory pro-history-state-directory) recentf-save-file)))
+
+(ert-deftest pro-history/kill-ring-snapshot-roundtrip ()
+  "kill-ring snapshot is written and restored as plain strings."
+  (let* ((tmp (make-temp-file "pro-history-kill-ring-" nil ".el"))
+         (kill-ring '("alpha" "beta" "гамма")))
+    (unwind-protect
+        (progn
+          (should (string-suffix-p ".el" (pro-history-save-kill-ring-snapshot tmp)))
+          (setq kill-ring nil)
+          (should (pro-history-load-kill-ring-snapshot tmp))
+          (should (equal kill-ring '("alpha" "beta" "гамма"))))
+      (ignore-errors (delete-file tmp)))))
 
 (provide 'test-history)
 
