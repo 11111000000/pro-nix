@@ -24,49 +24,53 @@
 (ignore-errors
   ;; Подгружаем пакет без жёсткой зависимости, чтобы модуль оставался безопасным
   ;; в минимальных окружениях и CI.
+  (unless (featurep 'transient)
+    (require 'transient nil t))
   (require 'agent-shell nil t))
 
 ;; Если пакет присутствует, добавим удобные локальные привязки клавиш
 ;; в buffers agent-shell. Не делаем этого жёстко — используем обёртки,
 ;; которые выводят диагностическое сообщение, если целевые команды
 ;; недоступны.
-(when (require 'agent-shell nil t)
-  (defun pro-agent-shell--call-set-session-model ()
-    "Вызвать `agent-shell-set-session-model' если доступна, иначе показать сообщение."
-    (interactive)
-    (if (fboundp 'agent-shell-set-session-model)
-        (call-interactively #'agent-shell-set-session-model)
-      (message "[pro-agent-shell] agent-shell-set-session-model недоступна")))
+(condition-case err
+    (when (require 'agent-shell nil t)
+      (defun pro-agent-shell--call-set-session-model ()
+        "Вызвать `agent-shell-set-session-model' если доступна, иначе показать сообщение."
+        (interactive)
+        (if (fboundp 'agent-shell-set-session-model)
+            (call-interactively #'agent-shell-set-session-model)
+          (message "[pro-agent-shell] agent-shell-set-session-model недоступна")))
 
-  (defun pro-agent-shell--call-set-session-mode ()
-    "Вызвать `agent-shell-set-session-mode' если доступна, иначе показать сообщение."
-    (interactive)
-    (if (fboundp 'agent-shell-set-session-mode)
-        (call-interactively #'agent-shell-set-session-mode)
-      (message "[pro-agent-shell] agent-shell-set-session-mode недоступна")))
+      (defun pro-agent-shell--call-set-session-mode ()
+        "Вызвать `agent-shell-set-session-mode' если доступна, иначе показать сообщение."
+        (interactive)
+        (if (fboundp 'agent-shell-set-session-mode)
+            (call-interactively #'agent-shell-set-session-mode)
+          (message "[pro-agent-shell] agent-shell-set-session-mode недоступна")))
 
-  (defun pro-agent-shell--setup-keys ()
-    "Установить локальные клавиши для agent-shell buffers.
+      (defun pro-agent-shell--setup-keys ()
+        "Установить локальные клавиши для agent-shell buffers.
 
 C-c m -> переключить модель сессии (agent-shell-set-session-model)
 TAB    -> выбрать агента / режим сессии (agent-shell-set-session-mode)
 "
-    (when (derived-mode-p 'agent-shell-mode)
-      (local-set-key (kbd "C-c m") #'pro-agent-shell--call-set-session-model)
-      ;; TAB обычно имеет важную роль; устанавливаем только локально в agent-shell буфере
-      (local-set-key (kbd "<tab>") #'pro-agent-shell--call-set-session-mode)))
+        (when (derived-mode-p 'agent-shell-mode)
+          (local-set-key (kbd "C-c m") #'pro-agent-shell--call-set-session-model)
+          ;; TAB обычно имеет важную роль; устанавливаем только локально в agent-shell буфере
+          (local-set-key (kbd "<tab>") #'pro-agent-shell--call-set-session-mode)))
 
-  ;; Попробуем зарегистрировать хук для agent-shell-mode, если он определён.
-  (cond
-   ((boundp 'agent-shell-mode-hook)
-    (add-hook 'agent-shell-mode-hook #'pro-agent-shell--setup-keys))
-   ((boundp 'agent-shell-hook)
-    (add-hook 'agent-shell-hook #'pro-agent-shell--setup-keys))
-   (t
-    ;; В редком случае, если ни один из хуков не существует, переопределим глобально
-    ;; при открытии командой agent-shell: поставим after-advice на команду открытия.
-    (when (fboundp 'agent-shell)
-      (advice-add #'agent-shell :after (lambda (&rest _) (pro-agent-shell--setup-keys)))))))
+      ;; Попробуем зарегистрировать хук для agent-shell-mode, если он определён.
+      (cond
+       ((boundp 'agent-shell-mode-hook)
+        (add-hook 'agent-shell-mode-hook #'pro-agent-shell--setup-keys))
+       ((boundp 'agent-shell-hook)
+        (add-hook 'agent-shell-hook #'pro-agent-shell--setup-keys))
+       (t
+        ;; В редком случае, если ни один из хуков не существует, переопределим глобально
+        ;; при открытии командой agent-shell: поставим after-advice на команду открытия.
+        (when (fboundp 'agent-shell)
+          (advice-add #'agent-shell :after (lambda (&rest _) (pro-agent-shell--setup-keys)))))))
+  (error (message "[pro-agent-shell] agent-shell load failed, skipping agent-shell integration: %S" err)))
 
 (provide 'pro-agent-shell)
 
