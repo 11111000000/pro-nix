@@ -65,13 +65,36 @@ echo "Найден sha256: $sha"
 # Сделать бэкап
 cp -v "$FILE" "$FILE.bak"
 
-# Обновить version и sha256 в блоке с pi-coding-agent
-perl -0777 -pe '
-  my $v = shift @ARGV; my $s = shift @ARGV;
-  # Обновить version внутри блока, где есть pname = "pi-coding-agent";
-  s/(pname\s*=\s*"pi-coding-agent";.*?version\s*=\s*")([^\"]*)(")/"$1".$v."$3"/gs;
-  s/(pname\s*=\s*"pi-coding-agent";.*?sha256\s*=\s*")([^\"]*)(")/"$1".$s."$3"/gs;
-' "$version" "$sha" "$FILE" > "$FILE.tmp" || { echo "Не удалось обновить $FILE" >&2; mv "$FILE.bak" "$FILE"; exit 6; }
+# Обновить version и sha256 в блоке с pi-coding-agent (используем Python для безопасной замены)
+python3 - "$FILE" "$version" "$sha" <<'PY' > "$FILE.tmp"
+import re,sys
+file_path = sys.argv[1]
+version = sys.argv[2]
+sha = sys.argv[3]
+with open(file_path,'r',encoding='utf-8') as f:
+    s = f.read()
+# Найдём блок, содержащий pname = "pi-coding-agent" и в нём заменим version и sha256
+pattern = re.compile(r'(pname\s*=\s*"pi-coding-agent";.*?)(version\s*=\s*")([^\"]*)("|\n)', re.S)
+if pattern.search(s):
+    s = pattern.sub(lambda m: m.group(1) + m.group(2) + version + m.group(4), s, count=1)
+else:
+    sys.stderr.write('Не найден блок pi-coding-agent для обновления version\n')
+
+pattern_sha = re.compile(r'(pname\s*=\s*"pi-coding-agent";.*?)(sha256\s*=\s*")([^\"]*)("|\n)', re.S)
+if pattern_sha.search(s):
+    s = pattern_sha.sub(lambda m: m.group(1) + m.group(2) + sha + m.group(4), s, count=1)
+else:
+    sys.stderr.write('Не найден блок pi-coding-agent для обновления sha256\n')
+
+# Выводим результат в stdout — shell перенаправит в $FILE.tmp
+sys.stdout.write(s)
+PY
+
+if [ ! -f "$FILE.tmp" ]; then
+  echo "Не удалось обновить $FILE" >&2
+  mv "$FILE.bak" "$FILE"
+  exit 6
+fi
 
 mv "$FILE.tmp" "$FILE"
 chmod --reference="$FILE.bak" "$FILE" || true
