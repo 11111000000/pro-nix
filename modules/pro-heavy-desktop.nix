@@ -25,13 +25,6 @@
     jami
     weechat
     ffmpegthumbnailer
-    pavucontrol
-    copyq
-    udiskie
-    dunst
-    flameshot
     baobab
-    duc
-    mpv
   ]);
 }

@@ -40,5 +40,12 @@
     lm_sensors
     powertop
     acpi
+    pavucontrol
+    copyq
+    udiskie
+    dunst
+    flameshot
+    duc
+    mpv
   ]);
 }
