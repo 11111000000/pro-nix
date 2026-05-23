@@ -26,20 +26,7 @@
     extraPortals = lib.mkDefault [ pkgs.xdg-desktop-portal-gtk ];
   };
 
-  environment.systemPackages = lib.mkDefault (with pkgs; [
-    gawk
-    qt5ct
-    qt6ct
-    xorg.xset
-    xorg.xhost
-    xorg.setxkbmap
-    xorg.xsetroot
-    wmname
-    xbindkeys
-    xdotool
-    xclip
-    xauth
-    xvfb-run
+  services.displayManager.sessionPackages = lib.mkDefault [
     (pkgs.runCommand "pro-exwm-xsession" {} ''
       mkdir -p $out/share/xsessions $out/share/wayland-sessions
       cat > $out/share/xsessions/exwm.desktop <<'EOF'
@@ -57,5 +44,21 @@ EOF
       ln -s ../xsessions/exwm.desktop $out/share/wayland-sessions/exwm.desktop
       chmod -R a+rX $out
     '')
+  ];
+
+  environment.systemPackages = lib.mkDefault (with pkgs; [
+    gawk
+    qt5ct
+    qt6ct
+    xorg.xset
+    xorg.xhost
+    xorg.setxkbmap
+    xorg.xsetroot
+    wmname
+    xbindkeys
+    xdotool
+    xclip
+    xauth
+    xvfb-run
   ]);
 }
