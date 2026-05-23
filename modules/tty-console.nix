@@ -12,7 +12,10 @@ Migration: none.
 */
 
 let
-  ttyKeymap = "${pkgs.kbd}/share/keymaps/i386/qwerty/ruwin_alt-CP1251.map.gz";
+  # Use a UTF-8 compatible Russian keymap for virtual consoles.
+  # Previously a CP1251-based map was used which conflicts with system UTF-8 locales
+  # and can make Cyrillic characters invisible in the kernel console.
+  ttyKeymap = "${pkgs.kbd}/share/keymaps/i386/qwerty/ru.map.gz";
   ttyFont = "${pkgs.kbd}/share/consolefonts/latarcyrheb-sun16.psfu.gz";
 in
 {
