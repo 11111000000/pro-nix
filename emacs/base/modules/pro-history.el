@@ -223,7 +223,7 @@ Returns list of removed files."
 
 ;; Configure recentf
 (defun pro-history-configure-recentf ()
-  "Configure recentf to use state directory and exclude pro internals." 
+  "Configure recentf to use state directory and exclude pro internals."
   (ignore-errors (require 'recentf))
   (setq recentf-save-file (pro-history-state-file "recentf.el"))
   (setq recentf-max-saved-items 500)
@@ -237,6 +237,21 @@ Returns list of removed files."
           "\\.elc\\'"
           "\\.eln\\'"
           "/TAGS\\'")))
+
+(defun pro-history-configure-desktop-and-session ()
+  "Configure desktop and session management."
+  (ignore-errors (require 'desktop))
+  (setq desktop-path (list pro-history-session-directory)
+        desktop-base-file-name "emacs.desktop"
+        desktop-base-lock-name "emacs.desktop.lock"
+        desktop-save 'ask-if-new
+        desktop-restore-frames t
+        desktop-files-not-to-save (concat "^$" (regexp-opt '("TAGS" "core" "dired"))))
+  (when (fboundp 'desktop-save-mode)
+    (desktop-save-mode 1))
+  ;; Winner mode for window configuration
+  (when (fboundp 'winner-mode)
+    (winner-mode 1)))
 
 ;; Configure save-place
 (defun pro-history-configure-saveplace ()
@@ -255,6 +270,7 @@ Returns list of removed files."
   (pro-history-configure-savehist)
   (pro-history-configure-recentf)
   (pro-history-configure-saveplace)
+  (pro-history-configure-desktop-and-session)
   ;; Optional: enable persistent undo if undo-tree is available.
   (when (and pro-history-enable-undo-tree (require 'undo-tree nil t))
     (let ((ud-dir (pro-history-state-file "undo")))

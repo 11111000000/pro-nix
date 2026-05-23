@@ -14,9 +14,17 @@
 ;; - Идемпотентность: повторный вызов pro-ui-apply-* функций безопасен.
 ;;
 ;; Proof: headless ERT и ручные smoke-тесты через ./scripts/emacs-pro-wrapper.sh
-;; Last reviewed: 2026-05-03
+;; Last reviewed: 2026-05-23
 
 (require 'subr-x)
+
+;; Улучшение скроллинга
+(setq scroll-conservatively 101       ; плавно скроллить, если точка выходит за экран
+      scroll-margin 5                 ; оставлять N строк видимыми вокруг курсора
+      scroll-step 1
+      scroll-preserve-screen-position t
+      mouse-wheel-scroll-amount '(1 ((shift) . 1)) ; плавность для мыши
+      mouse-wheel-progressive-speed nil)
 
 (defcustom pro-ui-code-font-family "Aporetic Sans Mono"
   "Шрифт для кода."
@@ -266,39 +274,32 @@ is set accordingly."
   "Последнее применённое состояние курсора для буфера.")
 
 (defun pro-ui--cursor-state-from-input-method (input-method)
-  "Вернуть состояние курсора для INPUT-METHOD.
-Русские методы ввода дают состояние 'russian; пустое или неизвестное
-значение даёт 'english."
+  "Вернуть состояние курсора для INPUT-METHOD."
   (if (and input-method
            (string-match-p "russian\\|cyrill?ic\\|ru" input-method))
       'russian
     'english))
 
 (defun pro-ui--detect-cursor-state ()
-  "Определить нужное состояние курсора: 'readonly, 'russian или 'english.
-Если буфер в read-only — 'readonly; иначе состояние берётся из
-`current-input-method'."
+  "Определить нужное состояние курсора: 'readonly, 'russian или 'english."
   (cond
    (buffer-read-only 'readonly)
    (t (pro-ui--cursor-state-from-input-method
        (and (boundp 'current-input-method) current-input-method)))))
 
 (defun pro-ui--apply-cursor-for-state (state)
-  "Применить визуальные настройки курсора для STATE.
-STATE — один из: 'readonly, 'russian, 'english."
-  (pcase state
-    ('readonly
-     (setq cursor-type 'box)
-     (when (fboundp 'set-face-attribute)
-       (set-face-attribute 'cursor nil :background pro-ui-cursor-readonly-color)))
-    ('russian
-     (setq cursor-type `(bar . ,pro-ui-cursor-bar-width))
-     (when (fboundp 'set-face-attribute)
-       (set-face-attribute 'cursor nil :background pro-ui-cursor-russian-color)))
-    ('english
-     (setq cursor-type `(bar . ,pro-ui-cursor-bar-width))
-     (when (fboundp 'set-face-attribute)
-       (set-face-attribute 'cursor nil :background pro-ui-cursor-english-color)))))
+  "Применить визуальные настройки курсора для STATE."
+  (when (display-graphic-p)
+    (pcase state
+      ('readonly
+       (setq cursor-type 'box)
+       (set-face-attribute 'cursor nil :background pro-ui-cursor-readonly-color))
+      ('russian
+       (setq cursor-type `(bar . ,pro-ui-cursor-bar-width))
+       (set-face-attribute 'cursor nil :background pro-ui-cursor-russian-color))
+      ('english
+       (setq cursor-type `(bar . ,pro-ui-cursor-bar-width))
+       (set-face-attribute 'cursor nil :background pro-ui-cursor-english-color))))))
 
 (defun pro-ui--maybe-update-cursor (&rest _args)
   "Обновить курсор в текущем буфере, если состояние изменилось."
@@ -307,7 +308,15 @@ STATE — один из: 'readonly, 'russian, 'english."
       (setq pro-ui--cursor-last-state new-state)
       (pro-ui--apply-cursor-for-state new-state))))
 
-(when (fboundp 'add-hook)
+(defun pro-ui-apply-cursor-chg ()
+  "Инициализировать динамический курсор."
+  (defun pro-ui--maybe-update-cursor (&rest _args)
+    "Обновить курсор в текущем буфере, если состояние изменилось."
+    (let ((new-state (pro-ui--detect-cursor-state)))
+      (when (not (eq new-state pro-ui--cursor-last-state))
+        (setq pro-ui--cursor-last-state new-state)
+        (pro-ui--apply-cursor-for-state new-state))))
+
   (add-hook 'input-method-activate-hook #'pro-ui--maybe-update-cursor)
   (add-hook 'input-method-inactivate-hook #'pro-ui--maybe-update-cursor)
   (add-hook 'read-only-mode-hook #'pro-ui--maybe-update-cursor)

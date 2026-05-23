@@ -2,7 +2,13 @@
 
 let
   cfg = config.pro.emacs;
-  defaultModules = [ "core" "ui" "packages" "package-bootstrap" "text" "nav" "keys" "org" "lisp" "python" "c" "java" "haskell" "project" "git" "ai" "feeds" "chat" "agent" "exwm" ];
+  defaultModules = [
+    "core" "ui" "packages" "package-bootstrap"
+    "text" "nav" "keys" "org" "lisp" "python" "c" "java" "haskell"
+    "project" "git" "ai" "feeds" "chat" "agent" "exwm"
+    "ui-tty" "ui-improvements" "ui-icons" "ui-fringes" "ui-modeline"
+    "history" "dashboard" "help" "windows-popups"
+  ];
   defaultModulesText = lib.concatStringsSep " " defaultModules;
   treeSitterBundle = pkgs.runCommand "pro-emacs-tree-sitter-langs" { nativeBuildInputs = [ pkgs.gnutar ]; } ''
     set -euo pipefail
@@ -32,7 +38,7 @@ in
 
     providedPackages = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [ "magit" "consult" "vertico" "orderless" "marginalia" "gptel" "consult-dash" "dash-docs" "consult-eglot" "consult-yasnippet" "corfu" "cape" "kind-icon" "avy" "expand-region" "yasnippet" "projectile" "treemacs" "consult-projectile" "elfeed" "eglot" "rainbow-delimiters" "nix-mode" "mmm-mode" "org" "ob-mermaid" "vterm" "ace-window" ];
+      default = [ "magit" "consult" "vertico" "orderless" "marginalia" "gptel" "consult-dash" "dash-docs" "consult-eglot" "consult-yasnippet" "corfu" "cape" "kind-icon" "avy" "expand-region" "yasnippet" "projectile" "treemacs" "consult-projectile" "elfeed" "eglot" "rainbow-delimiters" "nix-mode" "mmm-mode" "org" "ob-mermaid" "vterm" "ace-window" "undo-tree" "cursor-chg" "which-key" "which-key-posframe" "eldoc-box" "keyfreq" "helpful" "popper" "buffer-expose" "embark" "embark-consult" ];
       description = "List of Emacs package names (symbols) provided by Nix and exposed to the runtime as pro-packages-provided-by-nix.";
     };
 

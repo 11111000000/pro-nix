@@ -18,6 +18,7 @@
     pro-terminals pro-test-helpers pro-tests pro-tests-keys pro-text
     pro-ui-completion pro-ui-fonts pro-ui-fringes pro-ui-icons
     pro-ui-improvements pro-ui-modeline pro-ui-theme pro-ui-tty
+    pro-dashboard pro-help pro-windows-popups
     pro-vterm-theme pro-windows pro-nav pro-completion)
   "Полный список модулей, загружаемых по умолчанию при старте Emacs.")
 (defvar pro-emacs-base-system-modules-dir nil)
