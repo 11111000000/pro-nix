@@ -103,13 +103,17 @@ in
   systemd.tmpfiles.rules = [
     "d /srv/samba/${hostName} 2775 root pro - -"
     "d /srv/samba/public 2775 az pro - -"
+    "d /srv/syncthing 2775 root pro - -"
+    "d /srv/syncthing/share 2775 root pro - -"
   ];
 
   services.syncthing = {
-    enable = lib.mkDefault false;
+    enable = lib.mkDefault true;
     guiAddress = "127.0.0.1:8384";
     openDefaultPorts = false;
   };
+
+  users.groups.pro.members = lib.mkDefault [ "az" "za" "la" "bo" ];
 
   # Контекст: конфигурация fail2ban зависит от путей логов и локальной политики.
   # Рекомендуется задавать правила и jails на уровне хоста для точной привязки к
