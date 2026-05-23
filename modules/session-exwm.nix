@@ -40,8 +40,8 @@
     xclip
     xauth
     xvfb-run
-    (runCommand "pro-exwm-xsession" {} ''
-      mkdir -p $out/share/xsessions
+    (pkgs.runCommand "pro-exwm-xsession" {} ''
+      mkdir -p $out/share/xsessions $out/share/wayland-sessions
       cat > $out/share/xsessions/exwm.desktop <<'EOF'
 [Desktop Entry]
 Name=EXWM
@@ -54,6 +54,7 @@ X-GNOME-Bugzilla-Bugzilla=Emacs
 X-GNOME-Bugzilla-Product=Emacs
 X-GNOME-Bugzilla-Component=window-manager
 EOF
+      ln -s ../xsessions/exwm.desktop $out/share/wayland-sessions/exwm.desktop
       chmod -R a+rX $out
     '')
   ]);
