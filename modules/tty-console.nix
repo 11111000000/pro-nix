@@ -16,7 +16,7 @@ let
   # Previously a CP1251-based map was used which conflicts with system UTF-8 locales
   # and can make Cyrillic characters invisible in the kernel console.
   ttyKeymap = "${pkgs.kbd}/share/keymaps/i386/qwerty/ru.map.gz";
-  ttyFont = "${pkgs.kbd}/share/consolefonts/latarcyrheb-sun16.psfu.gz";
+  ttyFont = "${pkgs.kbd}/share/consolefonts/Cyr_a8x14.psfu.gz";
 in
 {
   console.useXkbConfig = lib.mkDefault true;

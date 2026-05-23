@@ -35,10 +35,8 @@
     "mem_sleep_default=s2idle"
   ];
 
-  # Use a sharper Terminus bitmap font with good Cyrillic coverage
-  # (earlier config used latarcyrheb-sun16 which is less legible at higher
-  # framebuffer/KMS resolutions).
-  console.font = lib.mkForce "${pkgs.terminus_font}/share/consolefonts/ter-v16n.psf.gz";
+  # CF-19 uses the shared TTY font policy from modules/tty-console.nix.
+  # Host finalization does not override the default console font.
 
   # Ensure additional virtual consoles are available so switching from the
   # graphical session (Ctrl+Alt+F*) reliably reaches a text login. Enable
