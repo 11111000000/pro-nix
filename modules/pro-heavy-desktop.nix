@@ -26,5 +26,6 @@
     weechat
     ffmpegthumbnailer
     baobab
+    pavucontrol
   ]);
 }
