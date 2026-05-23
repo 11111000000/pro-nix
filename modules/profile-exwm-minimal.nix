@@ -26,14 +26,15 @@ in {
     # модулях-профилях.
     services.xserver = {
       enable = mkDefault true;
-      displayManager.lightdm.enable = mkDefault true;
+      displayManager.gdm.enable = mkDefault true;
+      displayManager.lightdm.enable = mkDefault false;
       windowManager.exwm.enable = mkDefault true;
       desktopManager.cinnamon.enable = mkDefault false;
     };
 
-    # Вклад в системные пакеты: только то, что нужно для EXWM и вспомогательных
-    # X11-инструментов. Базовый runtime и dev-наборы поставляются другими
-    # модулями (например, packages-runtime.nix, system-packages.nix).
+    # EXWM desktop entry нужен дисплейному менеджеру независимо от того,
+    # подключён ли полный desktop-слой. Файл создаётся в xsession-пакете,
+    # который GDM сканирует через `share/xsessions`.
     environment.systemPackages = mkDefault (with pkgs; [
       xorg.xset
       xorg.xhost
@@ -44,6 +45,22 @@ in {
       xdotool
       xclip
       xauth
+      (runCommand "pro-exwm-xsession" {} ''
+        mkdir -p $out/share/xsessions
+        cat > $out/share/xsessions/exwm.desktop <<'EOF'
+[Desktop Entry]
+Name=EXWM
+Comment=Emacs Window Manager
+Exec=/usr/bin/env bash -lc "$HOME/.config/pro/exwm-session"
+Type=Application
+DesktopNames=EXWM
+X-GNOME-WmName=EXWM
+X-GNOME-Bugzilla-Bugzilla=Emacs
+X-GNOME-Bugzilla-Product=Emacs
+X-GNOME-Bugzilla-Component=window-manager
+EOF
+        chmod -R a+rX $out
+      '')
     ]);
   };
 }
