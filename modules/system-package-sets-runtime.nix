@@ -15,5 +15,6 @@ with pkgs;
     kbd
     mc
     emacs
+    nodePackages.mermaid-cli
   ];
 }

@@ -14,7 +14,7 @@
         providedPackages = [
           "ace-window" "avy" "cape" "consult" "consult-dash" "consult-eglot" "consult-projectile" "consult-yasnippet"
           "corfu" "corfu-posframe" "corfu-terminal" "dash-docs" "eglot" "elfeed" "expand-region" "gptel"
-          "kind-icon" "magit" "marginalia" "nix-mode" "orderless" "org" "projectile" "rainbow-delimiters"
+          "kind-icon" "magit" "marginalia" "nix-mode" "orderless" "org" "ob-mermaid" "projectile" "rainbow-delimiters"
           "treemacs" "vertico" "vterm" "yasnippet" "embark-consult" "dash-docs" "consult-dash"
         ];
 

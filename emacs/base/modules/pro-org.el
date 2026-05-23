@@ -61,6 +61,8 @@
     (when (boundp 'org-structure-template-alist)
       (add-to-list 'org-structure-template-alist '("uml" . "src plantuml :file ./diagram.svg"))))
 
+  ;; Mermaid — обязательное расширение для этого профиля: при отсутствии
+  ;; Nix-пакета пробуем автодоставку через package.el.
   (when (or (pro--package-provided-p 'ob-mermaid)
             (pro-packages--maybe-install 'ob-mermaid t)
             (require 'ob-mermaid nil t))

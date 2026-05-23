@@ -112,9 +112,13 @@ in-buffer style popups during minibuffer commands when Vertico isn't active.
 (add-hook 'minibuffer-setup-hook #'pro-completion--maybe-enable-corfu-in-minibuffer)
 
 ;; Recommend completion-style overrides for reliable file/command matching.
+;; Orderless включаем только после успешной загрузки стиля, чтобы не получать
+;; ошибку `invalid completion style orderless' на старте.
 (when (boundp 'completion-category-overrides)
-  (setq completion-category-overrides '((file (styles partial-completion basic))
-                                         (command (styles orderless basic)))))
+  (setq completion-category-overrides
+        (append '((file (styles partial-completion basic)))
+                (when (require 'orderless nil t)
+                  '((command (styles orderless basic)))))))
 
 (provide 'pro-completion)
 
