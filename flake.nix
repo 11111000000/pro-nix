@@ -122,6 +122,7 @@ EOF
       hosts = {
         cf19 = mkHost [ ./hosts/cf19/configuration.nix ./hosts/cf19/composition.nix ];
         huawei = mkHost [ ./hosts/huawei/configuration.nix ./hosts/huawei/composition.nix ];
+        desktop = mkHost [ ./hosts/desktop/configuration.nix ./hosts/desktop/composition.nix ];
         vm = mkVmHost [ ./hosts/vm/configuration.nix ./hosts/vm/composition.nix ];
       };
     in {
@@ -152,6 +153,7 @@ EOF
             set -eu
             nix build .#nixosConfigurations.cf19.config.system.build.toplevel
             nix build .#nixosConfigurations.huawei.config.system.build.toplevel
+            nix build .#nixosConfigurations.desktop.config.system.build.toplevel
           '');
         };
 

@@ -19,11 +19,10 @@
   boot.loader.systemd-boot.configurationLimit = 6;
   boot.loader.timeout = 5;
 
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = lib.mkForce pkgs.linuxPackages_latest;
   boot.kernelParams = [
     "nvme_core.default_ps_max_latency_us=5500"
   ];
-  boot.kernel.sysctl."kernel.sysrq" = 1;
   boot.extraModprobeConfig = "options btusb enable_autosuspend=0";
 
   boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" ];
