@@ -212,11 +212,15 @@ install from a pinned GitHub repo. Return t on success, nil otherwise.
      ((pro--package-runtime-available-p pkg) t)
 
      ;; Объявлен в Nix, но не доступен в текущем runtime.
-     ;; В пользовательских/переходных окружениях допускаем fallback на MELPA,
-     ;; если это явно разрешено политикой автозагрузки.
+     ;; В пользовательских/переходных окружениях допускаем fallback на MELPA.
+     ;; Новое поведение: если переменная окружения PRO_PACKAGES_AUTO_INSTALL=1,
+     ;; то мы автоматически попытаемся установить пакет из MELPA даже когда
+     ;; allow-melpa не была явно передана. Это удобно для dev/containers,
+     ;; где Nix-профиль может не быть применён, но оператор сознательно
+     ;; разрешил автозагрузку.
      (declared
-      (if (and allow-melpa
-               (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "0") "1"))
+      (if (or allow-melpa
+              (string= (or (getenv "PRO_PACKAGES_AUTO_INSTALL") "0") "1"))
           (progn
             (message "[pro-packages] %s declared by Nix, but missing at runtime; trying MELPA fallback" pkg)
             (when (pro-packages--do-install pkg)
