@@ -35,6 +35,10 @@ in
     };
   };
 
+  services.gpm = {
+    enable = lib.mkDefault true;
+  };
+
   systemd.services."getty@tty2".enable = lib.mkDefault true;
   systemd.services."getty@tty3".enable = lib.mkDefault true;
 
