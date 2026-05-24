@@ -16,8 +16,7 @@ with pkgs;
     mc
     emacs
     nodePackages.mermaid-cli
-    # Real opencode binary — работает напрямую (для ACP/MCP) и как основа
-    # для programs.opencode-bwrap (sandboxed HM wrapper).
-    opencode
+    # opencode removed from the runtime set: it is delivered via the
+    # Home Manager wrapper path, not system runtime.
   ];
 }

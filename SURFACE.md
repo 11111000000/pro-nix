@@ -193,14 +193,14 @@ Proof — конкретную команду или тест, обеспечи�
 - Имя: Opencode Sandbox Runtime
   Стабильность: [FLUID]
   Спецификация: реальный opencode binary (из npm tarball) доступен:
-    - напрямую через `environment.systemPackages` для всех хостов (CLI, ACP/MCP);
+    - через отдельный overlay `nix/overlays/opencode-stub.nix`;
     - через Home Manager модуль `programs.opencode-bwrap` (sandboxed wrapper
       из upstream `opencode-bwrap-nix`), подключённый ко всем пользователям.
-    Overlay `nix/overlays/opencode-stub.nix` предоставляет real binary (не заглушку).
+    Системный runtime-набор больше не тащит `opencode` напрямую, чтобы не
+    провоцировать npm/bun plugin-цепочку во время `switch`.
   Proof: `./scripts/opencode-smoke.sh`, `tests/contract/unit/04-opencode-options.sh`
   Run: `./scripts/opencode-smoke.sh`
-  Owner: `nix/overlays/opencode-stub.nix`, `modules/packages-runtime.nix`,
-    `modules/pro-users.nix`, `modules/pro-users-nixos.nix`, `scripts/opencode-smoke.sh`
+  Owner: `nix/overlays/opencode-stub.nix`, `modules/pro-users.nix`, `modules/pro-users-nixos.nix`, `scripts/opencode-smoke.sh`
   Last reviewed: 2026-05-24
   Risk: medium
 

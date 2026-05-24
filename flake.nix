@@ -40,7 +40,8 @@
       # opencode-bwrap sandbox wrapper. The overlay provides a real opencode
       # binary from npm (not a stub) so both direct CLI usage and bwrap work.
       opencodeBwrapModule = opencodeBwrap.homeManagerModules.default;
-      # Pass the overlayed pkgs to system-packages so opencode is available
+      # Pass the overlayed pkgs to system-packages; opencode is no longer
+      # pulled into the system runtime set, so switch does not build bun plugins.
       spkgs = import ./system-packages.nix { inherit emacsPkg; pkgs = pkgsOverlay; };
       pythonWithTextual = pkgs.python3.withPackages (ps: with ps; [ textual psutil ]);
       # Python environment for agent apps (coordinator/worker)
