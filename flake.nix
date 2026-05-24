@@ -37,10 +37,10 @@
       emacsPkg = pkgs.emacs30 or pkgs.emacs;
       piPkg = pi.packages.${system}.coding-agent;
       # Keep the Home Manager module reference so HM users still get the
-      # opencode-bwrap sandbox wrapper. We do not build or ship opencode
-      # plugins or the opencode app sources in this flake.
+      # opencode-bwrap sandbox wrapper. The overlay provides a real opencode
+      # binary from npm (not a stub) so both direct CLI usage and bwrap work.
       opencodeBwrapModule = opencodeBwrap.homeManagerModules.default;
-      # Pass the overlayed pkgs to system-packages so opencode stubs take effect
+      # Pass the overlayed pkgs to system-packages so opencode is available
       spkgs = import ./system-packages.nix { inherit emacsPkg; pkgs = pkgsOverlay; };
       pythonWithTextual = pkgs.python3.withPackages (ps: with ps; [ textual psutil ]);
       # Python environment for agent apps (coordinator/worker)
@@ -122,6 +122,7 @@ EOF
       hosts = {
         cf19 = mkHost [ ./hosts/cf19/configuration.nix ./hosts/cf19/composition.nix ];
         huawei = mkHost [ ./hosts/huawei/configuration.nix ./hosts/huawei/composition.nix ];
+        desktop = mkHost [ ./hosts/desktop/configuration.nix ./hosts/desktop/composition.nix ];
         vm = mkVmHost [ ./hosts/vm/configuration.nix ./hosts/vm/composition.nix ];
       };
     in {
@@ -152,6 +153,7 @@ EOF
             set -eu
             nix build .#nixosConfigurations.cf19.config.system.build.toplevel
             nix build .#nixosConfigurations.huawei.config.system.build.toplevel
+            nix build .#nixosConfigurations.desktop.config.system.build.toplevel
           '');
         };
 
@@ -199,24 +201,27 @@ EOF
         };
       };
 
-      devShells.${system}.default = pkgs.mkShell {
+      devShells.${system}.default = let
+        rawPkgs = [
+          pkgs.emacsPackages.vertico pkgs.emacsPackages.consult pkgs.emacsPackages.orderless
+          pkgs.emacsPackages.marginalia pkgs.emacsPackages.gptel pkgs.emacsPackages.consult-dash
+          pkgs.emacsPackages.consult-eglot pkgs.emacsPackages.consult-yasnippet pkgs.emacsPackages.corfu
+          pkgs.emacsPackages.cape pkgs.emacsPackages.kind-icon pkgs.emacsPackages.avy
+          pkgs.emacsPackages.expand-region pkgs.emacsPackages.yasnippet pkgs.emacsPackages.projectile
+          pkgs.emacsPackages.treemacs pkgs.emacsPackages.vterm pkgs.emacsPackages.ace-window pkgs.emacsPackages.embark
+          pkgs.emacsPackages.dash-docs pkgs.emacsPackages.embark-consult
+          # Try overlay-provided packages when available (agent-shell, treemacs-icons-dired, eldoc-box)
+          (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "agent-shell" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.agent-shell else null)
+          (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "treemacs-icons-dired" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages."treemacs-icons-dired" else null)
+          (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "eldoc-box" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.eldoc-box else null)
+        ];
+        presentPkgs = builtins.filter (p: p != null) rawPkgs;
+      in pkgs.mkShell {
         name = "pro-nix-dev";
-        buildInputs = [ emacsPkg pkgs.ripgrep pkgs.fd pkgs.findutils pkgs.stress-ng pkgs.fio pkgs.powertop pkgs.iotop pkgs.lm_sensors pkgs.time pkgs.shellcheck pkgs.direnv pkgs.gh ];
+        # Ensure overlay-provided emacs package derivations are present in the shell
+        # so their /share/emacs/site-lisp paths exist for the emacs wrapper.
+        buildInputs = [ emacsPkg pkgs.ripgrep pkgs.fd pkgs.findutils pkgs.stress-ng pkgs.fio pkgs.powertop pkgs.iotop pkgs.lm_sensors pkgs.time pkgs.shellcheck pkgs.direnv pkgs.gh ] ++ presentPkgs;
         shellHook = let
-          rawPkgs = [
-            pkgs.emacsPackages.vertico pkgs.emacsPackages.consult pkgs.emacsPackages.orderless
-            pkgs.emacsPackages.marginalia pkgs.emacsPackages.gptel pkgs.emacsPackages.consult-dash
-            pkgs.emacsPackages.consult-eglot pkgs.emacsPackages.consult-yasnippet pkgs.emacsPackages.corfu
-            pkgs.emacsPackages.cape pkgs.emacsPackages.kind-icon pkgs.emacsPackages.avy
-            pkgs.emacsPackages.expand-region pkgs.emacsPackages.yasnippet pkgs.emacsPackages.projectile
-            pkgs.emacsPackages.treemacs pkgs.emacsPackages.vterm pkgs.emacsPackages.ace-window pkgs.emacsPackages.embark
-            pkgs.emacsPackages.dash-docs pkgs.emacsPackages.embark-consult
-            # Try overlay-provided packages when available (agent-shell, treemacs-icons-dired, eldoc-box)
-            (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "agent-shell" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.agent-shell else null)
-            (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "treemacs-icons-dired" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages."treemacs-icons-dired" else null)
-            (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "eldoc-box" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.eldoc-box else null)
-          ];
-          presentPkgs = builtins.filter (p: p != null) rawPkgs;
           flags = lib.concatStringsSep " " (map (p: "-L " + p + "/share/emacs/site-lisp") presentPkgs);
         in ''
           echo "Entering pro-nix devshell with Emacs available"

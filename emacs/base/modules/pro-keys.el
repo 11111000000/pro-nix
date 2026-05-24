@@ -30,13 +30,17 @@
 ;; concrete user keys file and keeps per-user overrides local.
 
 (defconst pro-keys-system-file
-  (or (let ((etc-file "/etc/pro/emacs-keys.org"))
-        (and (file-readable-p etc-file) etc-file))
-      ;; В режиме разработки мы ожидаем, что системный файл может
-      ;; располагаться в репозитории рядом с инициализатором.
-      (expand-file-name "pro/emacs-keys.org" (expand-file-name ".." (file-name-directory (or load-file-name buffer-file-name)))))
+  (let* ((etc-file "/etc/pro/emacs-keys.org")
+         (repo-base (expand-file-name ".." (file-name-directory (or load-file-name buffer-file-name))))
+         (cand1 (expand-file-name "pro/emacs-keys.org" repo-base))
+         ;; Some repository layouts keep emacs-keys.org at the repo root.
+         (cand2 (expand-file-name "emacs-keys.org" (expand-file-name ".." repo-base))))
+    (or (and (file-readable-p etc-file) etc-file)
+        cand1
+        cand2))
   "Путь к системному файлу клавиш PRO. По умолчанию ищем /etc/..., затем
-файл в репозитории. Пользовательский файл по-прежнему в ~/.config/emacs/keys.org.")
+файл в репозитории (pro/emacs-keys.org), и в некоторых layout'ах — emacs-keys.org
+в корне репозитория. Пользовательский файл по-прежнему в ~/.config/emacs/keys.org.")
 
 (defvar pro-keys-exwm-global-keys nil
   "Список глобальных клавиш EXWM, собранный из Org-таблиц.")

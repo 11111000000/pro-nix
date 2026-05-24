@@ -58,5 +58,6 @@
     lsof
     ncdu
     time
+    opencode
   ];
 }

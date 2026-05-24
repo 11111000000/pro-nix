@@ -33,3 +33,6 @@ docs
 .crew
 .crew/*
 
+# Ignore temp system-packages files
+system-packages.nix.bak
+system-packages.nix.tmp

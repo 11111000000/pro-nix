@@ -192,17 +192,22 @@ Proof — конкретную команду или тест, обеспечи�
 
 - Имя: Opencode Sandbox Runtime
   Стабильность: [FLUID]
-  Спецификация: Home Manager модуль `programs.opencode-bwrap` подключается ко всем пользователям NixOS-профиля и даёт воспроизводимый sandboxed wrapper `opencode-bwrap` с пользовательскими настройками, импортированными из upstream `opencode-bwrap-nix`.
+  Спецификация: реальный opencode binary (из npm tarball) доступен:
+    - напрямую через `environment.systemPackages` для всех хостов (CLI, ACP/MCP);
+    - через Home Manager модуль `programs.opencode-bwrap` (sandboxed wrapper
+      из upstream `opencode-bwrap-nix`), подключённый ко всем пользователям.
+    Overlay `nix/overlays/opencode-stub.nix` предоставляет real binary (не заглушку).
   Proof: `./scripts/opencode-smoke.sh`, `tests/contract/unit/04-opencode-options.sh`
   Run: `./scripts/opencode-smoke.sh`
-  Owner: `modules/pro-users.nix`, `modules/pro-users-nixos.nix`, `scripts/opencode-smoke.sh`
-  Last reviewed: 2026-05-16
+  Owner: `nix/overlays/opencode-stub.nix`, `modules/packages-runtime.nix`,
+    `modules/pro-users.nix`, `modules/pro-users-nixos.nix`, `scripts/opencode-smoke.sh`
+  Last reviewed: 2026-05-24
   Risk: medium
 
 Note: repository-local opencode plugin sources were removed due to build
-failures. The public contract above refers only to the bubblewrap-backed
-Home Manager wrapper; packaging or shipping opencode plugins in the flake is
-no longer supported.
+failures. The public contract above refers only to the real binary from npm
+and the bubblewrap-backed Home Manager wrapper; packaging or shipping opencode
+plugins in the flake is no longer supported.
 
 - Имя: zram / Swap Policy
   Стабильность: [FLUID]
