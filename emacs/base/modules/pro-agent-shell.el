@@ -54,6 +54,23 @@
         (advice-add #'agent-shell :after (lambda (&rest _) (pro-agent-shell--setup-keys)))))
   (error (message "[pro-agent-shell] agent-shell integration skipped: %S" err)))
 
+(defun pro-agent-install ()
+  "Убедиться, что пакет `agent-shell' доступен.
+
+Если пакет отсутствует в runtime, попытаемся установить его из MELPA
+через политику `pro/packages-ensure' с разрешением fallback (allow-melpa).
+Команда безопасна для вызова вручную и выводит читаемое сообщение о результате.
+"
+  (interactive)
+  (condition-case err
+      (let ((ok (pro/packages-ensure 'agent-shell t)))
+        (if ok
+            (if (require 'agent-shell nil t)
+                (message "[pro-agent-shell] agent-shell доступен")
+              (message "[pro-agent-shell] пакет установлен, но не найден в load-path — перезапустите Emacs"))
+          (message "[pro-agent-shell] не удалось обеспечить agent-shell (pro/packages-ensure вернул nil)")))
+    (error (message "[pro-agent-shell] ошибка при попытке обеспечить agent-shell: %S" err))))
+
 (provide 'pro-agent-shell)
 
 ;;; pro-agent-shell.el ends here
