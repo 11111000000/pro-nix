@@ -97,13 +97,13 @@ Proof — конкретную команду или тест, обеспечи�
   Last reviewed: 2026-05-04
   Risk: high
 
-- Имя: Desktop / EXWM
+- Имя: Desktop / EXWM, Sway, i3
   Стабильность: [FLUID]
-  Спецификация: декларативная конфигурация рабочего стола (EXWM, display-manager, X/Wayland настройки) для поддерживаемых хостов.
-  Proof: headless ERT + локальные smoke-tests (`./scripts/test-emacs-headless.sh`)
+  Спецификация: декларативная конфигурация рабочего стола и сессий входа (EXWM, Sway, i3, display-manager, X/Wayland настройки) для поддерживаемых хостов.
+  Proof: headless ERT + локальные smoke-tests (`./scripts/test-emacs-headless.sh`); наличие session entries проверяется eval-конфигурацией хоста и содержимым `services.displayManager.sessionPackages`.
   Run: `./scripts/test-emacs-headless.sh`
-  Owner: `emacs/base`, `modules/pro-desktop.nix`
-  Last reviewed: 2026-05-04
+  Owner: `emacs/base`, `modules/pro-desktop.nix`, `modules/session-exwm.nix`, `modules/session-sway.nix`, `modules/session-i3.nix`
+  Last reviewed: 2026-05-24
   Risk: low
 
 - Имя: Portable Emacs Runtime

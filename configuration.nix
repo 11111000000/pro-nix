@@ -58,6 +58,7 @@
       ./modules/pro-desktop.nix
       ./modules/pro-exwm-desktop.nix
       ./modules/pro-profiles.nix
+      ./modules/session-exwm.nix
       ./modules/nix-cuda-compat.nix
       ./nixos/modules/zram-slice.nix
       ./nix/modules/searxng.nix

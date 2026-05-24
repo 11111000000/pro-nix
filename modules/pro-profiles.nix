@@ -25,7 +25,11 @@
 
 {
   options.pro.profiles = lib.mkOption {
-    type = lib.types.attrsOf (lib.types.submodule {});
+    # Тип submodule с пустыми options позволяет другим модулям
+    # добавлять вложенные опции (pro.profiles.*.enable и т.п.).
+    # Предыдущий тип attrsOf (submodule {}) не поддерживал вложенные опции,
+    # что ломало profile-exwm-minimal.nix и другие профильные модули.
+    type = lib.types.submodule { options = {}; };
     default = {};
     description = ''
       Пространство для декларативных профилей окружения (tui, exwm-minimal,

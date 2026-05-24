@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, emacsPkg ? pkgs.emacs, ... }:
 
 {
   # EXWM session glue: environment, xsession entry, portal policy and the
@@ -27,7 +27,7 @@
   };
 
   services.displayManager.sessionPackages = lib.mkDefault [
-    (pkgs.runCommand "pro-exwm-xsession" {} ''
+    (pkgs.runCommand "pro-exwm-xsession" { passthru.providedSessions = [ "exwm" ]; } ''
       mkdir -p $out/share/xsessions $out/share/wayland-sessions
       cat > $out/share/xsessions/exwm.desktop <<'EOF'
 [Desktop Entry]

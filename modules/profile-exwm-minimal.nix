@@ -32,28 +32,6 @@ in {
       desktopManager.cinnamon.enable = mkDefault false;
     };
 
-    # EXWM сессия должна быть видна дисплейному менеджеру через
-    # services.displayManager.sessionPackages. GDM читает xsessions и
-    # wayland-sessions из этого набора.
-    services.displayManager.sessionPackages = [
-      (pkgs.runCommand "pro-exwm-xsession" {} ''
-        mkdir -p $out/share/xsessions $out/share/wayland-sessions
-        cat > $out/share/xsessions/exwm.desktop <<'EOF'
-[Desktop Entry]
-Name=EXWM
-Comment=Emacs Window Manager
-Exec=/usr/bin/env bash -lc "$HOME/.config/pro/exwm-session"
-Type=Application
-DesktopNames=EXWM
-X-GNOME-WmName=EXWM
-X-GNOME-Bugzilla-Bugzilla=Emacs
-X-GNOME-Bugzilla-Product=Emacs
-X-GNOME-Bugzilla-Component=window-manager
-EOF
-        ln -s ../xsessions/exwm.desktop $out/share/wayland-sessions/exwm.desktop
-        chmod -R a+rX $out
-      '')
-    ];
 
     environment.systemPackages = mkDefault (with pkgs; [
       xorg.xset

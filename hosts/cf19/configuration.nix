@@ -6,6 +6,11 @@
   # задаётся через общие модули и hosts/cf19/composition.nix.
   imports = [
     ../../modules/pro-users.nix
+    ../../modules/pro-desktop.nix
+    ../../modules/profile-exwm-minimal.nix
+    ../../modules/session-exwm.nix
+    ../../modules/session-sway.nix
+    ../../modules/session-i3.nix
     ./composition.nix
   ];
 
@@ -41,8 +46,8 @@
   # Ensure additional virtual consoles are available so switching from the
   # graphical session (Ctrl+Alt+F*) reliably reaches a text login. Enable
   # getty instances for tty2 and tty3 in addition to the default tty1.
-  systemd.services."getty@tty2".enable = true;
-  systemd.services."getty@tty3".enable = true;
+  systemd.services."getty@tty2".enable = lib.mkDefault true;
+  systemd.services."getty@tty3".enable = lib.mkDefault true;
 
   # На cf19 live reload системной и пользовательской D-Bus шины во время
   # switch может приводить к отказам org.freedesktop.systemd1.Manager.
@@ -107,7 +112,6 @@
   # Cinnamon не нужен на cf19: оставляем GDM + EXWM, но убираем тяжёлый
   # desktop branch. TTY-login сохраняется через tty1/tty2/tty3 и getty.
   services.xserver.desktopManager.cinnamon.enable = lib.mkForce false;
-  # Enable fbterm service on tty2 for improved font rendering/color in a
-  # framebuffer terminal. This is experimental; disable if it causes issues.
-  systemd.services."fbterm-tty2".enable = true;
+  # fbterm отключён: он занимает tty2 и может конфликтовать с запуском display manager.
+  systemd.services."fbterm-tty2".enable = lib.mkForce false;
 }
