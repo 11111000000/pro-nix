@@ -8,6 +8,7 @@
       home.username = name;
       home.homeDirectory = "/home/${name}";
       home.stateVersion = "23.11";
+      programs.opencode-bwrap.enable = true;
       pro.emacs = {
         enable = true;
         gui.enable = false;

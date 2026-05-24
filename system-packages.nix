@@ -148,6 +148,10 @@ in
   nix
   nix-info
   
+  # Real opencode binary from npm overlay — доступен напрямую (для ACP/MCP)
+  # и через programs.opencode-bwrap (sandboxed wrapper).
+  (if builtins.hasAttr "opencode" pkgs then pkgs.opencode else null)
+  
   kbd
   # Редактор и связанные пакеты: инструменты для работы с текстом, ссылками и навигацией.
   emacsRuntime

@@ -37,10 +37,10 @@
       emacsPkg = pkgs.emacs30 or pkgs.emacs;
       piPkg = pi.packages.${system}.coding-agent;
       # Keep the Home Manager module reference so HM users still get the
-      # opencode-bwrap sandbox wrapper. We do not build or ship opencode
-      # plugins or the opencode app sources in this flake.
+      # opencode-bwrap sandbox wrapper. The overlay provides a real opencode
+      # binary from npm (not a stub) so both direct CLI usage and bwrap work.
       opencodeBwrapModule = opencodeBwrap.homeManagerModules.default;
-      # Pass the overlayed pkgs to system-packages so opencode stubs take effect
+      # Pass the overlayed pkgs to system-packages so opencode is available
       spkgs = import ./system-packages.nix { inherit emacsPkg; pkgs = pkgsOverlay; };
       pythonWithTextual = pkgs.python3.withPackages (ps: with ps; [ textual psutil ]);
       # Python environment for agent apps (coordinator/worker)

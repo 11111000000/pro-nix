@@ -1,65 +1,34 @@
-# Overlay: replace opencode with a small stub to avoid building its plugins
+# Overlay: provide real opencode binary from npm
 final: prev: {
   opencode = prev.stdenv.mkDerivation {
-    pname = "opencode-stub";
-    version = "1";
-    dontBuild = true;
-    installPhase = ''
-      mkdir -p $out/bin
-      cat > $out/bin/opencode <<'EOF'
-#!/bin/sh
-echo "opencode (stub)"
-EOF
-      chmod +x $out/bin/opencode
-    '';
-    meta = with prev.lib; {
-      description = "Stub opencode package used in pro-nix to skip building upstream plugins";
-      license = licenses.mit;
-      maintainers = [];
+    pname = "opencode";
+    version = "1.15.10";
+
+    src = prev.fetchurl {
+      url = "https://registry.npmjs.org/opencode-linux-x64/-/opencode-linux-x64-1.15.10.tgz";
+      sha256 = "0f7n2avwjc54b4lbd9fwqgx9nbjs1v4xa8bnhq4qfk17jf5njcc3";
     };
-  };
-  opencode-plugins = prev.stdenv.mkDerivation {
-    pname = "opencode-plugins-stub";
-    version = "1";
-    dontBuild = true;
+
+    nativeBuildInputs = [ prev.patchelf ];
+    sourceRoot = "package";
+
+    dontStrip = true;
+    dontPatchELF = true;
+    dontPatchShebangs = true;
+
     installPhase = ''
-      mkdir -p $out
-      echo "opencode-plugins (stub)" > $out/README
+      runHook preInstall
+      install -Dm755 bin/opencode $out/bin/opencode
+      patchelf --set-interpreter ${prev.glibc}/lib/ld-linux-x86-64.so.2 $out/bin/opencode
+      runHook postInstall
     '';
-    meta = with prev.lib; { description = "Stub for opencode-plugins"; license = licenses.mit; };
-  };
-  opencode-notifier = prev.stdenv.mkDerivation {
-    pname = "opencode-notifier-stub";
-    version = "1";
-    dontBuild = true;
-    installPhase = ''
-      mkdir -p $out/bin
-      cat > $out/bin/opencode-notifier <<'EOF'
-#!/bin/sh
-echo "opencode-notifier (stub)"
-EOF
-      chmod +x $out/bin/opencode-notifier
-    '';
-    meta = with prev.lib; { description = "Stub for opencode-notifier"; license = licenses.mit; };
-  };
-  opencode-anthropic-auth = prev.stdenv.mkDerivation {
-    pname = "opencode-anthropic-auth-stub";
-    version = "1";
-    dontBuild = true;
-    installPhase = ''
-      mkdir -p $out
-      echo "opencode-anthropic-auth (stub)" > $out/README
-    '';
-    meta = with prev.lib; { description = "Stub for opencode-anthropic-auth"; license = licenses.mit; };
-  };
-  opencode-node_modules = prev.stdenv.mkDerivation {
-    pname = "opencode-node-modules-stub";
-    version = "1";
-    dontBuild = true;
-    installPhase = ''
-      mkdir -p $out
-      echo "opencode-node-modules (stub)" > $out/README
-    '';
-    meta = with prev.lib; { description = "Stub for opencode node modules"; license = licenses.mit; };
+
+    meta = with prev.lib; {
+      description = "AI coding agent built for the terminal";
+      homepage = "https://opencode.ai";
+      license = licenses.mit;
+      platforms = [ "x86_64-linux" ];
+      mainProgram = "opencode";
+    };
   };
 }
