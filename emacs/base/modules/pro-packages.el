@@ -314,6 +314,35 @@ PKG может быть символом или строкой. Эта кома�
     (message "pro-packages: package-list-packages not available")))
 
 ;;; Дополнительные утилиты
+
+(defun pro-packages-install-missing-declared (&optional confirm)
+  "Установить все пакеты, объявленные в `pro-packages-provided-by-nix', которых нет в runtime.
+
+Если CONFIRM non-nil (prefix-arg) запрашивать подтверждение перед каждой установкой.
+Команда использует `pro/packages-ensure' с allow-melpa и возвращает сообщение-резюме
+о количестве успешно установленных и неудачных пакетов.
+"
+  (interactive "P")
+  (unless (and (boundp 'pro-packages-provided-by-nix) pro-packages-provided-by-nix)
+    (user-error "pro-packages-provided-by-nix не задан; нет declared списка"))
+  (let ((installed '())
+        (failed '())
+        (skipped '()))
+    (dolist (pkg pro-packages-provided-by-nix)
+      (cond
+       ((pro--package-runtime-available-p pkg)
+        (push pkg skipped))
+       (t
+        (when (or (not confirm)
+                  (y-or-n-p (format "Установить %s из MELPA (fallback)? " pkg)))
+          (let ((ok (condition-case nil (pro/packages-ensure pkg t) (error nil))))
+            (if ok (push pkg installed) (push pkg failed))))))
+    (message "pro-packages: installed=%s failed=%s skipped=%s"
+             (mapconcat #'symbol-name (nreverse installed) ", ")
+             (mapconcat #'symbol-name (nreverse failed) ", ")
+             (mapconcat #'symbol-name (nreverse skipped) ", "))))
+
+;;; Дополнительные утилиты
 (defun pro-packages-ensure-required (&optional packages)
   "Убедиться, что PACKAGES (список символов) доступны.
 Если PACKAGES не передан, используется набор рекомендуемых пакетов
