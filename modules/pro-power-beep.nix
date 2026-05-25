@@ -101,7 +101,7 @@ in {
     enable = mkEnableOption "звуковое оповещение при низком заряде батареи" // { default = true; };
     threshold = mkOption {
       type = types.int;
-      default = 15;
+      default = 20;
       description = "Порог процента заряда, ниже которого срабатывает сигнал.";
     };
     cooldownSec = mkOption {
