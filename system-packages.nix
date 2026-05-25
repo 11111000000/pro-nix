@@ -148,9 +148,9 @@ in
   nix
   nix-info
   
-  # Real opencode binary from npm overlay — доступен напрямую (для ACP/MCP)
-  # и через programs.opencode-bwrap (sandboxed wrapper).
-  (if builtins.hasAttr "opencode" pkgs then pkgs.opencode else null)
+  # opencode intentionally omitted from the system runtime set.
+  # It is delivered through Home Manager / user packages so `switch` does
+  # not need to build bun/plugin closures.
   
   kbd
   # Редактор и связанные пакеты: инструменты для работы с текстом, ссылками и навигацией.
