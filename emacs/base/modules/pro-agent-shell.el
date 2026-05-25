@@ -33,6 +33,9 @@
 ;; Если пакет доступен — зарегистрируем небольшие обёртки и локальные клавиши.
 (condition-case err
     (when (require 'agent-shell nil t)
+      ;; Минималистичный заголовок вместо баннера
+      (setq agent-shell-header-style 'text
+            agent-shell-show-welcome-message nil)
       (defun pro-agent-shell--maybe-call (fn &rest args)
         "Вызвать FN если он определён, иначе показать сообщение.
 Аргументы передаются в FN напрямую." (apply (if (fboundp fn) fn (lambda (&rest _) (message "[pro-agent-shell] %s недоступна" fn))) args))
