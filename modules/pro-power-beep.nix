@@ -15,7 +15,8 @@ let
   cfg = config.pro.power.lowBattery.beep;
   inherit (lib) mkEnableOption mkOption mkIf types mkDefault;
 
-  script = pkgs.writeShellScriptBin "pro-beep-low-battery" ''
+  script = pkgs.writeShellScriptBin "pro-beep-low-battery" (
+    ''
     set -euo pipefail
 
     THRESHOLD="${toString cfg.threshold}"
@@ -50,7 +51,7 @@ let
         exit 0 ;;
     esac
 
-    cap_num=${cap%%[^0-9]*}
+    cap_num=${"\${cap%%[^0-9]*}"}
     if [ -z "$cap_num" ]; then cap_num=100; fi
 
     if [ "$cap_num" -ge "$THRESHOLD" ]; then
@@ -86,7 +87,7 @@ let
     fi
 
     echo "$now" >"$LAST_FILE" 2>/dev/null || true
-  '';
+  '');
 
 in {
   options.pro.power.lowBattery.beep = {
@@ -120,6 +121,11 @@ in {
     systemd.timers.pro-beep-low-battery = {
       description = "Timer: check battery and beep on threshold";
       wantedBy = [ "timers.target" ];
+      partOf = [ "pro-beep-low-battery.service" ];
+      # Some NixOS versions expose startLimit* on timers — set safe defaults
+      startLimitBurst = 3;
+      startLimitIntervalSec = "5min";
+      unitConfig = { };
       timerConfig = {
         OnBootSec = "120s";
         OnUnitActiveSec = "60s";
