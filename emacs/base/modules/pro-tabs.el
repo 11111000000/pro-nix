@@ -74,6 +74,30 @@ If `pro-tabs' package is present, delegate to it; otherwise use `tab-bar-new-tab
     (when (buffer-live-p buf)
       (kill-buffer buf))))
 
+(defun pro-tabs-select-tab-1 ()
+  "Переключиться на вкладку 1."
+  (interactive) (tab-bar-select-tab 1))
+
+(defun pro-tabs-select-tab-2 ()
+  "Переключиться на вкладку 2."
+  (interactive) (tab-bar-select-tab 2))
+
+(defun pro-tabs-select-tab-3 ()
+  "Переключиться на вкладку 3."
+  (interactive) (tab-bar-select-tab 3))
+
+(defun pro-tabs-select-tab-4 ()
+  "Переключиться на вкладку 4."
+  (interactive) (tab-bar-select-tab 4))
+
+(defun pro-tabs-select-tab-5 ()
+  "Переключиться на вкладку 5."
+  (interactive) (tab-bar-select-tab 5))
+
+(defun pro-tabs-select-tab-6 ()
+  "Переключиться на вкладку 6."
+  (interactive) (tab-bar-select-tab 6))
+
 (when pro-pro-tabs-enable
   ;; attempt to use pro-tabs package if available, otherwise enable built-in
   (if (require 'pro-tabs nil t)

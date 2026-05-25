@@ -33,6 +33,12 @@
 | EXWM       | s-J     | buf-move-down                         | Переместить буфер вниз          |
 | EXWM       | s-K     | buf-move-up                           | Переместить буфер вверх         |
 | EXWM       | s-L     | buf-move-right                        | Переместить буфер вправо        |
+| EXWM       | s-1     | pro-tabs-select-tab-1                 | Вкладка 1                        |
+| EXWM       | s-2     | pro-tabs-select-tab-2                 | Вкладка 2                        |
+| EXWM       | s-3     | pro-tabs-select-tab-3                 | Вкладка 3                        |
+| EXWM       | s-4     | pro-tabs-select-tab-4                 | Вкладка 4                        |
+| EXWM       | s-5     | pro-tabs-select-tab-5                 | Вкладка 5                        |
+| EXWM       | s-6     | pro-tabs-select-tab-6                 | Вкладка 6                        |
 | EXWM       | s-&     | async-shell-command                   | Запуск команды                   |
 | ORG        | C-c K   | pro-org-open-keys-file                | Открыть файл клавиш              |
 | Completion | C-c o f | cape-file                             | Источник файлов для CAPF         |
