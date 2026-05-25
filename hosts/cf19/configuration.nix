@@ -31,12 +31,13 @@
     "sd_mod"
   ];
 
+  boot.resumeDevice = "/dev/disk/by-uuid/68ade83c-1e5b-4f37-a13f-2c386be87be6";
+
   boot.kernelParams = [
     "i8042.reset"
     "i8042.nomux"
     "mitigations=off"
     "preempt=full"
-    "nohibernate"
     "mem_sleep_default=s2idle"
   ];
 
