@@ -45,6 +45,7 @@
       ./modules/packages-runtime.nix
       ./modules/systemd-policy.nix
       ./modules/tty-console.nix
+      ./modules/pro-power-beep.nix
 
       # Общие модули формируют общую политику и не зависят от пользовательских настроек.
      ./modules/pro-users.nix

@@ -263,6 +263,15 @@ plugins in the flake is no longer supported.
   Last reviewed: 2026-05-04
   Risk: high
 
+- Имя: Low-battery Audible Alert
+  Стабильность: [FLUID]
+  Спецификация: при разряде батареи ниже порога (`pro.power.lowBattery.beep.threshold`, по умолчанию 15%) в состоянии Discharging система издаёт звуковой сигнал через PC‑спикер (утилита `beep`) с fallback на консольный колокольчик и опционально ALSA. Частота опроса — таймер systemd (по умолчанию 60 с), есть кулдаун (`pro.power.lowBattery.beep.cooldownSec`, по умолчанию 180 с) от повторных сигналов.
+  Proof: `nix eval --json .#nixosConfigurations.<host>.config.systemd.timers.pro-beep-low-battery` и `systemd-analyze verify` для сгенерированного unit; смоук: `PRO_BEEP_FORCE=1 ${/nix/store/.../pro-beep-low-battery}/bin/pro-beep-low-battery` на хосте.
+  Run: `nix eval --json .#nixosConfigurations.huawei.config.systemd.timers.pro-beep-low-battery`
+  Owner: `modules/pro-power-beep.nix`
+  Last reviewed: 2026-05-24
+  Risk: low
+
 - Имя: Systemd Unit Verification
   Стабильность: [FLUID]
   Спецификация: единая политика генерации systemd unit-файлов и проверка их корректности (`systemd-analyze verify`).
