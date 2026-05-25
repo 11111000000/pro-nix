@@ -124,7 +124,7 @@ in {
       partOf = [ "pro-beep-low-battery.service" ];
       # Some NixOS versions expose startLimit* on timers — set safe defaults
       startLimitBurst = 3;
-      startLimitIntervalSec = "5min";
+      startLimitIntervalSec = 300; # seconds
       unitConfig = { };
       timerConfig = {
         OnBootSec = "120s";
