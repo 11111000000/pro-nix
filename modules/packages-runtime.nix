@@ -58,5 +58,10 @@
     lsof
     ncdu
     time
+
+    # ALSA utilities и beep добавлены в базовый runtime чтобы обеспечить
+    # наличие amixer/alsamixer/speaker-test/aplay и утилиты beep на всех хостах.
+    alsa-utils
+    beep
   ];
 }
