@@ -30,8 +30,7 @@ let
 
     # Принудительный тест: можно включить через опцию forceTest или одноразово через PRO_BEEP_FORCE=1
     FORCE_DEFAULT="${if cfg.forceTest or false then "1" else "0"}"
-    FORCE="$FORCE_DEFAULT"
-    if [ -n "${"$"}PRO_BEEP_FORCE" ]; then FORCE="${"$"}PRO_BEEP_FORCE"; fi
+    FORCE=${"\${PRO_BEEP_FORCE:-$FORCE_DEFAULT}"}
 
     if [ "$FORCE" != "1" ]; then
       if [ -f "$LAST_FILE" ]; then
