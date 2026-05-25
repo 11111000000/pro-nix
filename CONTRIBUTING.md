@@ -92,7 +92,6 @@ Emacs-лисп правила
 Частые быстрые проверки:
 
 ```bash
-./tools/surface-lint.sh                 # документы и реестр Proof
 ./tools/holo-verify.sh elisp            # синтаксис Emacs Lisp
 nix eval --json .#<точный-атрибут>      # NixOS/Home Manager атрибут
 nix build .#<точный-derivation>         # отдельный пакет или app

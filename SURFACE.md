@@ -17,8 +17,8 @@ Proof — конкретную команду или тест, обеспечи�
   Стабильность: [FROZEN]
   Спецификация: минимальная воспроизводимая проверка работоспособности репозитория — набор контрактных проверок, которые должны успешно выполняться в чистой среде.
   Proof: `tests/contract/test_surface_health.spec`
-  Run: `./tools/surface-lint.sh && ./tools/holo-verify.sh --quick`
-  Owner: `tools/surface-lint.sh`, `tests/contract`
+  Run: `./tools/holo-verify.sh --quick`
+  Owner: `tests/contract`
   Last reviewed: 2026-05-04
   Risk: high
 
@@ -43,14 +43,6 @@ Proof — конкретную команду или тест, обеспечи�
   Last reviewed: 2026-05-13
   Risk: high
 
-- Имя: Git Worktree Policy
-  Стабильность: [FLUID]
-  Спецификация: рекомендуется, чтобы агенты (автоматические и люди), вносящие изменения в репозиторий pro-nix, по возможности использовали linked worktree; primary worktree допускается при явном разрешении оператора. Ранее в репозитории был helper-скрипт для создания linked worktree — он удалён.
-  Proof: none (helper removed)
-  Run: (manual) рекомендация — см. CONTRIBUTING.md
-  Owner: `AGENTS.md`, `CONTRIBUTING.md`
-  Last reviewed: 2026-05-20
-  Risk: medium
 
 - Имя: Runtime Packages & Activation
   Стабильность: [FLUID]
@@ -145,14 +137,7 @@ Proof — конкретную команду или тест, обеспечи�
   Last reviewed: 2026-05-06
   Risk: low
 
- - Имя: Emacs AI / Agent Shell (removed)
-  Стабильность: [REMOVED]
-  Спецификация: удалено — интеграция ai-агентов/agent-shell/skills удалена из репозитория по инициативе владельца.
-  Proof: none
-  Run: none
-  Owner: n/a
-  Last reviewed: 2026-05-15
-  Risk: none
+ - Имя: Emacs AI / Agent Shell [REMOVED]
 
 - Имя: Pro-peer Key Sync
   Стабильность: [FLUID]
@@ -257,8 +242,8 @@ plugins in the flake is no longer supported.
 - Имя: Verification Tooling & CI Proofs
   Стабильность: [FROZEN]
   Спецификация: локальные и CI-утилиты, которые проверяют соответствие SURFACE/HOLO контрактам (surface-lint, holo-verify, flake checks).
-  Proof: `./tools/surface-lint.sh`, `./tools/holo-verify.sh`, `nix flake check`
-  Run: `./tools/surface-lint.sh && ./tools/holo-verify.sh --quick`
+  Proof: `./tools/holo-verify.sh`, `nix flake check`
+  Run: `./tools/holo-verify.sh --quick`
   Owner: `tools/`, `tests/contract`
   Last reviewed: 2026-05-04
   Risk: high

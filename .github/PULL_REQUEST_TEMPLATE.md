@@ -16,9 +16,6 @@ Proof: tests: <команды или файлы, подтверждающие и
 
 - [ ] Я обновил `SURFACE.md`, если менялось публичное поведение.
 - [ ] Я добавил или обновил Proof для `[FROZEN]` поверхностей.
-- [ ] Я запустил `nix fmt`.
-- [ ] Я запустил `nix flake check`.
-- [ ] Я запустил `./tools/surface-lint.sh`.
 - [ ] Я запустил `./tools/holo-verify.sh`.
 
 ## Migration

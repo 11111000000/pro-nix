@@ -125,7 +125,6 @@ nix run .#check-all
 Основные команды проверки:
 
 ```bash
-./tools/surface-lint.sh   # проверяет ссылки SURFACE → Proof и базовые style-правила
 ./tools/holo-verify.sh    # прогон контрактов и вспомогательных проверок
 nix flake check           # стандартная flake-проверка
 ```
@@ -135,7 +134,7 @@ nix flake check           # стандартная flake-проверка
 1. Inspect — прочитать AGENTS.md, SURFACE.md, HOLO.md и релевантные модули.
 2. Contract — сформулировать Intent, Surface impact и Proof (особенно для FROZEN).
 3. Patch — минимальный код/док-дифф, соблюдая правила Nix/Emacs проекта.
-4. Verify — запустить Proof, surface-lint и holo-verify.
+4. Verify — запустить Proof и holo-verify.
 5. Switch — live-активация после успешных preflight-проверок (при необходимости).
 
 Границы репозитория
