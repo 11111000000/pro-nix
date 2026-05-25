@@ -8,7 +8,11 @@
       home.username = name;
       home.homeDirectory = "/home/${name}";
       home.stateVersion = "23.11";
-      programs.opencode-bwrap.enable = true;
+      # Доставка бинаря opencode без бандла плагинов/bun во время switch
+      # Опционально: можно включить sandboxed wrapper через programs.opencode-bwrap,
+      # но он может тащить плагины. Поэтому оставляем только бинарь.
+      # programs.opencode-bwrap.enable = lib.mkDefault false;
+      home.packages = lib.mkAfter [ pkgs.opencode ];
       pro.emacs = {
         enable = true;
         gui.enable = false;

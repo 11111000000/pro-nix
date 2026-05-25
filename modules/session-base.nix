@@ -10,6 +10,7 @@
 
   services.xserver.xkb = {
     layout = "us,ru";
-    options = "grp:ralt_toggle,caps:ctrl_modifier,grp_led:caps";
+    # Right Alt переключает раскладку, а индикатор CapsLock отражает активную раскладку.
+    options = "grp:ralt_toggle,grp_led:caps";
   };
 }

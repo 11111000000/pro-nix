@@ -27,38 +27,45 @@ let
     mkdir -p "$STATE_DIR"
 
     now=$(date +%s)
-    if [ -f "$LAST_FILE" ]; then
-      last=$(cat "$LAST_FILE" 2>/dev/null || echo 0)
-      if [ "$(( now - last ))" -lt "$COOLDOWN" ]; then
+
+    # Принудительный тест: можно включить через опцию forceTest или одноразово через PRO_BEEP_FORCE=1
+    FORCE_DEFAULT="${if cfg.forceTest or false then "1" else "0"}"
+    FORCE=${"\${PRO_BEEP_FORCE:-$FORCE_DEFAULT}"}
+
+    if [ "$FORCE" != "1" ]; then
+      if [ -f "$LAST_FILE" ]; then
+        last=$(cat "$LAST_FILE" 2>/dev/null || echo 0)
+        if [ "$(( now - last ))" -lt "$COOLDOWN" ]; then
+          exit 0
+        fi
+      fi
+
+      # Найти батарею
+      bat=""
+      for p in /sys/class/power_supply/BAT*; do
+        if [ -d "$p" ]; then bat="$p"; break; fi
+      done
+      [ -n "$bat" ] || exit 0
+
+      status="$(cat "$bat/status" 2>/dev/null || echo Unknown)"
+      cap="$(cat "$bat/capacity" 2>/dev/null || echo 100)"
+
+      case "$status" in
+        Discharging)
+          : ;;
+        *)
+          exit 0 ;;
+      esac
+
+      cap_num=${"\${cap%%[^0-9]*}"}
+      if [ -z "$cap_num" ]; then cap_num=100; fi
+
+      if [ "$cap_num" -ge "$THRESHOLD" ]; then
         exit 0
       fi
     fi
 
-    # Найти батарею
-    bat=""
-    for p in /sys/class/power_supply/BAT*; do
-      if [ -d "$p" ]; then bat="$p"; break; fi
-    done
-    [ -n "$bat" ] || exit 0
-
-    status="$(cat "$bat/status" 2>/dev/null || echo Unknown)"
-    cap="$(cat "$bat/capacity" 2>/dev/null || echo 100)"
-
-    case "$status" in
-      Discharging)
-        : ;;
-      *)
-        exit 0 ;;
-    esac
-
-    cap_num=${"\${cap%%[^0-9]*}"}
-    if [ -z "$cap_num" ]; then cap_num=100; fi
-
-    if [ "$cap_num" -ge "$THRESHOLD" ]; then
-      exit 0
-    fi
-
-    # Порог пройден — пищим
+    # Порог пройден или принудительный тест — пищим
     # 1) PC speaker через beep, если доступен
     ${pkgs.kmod}/bin/modprobe pcspkr 2>/dev/null || true
 
@@ -102,6 +109,15 @@ in {
       default = 180;
       description = "Минимальный интервал (сек) между сигналами.";
     };
+    forceTest = mkOption {
+      type = types.bool;
+      default = false;
+      description = ''
+        Принудительный тестовый режим: при включении всегда подаёт сигнал при срабатывании таймера,
+        игнорируя состояние батареи и кулдаун. Для одноразового запуска можно задать 
+        переменную окружения PRO_BEEP_FORCE=1 через systemd-run.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -124,7 +140,7 @@ in {
       partOf = [ "pro-beep-low-battery.service" ];
       # Some NixOS versions expose startLimit* on timers — set safe defaults
       startLimitBurst = 3;
-      startLimitIntervalSec = 300;
+      startLimitIntervalSec = 300; # seconds
       unitConfig = { };
       timerConfig = {
         OnBootSec = "120s";
