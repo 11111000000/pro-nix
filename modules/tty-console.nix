@@ -51,10 +51,10 @@ in
     serviceConfig = {
       Type = "oneshot";
       # kbdrate обращается к i8042 напрямую. На системах без PS/2
-      # контроллера (USB-only, VM) он зависает и systemd шлёт SIGINT.
-      # trap ловит сигнал и выходит с 0, чтобы не маркировать сервис как failed.
-      ExecStart = ''${pkgs.bash}/bin/sh -c 'trap "exit 0" INT; ${pkgs.kbd}/bin/kbdrate -d 250 -r 30' '';
-      SuccessExitStatus = [ 0 1 ];
+      # контроллера (USB-only, VM) он зависает. timeout обрывает
+      # через 5 секунд (exit 124), что разрешено в SuccessExitStatus.
+      ExecStart = "${pkgs.coreutils}/bin/timeout 5 ${pkgs.kbd}/bin/kbdrate -d 250 -r 30";
+      SuccessExitStatus = [ 0 1 124 ];
     };
   };
 }
