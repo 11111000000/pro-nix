@@ -39,6 +39,14 @@ Disable if you observe frame jitter on your setup."
   (when (fboundp 'global-corfu-mode) (global-corfu-mode 1))
   (when (fboundp 'corfu-history-mode) (corfu-history-mode 1)))
 
+;; Явные клавиши Tab/Shift-Tab для навигации по кандидатам corfu
+(with-eval-after-load 'corfu
+  (when (boundp 'corfu-map)
+    (define-key corfu-map (kbd "TAB") #'corfu-next)
+    (define-key corfu-map (kbd "<tab>") #'corfu-next)
+    (define-key corfu-map (kbd "<backtab>") #'corfu-previous)
+    (define-key corfu-map (kbd "S-TAB") #'corfu-previous)))
+
 ;; Corfu in TTY
 (when (and (not (display-graphic-p))
            (or (pro--package-provided-p 'corfu-terminal) (pro-packages--maybe-install 'corfu-terminal t) (require 'corfu-terminal nil t)))
