@@ -17,6 +17,7 @@
 | Поиск      | C-c p f | pro-project-find-file                 | Файл проекта                     |
 | Поиск      | C-c C-f | consult-find                          | Поиск файла (consult)            |
 | UI         | C-=     | pro-ui-zoom-in                        | Увеличить шрифт                  |
+| UI         | C-+     | pro-ui-zoom-in                        | Увеличить шрифт (альтернатива)    |
 | UI         | C--     | pro-ui-zoom-out                       | Уменьшить шрифт                  |
 | UI         | C-0     | pro-ui-zoom-reset                     | Сбросить масштаб                 |
 | UI         | C-c u   | undo-tree-visualize                   | Визуализировать историю отмен   |
