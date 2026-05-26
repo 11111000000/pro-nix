@@ -23,6 +23,9 @@
   networking.networkmanager.enable = true;
   networking.nameservers = [ "77.88.8.8" "77.88.8.1" "1.1.1.1" "8.8.8.8" ];
   networking.networkmanager.dns = "systemd-resolved";
+  networking.networkmanager.settings.connection = {
+    "wifi.powersave" = 2;
+  };
 
   services.openssh = {
     enable = true;

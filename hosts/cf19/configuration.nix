@@ -1,4 +1,8 @@
-{ lib, pkgs, ... }:
+{ config, lib, pkgs, ... }:
+
+let
+  wifiRecover = pkgs.writeShellScriptBin "ops-wifi-recover" (builtins.readFile ../../scripts/ops-wifi-recover.sh);
+in
 
 {
   # CF-19: host-конфигурация описывает только железо и специфические
@@ -76,6 +80,8 @@
         echo "$n" > /proc/acpi/wakeup || true
       fi
     done
+    # WiFi reset: после s2idle чип может не переинициализироваться.
+    ${wifiRecover}/bin/ops-wifi-recover || true
   '';
 
   powerManagement.powerUpCommands = lib.mkAfter ''
@@ -84,6 +90,7 @@
         echo "$n" > /proc/acpi/wakeup || true
       fi
     done
+    ${wifiRecover}/bin/ops-wifi-recover || true
   '';
 
   fileSystems."/" = lib.mkForce {
