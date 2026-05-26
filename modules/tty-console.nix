@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, config, ... }:
 
 /*
 Change Gate
@@ -6,33 +6,35 @@ Intent: Сделать TTY-шрифт и keymap виртуальной конс�
 Pressure: Ops
 Surface impact: NixOS Base Configuration [FROZEN] — виртуальные консоли получают
                 общий UTF-8 шрифт и совместимый keymap без зависимости от desktop-модулей.
-Proof: `nix eval --json .#nixosConfigurations.<host>.config.systemd.services.load-tty-keymap`
-       и `systemd-analyze verify /etc/systemd/system/load-tty-keymap.service`.
+Proof: `systemd-analyze verify /etc/systemd/system/systemd-vconsole-setup.service`
+       и проверка `nix eval --json .#nixosConfigurations.<host>.config.console.keyMap`.
 Migration: none.
 */
 
 let
-  # Use a UTF-8 compatible Russian keymap for virtual consoles.
-  # Previously a CP1251-based map was used which conflicts with system UTF-8 locales
-  # and can make Cyrillic characters invisible in the kernel console.
-  ttyKeymap = "${pkgs.kbd}/share/keymaps/i386/qwerty/ru.map.gz";
   ttyFont = "${pkgs.kbd}/share/consolefonts/Cyr_a8x14.psfu.gz";
+
+  # Генерируем keymap из XKB через ckbcomp, чтобы избежать unknown keysym
+  # в stock-раскладках kbd (U+0439 → cyrillic_small_letter_short_i неизвестен
+  # в kbd-2.9.0). После генерации фиксим Right Alt (keycode 100) так, чтобы
+  # он переключал раскладку в консоли (AltGr_Lock вместо просто Alt).
+  ruConsoleKeymap = pkgs.runCommand "ru-console-keymap" {
+    nativeBuildInputs = [ pkgs.buildPackages.ckbcomp ];
+    preferLocalBuild = true;
+  } ''
+    ckbcomp \
+      -model pc105 -layout us,ru \
+      -option grp:ralt_toggle,grp_led:caps > "$out"
+    # ckbcomp превращает grp:ralt_toggle в Alt, а консоли нужен AltGr_Lock
+    sed -i 's/^keycode 100 = .*/keycode 100 = AltGr_Lock/' "$out"
+  '';
 in
 {
-  console.useXkbConfig = lib.mkDefault true;
-  console.earlySetup = lib.mkDefault true;
-  console.font = lib.mkDefault ttyFont;
-
-  # Linux console не применяет XKB option `grp:ralt_toggle` напрямую.
-  # Поэтому keymap для TTY загружается отдельным unit-ом через loadkeys.
-  systemd.services.load-tty-keymap = {
-    description = "Загрузить TTY keymap: Right Alt переключает ru/en";
-    wantedBy = [ "multi-user.target" ];
-    before = [ "getty@tty1.service" "getty@tty2.service" "getty@tty3.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${pkgs.kbd}/bin/loadkeys ${ttyKeymap}";
-    };
+  console = {
+    useXkbConfig = lib.mkDefault false;
+    earlySetup = lib.mkDefault true;
+    font = lib.mkDefault ttyFont;
+    keyMap = lib.mkDefault ruConsoleKeymap;
   };
 
   services.gpm = {
@@ -45,10 +47,13 @@ in
   systemd.services.kbdrate = {
     description = "Задание интервалов повторения на виртуальной консоли";
     wantedBy = [ "multi-user.target" ];
-    after = [ "load-tty-keymap.service" ];
+    after = [ "systemd-vconsole-setup.service" ];
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "${pkgs.kbd}/bin/kbdrate -d 250 -r 30";
+      # На системах без i8042 (USB-клавиатура, виртуализация) kbdrate
+      # возвращает exit 1 — это не ошибка конфигурации
+      SuccessExitStatus = [ 0 1 ];
     };
   };
 }

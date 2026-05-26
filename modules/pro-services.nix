@@ -38,6 +38,13 @@
   # Примечание: auditd требует поддержки аудита в ядре; при отсутствии поддержки
   # эта опция будет неэффективна.
   security.audit.enable = true;
+  security.audit.backlogLimit = 8192;
+  security.audit.rules = [
+    "-w /etc/passwd -p wa -k identity"
+    "-w /etc/shadow -p wa -k identity"
+    "-w /etc/group -p wa -k identity"
+    "-a always,exit -F arch=b64 -S execve -k exec"
+  ];
   security.auditd.enable = true;
 
   services.fail2ban = {
