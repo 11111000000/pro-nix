@@ -44,9 +44,7 @@
         "Установить локальные клавиши в буфере agent-shell, если режим доступен." 
         (when (derived-mode-p 'agent-shell-mode)
           (when (fboundp 'agent-shell-set-session-model)
-            (local-set-key (kbd "C-c m") #'agent-shell-set-session-model))
-          (when (fboundp 'agent-shell-set-session-mode)
-            (local-set-key (kbd "<tab>") #'agent-shell-set-session-mode))))
+            (local-set-key (kbd "C-c m") #'agent-shell-set-session-model))))
 
       (when (boundp 'agent-shell-mode-hook)
         (add-hook 'agent-shell-mode-hook #'pro-agent-shell--setup-keys))
