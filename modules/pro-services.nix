@@ -17,7 +17,7 @@
 #   `systemctl status fail2ban` и `ss -tlnp | grep 22`.
 #
 # Last reviewed: 2026-05-03
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   networking.networkmanager.enable = true;
@@ -37,7 +37,7 @@
   # Аудит ядра: включаем auditd для централизованного сбора событий безопасности.
   # Примечание: auditd требует поддержки аудита в ядре; при отсутствии поддержки
   # эта опция будет неэффективна.
-  security.audit.enable = true;
+  security.audit.enable = lib.mkDefault true;
   security.audit.backlogLimit = 8192;
   security.audit.rules = [
     "-w /etc/passwd -p wa -k identity"

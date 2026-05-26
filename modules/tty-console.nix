@@ -50,9 +50,10 @@ in
     after = [ "systemd-vconsole-setup.service" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${pkgs.kbd}/bin/kbdrate -d 250 -r 30";
-      # На системах без i8042 (USB-клавиатура, виртуализация) kbdrate
-      # возвращает exit 1 — это не ошибка конфигурации
+      # kbdrate обращается к i8042 напрямую. На системах без PS/2
+      # контроллера (USB-only, VM) он зависает и systemd шлёт SIGINT.
+      # trap ловит сигнал и выходит с 0, чтобы не маркировать сервис как failed.
+      ExecStart = ''${pkgs.bash}/bin/sh -c 'trap "exit 0" INT; ${pkgs.kbd}/bin/kbdrate -d 250 -r 30' '';
       SuccessExitStatus = [ 0 1 ];
     };
   };

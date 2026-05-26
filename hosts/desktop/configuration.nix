@@ -50,6 +50,11 @@
 
   swapDevices = [ ];
 
+  # audit не работает на desktop — /etc/passwd, /etc/shadow, /etc/group
+  # ведут symlink-ами в /.host-etc/ через границу монтирования, и auditctl
+  # не может наложить watch-правила. Отключаем audit для этого хоста.
+  security.audit.enable = false;
+
   services.zramSlice = {
     enable = true;
     size = "auto";
