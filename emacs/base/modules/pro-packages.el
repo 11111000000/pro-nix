@@ -79,14 +79,14 @@ FORCE принудительно запускает refresh."
   (equal package-archives pro-packages-archives))
 
 (defun pro-packages--load-decisions ()
-  "Load decisions from `pro-packages-decisions-file` if present." 
+  "Load decisions from `pro-packages-decisions-file` if present."
   (when (file-exists-p pro-packages-decisions-file)
     (condition-case _err
         (load-file pro-packages-decisions-file)
       (error (message "[pro-packages] failed to load decisions")))))
 
 (defun pro-packages--save-decisions ()
-  "Persist `pro-packages-decisions` into `pro-packages-decisions-file` atomically." 
+  "Persist `pro-packages-decisions` into `pro-packages-decisions-file` atomically."
   (let ((dir (file-name-directory pro-packages-decisions-file)))
     (unless (file-directory-p dir) (make-directory dir t)))
   (with-temp-file (concat pro-packages-decisions-file ".tmp")

@@ -38,6 +38,9 @@
   (when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
   (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
   (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+  (when (fboundp 'horizontal-scroll-bar-mode) (horizontal-scroll-bar-mode -1))
+  (setq-default left-fringe-width 0
+                right-fringe-width 0)
   ;; Thin window divider to give subtle separation between windows.
   (when (fboundp 'window-divider-mode)
     (setq window-divider-default-bottom-width 1

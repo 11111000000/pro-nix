@@ -10,14 +10,15 @@
   :group 'pro-ui)
 
 (defun pro-ui-apply-fringes ()
-  "Применить аккуратные параметры fringe и window-divider в GUI.
+  "Применить минимальный GUI-слой: fringe и window-divider.
 Идемпотентна и безопасна к повторному вызову." 
   (when (display-graphic-p)
     (when (fboundp 'window-divider-mode)
       (setq window-divider-default-bottom-width 1
             window-divider-default-places 'bottom-only)
       (window-divider-mode 1))
-    ;; Размер fringe по умолчанию
-    (when (fboundp 'fringe-mode) (fringe-mode '(8 . 8)))))
+    (setq-default left-fringe-width 0
+                  right-fringe-width 0)
+    (when (fboundp 'fringe-mode) (fringe-mode '(0 . 0))))
 
 (provide 'pro-ui-fringes)
