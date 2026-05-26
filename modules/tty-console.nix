@@ -48,13 +48,13 @@ in
     description = "Задание интервалов повторения на виртуальной консоли";
     wantedBy = [ "multi-user.target" ];
     after = [ "systemd-vconsole-setup.service" ];
+    unitConfig.ConditionPathExists = "/sys/module/i8042";
     serviceConfig = {
       Type = "oneshot";
-      # kbdrate обращается к i8042 напрямую. На системах без PS/2
-      # контроллера (USB-only, VM) он зависает. timeout обрывает
-      # через 5 секунд (exit 124), что разрешено в SuccessExitStatus.
-      ExecStart = "${pkgs.coreutils}/bin/timeout 5 ${pkgs.kbd}/bin/kbdrate -d 250 -r 30";
-      SuccessExitStatus = [ 0 1 124 ];
+      # kbdrate работает только при наличии i8042. На USB-only/VM хостах
+      # сервис пропускается через ConditionPathExists и не влияет на switch.
+      ExecStart = "${pkgs.kbd}/bin/kbdrate -d 250 -r 30";
+      SuccessExitStatus = [ 0 1 ];
     };
   };
 }
