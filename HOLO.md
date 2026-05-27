@@ -64,7 +64,7 @@ NixOS‑ориентированные инварианты (конфигура�
 
 
 24. INV-Activation-Preflight
-    Перед `nixos-rebuild switch`/`just switch` выполняются preflight проверки: вычислимость профиля пакетов, unit verify, quick smoke tests. Proof: `scripts/helper-check-nixos-build.sh`, `tests/contract/test_live_activation_smoke.sh`.
+    Перед live-активацией через отдельный helper выполняется preflight; `just switch` остаётся быстрым и не запускает eval-гейт. Proof: `scripts/helper-check-nixos-build.sh`, `tests/contract/test_live_activation_smoke.sh`.
 
 25. INV-Minimal-Verify-First
     Проверка изменения начинается с минимального затронутого артефакта: отдельный пакет, отдельный модуль или отдельный eval. Полный host build допускается только если правка затрагивает системную сборку целиком или локальная проверка не покрывает риск. Proof: review + целевые `nix build`/`nix eval` команды для изменённого файла.

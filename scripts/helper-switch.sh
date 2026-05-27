@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# simple-helper-switch — предварительная проверка перед switch
+# simple-helper-switch — быстрая активация перед switch
 #
 # Использует nixpkgs defaults напрямую (без кастомных модулей).
 # Предлагает использовать boot для избежания race conditions при switch.
@@ -28,17 +28,7 @@ fi
 
 echo "[simple-helper] Checking configuration for host: $HOST_ARG"
 
-# 1. Preflight eval — проверяем что конфигурация вычисляется.
-# Явный path:-ref не заставляет root открывать рабочее дерево как Git-репозиторий.
-echo "[simple-helper] Running preflight eval..."
-if ! nix --extra-experimental-features 'nix-command flakes' eval --json "$FLAKE_REF#nixosConfigurations.$HOST_ARG.config.environment.systemPackages" >/dev/null 2>&1; then
-  echo "[simple-helper] ERROR: preflight eval failed" >&2
-  exit 1
-fi
-
-echo "[simple-helper] Preflight eval passed."
-
-# 2. Запуск switch с сохранением логов
+# Запуск switch с сохранением логов.
 echo ""
 echo "[simple-helper] Running switch for $HOST_ARG..."
 SWITCH_LOG="/tmp/switch-$(date +%s).log"

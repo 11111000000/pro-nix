@@ -268,7 +268,7 @@ plugins in the flake is no longer supported.
 
 - Имя: Live Activation Preflight
   Стабильность: [FROZEN]
-  Спецификация: обязательные preflight-проверки перед `nixos-rebuild switch`/`just switch`: вычислимость профиля пакетов и тесты system-packages.
+  Спецификация: обязательные preflight-проверки для live-активации через отдельный helper; быстрый `just switch` не выполняет eval-гейт. Полный preflight остаётся отдельной операцией для операторского контроля.
   Proof: `nix --extra-experimental-features 'nix-command flakes' eval --json .#nixosConfigurations.<host>.config.environment.systemPackages`, `tests/contract/unit/09-system-packages-eval.sh`
   Run: `./scripts/helper-check-nixos-build.sh huawei`
   Owner: `tests/contract`

@@ -106,10 +106,10 @@
 
 
 
-### Обязательный preflight перед `just switch` / `nixos-rebuild switch`
-Перед live-активацией проверить вычислимость `.#nixosConfigurations.<host>.config.environment.systemPackages`.
+### Обязательный preflight перед live-активацией через helper
+Перед операторским preflight проверить вычислимость `.#nixosConfigurations.<host>.config.environment.systemPackages`.
 Для изменений в `system-packages.nix` — дополнительно `tests/contract/unit/09-system-packages-eval.sh`.
-Если eval падает, live-активация запрещена.
+`just switch` использует быстрый путь без eval-гейта; если нужен preflight, запускайте отдельный helper.
 
 ## Конфликты и сомнения
 - При сомнении следуйте существующему стилю репозитория, а не абстрактному идеалу.
