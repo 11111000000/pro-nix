@@ -22,15 +22,12 @@ in
 
   config = lib.mkMerge [
     (lib.mkIf config.services.zramSlice.enable {
-      # Create a small script in /etc that performs the zram setup with chosen size
-      # use a plain string here; lib.mkString isn't available in all nixpkgs
       environment.etc."enable-zram.sh" = {
         text = ''
 #!/bin/sh
 set -e
 # compute size in MB
 if [ "${cfg.size}" = "auto" ]; then
-  # use absolute path for awk to avoid minimal PATH in systemd ExecStart
   mem_kb=$(/run/current-system/sw/bin/awk '/MemTotal/ {print $2}' /proc/meminfo)
   size_mb=$(( mem_kb/1024/2 ))
   if [ $size_mb -gt 16384 ]; then size_mb=16384; fi
@@ -38,12 +35,8 @@ else
   size_mb=${cfg.size}
 fi
 echo "Configuring zram with $size_mb M"
-# use absolute paths for commands invoked from unit
-# Be defensive: if zram is already configured or swap is active on /dev/zram0,
-# do not fail the script. Attempt a gentle reset if writing disksize fails.
 /run/current-system/sw/sbin/modprobe zram max_comp_streams=4 || true
 
-# If disksize already non-zero, assume configured and exit cleanly.
 if [ -e /sys/block/zram0/disksize ]; then
   current=$(cat /sys/block/zram0/disksize 2>/dev/null || echo 0)
   if [ "$current" -ne 0 ]; then
@@ -52,13 +45,11 @@ if [ -e /sys/block/zram0/disksize ]; then
   fi
 fi
 
-# If swap is active on /dev/zram0, skip configuration.
 if /run/current-system/sw/bin/swapon --noheadings --show=NAME 2>/dev/null | /run/current-system/sw/bin/grep -q '/dev/zram0'; then
   echo "zram: swap on /dev/zram0 already active; skipping."
   exit 0
 fi
 
-# Try to set disksize; if it fails, attempt a reset and retry once.
 if ! (echo $((size_mb * 1024 * 1024)) > /sys/block/zram0/disksize) 2>/dev/null; then
   echo "zram: failed to write disksize; attempting reset"
   /run/current-system/sw/sbin/swapoff /dev/zram0 2>/dev/null || true

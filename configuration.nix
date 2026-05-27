@@ -61,8 +61,8 @@
       ./modules/pro-profiles.nix
       ./modules/session-exwm.nix
       ./modules/nix-cuda-compat.nix
-      ./nixos/modules/zram-slice.nix
-      ./nix/modules/searxng.nix
+      ./modules/zram-slice.nix
+      ./modules/searxng.nix
 
      # Локальные переопределения конкретного хоста остаются в файле local.nix.
    ] ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ];

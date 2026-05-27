@@ -61,7 +61,7 @@
         modules = [
           home-manager.nixosModules.home-manager
           ./configuration.nix
-          ./nix/modules/searxng.nix
+          ./modules/searxng.nix
           # NOTE: the treesitter grammars derivation is exposed at
           # the flake top level (treesitterGrammars). Do NOT import
           # it here as a NixOS module — that would return a derivation
@@ -81,7 +81,7 @@
           home-manager.nixosModules.home-manager
           ./modules/packages-runtime.nix
           ./modules/tty-console.nix
-          ./nix/modules/searxng.nix
+          ./modules/searxng.nix
         ] ++ extraModules;
       };
 

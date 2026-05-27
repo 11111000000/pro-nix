@@ -1,0 +1,30 @@
+{ lib, pkgs, ... }:
+
+# RU: Файловый контракт (modules/pro-samba-keys-sync.nix)
+
+let
+  helpers = {
+    proSambaSync = pkgs.writeShellScriptBin "pro-samba-sync-keys-wrapper" ''
+      #!/usr/bin/env bash
+      set -euo pipefail
+      exec /run/current-system/sw/bin/bash /etc/pro-samba-sync-keys-wrapper.sh "$@"
+    '';
+  };
+
+in
+{
+  environment.etc."pro-samba-sync-keys.sh".source = ../scripts/ops-pro-samba-sync-keys.sh;
+  environment.etc."pro-samba-sync-keys.sh".mode = "0755";
+
+  environment.etc."pro-samba-sync-keys-wrapper.sh".source = ../scripts/pro-samba-sync-keys-wrapper.sh;
+  environment.etc."pro-samba-sync-keys-wrapper.sh".mode = "0755";
+
+  systemd.services."pro-samba-sync-keys" = {
+    description = "Apply decrypted samba creds to /etc/samba/creds.d";
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${helpers.proSambaSync}/bin/pro-samba-sync-keys-wrapper --input /tmp/authorized_creds.gpg --out /etc/samba/creds.d/%i";
+      RemainAfterExit = "no";
+    };
+  };
+}

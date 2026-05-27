@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Безопасный помощник для обновления pi в pro-nix
+# Безопасный помощник для обновления `pi` input в pro-nix
 # По умолчанию: dry-run — не изменяет файлы.
 # Usage: ./scripts/update-pi-version.sh [version|latest] [--apply]
 # Пример: ./scripts/update-pi-version.sh latest
-# Если передать --apply, скрипт выдаст команды, которые нужно вручную выполнить (не производит автоматического коммита).
+# Если передать --apply, скрипт сам обновит flake.lock и создаст коммит.
 
 set -euo pipefail
 
@@ -43,44 +43,51 @@ url="${base_url_prefix}${version}/${asset_name}"
 echo "Версия: $version"
 echo "Asset URL: $url"
 
-echo "Вычисляю sha256 (nix-prefetch-url --unpack)..."
+echo "Вычисляю narHash (nix-prefetch-url --unpack)..."
 sha=$(nix-prefetch-url --unpack "$url" 2>/dev/null) || {
-  echo "Не удалось получить sha256 для $url" >&2
+  echo "Не удалось получить narHash для $url" >&2
   exit 4
 }
 
-echo "sha256: $sha"
+echo "narHash: $sha"
+
+timestamp=$(date +%s)
 
 cat <<EOF
 
-Dry-run: предлагаемые шаги для вручнуюcкого обновления system-packages.nix:
+Dry-run: предлагаемые шаги для вручнуюcкого обновления flake.lock:
 
-1) Сделать бэкап текущего файла (уже рекомендуется):
-   cp system-packages.nix system-packages.nix.bak
+1) Обновить `flake.lock` node `pi`:
+   - rev = "$version";
+   - lastModified = $timestamp;
+   - narHash = "$sha";
 
-2) Внести изменения в блок, где описан pi-coding-agent:
-   - обновить version = "$version";
-   - обновить sha256 = "$sha";
+2) Проверить diff:
+   git --no-pager diff -- flake.lock || true
 
-Если вы используете sed/perl, примерная команда (внимание: проверяйте diff перед коммитом):
-
-# Пример: заменить version
-perl -0777 -pe "s/(pname\s*=\s*\"pi-coding-agent\";.*?version\s*=\s*\")[^\"]*(\")/\1${version}\2/gs" system-packages.nix > system-packages.nix.new
-# Пример: заменить sha256
-perl -0777 -pe "s/(pname\s*=\s*\"pi-coding-agent\";.*?sha256\s*=\s*\")[^\"]*(\")/\1${sha}\2/gs" system-packages.nix.new > system-packages.nix.updated
-
-# Посмотреть diff
-git --no-pager diff -- system-packages.nix system-packages.nix.updated || true
-
-# После проверки выполнить замещение и коммит
-mv system-packages.nix.updated system-packages.nix
-git add system-packages.nix
-git commit -m "chore: update pi-coding-agent to v${version} (sha256: ${sha})"
+3) Зафиксировать изменения:
+   git add flake.lock
+   git commit -m "chore: update pi input to v${version}"
 
 EOF
 
 if [ "$APPLY" = true ]; then
-  echo "--apply указан: скрипт не станет автоматически вносить правки, но вы можете выполнить предложенные команды вручную." >&2
+  python3 - "$version" "$timestamp" "$sha" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+version, timestamp, nar_hash = sys.argv[1:4]
+lock = json.loads(Path("flake.lock").read_text())
+node = lock["nodes"]["pi"]
+node["locked"]["lastModified"] = int(timestamp)
+node["locked"]["narHash"] = nar_hash
+node["locked"]["rev"] = version
+Path("flake.lock").write_text(json.dumps(lock, indent=2) + "\n")
+PY
+  git add flake.lock
+  git commit -m "chore: update pi input to v${version}"
+  echo "flake.lock updated and committed." >&2
 fi
 
 echo "Готово (dry-run)."

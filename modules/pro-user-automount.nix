@@ -1,16 +1,8 @@
 { lib, pkgs, ... }:
 
-# RU: Файловый контракт — nix/modules/pro-user-automount.nix
+# RU: Файловый контракт — modules/pro-user-automount.nix
 #    Кратко: systemd user-level templates и обёртки для автоматического монтирования SMB
 #    под $HOME/mnt/hosts/<host>.
-
-#    Цель: предоставить проверяемые user-level unit-шаблоны, где ExecStart ссылается
-#      на store-путь, чтобы `systemd-analyze verify` мог разрешить путь.
-
-#    Контракт: экспорт environment.etc."systemd/user/smb-mount-user@.service" и
-#      соответствующий automount, а также helper script в /usr/local/bin.
-
-#    Proof: `systemd-analyze verify --user /run/user/$(id -u)/system/smb-mount-user@.service`
 
 let
   helpers = {
@@ -21,8 +13,8 @@ let
     '';
   };
 
+in
 {
-  # Optional systemd user automount template: mounts under $HOME/mnt/hosts/<host>
   environment.etc."systemd/user/smb-mount-user@.service".text = ''
   [Unit]
   Description=Mount SMB share for %i (user)
@@ -41,10 +33,9 @@ let
   TimeoutIdleSec=120
   '';
 
-  # Install a user-facing wrapper that calls repo script
   environment.etc."usr/local/bin/mount-smb-user".text = ''
   #!/usr/bin/env bash
-  exec "${./scripts/mount-smb.sh}" "$@"
+  exec "${../scripts/ops-mount-smb.sh}" "$@"
   '';
   environment.etc."usr/local/bin/mount-smb-user".mode = "0755";
 }
