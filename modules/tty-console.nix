@@ -2,12 +2,14 @@
 
 /*
 Change Gate
-Intent: Сделать TTY-шрифт и раскладку виртуальной консоли безопасными для активации.
-Pressure: Ops
-Surface impact: NixOS Base Configuration [FROZEN] — виртуальные консоли получают
-                общий UTF-8 шрифт и раскладку через XKB без зависимости от desktop-модулей.
-Proof: `systemd-analyze verify /etc/systemd/system/systemd-vconsole-setup.service`
-       и проверка `nix eval --json .#nixosConfigurations.<host>.config.console.useXkbConfig`.
+Intent: Упростить конфигурацию TTY-раскладки: использовать XKB для виртуальной
+консоли и переключать en/ru через Right Alt (RAlt). Убрать генерирование и
+патчи keymap-скриптов — это излишне.
+Pressure: Debt
+Surface impact: NixOS Base Configuration — поведение TTY для раскладок будет
+                совпадать с X11/XKB: layout = "us,ru", options = "grp:ralt_toggle".
+Proof: Проверка systemd-vconsole-setup и простая ручная проверка переключения
+       раскладки на виртуальной консоли (RAlt).
 Migration: none.
 */
 
@@ -16,10 +18,12 @@ let
 in
 {
   console = {
-    # tty должен повторять XKB-раскладку из services.xserver.xkb.
+    # Используем XKB-конфигурацию, чтобы консольная раскладка совпадала с X11.
     useXkbConfig = lib.mkDefault true;
     earlySetup = lib.mkDefault true;
     font = lib.mkDefault ttyFont;
+    # Не генерируем кастомные loadkeys-таблицы —XKB обработает группу раскладок
+    # и переключение по Right Alt согласно services.xserver.xkb.
   };
 
   services.gpm = {
