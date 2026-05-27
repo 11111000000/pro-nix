@@ -91,7 +91,7 @@ Proof — конкретную команду или тест, обеспечи�
 
 - Имя: Desktop / EXWM, Sway, i3
   Стабильность: [FLUID]
-  Спецификация: декларативная конфигурация рабочего стола и сессий входа (EXWM, Sway, i3, display-manager, X/Wayland настройки) для поддерживаемых хостов.
+  Спецификация: декларативная конфигурация рабочего стола и сессий входа (EXWM, Sway, i3, display-manager, X/Wayland настройки) для поддерживаемых хостов. Для EXWM глобальные клавиши `s-1`..`s-6` регистрируются как EXWM global keys и работают поверх управляемых Xorg-окон.
   Proof: headless ERT + локальные smoke-tests (`./scripts/test-emacs-headless.sh`); наличие session entries проверяется eval-конфигурацией хоста и содержимым `services.displayManager.sessionPackages`.
   Run: `./scripts/test-emacs-headless.sh`
   Owner: `emacs/base`, `modules/pro-desktop.nix`, `modules/session-exwm.nix`, `modules/session-sway.nix`, `modules/session-i3.nix`

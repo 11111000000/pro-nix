@@ -48,6 +48,7 @@ EOF
 
   environment.systemPackages = lib.mkDefault (with pkgs; [
     gawk
+    pavucontrol
     qt5ct
     qt6ct
     xorg.xset

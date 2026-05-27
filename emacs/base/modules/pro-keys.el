@@ -231,6 +231,14 @@
           (_ (message "  unknown pending entry: %S" entry)))))))
 
 (setq pro-keys-exwm-global-keys nil)
+;; EXWM-слой должен сохранять собственные глобальные бинды поверх Xorg-окон.
+;; Если `pro-exwm` уже загрузил дополнительные Super-цифры, сохраняем их при
+;; любом пересборе списка из Org-таблицы.
+(defun pro-keys--exwm-keys-with-overrides ()
+  "Собрать EXWM-клавиши и добавить системные переопределения pro-exwm."
+  (append (and (boundp 'pro-exwm-super-tab-keys) pro-exwm-super-tab-keys)
+          pro-keys-exwm-global-keys))
+
 ;; Ensure small pro helpers are available when we apply keybindings.
 ;; Some bindings reference pro/* functions (eg. pro/consult-buffer) and
 ;; in practice the loading order may cause those functions to be absent
@@ -242,7 +250,7 @@
 (pro-keys-load-org-file pro-keys-user-file)
 
 (with-eval-after-load 'exwm
-  (setq exwm-input-global-keys pro-keys-exwm-global-keys))
+  (setq exwm-input-global-keys (pro-keys--exwm-keys-with-overrides)))
 
 (dolist (feat '(projectile project consult vertico))
   (with-eval-after-load feat
