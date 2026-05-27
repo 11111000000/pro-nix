@@ -15,6 +15,31 @@ with pkgs;
     kbd
     mc
     emacs
+    nix
+    nix-info
+    acpi
+    lm_sensors
+    stress-ng
+    fio
+    powertop
+    neofetch
+    openssl
+    unzip
+    smartmontools
+    parted
+    usbutils
+    pciutils
+    efibootmgr
+    dosfstools
+    exfatprogs
+    ntfs3g
+    iftop
+    iotop
+    iperf3
+    dnsutils
+    atop
+    cifs-utils
+    avahi
     nodePackages.mermaid-cli
     # opencode removed from the runtime set: it is delivered via the
     # Home Manager wrapper path, not system runtime.

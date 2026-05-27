@@ -15,5 +15,12 @@ with pkgs;
     dnscrypt-proxy
     wireguard-tools
     yggdrasil
+    i2p
+    proxychains
+    mullvad-vpn
+    # System launcher for Tor Browser
+    (writeShellScriptBin "tor-browser" ''
+      exec ${pkgs.tor-browser}/bin/tor-browser "$@"
+    '')
   ];
 }

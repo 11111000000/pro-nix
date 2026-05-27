@@ -83,8 +83,8 @@ run_sh 'emacsclient -s exwm --eval "(list :emacs-version emacs-version :system-t
 
 section "NixOS config quick grep (python wrappers / requests / org-babel hints)"
 # Adjust if script is not executed from the nixos config dir
-if [[ -f "./system-packages.nix" ]]; then
-  run_sh 'grep -nE "myPython|withPackages|requests|pythonCmd|python3Cmd" -n ./system-packages.nix || true'
+if [[ -f "./modules/system-package-sets-dev.nix" ]]; then
+  run_sh 'grep -nE "myPython|withPackages|requests|pythonCmd|python3Cmd" -n ./modules/system-package-sets-dev.nix || true'
 fi
 if [[ -f "./systemd-user-services.nix" ]]; then
   run_sh 'grep -nE "PATH=|ExecStart|emacs" -n ./systemd-user-services.nix || true'

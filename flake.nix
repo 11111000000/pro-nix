@@ -40,9 +40,6 @@
       # opencode-bwrap sandbox wrapper. The overlay provides a real opencode
       # binary from npm (not a stub) so both direct CLI usage and bwrap work.
       opencodeBwrapModule = opencodeBwrap.homeManagerModules.default;
-      # Pass the overlayed pkgs to system-packages. opencode is intentionally
-      # excluded from the runtime set to avoid bun/plugin closures during switch.
-      spkgs = import ./system-packages.nix { inherit emacsPkg; pkgs = pkgsOverlay; };
       pythonWithTextual = pkgs.python3.withPackages (ps: with ps; [ textual psutil ]);
       # Python environment for agent apps (coordinator/worker)
       pythonAgentEnv = pkgs.python3.withPackages (ps: with ps; [ flask requests ]);
@@ -54,7 +51,6 @@
       # If the nix-hermes input provides a NixOS module, enable it globally so
       # Hermes is available on all hosts (hosts may still opt-out).
       # Import the upstream pi NixOS module so its options are available.
-      # The CLI itself is exposed via system-packages.nix.
       globalModules = [ pi.nixosModules.default ./modules/ssh-agent.nix ];
 
       mkHost = extraModules: nixpkgs.lib.nixosSystem {
@@ -66,10 +62,9 @@
           home-manager.nixosModules.home-manager
           ./configuration.nix
           ./nix/modules/searxng.nix
-          # NOTE: the treesitter grammars derivation is exposed via
-          # `system-packages.nix` (the derivation itself is added to
-          # environment.systemPackages). Do NOT import the derivation
-          # here as a NixOS module — that would return a derivation
+          # NOTE: the treesitter grammars derivation is exposed at
+          # the flake top level (treesitterGrammars). Do NOT import
+          # it here as a NixOS module — that would return a derivation
           # (a store path / string) where a module attribute set is
           # expected and causes evaluation errors.
           # user-templates is imported directly from configuration.nix to avoid

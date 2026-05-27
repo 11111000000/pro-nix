@@ -1,4 +1,3 @@
-;; Русский: комментарии и пояснения оформлены в стиле учебника
 ;;; pro-compat.el --- small compatibility shims -*- lexical-binding: t; -*-
 
 (require 'subr-x)

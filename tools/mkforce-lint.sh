@@ -25,7 +25,7 @@ echo "mkForce-lint: scanning repository for lib.mkForce and environment.systemPa
 found=0
 
 # Default include patterns (focused areas)
-include_patterns=("*.nix" "modules/**" "nixos/**" "hosts/**" "flake.nix" "configuration.nix" "system-packages.nix")
+include_patterns=("*.nix" "modules/**" "nixos/**" "hosts/**" "flake.nix" "configuration.nix" "modules/system-packages.nix")
 
 # Default excludes
 exclude_globs=("./.git/*" "docs/analyse/**" "logs/**" ".agent-shell/**" "vendor/**" "cache/**")

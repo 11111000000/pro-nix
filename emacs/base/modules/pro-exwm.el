@@ -1,7 +1,4 @@
-;; Русский: комментарии и пояснения оформлены в учебном стиле (пояснения и примеры)
-;;; exwm.el --- EXWM session -*- lexical-binding: t; -*-
-
-;; Этот модуль поднимает EXWM и отдельно регистрирует Super-цифры через
+;;; exwm.el --- EXWM session -*- lexical-binding: t; -*;; Этот модуль поднимает EXWM и отдельно регистрирует Super-цифры через
 ;; `exwm-input-set-key`, чтобы они перехватывались поверх Xorg-окон.
 
 (defvar pro-exwm-session-desktop-name "EXWM"

@@ -29,7 +29,6 @@ docs
 .opencode/
 
 # pi-crew runtime state
-# pi-crew runtime state
 .crew
 .crew/*
 

@@ -1,4 +1,3 @@
-;; Русский: комментарии и пояснения оформлены в учебном стиле (пояснения и примеры)
 ;;; tests.el --- headless ERT tests -*- lexical-binding: t; -*-
 
 ;; Guard against being loaded multiple times in the same Emacs process.

@@ -1,4 +1,3 @@
-;; Русский: комментарии и пояснения оформлены в учебном стиле (пояснения и примеры)
 ;;; pro-org.el --- орг-работа и таблицы -*- lexical-binding: t; -*-
 
 (declare-function org-redisplay-inline-images "org")
