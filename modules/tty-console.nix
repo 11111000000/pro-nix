@@ -25,8 +25,10 @@ let
     ckbcomp \
       -model pc105 -layout us,ru \
       -option grp:ralt_toggle,grp_led:caps > "$out"
-    # ckbcomp превращает grp:ralt_toggle в Alt, а консоли нужен AltGr_Lock
-    sed -i 's/^keycode 100 = .*/keycode 100 = AltGr_Lock/' "$out"
+    # ckbcomp превращает grp:ralt_toggle в Alt/Alt_R/ISO_Level3_Shift etc.,
+    # поэтому используем более устойчивый regexp и нормализуем строку так,
+    # чтобы правая Alt (keycode 100) стал AltGr_Lock в keymap консоли.
+    sed -E -i 's/^[[:space:]]*keycode[[:space:]]+100[[:space:]]*=.*/keycode 100 = AltGr_Lock/' "$out"
   '';
 in
 {
