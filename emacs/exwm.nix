@@ -18,7 +18,7 @@ lib.mkIf cfg.gui.enable {
 
   home.file.".xprofile".text = ''
     [ -f "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources" || true
-    pgrep -x xbindkeys >/dev/null 2>&1 || xbindkeys
+    pgrep -x xbindkeys >/dev/null 2>&1 || /run/current-system/sw/bin/xbindkeys >/dev/null 2>&1 &
   '';
 
   home.file.".config/autostart/systemd-user-import-env.desktop".text = ''

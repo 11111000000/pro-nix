@@ -19,6 +19,6 @@
       (window-divider-mode 1))
     (setq-default left-fringe-width 0
                   right-fringe-width 0)
-    (when (fboundp 'fringe-mode) (fringe-mode '(0 . 0))))
+    (when (fboundp 'fringe-mode) (fringe-mode '(0 . 0)))))
 
 (provide 'pro-ui-fringes)

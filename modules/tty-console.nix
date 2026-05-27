@@ -1,17 +1,15 @@
 { pkgs, lib, config, ... }:
 
-/*
-Change Gate
-Intent: Упростить конфигурацию TTY-раскладки: использовать XKB для виртуальной
-консоли и переключать en/ru через Right Alt (RAlt). Убрать генерирование и
-патчи keymap-скриптов — это излишне.
-Pressure: Debt
-Surface impact: NixOS Base Configuration — поведение TTY для раскладок будет
-                совпадать с X11/XKB: layout = "us,ru", options = "grp:ralt_toggle".
-Proof: Проверка systemd-vconsole-setup и простая ручная проверка переключения
-       раскладки на виртуальной консоли (RAlt).
-Migration: none.
-*/
+# Change Gate
+# Intent: Упростить конфигурацию TTY-раскладки: использовать XKB для виртуальной
+# консоли и переключать en/ru через Right Alt (RAlt). Убрать генерирование и
+# патчи keymap-скриптов — это излишне.
+# Pressure: Debt
+# Surface impact: NixOS Base Configuration — поведение TTY для раскладок будет
+#                совпадать с X11/XKB: layout = "us,ru", options = "grp:ralt_toggle".
+# Proof: Проверка systemd-vconsole-setup и простая ручная проверка переключения
+#        раскладки на виртуальной консоли (RAlt).
+# Migration: none.
 
 let
   ttyFont = "${pkgs.kbd}/share/consolefonts/Cyr_a8x14.psfu.gz";

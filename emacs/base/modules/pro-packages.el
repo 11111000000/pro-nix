@@ -340,7 +340,7 @@ PKG может быть символом или строкой. Эта кома�
     (message "pro-packages: installed=%s failed=%s skipped=%s"
              (mapconcat #'symbol-name (nreverse installed) ", ")
              (mapconcat #'symbol-name (nreverse failed) ", ")
-             (mapconcat #'symbol-name (nreverse skipped) ", "))))
+             (mapconcat #'symbol-name (nreverse skipped) ", ")))))
 
 ;;; Дополнительные утилиты
 (defun pro-packages-ensure-required (&optional packages)
