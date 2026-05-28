@@ -20,7 +20,9 @@
 { pkgs, lib, ... }:
 
 {
-  environment.systemPackages = lib.mkDefault (with pkgs; [
+  # Package list uses plain assignment (not lib.mkDefault) so it is always
+  # concatenated with lists from other imported modules.
+  environment.systemPackages = with pkgs; [
     feh
     xterm
     scrot
@@ -47,5 +49,5 @@
     flameshot
     duc
     mpv
-  ]);
+  ];
 }

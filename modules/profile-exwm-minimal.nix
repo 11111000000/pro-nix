@@ -33,7 +33,9 @@ in {
     };
 
 
-    environment.systemPackages = mkDefault (with pkgs; [
+    # Package list uses plain assignment (not mkDefault) so it is always
+    # concatenated with lists from other imported modules.
+    environment.systemPackages = with pkgs; [
       xorg.xset
       xorg.xhost
       xorg.setxkbmap
@@ -43,6 +45,6 @@ in {
       xdotool
       xclip
       xauth
-    ]);
+    ];
   };
 }
