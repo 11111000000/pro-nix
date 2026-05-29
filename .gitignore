@@ -35,3 +35,28 @@ docs
 # Ignore temp system-packages files
 system-packages.nix.bak
 system-packages.nix.tmp
+
+# Local overrides, secrets, and build artifacts
+local.nix
+local.nix.example
+.env
+.env.local
+*.env
+*.secret
+secret
+secrets
+
+# result/build artifacts
+result*
+result-*
+result-cf19
+
+# node / frontend
+node_modules/
+dist/
+build/
+
+# editors / IDE
+*.swp
+.vscode/
+.idea/
