@@ -13,31 +13,43 @@
 
 ;; UI zoom functions
 (unless (fboundp 'pro-ui-zoom-in)
-  ;; Use defvar instead of defcustom here to avoid calling custom initialization
-  ;; machinery during early batch/startup which can lead to "void-variable"
-  ;; errors in minimal/test environments. This keeps the default simple and
-  ;; reliable while still documenting the variable.
-  (defvar pro-ui-zoom-step 10 "Zoom step in tenths of a point.")
+  ;; Use a buffer-local text scaling approach rather than changing the global
+  ;; `pro-ui-font-height'. The latter adjusts the default face globally which
+  ;; affects all buffers/frames. Using `text-scale-*' functions keeps the
+  ;; zoom local to the current buffer and matches expected behaviour for
+  ;; C-+ / C-- / C-0 keybindings.
+  (defvar pro-ui-zoom-step 1 "Zoom step in text-scale steps (each step ~10%).")
+  (defun pro-ui--current-text-scale ()
+    "Return current buffer-local text scale amount (may be nil)."
+    (if (boundp 'text-scale-mode-amount)
+        text-scale-mode-amount
+      0))
   (defun pro-ui-zoom-in (&optional steps)
+    "Increase buffer-local text scale by STEPS (default 1)."
     (interactive "p")
-    (let ((s (* (or steps 1) pro-ui-zoom-step)))
-      (when (boundp 'pro-ui-font-height)
-        (setq pro-ui-font-height (min 400 (+ pro-ui-font-height s)))
-        (when (fboundp 'pro-ui-apply-fonts) (pro-ui-apply-fonts)))
-      (message "Font height: %s" (if (boundp 'pro-ui-font-height) pro-ui-font-height "<unknown>"))))
+    (let ((s (or steps 1)))
+      (if (fboundp 'text-scale-increase)
+          (progn
+            (text-scale-increase s)
+            (message "Buffer text-scale: %s" (pro-ui--current-text-scale)))
+        (pro-compat--notify-once "text-scale" "text-scale functions not available — cannot zoom"))))
   (defun pro-ui-zoom-out (&optional steps)
+    "Decrease buffer-local text scale by STEPS (default 1)."
     (interactive "p")
-    (let ((s (* (or steps 1) pro-ui-zoom-step)))
-      (when (boundp 'pro-ui-font-height)
-        (setq pro-ui-font-height (max 60 (- pro-ui-font-height s)))
-        (when (fboundp 'pro-ui-apply-fonts) (pro-ui-apply-fonts)))
-      (message "Font height: %s" (if (boundp 'pro-ui-font-height) pro-ui-font-height "<unknown>"))))
+    (let ((s (or steps 1)))
+      (if (fboundp 'text-scale-increase)
+          (progn
+            (text-scale-increase (- s))
+            (message "Buffer text-scale: %s" (pro-ui--current-text-scale)))
+        (pro-compat--notify-once "text-scale" "text-scale functions not available — cannot zoom"))))
   (defun pro-ui-zoom-reset ()
+    "Reset buffer-local text scale to default (0)."
     (interactive)
-    (when (boundp 'pro-ui-font-height)
-      (setq pro-ui-font-height 130)
-      (when (fboundp 'pro-ui-apply-fonts) (pro-ui-apply-fonts)))
-    (message "Font reset to %s" (if (boundp 'pro-ui-font-height) pro-ui-font-height "<unknown>"))))
+    (if (fboundp 'text-scale-set)
+        (progn
+          (text-scale-set 0)
+          (message "Buffer text-scale reset to 0"))
+      (pro-compat--notify-once "text-scale" "text-scale-set not available — cannot reset zoom"))))
 
 ;; Minimal consult fallbacks
 (unless (fboundp 'consult-line)
