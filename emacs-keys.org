@@ -17,23 +17,24 @@
 | Поиск      | C-c p f | pro-project-find-file                 | Файл проекта                     |
 | Поиск      | C-c C-f | consult-find                          | Поиск файла (consult)            |
 | UI         | C-=     | pro-ui-zoom-in                        | Увеличить шрифт                  |
-| UI         | C-+     | pro-ui-zoom-in                        | Увеличить шрифт (альтернатива)    |
+| UI         | C-+     | pro-ui-zoom-in                        | Увеличить шрифт (альтернатива)   |
 | UI         | C--     | pro-ui-zoom-out                       | Уменьшить шрифт                  |
 | UI         | C-0     | pro-ui-zoom-reset                     | Сбросить масштаб                 |
-| UI         | C-c u   | undo-tree-visualize                   | Визуализировать историю отмен   |
+| UI         | s-S-R   | pro/reload-config                     | Перечитать весь конфиг (soft reload) |
+| UI         | C-c u   | undo-tree-visualize                   | Визуализировать историю отмен    |
 | UI         | M-/     | eldoc-box-help-at-point               | Подсказка под курсором           |
 | EXWM       | s-r     | exwm-reset                            | Сброс окна EXWM                  |
 | EXWM       | s-w     | exwm-workspace-switch                 | Переключить рабочее пространство |
 | EXWM       | s-t     | pro-tabs-open-new-tab                 | Новая вкладка                    |
 | EXWM       | s-T     | tab-bar-undo-close-tab                | Восстановить вкладку             |
-| EXWM       | s-h     | windmove-left                         | Переместить фокус влево         |
-| EXWM       | s-j     | windmove-down                         | Переместить фокус вниз          |
-| EXWM       | s-k     | windmove-up                            | Переместить фокус вверх         |
-| EXWM       | s-l     | windmove-right                        | Переместить фокус вправо        |
-| EXWM       | s-H     | buf-move-left                         | Переместить буфер влево         |
-| EXWM       | s-J     | buf-move-down                         | Переместить буфер вниз          |
-| EXWM       | s-K     | buf-move-up                           | Переместить буфер вверх         |
-| EXWM       | s-L     | buf-move-right                        | Переместить буфер вправо        |
+| EXWM       | s-h     | windmove-left                         | Переместить фокус влево          |
+| EXWM       | s-j     | windmove-down                         | Переместить фокус вниз           |
+| EXWM       | s-k     | windmove-up                           | Переместить фокус вверх          |
+| EXWM       | s-l     | windmove-right                        | Переместить фокус вправо         |
+| EXWM       | s-S-h   | buf-move-left                         | Переместить буфер влево          |
+| EXWM       | s-S-j   | buf-move-down                         | Переместить буфер вниз           |
+| EXWM       | s-S-k   | buf-move-up                           | Переместить буфер вверх          |
+| EXWM       | s-S-r   | buf-move-right                        | Переместить буфер вправо         |
 | EXWM       | s-1     | pro-tabs-select-tab-1                 | Вкладка 1                        |
 | EXWM       | s-2     | pro-tabs-select-tab-2                 | Вкладка 2                        |
 | EXWM       | s-3     | pro-tabs-select-tab-3                 | Вкладка 3                        |
@@ -53,14 +54,14 @@
 | Completion | C-c o t | complete-tag                          | Дополнить тег                    |
 | Completion | C-c o i | cape-ispell                           | Орфография                       |
 | Completion | C-c o l | cape-line                             | Строка из буфера                 |
-| Completion | C-c o w | cape-wrap-prefix                     | Обёртка префикса                 |
+| Completion | C-c o w | cape-wrap-prefix                      | Обёртка префикса                 |
 | Snippet    | C-c y y | consult-yasnippet                     | Выбор сниппета                   |
 | LSP        | C-c C-. | consult-eglot-symbols                 | Поиск символов LSP               |
 | Навигация  | M-g g   | avy-goto-char                         | Прыжок к символу                 |
 | Выделение  | M-SPC   | er/expand-region                      | Расширение выделения             |
 | Проекты    | C-c p p | projectile-switch-project             | Сменить проект                   |
 | Проекты    | C-c p f | projectile-find-file                  | Файл в проекте                   |
-| Проекты    | C-c C-p | projectile-switch-project             | Сменить проект (alias)          |
+| Проекты    | C-c C-p | projectile-switch-project             | Сменить проект (alias)           |
 | Проекты    | C-c pa  | projectile-add-known-project          | Добавить проект                  |
 | Дерево     | s-d     | treemacs                              | Открыть дерево                   |
 | AI         | C-c a   | pro-ai-open-entry                     | Вход в AI                        |
