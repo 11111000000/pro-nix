@@ -7,5 +7,5 @@
   # Этот файл содержит минимальные хелперы для корректной работы пользователей
   # в WSL окружении; он не навязывает глобальных правил и предназначен для
   # импортирования опционально в host config.
-  environment.systemPackages = lib.mkDefault (with pkgs; [ ]);
+  environment.systemPackages = with pkgs; [ ];
 }

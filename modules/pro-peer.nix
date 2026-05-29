@@ -194,9 +194,8 @@ in
     })
 
     (lib.mkIf config.pro-peer.enableKeySync {
-      # Make package contribution additive and low-priority so top-level
-      # aggregation decides final list. Avoid lib.mkForce at module level.
-      environment.systemPackages = lib.mkDefault (with pkgs; [ gnupg ]);
+      # Ensure gnupg is present when key sync is enabled.
+      environment.systemPackages = with pkgs; [ gnupg ];
       environment.etc."pro-peer-sync-keys.sh".source = ../scripts/ops-pro-peer-sync-keys.sh;
       environment.etc."pro-peer-sync-keys.sh".mode = "0755";
       # Expose a canary helper script for operators to run dry-run locally
@@ -221,7 +220,7 @@ in
     })
 
     (lib.mkIf (config.pro-peer.allowTorHiddenService && (config.pro-peer.torBackupRecipient != null)) {
-      environment.systemPackages = lib.mkDefault (with pkgs; [ gnupg tar ]);
+      environment.systemPackages = with pkgs; [ gnupg tar ];
       environment.etc."pro-peer-backup-hiddenservice.sh".source = ../scripts/ops-backup-hiddenservice.sh;
       environment.etc."pro-peer-backup-hiddenservice.sh".mode = "0755";
       # Install a thin wrapper that normalizes invocation from systemd units.
@@ -244,7 +243,7 @@ in
     })
 
     (lib.mkIf config.pro-peer.enableYggdrasil {
-      environment.systemPackages = lib.mkDefault (with pkgs; [ yggdrasil ]);
+      environment.systemPackages = with pkgs; [ yggdrasil ];
       environment.etc."pro-peer-yggdrasil-wrapper.sh".source = ./scripts/pro-peer-yggdrasil-wrapper.sh;
       environment.etc."pro-peer-yggdrasil-wrapper.sh".mode = "0755";
 
@@ -265,7 +264,7 @@ in
     })
 
     (lib.mkIf config.pro-peer.enableWireguardHelper {
-      environment.systemPackages = lib.mkDefault (with pkgs; [ wireguard-tools ]);
+      environment.systemPackages = with pkgs; [ wireguard-tools ];
       # Устанавливаем небольшой оболочный wrapper для нормализации поведения
       # wg-quick; это позволяет systemd‑юниту оставаться простым и не
       # включать сложную shell‑логику.

@@ -97,7 +97,7 @@ in {
     wantedBy = [ "multi-user.target" ];
   };
 
-  environment.systemPackages = lib.mkDefault (with pkgs; [
+  environment.systemPackages = with pkgs; [
     gawk
     obfs4
     meek-client
