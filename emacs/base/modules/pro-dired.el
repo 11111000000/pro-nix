@@ -30,7 +30,37 @@ Set to nil to disable."
     (add-hook 'dired-mode-hook #'dired-hide-details-mode)
     (add-hook 'dired-mode-hook #'hl-line-mode)
 
-    (setq-default dired-listing-switches "-aBhlv --group-directories-first")
+    ;; Listing format customization: keep long format as default to preserve tests
+    (defcustom pro-dired-prefer-short nil
+      "If non-nil, use compact/short `ls' output in dired (one-file-per-line).
+Default is nil to preserve test compatibility and familiar long listing."
+      :type 'boolean :group 'pro)
+
+    (defcustom pro-dired-long-listing-switches "-aBhlv --group-directories-first"
+      "The long-format listing switches used by pro dired (default)."
+      :type 'string :group 'pro)
+
+    (defcustom pro-dired-short-listing-switches "-aB1 --group-directories-first"
+      "The short/compact listing switches used when `pro-dired-prefer-short' is non-nil.
+This produces one file per line with minimal metadata."
+      :type 'string :group 'pro)
+
+    (setq-default dired-listing-switches
+                  (if pro-dired-prefer-short
+                      pro-dired-short-listing-switches
+                    pro-dired-long-listing-switches))
+
+    (defun pro/dired-toggle-listing-format ()
+      "Toggle between pro dired long and short listing formats.
+This flips `pro-dired-prefer-short' and updates `dired-listing-switches' for new buffers."
+      (interactive)
+      (setq pro-dired-prefer-short (not pro-dired-prefer-short))
+      (setq-default dired-listing-switches
+                    (if pro-dired-prefer-short
+                        pro-dired-short-listing-switches
+                      pro-dired-long-listing-switches))
+      (message "pro-dired: listing-format => %s"
+               (if pro-dired-prefer-short "short" "long")))
     (setq ls-lisp-dirs-first t)
     (setq ls-lisp-use-insert-directory-program nil)
     (setq dired-dwim-target t)

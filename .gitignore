@@ -32,6 +32,9 @@ docs
 .crew
 .crew/*
 
+# pi — локальные настройки агента (models.json содержит API-ключи)
+.pi/
+
 # Ignore temp system-packages files
 system-packages.nix.bak
 system-packages.nix.tmp

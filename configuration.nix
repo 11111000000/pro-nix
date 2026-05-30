@@ -53,16 +53,16 @@
      ./modules/pro-storage.nix
      ./modules/pro-privacy.nix
      ./modules/pro-dev.nix
-      ./modules/pro-peer.nix
-      ./modules/host-policies.nix
-      ./modules/headscale.nix
-      ./modules/pro-desktop.nix
-      ./modules/pro-exwm-desktop.nix
-      ./modules/pro-profiles.nix
-      ./modules/session-exwm.nix
-      ./modules/nix-cuda-compat.nix
-      ./modules/zram-slice.nix
-      ./modules/searxng.nix
+     ./modules/pro-peer.nix
+     ./modules/host-policies.nix
+     ./modules/headscale.nix
+     ./modules/pro-desktop.nix
+     ./modules/pro-exwm-desktop.nix
+     ./modules/pro-profiles.nix
+     ./modules/session-exwm.nix
+     ./modules/nix-cuda-compat.nix
+     ./modules/zram-slice.nix
+     ./modules/searxng.nix
 
      # Локальные переопределения конкретного хоста остаются в файле local.nix.
    ] ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ];

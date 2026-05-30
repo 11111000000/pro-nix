@@ -100,7 +100,7 @@ in {
   environment.systemPackages = with pkgs; [
     gawk
     obfs4
-    meek-client
+    meek
     snowflake
     tor
     torsocks
@@ -113,7 +113,7 @@ in {
     mullvad-vpn
     wireguard-tools
     yggdrasil
-  ]);
+  ];
 
   networking.firewall = {
     allowedTCPPorts = [ 9050 9051 9052 9053 7657 4444 4445 ];

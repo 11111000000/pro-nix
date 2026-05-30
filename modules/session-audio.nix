@@ -17,6 +17,9 @@
     wireplumber.enable = true;
   };
 
+  # Сохранять состояние звуковой карты ALSA (громкость, включение/выключение каналов)
+  hardware.alsa.enablePersistence = true;
+
   environment.systemPackages = with pkgs; [
     pavucontrol
   ];
