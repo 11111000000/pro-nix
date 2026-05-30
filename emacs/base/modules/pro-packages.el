@@ -350,7 +350,7 @@ PKG может быть символом или строкой. Эта кома�
 считаются уже предоставленными и не устанавливаются через MELPA.
 " 
   (interactive)
-    (let* ((defaults '(consult corfu cape treemacs projectile expand-region yasnippet consult-yasnippet consult-eglot kind-icon vterm exwm eldoc-box mmm-mode))
+    (let* ((defaults '(consult corfu cape treemacs projectile expand-region yasnippet consult-yasnippet consult-eglot kind-icon vterm eldoc-box mmm-mode))
            (wanted (or packages defaults))
            (provided (when (boundp 'pro-packages-provided-by-nix) pro-packages-provided-by-nix)))
     (dolist (p wanted)
