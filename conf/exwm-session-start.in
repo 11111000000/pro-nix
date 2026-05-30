@@ -1,3 +1,13 @@
+# ══════════════════════════════════════════════════════════════════════
+# DEPRECATED (2026-05-30): not used by NixOS modules.
+# The canonical EXWM session launcher is now generated inline in
+# emacs/exwm.nix → home.file.".config/pro/exwm-session".
+#
+# Note on XMODIFIERS (@im=exwm-xim): this is the EXWM X Input Method
+# for multi-language text input (IME).  It is NOT related to Emacs
+# keybinding simulation — that is handled by `exwm-input-simulation-keys'
+# in pro-exwm-sim.el.
+# ══════════════════════════════════════════════════════════════════════
 # Запуск вспомогательных приложений и переменных среды для EXWM.
 LOG_DIR="${EMACS_STARTUP_LOG_DIR:-$HOME/.cache/emacs-startup}"
 LOG_FILE="${EMACS_STARTUP_LOG_FILE:-$LOG_DIR/gdm-exwm.log}"

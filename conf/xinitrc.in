@@ -1,4 +1,8 @@
 #!/bin/sh
+# ══════════════════════════════════════════════════════════════════════
+# DEPRECATED (2026-05-30): not used by NixOS modules.
+# The active launch script is generated inline by emacs/exwm.nix.
+# ══════════════════════════════════════════════════════════════════════
 # X session for EXWM (manual start via: startx)
 
 # Make X resources available
