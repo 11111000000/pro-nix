@@ -11,6 +11,7 @@ in
   imports = [
     ../../modules/pro-users.nix
     ../../modules/pro-desktop.nix
+    ../../modules/pro-heavy-desktop.nix
     ../../modules/profile-exwm-minimal.nix
     ../../modules/session-exwm.nix
     ../../modules/session-sway.nix
