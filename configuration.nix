@@ -73,7 +73,7 @@
   services.searxng.enable = lib.mkForce false;
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Раздел 2: Загрузчик системы и параметры ядра — пояснительный блок
+# Раздел 2: Загрузчик системы и параметры ядра 
 #
 # Цель раздела:
 # Объяснить, какие параметры загрузчика и ядра важны для предсказуемости системы.
@@ -102,7 +102,7 @@
    boot.kernel.sysctl."kernel.sysrq" = lib.mkDefault 1;               # Включить SysRq для аварийного доступа.
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Раздел 3: Сетевая конфигурация и имя машины — пояснительный блок
+# Раздел 3: Сетевая конфигурация и имя машины 
 #
 # Суть:
 # Здесь задаётся идентификация хоста (hostname) и базовые сетевые службы. В
@@ -151,7 +151,7 @@
   # networking.wireless.enable = true;
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Раздел 4: Часовой пояс и языковая локализация — учебный блок
+# Раздел 4: Часовой пояс и языковая локализация 
 #
 # Суть:
 # Локализация определяет представление даты/времени, формат чисел, локализацию
@@ -326,6 +326,7 @@
 
   xdg.portal = {
     enable = true;
+    config.common.default = "*";
     # Allow modules to contribute portals additively.
     extraPortals = lib.mkDefault [ pkgs.xdg-desktop-portal-gtk ];
   };
@@ -368,10 +369,6 @@
   environment.etc."xdg/qt5ct/qt5ct.conf".source = ./conf/qt5ct.conf;
   environment.etc."xdg/qt6ct/qt6ct.conf".source = ./conf/qt6ct.conf;
   environment.etc."xdg/kdeglobals".source = ./conf/kdeglobals;
-  # Use the file contents directly to avoid referencing a pre-existing
-  # /nix/store path that may be missing during live activation. Это защитная
-  # правка: храним содержимое как text, чтобы nix сам создал фиксированную
-  # деривацию из строкового содержимого файла.
   environment.etc."X11/Xresources".text = builtins.readFile ./conf/Xresources;
   environment.etc."xdg/dunst/dunstrc".source = ./conf/dunstrc;
 
@@ -381,9 +378,6 @@
     enableSystemSlice = lib.mkDefault true;
     enableUserSlices = lib.mkDefault true;
   };
-  # Prevent individual services (notably the nix daemon) from taking all CPU.
-  # Limit the nix-daemon service and enable default CPU accounting so user processes
-  # inherit reasonable defaults. Tweak values to taste (CPUQuota is a percentage).
   systemd.services."nix-daemon".serviceConfig = {
     # Do not let the daemon saturate the machine — allow up to 75% of total CPU.
     CPUQuota = "75%";
