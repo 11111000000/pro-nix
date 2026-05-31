@@ -23,6 +23,9 @@ vterm доступен в вашей системе (Nix/Home-Manager или ELP
 ;; vterm доступен. Все функции тщательно ограничены по контексту
 ;; (проверяют режимы) чтобы избежать побочных эффектов в других буферах.
 (when (and pro-terminals-enable (require 'vterm nil t))
+;; Ensure multi-vterm and eshell-toggle are loaded (Nix provides them on load-path)
+(ignore-errors (require 'multi-vterm nil t))
+(ignore-errors (require 'eshell-toggle nil t))
   ;; Example helper: yank into vterm with proper escaping
   (defun pro/vterm-yank ()
     "Yank from kill-ring into vterm with proper handling."

@@ -1,0 +1,6 @@
+[submodule "submodules/pro-tabs"]
+	path = submodules/pro-tabs
+	url = https://github.com/gnu-emacs-ru/pro-tabs
+[submodule "submodules/carriage"]
+	path = submodules/carriage
+	url = https://github.com/gnu-emacs-ru/carriage

@@ -21,10 +21,17 @@
             "corfu" "corfu-posframe" "corfu-terminal" "dash-docs" "eglot" "elfeed" "expand-region" "gptel"
             "kind-icon" "magit" "marginalia" "nix-mode" "orderless" "org" "ob-mermaid" "projectile" "rainbow-delimiters"
             "treemacs" "vertico" "vterm" "yasnippet" "embark-consult" "dash-docs" "consult-dash"
+            "multi-vterm" "eshell-toggle"
           ];
 
           extraPackages = let
             piAcp = if builtins.hasAttr "piAcp" pkgs then [ pkgs.piAcp ] else [ ];
+            extraEmacs = let
+              epkgs = pkgs.emacsPackages;
+            in
+              [ epkgs.tao-theme ]
+              ++ (if builtins.hasAttr "pro-tabs" epkgs then [ epkgs.pro-tabs ] else [ ])
+              ++ (if builtins.hasAttr "carriage" epkgs then [ epkgs.carriage ] else [ ]);
           in piAcp ++ [
             pkgs.emacsPackages.ace-window pkgs.emacsPackages.avy pkgs.emacsPackages.cape pkgs.emacsPackages.consult
             pkgs.emacsPackages.consult-dash pkgs.emacsPackages.consult-eglot pkgs.emacsPackages.consult-projectile pkgs.emacsPackages.consult-yasnippet
@@ -33,7 +40,7 @@
             pkgs.emacsPackages.kind-icon pkgs.emacsPackages.magit pkgs.emacsPackages.marginalia pkgs.emacsPackages.nix-mode
             pkgs.emacsPackages.orderless pkgs.emacsPackages.org pkgs.emacsPackages.projectile pkgs.emacsPackages.rainbow-delimiters
             pkgs.emacsPackages.treemacs pkgs.emacsPackages.vertico pkgs.emacsPackages.vterm pkgs.emacsPackages.yasnippet
-          ];
+          ] ++ extraEmacs;
         };
 
         pro.opencode.tui = {

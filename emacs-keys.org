@@ -1,87 +1,104 @@
 #+title: Клавиши PRO
 
-| Секция     | Клавиша | Команда                               | Примечание                       |
-|------------+---------+---------------------------------------+----------------------------------|
-| Навигация  | C-s     | consult-line                          | Поиск по текущему буферу         |
-| Навигация  | C-x b   | pro/consult-buffer                    | Смена буфера (helper)            |
-| Навигация  | C-x C-b | pro/consult-buffer-other-window       | Смена буфера в другом окне       |
-| Навигация  | M-s s   | consult-line                          | Поиск по буферу (alias)          |
-| Навигация  | M-s M-s | consult-line-multi                    | Поиск по нескольким буферам      |
-| Навигация  | C-x y   | consult-yank-from-kill-ring           | Вставка из истории kill-ring     |
-| Навигация  | M-g i   | consult-imenu                         | Символы файла                    |
-| Навигация  | M-g g   | consult-goto-line                     | Переход к строке                 |
-| Поиск      | C-c s   | consult-ripgrep                       | Поиск по проекту                 |
-| Поиск      | C-c f   | pro/consult-find                      | Поиск файла (project-aware)      |
-| Поиск      | M-s d   | consult-dash                          | Поиск по документации            |
-| Поиск      | C-c p s | pro-project-ripgrep                   | Поиск в проекте                  |
-| Поиск      | C-c p f | pro-project-find-file                 | Файл проекта                     |
-| Поиск      | C-c C-f | consult-find                          | Поиск файла (consult)            |
-| UI         | C-=     | pro-ui-zoom-in                        | Увеличить шрифт                  |
-| UI         | C-+     | pro-ui-zoom-in                        | Увеличить шрифт (альтернатива)   |
-| UI         | C--     | pro-ui-zoom-out                       | Уменьшить шрифт                  |
-| UI         | C-0     | pro-ui-zoom-reset                     | Сбросить масштаб                 |
-| UI         | s-S-R   | pro/reload-config                     | Перечитать весь конфиг (soft reload) |
-| UI         | C-c u   | undo-tree-visualize                   | Визуализировать историю отмен    |
-| UI         | M-/     | eldoc-box-help-at-point               | Подсказка под курсором           |
-| EXWM       | s-r     | exwm-reset                            | Сброс окна EXWM                  |
-| EXWM       | s-w     | exwm-workspace-switch                 | Переключить рабочее пространство |
-| EXWM       | s-t     | pro-tabs-open-new-tab                 | Новая вкладка                    |
-| EXWM       | s-T     | tab-bar-undo-close-tab                | Восстановить вкладку             |
-| EXWM       | s-h     | windmove-left                         | Переместить фокус влево          |
-| EXWM       | s-j     | windmove-down                         | Переместить фокус вниз           |
-| EXWM       | s-k     | windmove-up                           | Переместить фокус вверх          |
-| EXWM       | s-l     | windmove-right                        | Переместить фокус вправо         |
-| EXWM       | s-S-h   | buf-move-left                         | Переместить буфер влево          |
-| EXWM       | s-S-j   | buf-move-down                         | Переместить буфер вниз           |
-| EXWM       | s-S-k   | buf-move-up                           | Переместить буфер вверх          |
-| EXWM       | s-S-r   | buf-move-right                        | Переместить буфер вправо         |
-| EXWM       | s-1     | pro-tabs-select-tab-1                 | Вкладка 1                        |
-| EXWM       | s-2     | pro-tabs-select-tab-2                 | Вкладка 2                        |
-| EXWM       | s-3     | pro-tabs-select-tab-3                 | Вкладка 3                        |
-| EXWM       | s-4     | pro-tabs-select-tab-4                 | Вкладка 4                        |
-| EXWM       | s-5     | pro-tabs-select-tab-5                 | Вкладка 5                        |
-| EXWM       | s-6     | pro-tabs-select-tab-6                 | Вкладка 6                        |
-| EXWM       | s-&     | async-shell-command                   | Запуск команды                   |
-| ORG        | C-c K   | pro-org-open-keys-file                | Открыть файл клавиш              |
-| Completion | C-c o f | cape-file                             | Источник файлов для CAPF         |
-| Completion | C-c o d | cape-dabbrev                          | Слова из буферов                 |
-| Completion | C-c o h | cape-history                          | История                          |
-| Completion | C-c o k | cape-keyword                          | Ключевые слова языка             |
-| Completion | C-c o s | cape-symbol                           | Символы                          |
-| Completion | C-c o a | cape-abbrev                           | Аббревиатуры                     |
-| Completion | C-c o . | completion-at-point                   | Вызвать CAPF                     |
-| Completion | C-c o p | completion-at-point                   | CAPF (alias из pro)              |
-| Completion | C-c o t | complete-tag                          | Дополнить тег                    |
-| Completion | C-c o i | cape-ispell                           | Орфография                       |
-| Completion | C-c o l | cape-line                             | Строка из буфера                 |
-| Completion | C-c o w | cape-wrap-prefix                      | Обёртка префикса                 |
-| Snippet    | C-c y y | consult-yasnippet                     | Выбор сниппета                   |
-| LSP        | C-c C-. | consult-eglot-symbols                 | Поиск символов LSP               |
-| Навигация  | M-g g   | avy-goto-char                         | Прыжок к символу                 |
-| Выделение  | M-SPC   | er/expand-region                      | Расширение выделения             |
-| Проекты    | C-c p p | projectile-switch-project             | Сменить проект                   |
-| Проекты    | C-c p f | projectile-find-file                  | Файл в проекте                   |
-| Проекты    | C-c C-p | projectile-switch-project             | Сменить проект (alias)           |
-| Проекты    | C-c pa  | projectile-add-known-project          | Добавить проект                  |
-| Дерево     | s-d     | treemacs                              | Открыть дерево                   |
-| AI         | C-c a   | pro-ai-open-entry                     | Вход в AI                        |
-| AI         | C-c A   | pro-agent-open                        | agent-shell                      |
-| Tabs       | C-c t n | pro-tabs-open-new-tab                 | Открыть новую вкладку            |
-| Tabs       | C-c t k | pro-tabs-close-tab-and-buffer         | Закрыть вкладку и буфер          |
-| Tabs       | C-c t s | tab-bar-switch-to-tab                 | Переключиться на вкладку         |
-| Package    | C-c P p | pro-packages-menu                     | Список пакетов                   |
-| Package    | C-c P i | pro-packages-install                  | Установить пакет из ELPA         |
-| Package    | C-c P v | pro-packages-install-vc               | Установить пакет из VC           |
-| Package    | C-c P u | pro-packages-upgrade-all              | Обновить пакеты                  |
-| Package    | C-c P r | pro-packages-refresh                  | Обновить список архивов          |
-| Package    | C-c P b | pro-packages-upgrade-built-ins        | Разрешить built-in upgrade       |
-| Package    | C-c P a | pro-package-bootstrap-install-targets | Установить базовые пакеты        |
-| Git        | C-x g   | pro-git-status                        | Статус репозитория               |
-| Git        | C-c g   | pro-git-status                        | Magit status                     |
-| Org        | C-c o   | org-agenda                            | Повестка                         |
-| Ключи      | C-c k   | pro-keys-reload                       | Перезагрузить клавиши            |
-| Ключи      | C-c M-k | pro-keys-reload                       | Перезагрузить клавиши (alias)    |
-| Suggested  | C-c v y | pro/vterm-yank                        | suggested from terminals         |
-| Suggested  | C-c v i | pro/vterm-interrupt                   | suggested from terminals         |
-| Suggested  | C-c v c | vterm-copy-mode                       | suggested from terminals         |
-| Suggested  | C-x y   | pro/clipboard-yank-pop                | suggested from clipboard         |
+| Секция     | Клавиша       | Команда                               | Примечание                           |
+|------------+---------------+---------------------------------------+--------------------------------------|
+| Навигация  | C-s           | consult-line                          | Поиск по текущему буферу             |
+| Навигация  | C-x b         | pro/consult-buffer                    | Смена буфера (helper)                |
+| Навигация  | C-x C-b       | pro/consult-buffer-other-window       | Смена буфера в другом окне           |
+| Навигация  | M-s s         | consult-line                          | Поиск по буферу (alias)              |
+| Навигация  | M-s M-s       | consult-line-multi                    | Поиск по нескольким буферам          |
+| Навигация  | C-x y         | consult-yank-from-kill-ring           | Вставка из истории kill-ring         |
+| Навигация  | M-g i         | consult-imenu                         | Символы файла                        |
+| Навигация  | M-g g         | consult-goto-line                     | Переход к строке                     |
+| Поиск      | C-c s         | consult-ripgrep                       | Поиск по проекту                     |
+| Поиск      | C-c f         | pro/consult-find                      | Поиск файла (project-aware)          |
+| Поиск      | M-s d         | consult-dash                          | Поиск по документации                |
+| Поиск      | C-c p s       | pro-project-ripgrep                   | Поиск в проекте                      |
+| Поиск      | C-c p f       | pro-project-find-file                 | Файл проекта                         |
+| Поиск      | C-c C-f       | consult-find                          | Поиск файла (consult)                |
+| UI         | C-=           | pro-ui-zoom-in                        | Увеличить шрифт                      |
+| UI         | C-+           | pro-ui-zoom-in                        | Увеличить шрифт (альтернатива)       |
+| UI         | C--           | pro-ui-zoom-out                       | Уменьшить шрифт                      |
+| UI         | C-0           | pro-ui-zoom-reset                     | Сбросить масштаб                     |
+| UI         | s-S-R         | pro/reload-config                     | Перечитать весь конфиг (soft reload) |
+| History    | C-_           | undo-tree-undo                        | Шаг назад (undo)                     |
+| History    | M-_           | undo-tree-redo                        | Шаг вперёд (redo)                    |
+| History    | C-z           | undo-tree-undo                        | Шаг назад (дубль)                    |
+| History    | C-M-z         | undo-tree-redo                        | Шаг вперёд (дубль)                   |
+| History    | C-c u         | undo-tree-visualize                   | Дерево отмен                         |
+| History    | C-c z         | undo-tree-visualize                   | Дерево отмен (дубль)                 |
+| History    | C-c C-,       | goto-last-point                       | К последней позиции курсора          |
+| History    | C-c .         | goto-last-change                      | К последней правке                   |
+| History    | C-c ,         | goto-last-point                       | К предыдущей позиции                 |
+| History    | <XF86Back>    | winner-undo                           | Откат раскладки окон                 |
+| History    | <XF86Forward> | winner-redo                           | Повтор раскладки окон                |
+| History    | C-c M-h       | pro-history-transient                 | Меню истории (transient)             |
+| UI         | M-/           | eldoc-box-help-at-point               | Подсказка под курсором               |
+| EXWM       | s-r           | exwm-reset                            | Сброс окна EXWM                      |
+| EXWM       | s-w           | tab-bar-close-tab                     | Закрыть вкладку                      |
+| EXWM       | s-t           | pro-tabs-open-new-tab                 | Новая вкладка                        |
+| EXWM       | s-n           | tab-bar-switch-to-next-tab            | Следующая вкладка                    |
+| EXWM       | s-p           | tab-bar-switch-to-prev-tab            | Предыдущая вкладка                   |
+| EXWM       | s-N           | tab-bar-move-tab                      | Переместить вкладку вправо           |
+| EXWM       | s-P           | tab-bar-move-tab-backward             | Переместить вкладку влево            |
+| EXWM       | s-T           | tab-bar-undo-close-tab                | Восстановить вкладку                 |
+| EXWM       | s-h           | windmove-left                         | Переместить фокус влево              |
+| EXWM       | s-j           | windmove-down                         | Переместить фокус вниз               |
+| EXWM       | s-k           | windmove-up                           | Переместить фокус вверх              |
+| EXWM       | s-l           | windmove-right                        | Переместить фокус вправо             |
+| EXWM       | s-H           | buf-move-left                         | Переместить буфер влево              |
+| EXWM       | s-J           | buf-move-down                         | Переместить буфер вниз               |
+| EXWM       | s-K           | buf-move-up                           | Переместить буфер вверх              |
+| EXWM       | s-L           | buf-move-right                        | Переместить буфер вправо             |
+| EXWM       | s-1           | pro-tabs-select-tab-1                 | Вкладка 1                            |
+| EXWM       | s-2           | pro-tabs-select-tab-2                 | Вкладка 2                            |
+| EXWM       | s-3           | pro-tabs-select-tab-3                 | Вкладка 3                            |
+| EXWM       | s-4           | pro-tabs-select-tab-4                 | Вкладка 4                            |
+| EXWM       | s-5           | pro-tabs-select-tab-5                 | Вкладка 5                            |
+| EXWM       | s-6           | pro-tabs-select-tab-6                 | Вкладка 6                            |
+| EXWM       | s-&           | async-shell-command                   | Запуск команды                       |
+| ORG        | C-c K         | pro-org-open-keys-file                | Открыть файл клавиш                  |
+| Completion | C-c o f       | cape-file                             | Источник файлов для CAPF             |
+| Completion | C-c o d       | cape-dabbrev                          | Слова из буферов                     |
+| Completion | C-c o h       | cape-history                          | История                              |
+| Completion | C-c o k       | cape-keyword                          | Ключевые слова языка                 |
+| Completion | C-c o s       | cape-symbol                           | Символы                              |
+| Completion | C-c o a       | cape-abbrev                           | Аббревиатуры                         |
+| Completion | C-c o .       | completion-at-point                   | Вызвать CAPF                         |
+| Completion | C-c o p       | completion-at-point                   | CAPF (alias из pro)                  |
+| Completion | C-c o t       | complete-tag                          | Дополнить тег                        |
+| Completion | C-c o i       | cape-ispell                           | Орфография                           |
+| Completion | C-c o l       | cape-line                             | Строка из буфера                     |
+| Completion | C-c o w       | cape-wrap-prefix                      | Обёртка префикса                     |
+| Snippet    | C-c y y       | consult-yasnippet                     | Выбор сниппета                       |
+| LSP        | C-c C-.       | consult-eglot-symbols                 | Поиск символов LSP                   |
+| Навигация  | M-g g         | avy-goto-char                         | Прыжок к символу                     |
+| Выделение  | M-SPC         | er/expand-region                      | Расширение выделения                 |
+| Проекты    | C-c p p       | projectile-switch-project             | Сменить проект                       |
+| Проекты    | C-c p f       | projectile-find-file                  | Файл в проекте                       |
+| Проекты    | C-c C-p       | projectile-switch-project             | Сменить проект (alias)               |
+| Проекты    | C-c pa        | projectile-add-known-project          | Добавить проект                      |
+| Дерево     | s-d           | treemacs                              | Открыть дерево                       |
+| AI         | C-c a         | pro-ai-open-entry                     | Вход в AI                            |
+| AI         | C-c A         | pro-agent-open                        | agent-shell                          |
+| Tabs       | C-c t n       | pro-tabs-open-new-tab                 | Открыть новую вкладку                |
+| Tabs       | C-c t k       | pro-tabs-close-tab-and-buffer         | Закрыть вкладку и буфер              |
+| Tabs       | C-c t s       | tab-bar-switch-to-tab                 | Переключиться на вкладку             |
+| Package    | C-c P p       | pro-packages-menu                     | Список пакетов                       |
+| Package    | C-c P i       | pro-packages-install                  | Установить пакет из ELPA             |
+| Package    | C-c P v       | pro-packages-install-vc               | Установить пакет из VC               |
+| Package    | C-c P u       | pro-packages-upgrade-all              | Обновить пакеты                      |
+| Package    | C-c P r       | pro-packages-refresh                  | Обновить список архивов              |
+| Package    | C-c P b       | pro-packages-upgrade-built-ins        | Разрешить built-in upgrade           |
+| Package    | C-c P a       | pro-package-bootstrap-install-targets | Установить базовые пакеты            |
+| Git        | C-x g         | pro-git-status                        | Статус репозитория                   |
+| Git        | C-c g         | pro-git-status                        | Magit status                         |
+| Org        | C-c o         | org-agenda                            | Повестка                             |
+| Ключи      | C-c k         | pro-keys-reload                       | Перезагрузить клавиши                |
+| Ключи      | C-c M-k       | pro-keys-reload                       | Перезагрузить клавиши (alias)        |
+| Shell      | s-`           | multi-vterm-project                   | vterm по проекту                     |
+| Shell      | s-~           | eshell-toggle                         | eshell toggle                        |
+| Suggested  | C-c v y       | pro/vterm-yank                        | suggested from terminals             |
+| Suggested  | C-c v i       | pro/vterm-interrupt                   | suggested from terminals             |
+| Suggested  | C-c v c       | vterm-copy-mode                       | suggested from terminals             |
+| Suggested  | C-x y         | pro/clipboard-yank-pop                | suggested from clipboard             |
