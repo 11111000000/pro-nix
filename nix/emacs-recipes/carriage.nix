@@ -3,7 +3,7 @@
 stdenv.mkDerivation rec {
   pname = "carriage";
   version = "dev";
-  src = ../../submodules/carriage;
+  src = builtins.fetchTree { type = "github"; owner = "gnu-emacs-ru"; repo = "carriage"; rev = "4c18e9bfe4a195ae305f814c68eae02383e33842"; narHash = "sha256-DJ0cbAhHbcJcdIN2cYueq0P1lgRDkclQNDr6RNp/728="; };
 
   nativeBuildInputs = [ emacs ];
   buildInputs = if gptel != null then [ gptel ] else [ ];
