@@ -30,8 +30,8 @@ in {
       desktopManager.cinnamon.enable = mkDefault false;
     };
 
-    services.displayManager.gdm.enable = mkDefault true;
-    services.xserver.displayManager.lightdm.enable = mkDefault false;
+    services.xserver.displayManager.lightdm.enable = mkDefault true;
+    services.displayManager.gdm.enable = mkDefault false;
 
 
     # Package list uses plain assignment (not mkDefault) so it is always

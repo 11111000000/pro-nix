@@ -12,7 +12,7 @@
   boot.loader.efi.canTouchEfiVariables = lib.mkForce false;
 
   services.xserver.enable = lib.mkForce false;
-  services.displayManager.gdm.enable = lib.mkForce false;
+    services.xserver.displayManager.lightdm.enable = lib.mkForce false;
   services.xserver.desktopManager.cinnamon.enable = lib.mkForce false;
   services.openssh.enable = lib.mkForce false;
 

@@ -14,7 +14,7 @@ testers.nixosTest {
     # Отключаем графику
     services.xserver.enable = lib.mkForce false;
     services.displayManager.enable = lib.mkForce false;
-    services.gdm.enable = lib.mkForce false;
+    services.xserver.displayManager.lightdm.enable = lib.mkForce false;
     
     # Минимальные ресурсы VM
     virtualisation.memorySize = 1024;
