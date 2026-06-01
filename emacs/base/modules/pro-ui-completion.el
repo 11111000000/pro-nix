@@ -24,6 +24,6 @@ adds optional UI-facing tweaks once per session."
       (when (and (boundp 'corfu-margin-formatters)
                  (fboundp 'kind-icon-margin-formatter)
                  (not (member #'kind-icon-margin-formatter corfu-margin-formatters)))
-        (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))))
+        (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)))))
 
 (provide 'pro-ui-completion)

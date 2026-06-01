@@ -296,7 +296,7 @@ KEYS-ALIST is an alist of ("KEY" . command-symbol)."
              (insert (format "ERROR: time=%s module=%s\n" (current-time-string) module-id))
              (prin1 err (current-buffer))
              (insert "\nBacktrace:\n")
-             (prin1 (with-output-to-string (backtrace)) (current-buffer)))))))))
+             (prin1 (with-output-to-string (backtrace)) (current-buffer))))))))
 
 (defun pro/export-registered-keys-to-org (&optional out-file)
   "Export registered module key suggestions to OUT-FILE as an Org table." 

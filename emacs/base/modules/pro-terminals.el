@@ -46,6 +46,9 @@ vterm доступен в вашей системе (Nix/Home-Manager или ELP
               (setq-local scroll-margin 0)
               ;; enable tab-line in vterm for quick buffer switching
               (when (fboundp 'tab-line-mode) (tab-line-mode 1))
+              ;; C-\ (toggle-input-method) — перехватываем на уровне Emacs,
+              ;; иначе vterm отправит ESC в терминал и input-method не сработает.
+              (define-key vterm-mode-map (kbd "C-\\") #'toggle-input-method)
               ;; prefer sane history and copy mode
                (when (fboundp 'vterm-copy-mode)
                   (vterm-copy-mode 0))
