@@ -4,3 +4,10 @@
 [submodule "submodules/carriage"]
 	path = submodules/carriage
 	url = https://github.com/gnu-emacs-ru/carriage
+[submodule "submodules/emcp"]
+	path = submodules/emcp
+	url = https://codeberg.org/martenlienen/emcp
+
+[submodule "submodules/telega.el"]
+	path = submodules/telega.el
+	url = https://github.com/zevlg/telega.el
