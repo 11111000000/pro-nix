@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# torwrap - короткая утилита в PATH для запуска команды через Tor
+# поведение:
+#  - ищет доступный tor proxy (локальный или gateway) с помощью scripts/find_tor_proxy.sh
+#  - если найден SOCKS proxy: запускает приложение через torsocks если доступен, иначе использует 'proxychains4' если настроен
+#  - если найден HTTP proxy: запускает приложение с env http_proxy set для этой команды
+#  - если ничего не найдено — возвращает ошибку
+
+set -euo pipefail
+
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+FINDER="$SCRIPT_DIR/scripts/find_tor_proxy.sh"
+
+if [ ! -x "$FINDER" ]; then
+  echo "Не найден $FINDER" >&2
+  exit 2
+fi
+
+if [ $# -lt 1 ]; then
+  echo "Usage: torwrap <command> [args...]" >&2
+  exit 2
+fi
+
+proxy_line=$("$FINDER" 2>/dev/null || true)
+if [ -z "$proxy_line" ]; then
+  echo "Tor proxy не найден" >&2
+  exit 3
+fi
+
+set -- $proxy_line
+ptype=$1; phost=$2; pport=$3
+
+# prefer torsocks for socks
+if [ "$ptype" = "socks" ]; then
+  if command -v torsocks >/dev/null 2>&1; then
+    exec torsocks "$@"
+  elif command -v proxychains4 >/dev/null 2>&1; then
+    exec proxychains4 "$@"
+  else
+    # fallback: set ALL_PROXY env for the executed command
+    ALL_PROXY="socks5h://$phost:$pport" exec "$@"
+  fi
+else
+  # http proxy
+  HTTP_PROXY="http://$phost:$pport" HTTPS_PROXY="http://$phost:$pport" exec "$@"
+fi
