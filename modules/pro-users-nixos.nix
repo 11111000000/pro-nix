@@ -46,11 +46,7 @@
           ] ++ extraEmacs;
         };
 
-        pro.opencode.tui = {
-          enable = true;
-          enableSubagentStatusline = true;
-          enableEvanDbgSidebar = true;
-        };
+        # OpenCode TUI config disabled: no plugins, no generated files.
     };
   }) [ "az" "za" "la" "bo" ]);
 }
