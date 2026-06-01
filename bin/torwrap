@@ -8,9 +8,12 @@
 
 set -euo pipefail
 
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+SELF=$(readlink -f "${BASH_SOURCE[0]}")
+SCRIPT_DIR=$(cd "$(dirname "$SELF")/.." && pwd)
 FINDER="$SCRIPT_DIR/scripts/find_tor_proxy.sh"
-
+if [ ! -x "$FINDER" ] && [ -x "$HOME/pro-nix/scripts/find_tor_proxy.sh" ]; then
+  FINDER="$HOME/pro-nix/scripts/find_tor_proxy.sh"
+fi
 if [ ! -x "$FINDER" ]; then
   echo "Не найден $FINDER" >&2
   exit 2
@@ -21,6 +24,8 @@ if [ $# -lt 1 ]; then
   exit 2
 fi
 
+ORIGINAL_CMD=( "$@" )
+
 proxy_line=$("$FINDER" 2>/dev/null || true)
 if [ -z "$proxy_line" ]; then
   echo "Tor proxy не найден" >&2
@@ -29,6 +34,7 @@ fi
 
 set -- $proxy_line
 ptype=$1; phost=$2; pport=$3
+set -- "${ORIGINAL_CMD[@]}"
 
 # prefer torsocks for socks
 if [ "$ptype" = "socks" ]; then
