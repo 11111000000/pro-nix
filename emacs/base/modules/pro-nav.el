@@ -135,12 +135,8 @@
           (and (fboundp 'pro-packages--maybe-install)
                (pro-packages--maybe-install 'orderless t)
                (require 'orderless nil t)))
-  (setq completion-styles '(basic)
-        completion-category-defaults
-        '((file (styles partial-completion basic))
-          (buffer (styles basic))
-          (symbol (styles basic orderless))
-          (command (styles basic orderless)))))
+  (setq completion-styles '(orderless basic)
+        completion-category-defaults nil))
 
 (when (or (pro--package-provided-p 'marginalia) (pro-packages--maybe-install 'marginalia t) (require 'marginalia nil t))
   ;; marginalia-mode может не иметь автозагрузки; включаем только при наличии.
