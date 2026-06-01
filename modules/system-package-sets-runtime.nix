@@ -9,6 +9,7 @@ with pkgs;
     openssh
     python3
     coreutils
+    file
     procps
     dbus
     gawk

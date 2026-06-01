@@ -274,15 +274,29 @@ KEYS-ALIST is an alist of ("KEY" . command-symbol)."
             (let ((file (format "/tmp/pro-register-%s.log" module-id)))
               (with-temp-file file
                 (insert (format "CALL: time=%s module=%s type=%S\n" (current-time-string) module-id (type-of keys-alist)))
-                (prin1 keys-alist (current-buffer))))))
-        (message "pro/register-module-keys: module=%s" module-id)
-        (let* ((raw (if (listp keys-alist) keys-alist (list keys-alist))) (safe-keys '()) (preview '()))
-          (dolist (e raw)
-            (condition-case _ (when (and (consp e) (stringp (car e))) (push e safe-keys) (push (cons (car e) (if (and (consp e) (symbolp (cdr e))) (cdr e) (format "%S" (cdr e)))) preview)) (error (push (format "<invalid:%S>" e) preview))))
-          (setq safe-keys (nreverse safe-keys) preview (nreverse preview))
-          (puthash module safe-keys pro/registered-module-keys)
+                (prin1 keys-alist (current-buffer)))))
+          (message "pro/register-module-keys: module=%s" module-id)
+          (let* ((raw (if (listp keys-alist) keys-alist (list keys-alist))) (safe-keys '()) (preview '()))
+            (dolist (e raw)
+              (condition-case _ (when (and (consp e) (stringp (car e))) (push e safe-keys) (push (cons (car e) (if (and (consp e) (symbolp (cdr e))) (cdr e) (format "%S" (cdr e)))) preview)) (error (push (format "<invalid:%S>" e) preview))))
+            (setq safe-keys (nreverse safe-keys) preview (nreverse preview))
+            (puthash module safe-keys pro/registered-module-keys)
+            (ignore-errors
+              (let ((file (format "/tmp/pro-register-%s.success.log" module-id)))
+                (with-temp-file file
+                  (insert (format "OK: time=%s module=%s registered=%d\n" (current-time-string) module-id (length safe-keys)))
+                  (prin1 preview (current-buffer))))))
           (message "pro: registered %s suggested keys from %s" (if (listp safe-keys) (format "%d" (length safe-keys)) "(unknown)") module-id))))
-    (error (message "pro: failed to register module keys for %s" (or (and (boundp 'module-id) module-id) "<module?>"))))
+    (error
+     (let ((module-id (if (symbolp module) (symbol-name module) (format "%S" module))))
+       (message "pro: failed to register module keys for %s - %S" module-id err)
+       (ignore-errors
+         (let ((file (format "/tmp/pro-register-%s.error.log" module-id)))
+           (with-temp-file file
+             (insert (format "ERROR: time=%s module=%s\n" (current-time-string) module-id))
+             (prin1 err (current-buffer))
+             (insert "\nBacktrace:\n")
+             (prin1 (with-output-to-string (backtrace)) (current-buffer)))))))))
 
 (defun pro/export-registered-keys-to-org (&optional out-file)
   "Export registered module key suggestions to OUT-FILE as an Org table." 
