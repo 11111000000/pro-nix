@@ -41,7 +41,7 @@ environment.systemPackages = with pkgs; [ pavucontrol playerctl ];
 
 | Секция | Клавиша | Команда | Описание |
 |--------|---------|---------|----------|
-| UI     | s-S-R   | pro/reload-config | Перечитать весь конфиг |
+| UI     | C-x M-c | pro/reload-config | Перечитать весь конфиг |
 
 - `s-` = super, `S-` = shift, `C-` = control, `M-` = meta
 - Глобальные биндинги живут **только** здесь. Модули регистрируют предложения
@@ -65,7 +65,7 @@ environment.systemPackages = with pkgs; [ pavucontrol playerctl ];
 
 | Действие | Команда | Когда |
 |----------|---------|-------|
-| Быстрый reload | `s-S-R` / `M-x pro/reload-config` | После правки модулей, ключей, UI |
+| Быстрый reload | `C-x M-c` / `M-x pro/reload-config` | После правки модулей, ключей, UI |
 | Полный reload  | `C-u M-x pro/reload-config` | Если что-то сломалось |
 | Перезапуск     | Закрыть/открыть Emacs | Крайний случай |
 

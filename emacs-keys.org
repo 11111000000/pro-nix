@@ -20,7 +20,7 @@
 | UI         | C-+           | pro-ui-zoom-in                        | Увеличить шрифт (альтернатива)       |
 | UI         | C--           | pro-ui-zoom-out                       | Уменьшить шрифт                      |
 | UI         | C-0           | pro-ui-zoom-reset                     | Сбросить масштаб                     |
-| UI         | s-S-R         | pro/reload-config                     | Перечитать весь конфиг (soft reload) |
+| UI         | C-x M-c       | pro/reload-config                     | Перечитать весь конфиг (soft reload) |
 | History    | C-_           | undo-tree-undo                        | Шаг назад (undo)                     |
 | History    | M-_           | undo-tree-redo                        | Шаг вперёд (redo)                    |
 | History    | C-z           | undo-tree-undo                        | Шаг назад (дубль)                    |
