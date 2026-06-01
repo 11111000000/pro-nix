@@ -368,6 +368,13 @@ message with recommendations (manual and Home-Manager snippets).
         (message "Icon fonts available: %s" (string-join (nreverse found) ", "))
       (message "No Nerd / icon fonts found. See docs/ICON-FONTS.md for installation instructions."))))
 
+(ignore-errors
+  ;; Apply modeline style if the pro-ui-modeline module is available.
+  ;; We use `require' with nil t to avoid hard failures in minimal/CI runs.
+  (when (require 'pro-ui-modeline nil t)
+    (when (fboundp 'pro-ui-apply-modeline)
+      (pro-ui-apply-modeline))))
+
 (provide 'pro-ui)
 
 ;;; pro-ui.el ends here
