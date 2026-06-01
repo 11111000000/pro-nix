@@ -23,3 +23,6 @@
 [submodule "submodules/tao-theme"]
 	path = submodules/tao-theme
 	url = https://github.com/11111000000/tao-theme-emacs
+[submodule "submodules/shaoline"]
+	path = submodules/shaoline
+	url = https://github.com/11111000000/shaoline

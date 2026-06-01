@@ -14,6 +14,22 @@
 (defgroup pro-ui-modeline nil
   "Настройки модельного слоя для pro UI.")
 
+;; Если shaoline подключён как submodule в репозитории, добавим его в load-path
+;; чтобы (require 'shaoline) могло найти пакет без установки извне.
+(defvar pro-ui--shaoline-path
+  (let* ((this-file (or load-file-name
+                        (and (boundp 'byte-compile-current-file) byte-compile-current-file)
+                        buffer-file-name))
+         (module-dir (and this-file (file-name-directory this-file)))
+         (repo-root (and module-dir (locate-dominating-file module-dir ".git"))))
+    (and repo-root (expand-file-name "submodules/shaoline" repo-root)))
+  "Путь к submodule shaoline, вычисляемый относительно корня репозитория.")
+
+(when (and pro-ui--shaoline-path
+           (file-directory-p pro-ui--shaoline-path)
+           (not (member pro-ui--shaoline-path load-path)))
+  (push pro-ui--shaoline-path load-path))
+
 (defcustom pro-ui-modeline-style 'shaoline
   "Стиль модельного слоя: 'minimal, 'shaoline или 'doom.
 По умолчанию — 'shaoline. Реализация попытается включить соответствующий
