@@ -59,6 +59,8 @@ let
     atlas = super.callPackage ../emacs-recipes/atlas.nix {};
     tao-theme-emacs = super.callPackage ../emacs-recipes/tao-theme-emacs.nix {};
     tao-theme = super.emacsPackages.tao-theme-emacs;
+    shaoline = super.callPackage ../emacs-recipes/shaoline.nix {};
+    shaoline-package = super.emacsPackages.shaoline;
   };
 in {
   emacsPackages = super.emacsPackages // repoExtras // localRecipes;
