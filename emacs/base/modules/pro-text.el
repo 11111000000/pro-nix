@@ -12,7 +12,7 @@
 (when (fboundp 'show-paren-mode)
   (show-paren-mode 1))
 
-(setq show-paren-delay 0)
+(setq show-paren-delay 0.1)
 (setq show-paren-when-point-inside-paren t)
 
 (when (fboundp 'global-prettify-symbols-mode)

@@ -123,16 +123,19 @@
   # lines (avoiding the `Include` directive that some tor builds reject
   # during `--verify-config`). Use lib.mkDefault so host-specific configs
   # can override these values if a host needs different behavior.
-  services.tor = lib.mkDefault {
-    enable = true;
-    client.enable = true;
-    torsocks.enable = true;
-    settings = {
-      # Do not emit `Include /etc/tor/bridges.conf` globally here — the
-      # pro-privacy module handles bridges declaratively to avoid
-      # verify-config incompatibilities.
-    };
-  };
+  services.tor = lib.mkMerge [
+    (lib.mkDefault {
+      enable = true;
+      client.enable = true;
+      torsocks.enable = true;
+      settings = {
+        # Do not emit `Include /etc/tor/bridges.conf` globally here — the
+        # pro-privacy module handles bridges declaratively to avoid
+        # verify-config incompatibilities.
+      };
+    })
+
+  ];
 
   # ADB нужен как системный инструмент на всех хостах этого профиля.
   programs.adb.enable = true;
@@ -262,7 +265,7 @@
   # Включение flakes, регулярная очистка и оптимизация кэша пакетов.
   nix = {
     settings.experimental-features = [ "nix-command" "flakes" "cgroups" ];
-    settings.connect-timeout = 5;
+    settings.connect-timeout = 20;
     settings.fallback = true;
     # Use cgroups so Nix places build processes into cgroups and systemd
     # resource controls (CPUQuota/MemoryMax) can be applied per-build.
@@ -270,29 +273,26 @@
     # Limit parallel builds to a conservative number to avoid saturating CPU.
     # Set to 2 for interactive responsiveness on typical desktop machines.
     settings.max-jobs = 2;
-    # Сначала используем публичный кэш и его Fastly-зеркало, чтобы сборка быстрее уходила в готовые бинарники.
-    # pi-crew cache switch branch: pi-crew/cache-switch-20260520152216
-    # Временно предпочитаем fastly mirror; cache.nixos.org остаётся запасным.
-    settings.substituters = lib.mkForce [
-      "https://nix-mirror.freetls.fastly.net"
-      "https://cache.nixos.org"
+
+    # Загрузка исходников: GitHub и другие хостинги исходного кода
+    # могут быть недоступны из РФ. Передаём http_proxy/https_proxy в
+    # песочницу сборки — выставьте переменные в /etc/nixos/local.nix:
+    #   nix.daemonEnv = { http_proxy = "..."; https_proxy = "..."; };
+    settings.stalled-download-timeout = 900;
+    settings.download-attempts = 5;
+    # Основной бинарный кэш — cache.nixos.org (Fastly CDN, доступен из РФ).
+    # mkDefault позволяет хостам добавить свои substituters (локальные/региональные).
+    settings.substituters = [
+      "https://mirror.sjtu.edu.cn/nix-channels/store"
+      "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
     ];
 
-    # Prefer the Fastly mirror as primary substituter and make cache.nixos.org
-    # a fallback by ordering. Also set trusted-substituters so Nix will prefer
-    # verified substitutes from the mirror. The public key for the mirror is
-    # unknown in this environment; the mirror advertises that it serves
-    # pre-signed cache.nixos.org binaries, so no extra key is strictly
-    # necessary. If you have a mirror public key, add it to
-    # settings.trusted-public-keys.
-    settings.trusted-substituters = lib.mkForce [
-      "https://nix-mirror.freetls.fastly.net"
-      "https://cache.nixos.org"
+    settings.trusted-substituters = [
+      "https://mirror.sjtu.edu.cn/nix-channels/store"
+      "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
     ];
 
-    settings.trusted-public-keys = lib.mkForce [
-      # If you have the mirror's public key, place it here (format: name:key)
-      # Example placeholder removed for safety; leaving only cache.nixos.org key.
+    settings.trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     ];
     gc = {
@@ -336,6 +336,7 @@
     noto-fonts
     noto-fonts-cjk-sans
     noto-fonts-color-emoji
+    emacs-all-the-icons-fonts
     (stdenv.mkDerivation rec {
       name = "aporetic-fonts";
       src = ./fonts;
@@ -383,6 +384,11 @@
     CPUQuota = "75%";
     # Lower CPUWeight so other services keep some proportionate share.
     CPUWeight = "200";
+    # Прокси для загрузки исходников (GitHub и др. заблокированы в РФ).
+    # Установите переменные через /etc/nixos/local.nix в environment.variables
+    # или systemd.services.nix-daemon.environment:
+    #   systemd.services.nix-daemon.environment = { http_proxy = "http://..."; };
+    EnvironmentFile = lib.mkBefore [ "-/etc/nixos/nix-daemon-proxy" ];
   };
 
   # polkit/unit ordering handled in modules/systemd-policy.nix

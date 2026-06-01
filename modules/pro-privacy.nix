@@ -59,7 +59,6 @@ in {
     settings = {
       ControlPort = [ 9051 ];
       CookieAuthentication = true;
-      bridges = lib.mkDefault [];
       ClientTransportPlugin = lib.mkForce [
         "obfs4 exec ${pkgs.obfs4}/bin/lyrebird"
         "meek exec ${pkgs.meek}/bin/meek-client"

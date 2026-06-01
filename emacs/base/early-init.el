@@ -35,10 +35,7 @@
 ;; Guarded to avoid errors in TTY. This is intentionally minimal and
 ;; safe to call from early-init (before packages are loaded).
 (when (display-graphic-p)
-  (when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
-  (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
-  (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
-  (when (fboundp 'horizontal-scroll-bar-mode) (horizontal-scroll-bar-mode -1))
+  ;; Fringes first: window-divider depends on fringes being disabled.
   (setq-default left-fringe-width 0
                 right-fringe-width 0)
   ;; Thin window divider to give subtle separation between windows.

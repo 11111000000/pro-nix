@@ -3,7 +3,7 @@
 ;; Этот модуль усиливает главную конфигурационную среду: Emacs Lisp.
 
 (show-paren-mode 1)
-(setq show-paren-delay 0)
+(setq show-paren-delay 0.1)
 
 (defun pro-lisp-setup ()
   "Подготовить Lisp-редактирование как основную среду разработки конфига."

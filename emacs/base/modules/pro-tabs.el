@@ -6,7 +6,7 @@
   "Pro tabs integration (opt-in)."
   :group 'pro)
 
-(defcustom pro-pro-tabs-enable nil
+(defcustom pro-pro-tabs-enable t
   "Enable pro-tabs integration.
 When non-nil, configure tab-bar/tab-line and pro-tabs if available.
 This does not install global keybindings; use emacs-keys.org for that." 

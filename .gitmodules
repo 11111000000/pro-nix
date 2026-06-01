@@ -11,3 +11,15 @@
 [submodule "submodules/telega.el"]
 	path = submodules/telega.el
 	url = https://github.com/zevlg/telega.el
+[submodule "submodules/agent-shell"]
+	path = submodules/agent-shell
+	url = https://github.com/11111000000/agent-shell
+[submodule "submodules/acapella"]
+	path = submodules/acapella
+	url = https://github.com/gnu-emacs-ru/acapella
+[submodule "submodules/atlas"]
+	path = submodules/atlas
+	url = https://github.com/gnu-emacs-ru/atlas
+[submodule "submodules/tao-theme"]
+	path = submodules/tao-theme
+	url = https://github.com/11111000000/tao-theme-emacs

@@ -26,9 +26,10 @@ let
       revision = "v0.3.0";
     };
 
-    agent-shell = super.emacsPackages.emacsPackageFromRepository {
-      pname = "agent-shell";
-      repository = "xenodium/agent-shell";
+
+    acp = super.emacsPackages.emacsPackageFromRepository {
+      pname = "acp";
+      repository = "xenodium/acp.el";
       revision = "master";
     };
 
@@ -53,6 +54,11 @@ let
     carriage = super.callPackage ../emacs-recipes/carriage.nix {
       gptel = super.emacsPackages.gptel or null;
     };
+    agent-shell = super.callPackage ../emacs-recipes/agent-shell.nix {};
+    acapella = super.callPackage ../emacs-recipes/acapella.nix {};
+    atlas = super.callPackage ../emacs-recipes/atlas.nix {};
+    tao-theme-emacs = super.callPackage ../emacs-recipes/tao-theme-emacs.nix {};
+    tao-theme = super.emacsPackages.tao-theme-emacs;
   };
 in {
   emacsPackages = super.emacsPackages // repoExtras // localRecipes;

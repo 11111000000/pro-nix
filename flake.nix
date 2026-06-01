@@ -24,6 +24,25 @@
       # so we can optionally reference emacsPackages that the overlay exposes.
       nixpkgsConfig = {
         allowUnfree = true;
+        rewriteURL = url:
+          let
+            githubProxy = builtins.getEnv "NIX_GITHUB_PROXY";
+            rewrites = [
+              { from = "https://astron.com/pub/file/"; to = "https://distfiles.macports.org/file/"; }
+              { from = "https://astron.com/"; to = "https://distfiles.macports.org/"; }
+              { from = "https://ftp.astron.com/pub/file/"; to = "https://distfiles.macports.org/file/"; }
+              { from = "https://git.kernel.org/"; to = "https://mirrors.edge.kernel.org/"; }
+              { from = "https://www.kernel.org/"; to = "https://mirrors.edge.kernel.org/"; }
+              { from = "https://curl.haxx.se/"; to = "https://curl.se/"; }
+            ];
+            rewriteOnce = u: r:
+              if lib.strings.hasPrefix r.from u then lib.strings.replaceStrings [ r.from ] [ r.to ] u else u;
+            rewritten = lib.foldl' rewriteOnce url rewrites;
+          in
+            if githubProxy != "" && lib.strings.hasPrefix "https://github.com/" rewritten then
+              githubProxy + rewritten
+            else
+              rewritten;
       };
       pkgs = import nixpkgs {
         inherit system;
@@ -32,7 +51,7 @@
       pkgsOverlay = import nixpkgs {
         inherit system;
         config = nixpkgsConfig;
-        overlays = [ (import ./nix/overlays/emacs-extra.nix) (import ./nix/overlays/opencode-stub.nix) (import ./nix/overlays/pi-acp.nix) ];
+        overlays = [ (import ./nix/overlays/emacs-extra.nix) (import ./nix/overlays/opencode-stub.nix) (import ./nix/overlays/pi-acp.nix) (import ./nix/overlays/mirrors.nix) (import ./nix/overlays/github-proxy.nix) ];
       };
       emacsPkg = pkgs.emacs30 or pkgs.emacs;
       piPkg = pi.packages.${system}.coding-agent;
@@ -206,8 +225,10 @@ EOF
           pkgs.emacsPackages.expand-region pkgs.emacsPackages.yasnippet pkgs.emacsPackages.projectile
           pkgs.emacsPackages.treemacs pkgs.emacsPackages.vterm pkgs.emacsPackages.ace-window pkgs.emacsPackages.embark
           pkgs.emacsPackages.dash-docs pkgs.emacsPackages.embark-consult
-          # Try overlay-provided packages when available (agent-shell, treemacs-icons-dired, eldoc-box)
+          # Try overlay-provided packages when available (agent-shell, acp, treemacs-icons-dired, eldoc-box)
           (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "agent-shell" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.agent-shell else null)
+          (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "acp" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.acp else null)
+          (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "telega" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.telega else null)
           (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "treemacs-icons-dired" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages."treemacs-icons-dired" else null)
           (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "eldoc-box" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.eldoc-box else null)
         ];

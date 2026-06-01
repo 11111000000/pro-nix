@@ -160,7 +160,10 @@ Return t on success."
 ;; developer convenience for packages that declare deps not present in the
 ;; runtime. Keep minimal and explicit.
 (defvar pro-packages-vc-deps
-  '((agent-shell . (acp shell-maker)))
+  '((agent-shell . (acp shell-maker))
+    (acapella . ())
+    (atlas . ())
+    (tao-theme-emacs . ()))
   "Alist mapping VC-installed package symbols to their runtime dependencies.")
 
 (defvar pro-packages-auto-install-allowlist

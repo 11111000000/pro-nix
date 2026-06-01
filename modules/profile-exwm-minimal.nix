@@ -26,11 +26,12 @@ in {
     # модулях-профилях.
     services.xserver = {
       enable = mkDefault true;
-      displayManager.gdm.enable = mkDefault true;
-      displayManager.lightdm.enable = mkDefault false;
       windowManager.exwm.enable = mkDefault true;
       desktopManager.cinnamon.enable = mkDefault false;
     };
+
+    services.displayManager.gdm.enable = mkDefault true;
+    services.xserver.displayManager.lightdm.enable = mkDefault false;
 
 
     # Package list uses plain assignment (not mkDefault) so it is always

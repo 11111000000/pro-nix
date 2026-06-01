@@ -10,6 +10,9 @@
 ;; Utility
 (require 'cl-lib)
 
+(defvar pro-nav--consult-loaded nil
+  "Non-nil when consult-specific defaults were applied.")
+
 (when (or (pro--package-provided-p 'vertico) (pro-packages--maybe-install 'vertico t) (require 'vertico nil t))
   ;; vertico-mode может быть не загружен на этапе инициализации; поэтому
   ;; проверяем наличие определения функции и безопасно включаем режим.
@@ -132,8 +135,12 @@
           (and (fboundp 'pro-packages--maybe-install)
                (pro-packages--maybe-install 'orderless t)
                (require 'orderless nil t)))
-  (setq completion-styles '(orderless basic)
-        completion-category-defaults nil))
+  (setq completion-styles '(basic)
+        completion-category-defaults
+        '((file (styles partial-completion basic))
+          (buffer (styles basic))
+          (symbol (styles basic orderless))
+          (command (styles basic orderless)))))
 
 (when (or (pro--package-provided-p 'marginalia) (pro-packages--maybe-install 'marginalia t) (require 'marginalia nil t))
   ;; marginalia-mode может не иметь автозагрузки; включаем только при наличии.
@@ -150,10 +157,12 @@
       (setq xref-show-definitions-function #'consult-xref
             xref-show-xrefs-function #'consult-xref)))
 
-  ;; Helpful consult defaults
-  (when (fboundp 'consult-line)
-    (setq consult-preview-key "M-.")
-    (setq consult-line-start-from-top t))
+  (unless pro-nav--consult-loaded
+    (setq pro-nav--consult-loaded t)
+    ;; Helpful consult defaults
+    (when (fboundp 'consult-line)
+      (setq consult-preview-key "M-."
+            consult-line-start-from-top t)))
 
   ;; Embark integration (без глобальных клавиш; бинды — через emacs-keys.org)
   (when (require 'embark nil t)

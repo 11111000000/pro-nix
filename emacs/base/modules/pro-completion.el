@@ -14,10 +14,18 @@ Disable if you observe frame jitter on your setup."
   :type 'boolean
   :group 'pro-completion)
 
-(defcustom pro-completion-auto-prefix 2
-  "Minimum prefix length before corfu auto-starts when `corfu-auto' is enabled." 
+(defcustom pro-completion-auto-prefix 3
+  "Minimum prefix length before corfu auto-starts when `corfu-auto' is enabled."
   :type 'integer
   :group 'pro-completion)
+
+(defcustom pro-completion-auto-delay 0.25
+  "Delay before Corfu auto popup appears."
+  :type 'number
+  :group 'pro-completion)
+
+(defvar pro-completion--kind-icon-installed nil
+  "Non-nil when kind-icon margin formatter was installed.")
 
 (defun pro-completion--disable-ispell-capf ()
   "Remove `ispell-completion-at-point' from `completion-at-point-functions'."
@@ -28,7 +36,7 @@ Disable if you observe frame jitter on your setup."
 (when (or (pro--package-provided-p 'corfu) (pro-packages--maybe-install 'corfu t) (require 'corfu nil t))
   (setq corfu-auto t
         corfu-auto-prefix pro-completion-auto-prefix
-        corfu-auto-delay 0.2
+        corfu-auto-delay pro-completion-auto-delay
         corfu-cycle t
         corfu-count 14
         corfu-separator ?\s
@@ -65,9 +73,13 @@ Disable if you observe frame jitter on your setup."
   (ignore-errors (require 'cape-keyword nil t))
   (ignore-errors (require 'cape-dabbrev nil t))
   ;; order: specific -> general
-  (dolist (fn '(cape-file cape-keyword cape-dabbrev))
+  (dolist (fn '(cape-file cape-keyword))
     (unless (member fn completion-at-point-functions)
       (add-to-list 'completion-at-point-functions fn)))
+  (add-hook 'prog-mode-hook
+            (lambda ()
+              (unless (member #'cape-dabbrev completion-at-point-functions)
+                (add-to-list 'completion-at-point-functions #'cape-dabbrev))))
 
   ;; Fallback shims: define lightweight cape helpers if real package is
   ;; not available. Placing them outside the `when' ensures they exist even
@@ -97,26 +109,23 @@ Disable if you observe frame jitter on your setup."
 ;; Optional candidate icons in Corfu margin
 (when (and (or (pro--package-provided-p 'kind-icon) (pro-packages--maybe-install 'kind-icon t) (require 'kind-icon nil t))
            (boundp 'corfu-margin-formatters)
-           (fboundp 'kind-icon-margin-formatter))
+           (fboundp 'kind-icon-margin-formatter)
+           (not pro-completion--kind-icon-installed))
+  (setq pro-completion--kind-icon-installed t)
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
 ;; Minibuffer: enable Corfu only when Vertico/MCT aren't active
-  (defun pro-completion--maybe-enable-corfu-in-minibuffer ()
+(defun pro-completion--maybe-enable-corfu-in-minibuffer ()
   "Configure Corfu in minibuffer unless Vertico/MCT is active.
 
 We intentionally do NOT enable `corfu-mode' in the minibuffer here — the
 minibuffer UX is better served by Vertico/Consult. We only disable automatic
 popup behaviour (corfu-auto) when Corfu is present, to avoid accidental
 in-buffer style popups during minibuffer commands when Vertico isn't active.
-" 
+"
   (unless (or (bound-and-true-p vertico--input) (bound-and-true-p mct--active))
     (when (boundp 'corfu-auto)
-      (setq-local corfu-auto nil))
-    ;; Ensure Corfu does not activate inside the minibuffer. Disabling the
-    ;; buffer-local `corfu-mode' here is safe even when `global-corfu-mode' is
-    ;; enabled because it only affects the minibuffer buffer.
-    (when (fboundp 'corfu-mode)
-      (corfu-mode -1))))
+      (setq-local corfu-auto nil))))
 (add-hook 'minibuffer-setup-hook #'pro-completion--maybe-enable-corfu-in-minibuffer)
 
 ;; Orderless включаем только после успешной загрузки стиля, чтобы не получать ошибку `invalid completion style orderless' на старте.
@@ -124,7 +133,8 @@ in-buffer style popups during minibuffer commands when Vertico isn't active.
   (setq completion-category-overrides
         (append '((file (styles partial-completion basic)))
                 (when (require 'orderless nil t)
-                  '((command (styles orderless basic)))))))
+                  '((command (styles orderless basic))
+                    (symbol (styles orderless basic)))))))
 
 (provide 'pro-completion)
 

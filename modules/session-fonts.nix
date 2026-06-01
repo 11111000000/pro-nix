@@ -8,6 +8,7 @@
     noto-fonts
     noto-fonts-cjk-sans
     noto-fonts-color-emoji
+    emacs-all-the-icons-fonts
     # aporetic-fonts removed to avoid impure local path during eval
     # If needed, package fonts via a derivation in the flake inputs or use --impure eval
     liberation_ttf

@@ -5,7 +5,18 @@
 ;; при require в минимальном окружении (CI, контейнеры).
 
 ;; Реализация минималистична: задаёт точку входа и аккуратно пытается
-;; загрузить опциональные функции из agent-shell.
+;; загрузить опциональные функции из agent-shell и emcp.
+
+(defvar pro-agent-shell--emcp-path
+  (let* ((this-file (or load-file-name
+                        (and (boundp 'byte-compile-current-file) byte-compile-current-file)
+                        buffer-file-name))
+         (module-dir (and this-file (file-name-directory this-file)))
+         (repo-root (and module-dir
+                         (locate-dominating-file module-dir ".git"))))
+    (and repo-root
+         (expand-file-name "submodules/emcp" repo-root)))
+  "Путь к EMCP submodule. Вычисляется относительно расположения этого файла в репозитории.")
 
 (defun pro-agent-open ()
   "Открыть agent-shell, если он доступен в runtime.
@@ -24,6 +35,12 @@
           (message "[pro-agent-shell] пакет agent-shell объявлен Nix, но не найден в runtime. Проверьте профиль / home-manager.")
         (message "[pro-agent-shell] пакет agent-shell не найден. Можно временно установить через M-x pro-packages-install RET agent-shell")))))
 
+;; Подключаем EMCP submodule к load-path (если доступен)
+(when (and pro-agent-shell--emcp-path
+           (file-directory-p pro-agent-shell--emcp-path)
+           (not (member pro-agent-shell--emcp-path load-path)))
+  (push pro-agent-shell--emcp-path load-path))
+
 ;; Попытки необязательной интеграции — выполняются в безопасном ignore-errors.
 (ignore-errors
   ;; transient не обязателен; пытаемся загрузить без ошибки.
@@ -36,6 +53,20 @@
       ;; Минималистичный заголовок вместо баннера
       (setq agent-shell-header-style 'text
             agent-shell-show-welcome-message nil)
+
+      ;; EMCP — MCP-сервер: даёт агенту доступ к Emacs (документация,
+      ;; eval, скриншоты, переменные). Профиль develop даёт inspect +
+      ;; get-variable, set-variable, screenshot.
+      (when (require 'emcp nil t)
+        (setq emcp-default-profile 'develop)
+        (add-to-list 'agent-shell-mcp-servers
+                     '((name . "emcp")
+                       (type . "http")
+                       (headers . ())
+                       (url . (lambda ()
+                                (require 'emcp)
+                                (let ((server (emcp-start emcp-default-profile)))
+                                  (emcp-server-url server)))))))
       (defun pro-agent-shell--maybe-call (fn &rest args)
         "Вызвать FN если он определён, иначе показать сообщение.
 Аргументы передаются в FN напрямую." (apply (if (fboundp fn) fn (lambda (&rest _) (message "[pro-agent-shell] %s недоступна" fn))) args))

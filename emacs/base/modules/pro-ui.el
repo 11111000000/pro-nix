@@ -26,6 +26,11 @@
       mouse-wheel-scroll-amount '(1 ((shift) . 1)) ; плавность для мыши
       mouse-wheel-progressive-speed nil)
 
+;; Отключаем лишние UI-элементы
+(scroll-bar-mode -1)
+(tool-bar-mode -1)
+(menu-bar-mode -1)
+
 (defcustom pro-ui-code-font-family "Aporetic Sans Mono"
   "Шрифт для кода."
   :type 'string
@@ -119,7 +124,8 @@ is set accordingly."
 
     (when (pro-ui--try-require 'kind-icon)
       (when (boundp 'corfu-margin-formatters)
-        (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)))
+        (unless (member #'kind-icon-margin-formatter corfu-margin-formatters)
+          (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))))
 
     (with-eval-after-load 'consult
       (cond
@@ -205,8 +211,8 @@ is set accordingly."
   (when (display-graphic-p)
     (when (pro-ui--try-require 'corfu)
       (setq corfu-auto t
-            corfu-auto-prefix 2
-            corfu-auto-delay 0.12
+            corfu-auto-prefix 3
+            corfu-auto-delay 0.25
             corfu-cycle t
             corfu-count 10
             corfu-separator ?\s
@@ -218,9 +224,13 @@ is set accordingly."
       (when (fboundp 'corfu-history-mode) (corfu-history-mode 1)))
 
     (when (pro-ui--try-require 'cape)
-      (dolist (fn '(cape-file cape-keyword cape-dabbrev))
+      (dolist (fn '(cape-file cape-keyword))
         (unless (member fn completion-at-point-functions)
           (add-to-list 'completion-at-point-functions fn)))
+      (add-hook 'prog-mode-hook
+                (lambda ()
+                  (unless (member #'cape-dabbrev completion-at-point-functions)
+                    (add-to-list 'completion-at-point-functions #'cape-dabbrev))))
       (defun pro-ui--disable-ispell-capf ()
         "Remove `ispell-completion-at-point' from `completion-at-point-functions'."
         (setq-local completion-at-point-functions
@@ -229,15 +239,15 @@ is set accordingly."
       (add-hook 'text-mode-hook #'pro-ui--disable-ispell-capf))
 
     (defun pro-ui--maybe-enable-corfu-in-minibuffer ()
-      "Enable `corfu-mode' in minibuffer unless Vertico/MCT is active."
+      "Configure minibuffer completion without enabling Corfu there."
       (unless (or (bound-and-true-p vertico--input) (bound-and-true-p mct--active))
-        (setq-local corfu-auto nil)
-        (when (fboundp 'corfu-mode) (corfu-mode 1))))
+        (setq-local corfu-auto nil)))
     (add-hook 'minibuffer-setup-hook #'pro-ui--maybe-enable-corfu-in-minibuffer)
 
     (when (and (pro-ui--try-require 'kind-icon)
                (boundp 'corfu-margin-formatters)
-               (fboundp 'kind-icon-margin-formatter))
+               (fboundp 'kind-icon-margin-formatter)
+               (not (member #'kind-icon-margin-formatter corfu-margin-formatters)))
       (setq kind-icon-default-face 'corfu-default)
       (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
@@ -323,12 +333,22 @@ is set accordingly."
     (define-key vertico-map (kbd "M-n") #'vertico-next)
     (define-key vertico-map (kbd "M-p") #'vertico-previous))
 
+  (when (and (boundp 'corfu-map) (keymapp corfu-map))
+    (define-key corfu-map (kbd "C-n") #'corfu-next)
+    (define-key corfu-map (kbd "C-p") #'corfu-previous)
+    (define-key corfu-map (kbd "M-n") #'corfu-next)
+    (define-key corfu-map (kbd "M-p") #'corfu-previous))
+
+  (when (and (boundp 'vertico-count) (numberp vertico-count))
+    (setq vertico-count (min vertico-count 10)))
+
   (unless (display-graphic-p)
     (when (pro-ui--try-require 'corfu-terminal)
       (when (fboundp 'corfu-terminal-mode) (corfu-terminal-mode 1))))
 
   (when (and (pro-ui--try-require 'kind-icon) (boundp 'corfu-margin-formatters) (fboundp 'kind-icon-margin-formatter))
-    (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)))
+    (unless (member #'kind-icon-margin-formatter corfu-margin-formatters)
+      (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))))
 
 ;; Helper: check icon fonts availability and print install guidance
 (defun pro-ui-check-icon-fonts ()

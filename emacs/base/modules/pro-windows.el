@@ -27,8 +27,8 @@
     (when (fboundp 'golden-ratio-mode) (golden-ratio-mode 1)))
 
   ;; buf-move: optional buffer swapping helpers
-  (when (require 'buf-move nil t)
-    ;; noop - buf-move provides buffer move functions; keys controlled via emacs-keys.org
+  (when (require 'buffer-move nil t)
+    ;; noop - buffer-move provides buffer move functions; keys controlled via emacs-keys.org
     (ignore (fboundp 'buf-move-left)))
 
   ;; ace-window: optional fast window selection (no keys set here)
@@ -54,5 +54,16 @@
                                              (window-height . 0.12))))
     )
   )
+
+;; --- Window resize (C-x + / C-x -) ---------------------------------------
+(defun pro-windows-enlarge ()
+  "Увеличить текущее окно на 4 строки (вертикально)."
+  (interactive)
+  (enlarge-window 4))
+
+(defun pro-windows-shrink ()
+  "Уменьшить текущее окно на 4 строки (вертикально)."
+  (interactive)
+  (shrink-window 4))
 
 (provide 'pro-windows)

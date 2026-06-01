@@ -21,7 +21,7 @@
             "corfu" "corfu-posframe" "corfu-terminal" "dash-docs" "eglot" "elfeed" "expand-region" "gptel"
             "kind-icon" "magit" "marginalia" "nix-mode" "orderless" "org" "ob-mermaid" "projectile" "rainbow-delimiters"
             "treemacs" "vertico" "vterm" "yasnippet" "embark-consult" "dash-docs" "consult-dash"
-            "multi-vterm" "eshell-toggle"
+            "multi-vterm" "eshell-toggle" "acapella" "atlas"
           ];
 
           extraPackages = let
@@ -29,9 +29,12 @@
             extraEmacs = let
               epkgs = pkgs.emacsPackages;
             in
-              [ epkgs.tao-theme ]
+              [ epkgs.tao-theme-emacs ]
+              ++ (if builtins.hasAttr "all-the-icons" epkgs then [ epkgs.all-the-icons ] else [ ])
               ++ (if builtins.hasAttr "pro-tabs" epkgs then [ epkgs.pro-tabs ] else [ ])
-              ++ (if builtins.hasAttr "carriage" epkgs then [ epkgs.carriage ] else [ ]);
+              ++ (if builtins.hasAttr "carriage" epkgs then [ epkgs.carriage ] else [ ])
+              ++ (if builtins.hasAttr "acapella" epkgs then [ epkgs.acapella ] else [ ])
+              ++ (if builtins.hasAttr "atlas" epkgs then [ epkgs.atlas ] else [ ]);
           in piAcp ++ [
             pkgs.emacsPackages.ace-window pkgs.emacsPackages.avy pkgs.emacsPackages.cape pkgs.emacsPackages.consult
             pkgs.emacsPackages.consult-dash pkgs.emacsPackages.consult-eglot pkgs.emacsPackages.consult-projectile pkgs.emacsPackages.consult-yasnippet

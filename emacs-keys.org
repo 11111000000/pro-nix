@@ -79,8 +79,11 @@
 | Проекты    | C-c C-p       | projectile-switch-project             | Сменить проект (alias)               |
 | Проекты    | C-c pa        | projectile-add-known-project          | Добавить проект                      |
 | Дерево     | s-d           | treemacs                              | Открыть дерево                       |
+| Окна       | C-x +         | pro-windows-enlarge                   | Увеличить окно                       |
+| Окна       | C-x -         | pro-windows-shrink                    | Уменьшить окно                       |
 | AI         | C-c a         | pro-ai-open-entry                     | Вход в AI                            |
 | AI         | C-c A         | pro-agent-open                        | agent-shell                          |
+| Чат        | C-c T         | pro-chat-open                         | Telegram                             |
 | Tabs       | C-c t n       | pro-tabs-open-new-tab                 | Открыть новую вкладку                |
 | Tabs       | C-c t k       | pro-tabs-close-tab-and-buffer         | Закрыть вкладку и буфер              |
 | Tabs       | C-c t s       | tab-bar-switch-to-tab                 | Переключиться на вкладку             |

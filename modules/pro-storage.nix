@@ -111,7 +111,20 @@ in
     enable = lib.mkDefault true;
     guiAddress = "127.0.0.1:8384";
     openDefaultPorts = false;
+
+    # Declarative shared folder at /srv/syncthing/share — replaces the
+    # default ~/Sync that Syncthing would create under dataDir.
+    # All members of the `pro` group have read-write access (2775 setgid).
+    settings.folders."share" = {
+      path = "/srv/syncthing/share";
+      id = "share";
+      label = "Shared Folder";
+    };
   };
+
+  # Permit the syncthing daemon to write to /srv/syncthing/share
+  # (owned by root:pro via tmpfiles).
+  users.users.syncthing.extraGroups = [ "pro" ];
 
   users.groups.pro.members = lib.mkDefault [ "az" "za" "la" "bo" ];
 
