@@ -83,7 +83,11 @@
         (add-hook 'agent-shell-hook #'pro-agent-shell--setup-keys))
       ;; На крайний случай — добавим advice на команду открытия, если она есть.
       (when (fboundp 'agent-shell)
-        (advice-add #'agent-shell :after (lambda (&rest _) (pro-agent-shell--setup-keys)))))
+        (defun pro-agent-shell--after-start (&rest _)
+          "Re-apply setup keys after `agent-shell' starts. Defun form keeps
+`advice-add' idempotent across `pro/reload-config' reloads."
+          (pro-agent-shell--setup-keys))
+        (advice-add #'agent-shell :after #'pro-agent-shell--after-start)))
   (error (message "[pro-agent-shell] agent-shell integration skipped: %S" err)))
 
 (defun pro-agent-install ()

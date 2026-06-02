@@ -244,27 +244,35 @@ If DAYS is nil use `pro-history-session-retention-days'. Returns removed files."
     (advice-add 'undo-tree-load-history :around #'pro-history--undo-tree-load-silently)
 
     ;; Auto-load undo history when a file is opened, auto-save after save
-    (add-hook 'undo-tree-mode-hook
-              (lambda ()
-                (when undo-tree-mode
-                  (when buffer-file-name
-                    (ignore-errors (undo-tree-load-history)))
-                  (add-hook 'after-save-hook
-                            (lambda () (ignore-errors (undo-tree-save-history nil t)))
-                            nil t))))
+    (defun pro-history--undo-tree-load-and-save ()
+      "Load undo history for the current file and arrange auto-save on save.
+Runs from `undo-tree-mode-hook'; extracted to a defun so the hook stays
+idempotent across `pro/reload-config' reloads (lambdas would accumulate)."
+      (when undo-tree-mode
+        (when buffer-file-name
+          (ignore-errors (undo-tree-load-history)))
+        (add-hook 'after-save-hook
+                  #'pro-history--undo-tree-save-after-save
+                  nil t)))
+    (defun pro-history--undo-tree-save-after-save ()
+      "Buffer-local `after-save-hook' that saves undo history silently."
+      (ignore-errors (undo-tree-save-history nil t)))
+    (add-hook 'undo-tree-mode-hook #'pro-history--undo-tree-load-and-save)
 
     ;; Save undo history for all buffers on exit
-    (add-hook 'kill-emacs-hook
-              (lambda ()
-                (dolist (buf (buffer-list))
-                  (with-current-buffer buf
-                    (when (and (bound-and-true-p undo-tree-mode) buffer-file-name)
-                      (ignore-errors (undo-tree-save-history nil t)))))))
+    (defun pro-history--save-all-undo-on-exit ()
+      "Save undo history for every live buffer that has undo-tree-mode."
+      (dolist (buf (buffer-list))
+        (with-current-buffer buf
+          (when (and (bound-and-true-p undo-tree-mode) buffer-file-name)
+            (ignore-errors (undo-tree-save-history nil t))))))
+    (add-hook 'kill-emacs-hook #'pro-history--save-all-undo-on-exit)
 
     ;; Auto-save all modified buffers on exit, no prompts
-    (advice-add 'save-buffers-kill-emacs :around
-                (lambda (orig-fun &optional arg)
-                  (apply orig-fun (list t))))))
+    (defun pro-history--save-buffers-kill-emacs-silently (orig-fun &optional arg)
+      "Wrap `save-buffers-kill-emacs' to skip the yes-or-no prompt."
+      (apply orig-fun (list t)))
+    (advice-add 'save-buffers-kill-emacs :around #'pro-history--save-buffers-kill-emacs-silently)))
 
 (defun pro-history-clear-undo (&optional confirm)
   "Delete all files under undo history directory. Prompts unless CONFIRM is nil.
