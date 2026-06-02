@@ -99,8 +99,8 @@
 | Org        | C-c o         | org-agenda                            | Повестка                             |
 | Ключи      | C-c k         | pro-keys-reload                       | Перезагрузить клавиши                |
 | Ключи      | C-c M-k       | pro-keys-reload                       | Перезагрузить клавиши (alias)        |
-| Shell      | s-`           | multi-vterm-project                   | vterm по проекту                     |
-| Shell      | s-~           | eshell-toggle                         | eshell toggle                        |
+| EXWM       | s-`           | multi-vterm-project                   | vterm по проекту                     |
+| EXWM       | s-~           | eshell-toggle                         | eshell toggle                        |
 | Suggested  | C-c v y       | pro/vterm-yank                        | suggested from terminals             |
 | Suggested  | C-c v i       | pro/vterm-interrupt                   | suggested from terminals             |
 | Suggested  | C-c v c       | vterm-copy-mode                       | suggested from terminals             |

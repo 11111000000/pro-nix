@@ -141,7 +141,23 @@ GDM может добавлять префикс \='none+' к имени сес�
 ;; the window manager — the display is ready but the user hasn't seen
 ;; anything yet.
 
-(add-hook 'window-setup-hook #'pro-exwm-start-session)
+(defun pro-exwm--start-when-ready ()
+  "Start EXWM as early as possible but only when environment is ready.
+
+Tries several hooks to ensure EXWM starts before user-visible frames are
+displayed while still having required packages and display variables set.
+If the session isn't EXWM, this becomes a no-op.
+"
+  (when (pro-exwm--session-p)
+    (pro-exwm-start-session)))
+
+;; Try early hooks in order: early-window-setup (if present), window-setup,
+;; and finally emacs-startup-hook as a fallback. This aims to start EXWM
+;; as early as possible to reduce flicker.
+(when (boundp 'early-window-setup-hook)
+  (add-hook 'early-window-setup-hook #'pro-exwm--start-when-ready))
+(add-hook 'window-setup-hook #'pro-exwm--start-when-ready)
+(add-hook 'emacs-startup-hook #'pro-exwm--start-when-ready)
 
 ;; When pro-keys module finishes loading, re-apply global keys so any
 ;; keys registered via pro/register-module-keys (exwm layer) take effect.
