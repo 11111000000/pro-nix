@@ -1,4 +1,4 @@
-{ lib, pkgs, config, ... }:
+{ lib, pkgs, config, searxngSecretKey, ... }:
 
 # Интеграция SearXNG как systemd-сервиса.
 # - Пакет searxng берётся из nixpkgs.
@@ -15,7 +15,7 @@ in
   options.services.searxng = {
     enable = lib.mkOption {
       type = lib.types.bool;
-      default = false;
+      default = true;
       description = "Включить SearXNG.";
     };
 
@@ -37,12 +37,32 @@ in
       description = "Путь к settings.yml.";
     };
 
+    engines = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [
+        "duckduckgo"
+        "brave"
+        "qwant"
+        "mojeek"
+        "startpage"
+        "wikipedia"
+      ];
+      description = ''
+        Список SearXNG-движков, не требующих API-ключей.
+        Полные имена: duckduckgo, brave, qwant, mojeek, startpage,
+        wikipedia, arxiv, crossref, semantic scholar, openalex, etc.
+      '';
+    };
+
     settingsText = lib.mkOption {
       type = lib.types.str;
       default = ''
+        use_default_settings: true
         server:
-          secret_key: "changeme-replace-with-secure-random"
+          secret_key: "${searxngSecretKey}"
           base_url: "http://127.0.0.1:8888"
+        engines:
+        ${lib.concatMapStringsSep "\n" (e : "  - name: ${e}\n    disabled: false") cfg.engines}
       '';
       description = "Текст settings.yml, записываемый в /etc/searxng/settings.yml.";
     };

@@ -76,7 +76,7 @@
         inherit system;
         # Use the overlayed pkgs so our opencode-stub overlay takes effect
         pkgs = pkgsOverlay;
-        specialArgs = { inherit emacsPkg piPkg opencodeBwrapModule; };
+        specialArgs = { inherit emacsPkg piPkg opencodeBwrapModule searxngSecretKey; };
         modules = [
           home-manager.nixosModules.home-manager
           ./configuration.nix
@@ -92,10 +92,14 @@
       };
 
       # Minimal VM host for testing without full configuration.nix (which brings in pro-peer, etc)
+      searxngSecretKey = if builtins.pathExists ./secrets/searxng-key
+                         then builtins.readFile ./secrets/searxng-key
+                         else "changeme-replace-with-secure-random";
+
       mkVmHost = extraModules: nixpkgs.lib.nixosSystem {
         inherit system;
         pkgs = pkgsOverlay;
-        specialArgs = { inherit emacsPkg piPkg opencodeBwrapModule; };
+        specialArgs = { inherit emacsPkg piPkg opencodeBwrapModule searxngSecretKey; };
         modules = [
           home-manager.nixosModules.home-manager
           ./modules/packages-runtime.nix

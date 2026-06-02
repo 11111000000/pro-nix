@@ -67,10 +67,8 @@
      # Локальные переопределения конкретного хоста остаются в файле local.nix.
    ] ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ];
 
-  # TEMP: SearXNG отключён до исправления схемы settings.yml. Невалидный
-  # settings.yml вызывал restart loop searxng.service и усиливал boot/switch
-  # таймауты D-Bus/systemd на cf19.
-  services.searxng.enable = lib.mkForce false;
+  # SearXNG включён глобально (default = true в modules/searxng.nix).
+  # Отключить: services.searxng.enable = false;
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 2: Загрузчик системы и параметры ядра 
