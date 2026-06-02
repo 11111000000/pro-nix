@@ -55,7 +55,7 @@ lib.mkIf cfg.gui.enable {
     Exec=${config.home.homeDirectory}/.config/pro/pro-emacs-session
     Terminal=false
     Categories=Development;Utility;
-    StartupNotify=true
+    StartupNotify=false
   '';
 
   home.file.".config/pro/pro-emacs-session" = {
@@ -107,6 +107,8 @@ lib.mkIf cfg.gui.enable {
       export VISUAL=emacsclient
       export EDITOR="$VISUAL"
 
+      # Merge Xresources early so Emacs/EXWM inherits fullscreen and font
+      # settings to avoid visual flicker when the first frame appears.
       xrdb -merge ~/.Xresources
 
       export XDG_CURRENT_DESKTOP=EXWM
