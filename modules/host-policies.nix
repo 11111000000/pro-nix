@@ -65,6 +65,14 @@ in
 
     (lib.mkIf isCf19 {
       pro-peer.allowTorHiddenService = true;
+
+      # iwlwifi на CF-19: явно отключить firmware power-save и поставить
+      # режим производительности, чтобы уменьшить link timed out при связи
+      # с Android-hotspot (см. docs/analyse/2026-06-02-network-drops-cf19.md).
+      boot.extraModprobeConfig = ''
+        options iwlwifi power_save=0
+        options iwlmvm power_scheme=1
+      '';
     })
   ];
 }

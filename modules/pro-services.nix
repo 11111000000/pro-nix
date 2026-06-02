@@ -23,8 +23,17 @@
   networking.networkmanager.enable = true;
   networking.nameservers = [ "77.88.8.8" "77.88.8.1" "1.1.1.1" "8.8.8.8" ];
   networking.networkmanager.dns = "systemd-resolved";
-  networking.networkmanager.settings.connection = {
-    "wifi.powersave" = 2;
+  networking.networkmanager.settings = {
+    connection = {
+      # 2 = disable (см. NMSettingWirelessPowersave: 2=DISABLE, 3=ENABLE)
+      "wifi.powersave" = 2;
+      # NM будет пинговать шлюз и пере-активировать соединение при недоступности
+      "connection.gateway-ping-timeout" = 5;
+    };
+    main = {
+      # стабильный MAC при скане (Android-hotspot стабильнее при re-association)
+      "wifi.scan-rand-mac-address" = false;
+    };
   };
 
   services.openssh = {
@@ -73,6 +82,8 @@
     exfatprogs
     ntfs3g
     openssl
+    iw
+    wireless_tools
   ];
 
   networking.firewall = {
