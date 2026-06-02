@@ -569,17 +569,21 @@ pro-history — part of pro-nix")))
 (defun pro-history-configure-desktop-and-session ()
   "Configure desktop and session management."
   (ignore-errors (require 'desktop))
-  (setq desktop-path (list pro-history-session-directory)
-        desktop-base-file-name "emacs.desktop"
-        desktop-base-lock-name "emacs.desktop.lock"
-        desktop-save 'ask-if-new
+  (setq desktop-save t
         desktop-restore-frames t
         desktop-files-not-to-save (concat "^$" (regexp-opt '("TAGS" "core" "dired"))))
-  (when (fboundp 'desktop-save-mode)
-    (desktop-save-mode 1))
+  (when (and (fboundp 'desktop-save) (fboundp 'add-hook))
+    (add-hook 'kill-emacs-hook #'pro-history-save-desktop-silently))
+  (message "Desktop is not restored automatically. Restore with M-x pro-history-restore-last-session")
   ;; Winner mode for window configuration undo/redo
   (when (fboundp 'winner-mode)
     (winner-mode 1)))
+
+(defun pro-history-save-desktop-silently ()
+  "Save the current desktop without prompting."
+  (ignore-errors
+    (when (fboundp 'desktop-save)
+      (desktop-save nil t))))
 
 (defun pro-history-configure-saveplace ()
   "Configure save-place to use state directory."

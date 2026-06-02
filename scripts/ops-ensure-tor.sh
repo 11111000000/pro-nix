@@ -88,8 +88,12 @@ else
     echo "[info] Attempting nixos-rebuild to install transports (this may take time)."
     # Attempt a non-interactive rebuild using the repository configuration if available
     if command -v nixos-rebuild >/dev/null 2>&1; then
-      echo "  -> running: nixos-rebuild switch -I nixos-config=$REPO/configuration.nix"
-      if nixos-rebuild switch -I nixos-config="$REPO/configuration.nix"; then
+      HOST_NAME="$(hostname -s 2>/dev/null || hostname 2>/dev/null || true)"
+      if [ -z "$HOST_NAME" ] && [ -r /etc/hostname ]; then
+        HOST_NAME="$(tr -d '\n' < /etc/hostname)"
+      fi
+      echo "  -> running: nixos-rebuild switch --flake $REPO#$HOST_NAME"
+      if nixos-rebuild switch --flake "$REPO#$HOST_NAME"; then
         echo "  -> nixos-rebuild succeeded"
       else
         echo "  -> nixos-rebuild failed; you may need to run it manually and inspect errors" >&2

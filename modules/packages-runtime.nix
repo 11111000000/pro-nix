@@ -27,11 +27,16 @@
 #   и проверка наличия runtime-утилит в выводе.
 #
 # Last reviewed: 2026-05-03
-{ pkgs, emacsPkg ? pkgs.emacs, ... }:
+{ pkgs, ... }:
 
 {
   # Мы намеренно держим этот слой узким: это не рабочая станция и не desktop,
   # а только та опорная точка, без которой система не оживает.
+  # `pkgs.emacs` here is the nixpkgs default; the emacs30 preference
+  # applied by flake.nix still flows to emacs/ and modules/session-exwm*
+  # via `emacsPkg` specialArgs, where it actually matters (Emacs session
+  # wrapper, X session). For the system-wide emacs binary this generic
+  # entry is enough and keeps the module free of specialArgs.
   environment.systemPackages = with pkgs; [
     bashInteractive
     openssh
@@ -42,7 +47,7 @@
     gawk
     kbd
     mc
-    emacsPkg
+    emacs
     curl
     wget
     jq

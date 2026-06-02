@@ -19,6 +19,7 @@
 проверяет наличие соответствующих публичных функций перед вызовом." 
   (interactive)
   (when (fboundp 'pro-ui-apply-fonts) (pro-ui-apply-fonts))
+  (when (fboundp 'pro-ui-apply-fringes) (pro-ui-apply-fringes))
   (when (fboundp 'pro-ui-apply-ligatures) (pro-ui-apply-ligatures))
   (when (fboundp 'pro-ui-apply-icons) (pro-ui-apply-icons))
   (when (fboundp 'pro-ui-apply-completion) (pro-ui-apply-completion)))

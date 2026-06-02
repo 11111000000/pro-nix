@@ -124,6 +124,7 @@ Usage:
   (ignore-errors (when (fboundp 'pro--reconstruct) (pro--reconstruct)))
   ;; Re-apply UI tweaks like fonts and cursor
   (ignore-errors (when (fboundp 'pro-ui-apply-fonts) (pro-ui-apply-fonts)))
+  (ignore-errors (when (fboundp 'pro-ui-apply-fringes) (pro-ui-apply-fringes)))
   (ignore-errors (when (fboundp 'pro-ui-apply-completion) (pro-ui-apply-completion)))
   (ignore-errors (when (fboundp 'pro-ui-apply-icons) (pro-ui-apply-icons)))
   (ignore-errors (when (fboundp 'pro-ui-apply-modeline) (pro-ui-apply-modeline)))

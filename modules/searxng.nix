@@ -1,15 +1,20 @@
-{ lib, pkgs, config, searxngSecretKey, ... }:
+{ lib, pkgs, config, ... }:
 
 # Интеграция SearXNG как systemd-сервиса.
 # - Пакет searxng берётся из nixpkgs.
 # - Конфиг задаётся через /etc/searxng/settings.yml.
 # - Сервис привязывается к loopback по умолчанию.
+# - secret_key читается из specialArgs (searxngSecretKey) если проброшен,
+#   иначе используется безопасный placeholder. Lazy-lookup через
+#   config._module.args нужен, чтобы flake-уровневые VM-тесты, которые не
+#   пробрасывают specialArgs, не падали с "attribute missing".
 
 let
   cfg = config.services.searxng;
   listenParts = lib.splitString ":" cfg.listen;
   host = builtins.elemAt listenParts 0;
   port = builtins.elemAt listenParts 1;
+  searxngSecretKey = config._module.args.searxngSecretKey or "changeme-replace-with-secure-random";
 in
 {
   options.services.searxng = {

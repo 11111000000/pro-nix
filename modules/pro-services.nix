@@ -23,18 +23,13 @@
   networking.networkmanager.enable = true;
   networking.nameservers = [ "77.88.8.8" "77.88.8.1" "1.1.1.1" "8.8.8.8" ];
   networking.networkmanager.dns = "systemd-resolved";
-  networking.networkmanager.settings = {
-    connection = {
-      # 2 = disable (см. NMSettingWirelessPowersave: 2=DISABLE, 3=ENABLE)
-      "wifi.powersave" = 2;
-      # NM будет пинговать шлюз и пере-активировать соединение при недоступности
-      "connection.gateway-ping-timeout" = 5;
-    };
-    main = {
-      # стабильный MAC при скане (Android-hotspot стабильнее при re-association)
-      "wifi.scan-rand-mac-address" = false;
-    };
+  networking.networkmanager.settings.connection = {
+    # 2 = disable (см. NMSettingWirelessPowersave: 0=DEFAULT,1=IGNORE,2=DISABLE,3=ENABLE)
+    "wifi.powersave" = 2;
   };
+  # connection.gateway-ping-timeout и wifi.scan-rand-mac-address — НЕ валидные
+  # глобальные ключи в NM 1.54 (NM ругается в journal: "unknown key").
+  # Они задаются per-profile через `nmcli con mod` (см. docs/analyse/2026-06-02-network-drops-cf19.md).
 
   services.openssh = {
     enable = true;
@@ -83,7 +78,7 @@
     ntfs3g
     openssl
     iw
-    wireless_tools
+    wirelesstools
   ];
 
   networking.firewall = {

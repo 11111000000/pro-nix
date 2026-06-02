@@ -31,7 +31,7 @@
                           pro-ui-text-font-family)))
       (set-face-attribute 'default nil :family code-font :height pro-ui-font-height)
       (set-face-attribute 'fixed-pitch nil :family code-font :height 1.0)
-      (set-face-attribute 'variable-pitch nil :family text-font :height 9.0)
+      (set-face-attribute 'variable-pitch nil :family text-font :height 1.0)
       (let ((font-spec `(font . ,(format "%s-%d" code-font (/ pro-ui-font-height 10)))))
         (unless (assq 'font default-frame-alist)
           (push font-spec default-frame-alist))
