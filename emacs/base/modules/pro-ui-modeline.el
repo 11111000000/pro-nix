@@ -14,17 +14,16 @@
 (defgroup pro-ui-modeline nil
   "Настройки модельного слоя для pro UI.")
 
-;; Если shaoline подключён как submodule в репозитории, добавим его в load-path
-;; чтобы (require 'shaoline) могло найти пакет без установки извне.
-;; Источник: submodules/shaoline/lisp/ — там лежат shaoline.el и друзья.
-(defvar pro-ui--shaoline-path
-  (let* ((this-file (or load-file-name
-                        (and (boundp 'byte-compile-current-file) byte-compile-current-file)
-                        buffer-file-name))
-         (module-dir (and this-file (file-name-directory this-file)))
-         (repo-root (and module-dir (locate-dominating-file module-dir ".git"))))
-    (and repo-root (expand-file-name "submodules/shaoline/lisp" repo-root)))
-  "Путь к submodule shaoline, вычисляемый относительно корня репозитория.")
+;; shaoline поставляется через Nix (см. nix/overlays/emacs-extra.nix и
+;; modules/pro-users-nixos.nix) и попадает в EMACSLOADPATH так же, как
+;; остальные пакеты (pro-tabs, carriage, atlas, ...). Здесь мы поддерживаем
+;; только один явный override для разработки: переменная окружения
+;; PRO_EMACS_SHAOLINE_PATH, указывающая на каталог с shaoline.el/lisp
+;; (например, при запуске Emacs из локального клона submodule вне Nix).
+(defvar pro-ui--shaoline-path (getenv "PRO_EMACS_SHAOLINE_PATH")
+  "Путь к каталогу с shaoline.el/lisp, заданный через PRO_EMACS_SHAOLINE_PATH.
+Пустое значение или несуществующий каталог означают: использовать только
+EMACSLOADPATH, который Nix выставляет автоматически.")
 
 (when (and pro-ui--shaoline-path
            (file-directory-p pro-ui--shaoline-path)

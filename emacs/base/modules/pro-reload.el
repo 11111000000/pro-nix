@@ -126,6 +126,8 @@ Usage:
   (ignore-errors (when (fboundp 'pro-ui-apply-fonts) (pro-ui-apply-fonts)))
   (ignore-errors (when (fboundp 'pro-ui-apply-completion) (pro-ui-apply-completion)))
   (ignore-errors (when (fboundp 'pro-ui-apply-icons) (pro-ui-apply-icons)))
+  (ignore-errors (when (fboundp 'pro-ui-apply-modeline) (pro-ui-apply-modeline)))
+  (ignore-errors (when (fboundp 'pro-ui-apply-theme) (pro-ui-apply-theme)))
   (message "pro: config reload finished"))
 
 (provide 'pro-reload)

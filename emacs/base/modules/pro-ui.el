@@ -56,12 +56,6 @@
   :type 'boolean
   :group 'pro-ui)
 
-(defcustom pro-ui-default-theme 'tao-yang
-  "Default theme to attempt to load early. Set to nil to disable.
-By default pro-nix will attempt to load tao-yang theme if available."
-  :type '(choice (const :tag "none" nil) symbol)
-  :group 'pro-ui)
-
 (defcustom pro-ui-modeline-style 'shaoline
   "Modeline style: 'minimal, 'shaoline or 'doom. Defaults to 'shaoline.
 Modeline packages are only enabled if available and if this value
@@ -91,8 +85,11 @@ is set accordingly."
       (set-face-attribute 'default nil :family code-font :height pro-ui-font-height)
       (set-face-attribute 'fixed-pitch nil :family code-font :height 1.0)
       (set-face-attribute 'variable-pitch nil :family text-font :height 1.0)
-      (push `(font . ,(format "%s-%d" code-font (/ pro-ui-font-height 10))) default-frame-alist)
-      (push `(font . ,(format "%s-%d" code-font (/ pro-ui-font-height 10))) initial-frame-alist))))
+      (let ((font-spec `(font . ,(format "%s-%d" code-font (/ pro-ui-font-height 10)))))
+        (unless (assq 'font default-frame-alist)
+          (push font-spec default-frame-alist))
+        (unless (assq 'font initial-frame-alist)
+          (push font-spec initial-frame-alist))))))
 
 (defun pro-ui-apply-ligatures ()
   "Включить лигатуры, если они доступны."
@@ -227,10 +224,11 @@ is set accordingly."
       (dolist (fn '(cape-file cape-keyword))
         (unless (member fn completion-at-point-functions)
           (add-to-list 'completion-at-point-functions fn)))
-      (add-hook 'prog-mode-hook
-                (lambda ()
-                  (unless (member #'cape-dabbrev completion-at-point-functions)
-                    (add-to-list 'completion-at-point-functions #'cape-dabbrev))))
+      (defun pro-ui--add-cape-dabbrev ()
+        "Add `cape-dabbrev' to `completion-at-point-functions' in prog-mode buffers."
+        (unless (member #'cape-dabbrev completion-at-point-functions)
+          (add-to-list 'completion-at-point-functions #'cape-dabbrev)))
+      (add-hook 'prog-mode-hook #'pro-ui--add-cape-dabbrev)
       (defun pro-ui--disable-ispell-capf ()
         "Remove `ispell-completion-at-point' from `completion-at-point-functions'."
         (setq-local completion-at-point-functions
@@ -374,6 +372,14 @@ message with recommendations (manual and Home-Manager snippets).
   (when (require 'pro-ui-modeline nil t)
     (when (fboundp 'pro-ui-apply-modeline)
       (pro-ui-apply-modeline))))
+
+(ignore-errors
+  ;; Apply default theme (pro-ui-default-theme, defaults to 'tao-yang).
+  ;; The theme package is provided via Nix and is on EMACSLOADPATH; loading
+  ;; here means the theme is active as soon as pro-ui is initialized.
+  (when (require 'pro-ui-theme nil t)
+    (when (fboundp 'pro-ui-apply-theme)
+      (pro-ui-apply-theme))))
 
 (provide 'pro-ui)
 
