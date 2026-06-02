@@ -2,8 +2,14 @@
 
 stdenv.mkDerivation rec {
   pname = "shaoline";
-  version = "0.0.0";
-  src = ../../submodules/shaoline;
+  version = "3.3.4";
+  src = builtins.fetchTree {
+    type = "github";
+    owner = "11111000000";
+    repo = "shaoline";
+    rev = "e4fa70ddd910b8517104093473aa19f8a37f9bc1";
+    narHash = "sha256-zBiLqfUccQbkRTjrg789An3KGFosxIkUY5H6AMUY57I=";
+  };
 
   nativeBuildInputs = [ emacs ];
   dontConfigure = true;

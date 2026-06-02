@@ -57,8 +57,7 @@ let
     agent-shell = super.callPackage ../emacs-recipes/agent-shell.nix {};
     acapella = super.callPackage ../emacs-recipes/acapella.nix {};
     atlas = super.callPackage ../emacs-recipes/atlas.nix {};
-    tao-theme-emacs = super.callPackage ../emacs-recipes/tao-theme-emacs.nix {};
-    tao-theme = super.emacsPackages.tao-theme-emacs;
+    tao-theme = super.callPackage ../emacs-recipes/tao-theme.nix {};
     shaoline = super.callPackage ../emacs-recipes/shaoline.nix {};
     shaoline-package = super.emacsPackages.shaoline;
   };

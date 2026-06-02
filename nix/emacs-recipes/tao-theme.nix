@@ -1,7 +1,7 @@
 { stdenv, emacs, lib, fetchFromGitHub }:
 
 stdenv.mkDerivation rec {
-  pname = "tao-theme-emacs";
+  pname = "tao-theme";
   version = "1.1.3";
   src = fetchFromGitHub {
     owner = "11111000000";
@@ -21,15 +21,15 @@ stdenv.mkDerivation rec {
 
   installPhase = ''
     runHook preInstall
-    mkdir -p $out/share/emacs/site-lisp/${pname}
-    cp ./*.el $out/share/emacs/site-lisp/${pname}/
-    cp ./*.elc $out/share/emacs/site-lisp/${pname}/ 2>/dev/null || true
-    cp -r images $out/share/emacs/site-lisp/${pname}/
+    mkdir -p $out/share/emacs/site-lisp
+    cp ./*.el $out/share/emacs/site-lisp/
+    cp ./*.elc $out/share/emacs/site-lisp/ 2>/dev/null || true
+    cp -r images $out/share/emacs/site-lisp/
     runHook postInstall
   '';
 
   meta = with lib; {
-    description = "tao-theme-emacs (11111000000/tao-theme-emacs fork)";
+    description = "tao-theme (11111000000/tao-theme-emacs fork) — themes: tao-yang, tao-yin";
     homepage = "https://github.com/11111000000/tao-theme-emacs";
     license = licenses.mit;
   };
