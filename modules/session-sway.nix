@@ -3,7 +3,7 @@
 {
   # Sway — современный Wayland-tile WM для GDM-сессии.
   # Модуль публикует только session entry и минимальный набор пакетов панели.
-  services.displayManager.sessionPackages = lib.mkDefault [
+  services.displayManager.sessionPackages = [
     (pkgs.runCommand "pro-sway-session" { passthru.providedSessions = [ "sway" ]; } ''
       mkdir -p $out/share/wayland-sessions
       cat > $out/share/wayland-sessions/sway.desktop <<'EOF'

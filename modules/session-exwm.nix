@@ -26,7 +26,7 @@
     extraPortals = lib.mkDefault [ pkgs.xdg-desktop-portal-gtk ];
   };
 
-  services.displayManager.sessionPackages = lib.mkDefault [
+  services.displayManager.sessionPackages = [
     (pkgs.runCommand "pro-exwm-xsession" { passthru.providedSessions = [ "exwm" ]; } ''
       mkdir -p $out/share/xsessions $out/share/wayland-sessions
       cat > $out/share/xsessions/exwm.desktop <<'EOF'

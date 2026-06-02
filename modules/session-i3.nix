@@ -3,7 +3,7 @@
 {
   # i3 — X11 tile WM для GDM-сессии.
   # Модуль публикует session entry и минимальный набор пакетов панели.
-  services.displayManager.sessionPackages = lib.mkDefault [
+  services.displayManager.sessionPackages = [
     (pkgs.runCommand "pro-i3-session" { passthru.providedSessions = [ "i3" ]; } ''
       mkdir -p $out/share/xsessions
       cat > $out/share/xsessions/i3.desktop <<'EOF'
