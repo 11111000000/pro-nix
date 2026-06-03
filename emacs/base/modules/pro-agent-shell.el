@@ -54,6 +54,12 @@
       (setq agent-shell-header-style 'text
             agent-shell-show-welcome-message nil)
 
+      ;; Disable automatic transcript file creation/append to avoid
+      ;; frequent disk I/O from agent-shell (helps performance under
+      ;; heavy traffic). When nil, transcript saving is disabled.
+      (when (boundp 'agent-shell-transcript-file-path-function)
+        (setq agent-shell-transcript-file-path-function nil))
+
       ;; EMCP — MCP-сервер: даёт агенту доступ к Emacs (документация,
       ;; eval, скриншоты, переменные). Профиль develop даёт inspect +
       ;; get-variable, set-variable, screenshot.
