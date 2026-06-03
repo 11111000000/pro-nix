@@ -1,14 +1,9 @@
-{ stdenv, emacs, lib, fetchFromGitHub }:
+{ stdenv, emacs, lib }:
 
 stdenv.mkDerivation rec {
   pname = "atlas";
   version = "0.0.0";
-  src = fetchFromGitHub {
-    owner = "gnu-emacs-ru";
-    repo = "atlas";
-    rev = "0aed422c57ed964b5fa7a2f988bb64b1bde924eb";
-    sha256 = "sha256-4fJ++QR6e/LSBYH3RokJq+nEqtGRJx5zmeUrroIxOjo=";
-  };
+  src = ../../submodules/atlas;
 
   nativeBuildInputs = [ emacs ];
   dontConfigure = true;

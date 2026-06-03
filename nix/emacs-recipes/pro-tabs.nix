@@ -3,7 +3,7 @@
 stdenv.mkDerivation rec {
   pname = "pro-tabs";
   version = "2.0";
-  src = builtins.fetchTree { type = "github"; owner = "gnu-emacs-ru"; repo = "pro-tabs"; rev = "d065069b28ff0a89feb7cd856122d454aa219591"; narHash = "sha256-xpYPrIa5IZtQZJ+5jQs/4nq9RinXrRZuCu0GsDRKAzI="; };
+  src = ../../submodules/pro-tabs;
 
   nativeBuildInputs = [ emacs ];
   buildInputs = if all-the-icons != null then [ all-the-icons ] else [ ];

@@ -1,14 +1,9 @@
-{ stdenv, emacs, lib, fetchFromGitHub }:
+{ stdenv, emacs, lib }:
 
 stdenv.mkDerivation rec {
   pname = "acapella";
   version = "0.0.0";
-  src = fetchFromGitHub {
-    owner = "gnu-emacs-ru";
-    repo = "acapella";
-    rev = "c7b9aa46c1298740fb49bbb58ca5ad902d7e4522";
-    sha256 = "sha256-USeW75QnYQ04REt9Fauvh+nx830vpiDPae1Vi9+o5sI=";
-  };
+  src = ../../submodules/acapella;
 
   nativeBuildInputs = [ emacs ];
   dontConfigure = true;

@@ -11,12 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # nix/emacs-recipes/*.nix читают src из submodules/ — нужен checkout с ними
+          submodules: recursive
       - name: Install Nix
         uses: cachix/install-nix-action@v17
         with:
           # Use the same NixOS channel as declared in flake.nix
           nix_path: nixpkgs=channel:nixos-25.11
       - name: Run nix flake check
-        run: nix --extra-experimental-features 'nix-command flakes' flake check --show-trace
+        # path:. чтобы Nix читал исходники напрямую с диска, иначе
+        # git+file:// по умолчанию исключает submodules из flake source.
+        run: nix --extra-experimental-features 'nix-command flakes' flake check path:. --show-trace
       - name: Run holo-verify
         run: ./tools/holo-verify.sh

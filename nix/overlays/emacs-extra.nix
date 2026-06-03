@@ -14,12 +14,6 @@ let
       revision = "v0.9";
     };
 
-    telega = super.emacsPackages.emacsPackageFromRepository {
-      pname = "telega";
-      repository = "zevlg/telega.el";
-      revision = "v1.6";
-    };
-
     eldoc-box = super.emacsPackages.emacsPackageFromRepository {
       pname = "eldoc-box";
       repository = "vitalie/eldoc-box";
@@ -41,6 +35,8 @@ let
   } else {};
 
   # Local recipes — always applied
+  # Все sources идут из submodules/ — единый источник истины.
+  # helper-switch.sh автоматически подтягивает свежий main/master перед сборкой.
   localRecipes = {
     buffer-move = super.emacsPackages.emacsPackageFromRepository {
       pname = "buffer-move";
@@ -54,6 +50,7 @@ let
     carriage = super.callPackage ../emacs-recipes/carriage.nix {
       gptel = super.emacsPackages.gptel or null;
     };
+    telega = super.callPackage ../emacs-recipes/telega.nix {};
     agent-shell = super.callPackage ../emacs-recipes/agent-shell.nix {};
     acapella = super.callPackage ../emacs-recipes/acapella.nix {};
     atlas = super.callPackage ../emacs-recipes/atlas.nix {};
