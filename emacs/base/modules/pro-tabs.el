@@ -104,4 +104,4 @@ If `pro-tabs' package is present, delegate to it; otherwise use `tab-bar-new-tab
       (when (fboundp 'pro-tabs-mode) (pro-tabs-mode 1))
     (pro-tabs--enable-built-in-tabs)))
 
-(provide 'pro-tabs)
+(provide 'pro-tabs-integration)
