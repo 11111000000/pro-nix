@@ -48,6 +48,7 @@
     kbd
     mc
     emacs
+    rxvt-unicode
     curl
     wget
     jq
