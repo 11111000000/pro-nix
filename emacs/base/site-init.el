@@ -12,6 +12,7 @@
     '(pro-core pro-ui pro-packages pro-package-bootstrap pro-project pro-git
     pro-nix pro-js pro-ai pro-agent-shell pro-c pro-chat pro-compat
     pro-completion pro-completion-keys pro-consult-helpers pro-dired
+    pro-app-launcher
     pro-emacs-check-fonts pro-exwm-sim pro-exwm pro-feeds pro-fix-corfu
     pro-haskell pro-java pro-key-utils pro-keys pro-lisp pro-nix-refresh
     pro-org pro-python pro-reload pro-session pro-history pro-startup-metrics pro-tabs

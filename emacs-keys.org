@@ -56,6 +56,7 @@
 | EXWM       | s-4           | pro-tabs-select-tab-4                 | Вкладка 4                            |
 | EXWM       | s-5           | pro-tabs-select-tab-5                 | Вкладка 5                            |
 | EXWM       | s-6           | pro-tabs-select-tab-6                 | Вкладка 6                            |
+| EXWM       | s-x           | pro/app-launcher                      | Запуск .desktop приложения (consult) |
 | EXWM       | s-&           | async-shell-command                   | Запуск команды                       |
 | ORG        | C-c K         | pro-org-open-keys-file                | Открыть файл клавиш                  |
 | Completion | C-c o f       | cape-file                             | Источник файлов для CAPF             |
