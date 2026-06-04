@@ -213,9 +213,13 @@
                      (define-key org-mode-map (kbd key) sym)))
                (push entry remaining))))
           (_ (push entry remaining))))
-      (setq pro-keys-pending-bindings (nreverse remaining)))
-    (when (featurep 'exwm)
-      (setq exwm-input-global-keys pro-keys-exwm-global-keys))))
+      (setq pro-keys-pending-bindings (nreverse remaining))))
+  ;; Always refresh exwm-input-global-keys. Раньше эта форма лежала внутри
+  ;; (when pro-keys-pending-bindings ...), из-за чего новые EXWM-биндинги
+  ;; (которые при reload уходят в pro-keys-exwm-global-keys напрямую, не в
+  ;; pending) не доезжали до EXWM — `s-x is undefined` после C-x M-c.
+  (when (featurep 'exwm)
+    (setq exwm-input-global-keys pro-keys-exwm-global-keys)))
 
 (defun pro-keys-report-pending ()
   "Вывести в журнал список отложенных биндингов (если они есть)." 

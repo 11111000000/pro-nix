@@ -10,10 +10,10 @@ install-nixos:
 	./bootstrap/install.sh
 
 install-emacs:
-	./scripts/emacs-sync.sh
+	./scripts/dev-emacs-sync.sh
 
 install-plain:
-	./scripts/emacs-sync.sh
+	./scripts/dev-emacs-sync.sh
 
 build HOST:
 	sudo nixos-rebuild build --flake .#{{HOST}}
@@ -60,7 +60,7 @@ logs-latest:
 	./scripts/emacs-headless-report.sh
 
 emacs-sync:
-	./scripts/emacs-sync.sh
+	./scripts/dev-emacs-sync.sh
 
 emacs-verify:
 	./scripts/emacs-verify.sh both
