@@ -36,6 +36,8 @@
               (lambda (sym) (memq sym '(exwm-systemtray-mode exwm-xim-mode))))
              ((symbol-function 'featurep)
               (lambda (feat &optional _sub) (eq feat 'exwm))))
+     (defvar exwm-input-prefix-keys)
+     (setq exwm-input-prefix-keys nil)
      ,@body))
 
 (defvar pro-exwm-test--wm-called nil)
@@ -84,3 +86,14 @@
             (pro-exwm-start-session)
             (should (equal pro-exwm-test--wm-called 1)))
         (setenv "XDG_CURRENT_DESKTOP" nil)))))
+
+(ert-deftest pro/exwm-adds-im-prefix-keys ()
+  "`C-\\' (toggle-input-method) должен быть в exwm-input-prefix-keys,
+чтобы Emacs-IM переключался из X-приложений (exwm-xim)."
+  (pro-exwm-test--with-exwm-mocks
+    (setenv "XDG_CURRENT_DESKTOP" "EXWM")
+    (unwind-protect
+        (progn
+          (pro-exwm-start-session)
+          (should (memq ?\C-\\ exwm-input-prefix-keys)))
+      (setenv "XDG_CURRENT_DESKTOP" nil))))

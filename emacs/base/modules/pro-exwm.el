@@ -42,6 +42,39 @@ fall back to class only."
   (when (boundp 'exwm-update-title-hook)
     (add-hook 'exwm-update-title-hook #'pro-exwm--buffer-name-from-title)))
 
+;; ── Input methods ────────────────────────────────────────────────────────
+;;
+;; Why this section is needed: in line-mode EXWM forwards every key from
+;; an X window to Emacs first, *unless* the key is in `exwm-input-prefix-keys'
+;; (or matches `exwm-input-global-keys').  In that case the key is consumed
+;; by EXWM/Emacs and never reaches the X application.  Without
+;; `C-\\' in `exwm-input-prefix-keys' the key falls through to the X app
+;; (Firefox uses it for "close tab", many other apps use it for "quit"),
+;; and `toggle-input-method' therefore cannot be invoked from inside
+;; an X window.  See the official exwm-xim.el commentary:
+;;
+;;   A keybinding for `toggle-input-method' is probably required to turn
+;;   on & off an input method (default to `default-input-method').  It's
+;;   bound to 'C-\\' by default and can be made reachable when working
+;;   with X windows:
+;;
+;;      (push ?\\C-\\\\ exwm-input-prefix-keys)
+;;
+;; We do the same plus a few related keys (C-\\, C-^, C-`) so the
+;; user can also use isearch-style switching if desired.
+(defvar pro-exwm-im-prefix-keys
+  '(?\C-\\ ?\C-^ ?\C-`)
+  "EXWM prefix keys forwarded to Emacs so IM-related bindings work in X apps.
+`C-\\' is the default `toggle-input-method' binding.
+`C-^' and `C-`' are alternatives if the user prefers a different switch.")
+
+(defun pro-exwm--install-im-prefix-keys ()
+  "Add `pro-exwm-im-prefix-keys' to `exwm-input-prefix-keys'."
+  (when (boundp 'exwm-input-prefix-keys)
+    (dolist (k pro-exwm-im-prefix-keys)
+      (unless (memq k exwm-input-prefix-keys)
+        (push k exwm-input-prefix-keys)))))
+
 ;; ── Global keys ──────────────────────────────────────────────────────────
 
 (defconst pro-exwm-super-tab-keys
@@ -93,6 +126,8 @@ GDM может добавлять префикс \='none+' к имени сес�
   - Включает exwm-systemtray-mode (системный трей)
   - Запускает exwm-xim (X Input Method для ввода поверх приложений)
   - Применяет глобальные клавиши перехвата
+  - Регистрирует C-\\ в exwm-input-prefix-keys (чтобы toggle-input-method
+    работал в X-окнах)
   - Настраивает переименование буферов"
   (interactive)
   (when (pro-exwm--session-p)
@@ -106,6 +141,10 @@ GDM может добавлять префикс \='none+' к имени сес�
     ;; Configure EXWM before activating the minor mode.
     ;; exwm-wm-mode reads these variables during init.
     (setq exwm-workspace-number 4)
+
+    ;; Make `toggle-input-method' reachable from X windows BEFORE
+    ;; exwm-wm-mode init (the prefix-keys list is consumed once).
+    (pro-exwm--install-im-prefix-keys)
 
     ;; Apply global keys BEFORE exwm-wm-mode init (idempotent — mode
     ;; reads the variable once).
@@ -203,6 +242,13 @@ If the session isn't EXWM, this becomes a no-op.
 (with-eval-after-load 'pro-keys
   (when (pro-exwm--session-p)
     (pro-exwm--apply-global-keys)))
+
+;; Re-apply IM prefix keys after EXWM is loaded.  This makes sure the
+;; prefix-keys are present even if pro-exwm is loaded before exwm, and
+;; also covers a soft reload (C-x M-c).
+(with-eval-after-load 'exwm
+  (when (pro-exwm--session-p)
+    (pro-exwm--install-im-prefix-keys)))
 
 (provide 'pro-exwm)
 
