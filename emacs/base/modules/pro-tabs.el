@@ -19,10 +19,7 @@ This does not install global keybindings; use emacs-keys.org for that."
     (tab-bar-mode 1)
     ;; make tab names shorter and useful
     (setq tab-bar-show 1)
-    (setq tab-bar-format '(tab-bar-format-tabs tab-bar-separator))
-    ;; enable tab-line for per-window buffer tabs if available
-    (when (fboundp 'tab-line-mode)
-      (tab-line-mode 1))))
+    (setq tab-bar-format '(tab-bar-format-tabs tab-bar-separator))))
 
 (defun pro-tabs-open-new-tab ()
   "Open a new tab (wrapper).
