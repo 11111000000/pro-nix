@@ -47,6 +47,12 @@ fall back to class only."
     (nreverse keys))
   "Глобальные клавиши EXWM для переключения вкладок (s-1..s-6).")
 
+(defvar pro-exwm-autostart-apps
+  '("nm-applet" "copyq" "udiskie --tray")
+  "List of shell commands to autostart after EXWM session starts.
+Each element is a string passed to `start-process-shell-command'.
+Default starts common helpers: nm-applet, copyq, udiskie.")
+
 (defun pro-exwm--apply-global-keys ()
   "Собрать глобальные EXWM-клавиши с учётом базового слоя.
 
@@ -132,7 +138,19 @@ GDM может добавлять префикс \='none+' к имени сес�
     (message "[pro-exwm] session started (workspaces: %d, systemtray: %s, xim: %s)"
              exwm-workspace-number
              (if (and (boundp 'exwm-systemtray-mode) exwm-systemtray-mode) "on" "off")
-             (if (and (boundp 'exwm-xim-mode) exwm-xim-mode) "on" "off"))))
+             (if (and (boundp 'exwm-xim-mode) exwm-xim-mode) "on" "off"))
+
+    ;; Autostart small userland helpers (tray icons, clipboard daemon, udisks)
+    ;; Start them only in a graphical session and only if the variable is set.
+    (when (and (display-graphic-p) (boundp 'pro-exwm-autostart-apps))
+      (dolist (cmd pro-exwm-autostart-apps)
+        (let* ((name (format "pro-exwm-autostart-%s" (replace-regexp-in-string "[^A-Za-z0-9_-]" "-" cmd)))
+               (existing (get-process name)))
+          (unless existing
+            (condition-case err
+                (start-process-shell-command name nil cmd)
+              (error (message "[pro-exwm] failed to autostart '%s': %s" cmd err)))))))
+    ))
 
 ;; ── Init hooks ───────────────────────────────────────────────────────────
 ;;
