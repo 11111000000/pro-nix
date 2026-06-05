@@ -38,22 +38,49 @@
   ;; Simple, conservative display-buffer policy for common transient buffers.
   ;; Keep this small and opt-in: users can override in their modules or user config.
   (when (boundp 'display-buffer-alist)
-    ;; vterm buffers: open in a small side window at the bottom
+    ;; Plain `vterm' (the buffer named *vterm*) opens in the current window
+    ;; without forcing a side window.
     (add-to-list 'display-buffer-alist
-                 '("\\*vterm\*" . ((display-buffer-in-side-window)
-                                        (side . bottom)
-                                        (slot . 0)
-                                        (window-height . 0.28)
-                                        (quit . delete-window))))
+                 '("\\*vterm\\*" . ((display-buffer-same-window))))
+
+    ;; multi-vterm buffers are named "*vterminal<N>*" (indexed) or
+    ;; "*vterminal - <path>*" (project). Open them in a bottom side window
+    ;; taking ~43% of the screen height.
+    (add-to-list 'display-buffer-alist
+                 '("\\*vterminal[^*]*\\*" . ((display-buffer-in-side-window)
+                                              (side . bottom)
+                                              (slot . 0)
+                                              (window-height . 0.43)
+                                              (quit . delete-window))))
+
+    ;; eshell-toggle uses "*et*" buffer names: also a 43% bottom side window.
+    (add-to-list 'display-buffer-alist
+                 '("\\*et[^*]*\\*" . ((display-buffer-in-side-window)
+                                       (side . bottom)
+                                       (slot . 0)
+                                       (window-height . 0.43)
+                                       (quit . delete-window))))
 
     ;; *Messages*: reuse existing window or show at the bottom with small height
     (add-to-list 'display-buffer-alist
-                 '("\\*Messages\\*" . ((display-buffer-reuse-window display-buffer-in-side-window)
+                 '("\\*Messages\*" . ((display-buffer-reuse-window display-buffer-in-side-window)
                                              (side . bottom)
                                              (slot . -1)
                                              (window-height . 0.12))))
     )
   )
+
+;; eshell-toggle splits the current window by `eshell-toggle-size-fraction'.
+;; We want the resulting eshell window to occupy ~43% of the screen, so the
+;; divisor must be ~1/0.43 ≈ 2.3.  An integer is required, so we use 2
+;; (≈ 50%) as a sensible default; users can fine-tune via customise.
+(when (boundp 'eshell-toggle-size-fraction)
+  (setq eshell-toggle-size-fraction 2))
+
+;; multi-vterm dedicated window height in percent of the frame.
+;; Default per the upstream package is a fixed 30 lines; we set it to 43%.
+(when (boundp 'multi-vterm-dedicated-window-height-percent)
+  (setq multi-vterm-dedicated-window-height-percent 43))
 
 ;; --- Window resize (C-x + / C-x -) ---------------------------------------
 (defun pro-windows-enlarge ()
