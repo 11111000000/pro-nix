@@ -59,14 +59,7 @@
       # opencode-bwrap sandbox wrapper. The overlay provides a real opencode
       # binary from npm (not a stub) so both direct CLI usage and bwrap work.
       opencodeBwrapModule = opencodeBwrap.homeManagerModules.default;
-      pythonWithTextual = pkgs.python3.withPackages (ps: with ps; [ textual psutil ]);
-      # Python environment for agent apps (coordinator/worker)
-      pythonAgentEnv = pkgs.python3.withPackages (ps: with ps; [ flask requests ]);
-      # Python environment for model-client (FastAPI + uvicorn)
-      pythonModelEnv = pkgs.python3.withPackages (ps: with ps; [ fastapi uvicorn requests ]);
-
       # Global modules to apply to all hosts
-      # Temporarily disable adb-udev global module to avoid etc.drv build permission issues.
       # If the nix-hermes input provides a NixOS module, enable it globally so
       # Hermes is available on all hosts (hosts may still opt-out).
       # Import the upstream pi NixOS module so its options are available.
@@ -108,36 +101,6 @@
         ] ++ extraModules;
       };
 
-      # Deterministic opencode derivation used by apps and made available
-      # via specialArgs to system modules for reproducible installs.
-       # opencode_from_release removed
-
-      # Expose nix-hermes overlay & modules if available. We don't enable
-      # the service by default; hosts opt-in via modules in their host config.
-       # hermes overlay/modules removed
-
-      # Package the TUI sources into a small derivation and provide a
-      # wrapper that uses a python interpreter with textual available.
-      proNixTui = pkgs.stdenv.mkDerivation {
-        pname = "pro-nix-tui";
-        version = "0";
-        src = ./.;
-        buildInputs = [];
-        nativeBuildInputs = [];
-        dontBuild = true;
-        installPhase = ''
-          mkdir -p $out/bin $out/lib/pro-nix-tui
-          cp -r ${./tui}/* $out/lib/pro-nix-tui/
-          cat > $out/bin/pro-nix <<EOF
-#!${pythonWithTextual}/bin/python3
-import os, sys
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'lib', 'pro-nix-tui'))
-exec(${pythonWithTextual}/bin/python3 if False else '${pythonWithTextual}/bin/python3')
-EOF
-          chmod +x $out/bin/pro-nix
-        '';
-      };
-
       hosts = {
         cf19 = mkHost [ ./hosts/cf19/configuration.nix ./hosts/cf19/composition.nix ];
         huawei = mkHost [ ./hosts/huawei/configuration.nix ./hosts/huawei/composition.nix ];
@@ -175,48 +138,6 @@ EOF
           '');
         };
 
-        # opencode app removed
-        # Утилита: добавляем удобное приложение для запуска TUI (Textual pro-nix manager)
-        pro-nix = {
-          type = "app";
-          # Create a tiny wrapper script in the store that calls the python
-          # interpreter from a python-with-textual closure and points at the
-          # app.py source in the flake. This avoids attempting to execute the
-          # app during the python env build and keeps closures explicit.
-          program = toString (pkgs.writeShellScript "pro-nix-tui" ''
-            #!${pythonWithTextual}/bin/python3
-            exec ${pythonWithTextual}/bin/python3 ${toString ./tui/app.py} "$@"
-          '');
-          meta = {
-            description = "Запустить текстовый TUI менеджер pro-nix (Textual)";
-          };
-        };
-        coordinator = {
-          type = "app";
-          program = toString (pkgs.writeShellScript "coordinator" ''
-            #!${pythonAgentEnv}/bin/python3
-            exec ${pythonAgentEnv}/bin/python3 ${toString ./apps/coordinator/coordinator.py} "$@"
-          '');
-          meta.description = "Запустить reference coordinator (dev)";
-        };
-
-        worker = {
-          type = "app";
-          program = toString (pkgs.writeShellScript "worker" ''
-            #!${pythonAgentEnv}/bin/python3
-            exec ${pythonAgentEnv}/bin/python3 ${toString ./apps/worker/worker.py} "$@"
-          '');
-          meta.description = "Запустить reference worker (dev)";
-        };
-
-        model-client = {
-          type = "app";
-          program = toString (pkgs.writeShellScript "model-client" ''
-            #!${pythonModelEnv}/bin/python3
-            exec ${pythonModelEnv}/bin/python3 ${toString ./apps/model-client/app.py} "$@"
-          '');
-          meta.description = "Запустить local model-client proxy (dev)";
-        };
       };
 
       devShells.${system}.default = let

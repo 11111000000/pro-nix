@@ -43,7 +43,6 @@
    imports = [
       ./modules/system-boot.nix
       ./modules/packages-runtime.nix
-      ./modules/systemd-policy.nix
       ./modules/tty-console.nix
       ./modules/pro-power-beep.nix
 
@@ -388,8 +387,6 @@
     #   systemd.services.nix-daemon.environment = { http_proxy = "http://..."; };
     EnvironmentFile = lib.mkBefore [ "-/etc/nixos/nix-daemon-proxy" ];
   };
-
-  # polkit/unit ordering handled in modules/systemd-policy.nix
 
   environment.variables = {
     LANG = "ru_RU.UTF-8";
