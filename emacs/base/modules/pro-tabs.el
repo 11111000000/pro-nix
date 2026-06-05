@@ -71,6 +71,31 @@ If `pro-tabs' package is present, delegate to it; otherwise use `tab-bar-new-tab
     (when (buffer-live-p buf)
       (kill-buffer buf))))
 
+(defun pro-tabs--line-tabs ()
+  "Return non-nil if the current window has a tab-line with tabs.
+A non-nil result means the current window has tab-line tabs that can be
+navigated. Returns nil when `tab-line-mode' is not active or the window
+has no tab-line entries."
+  (and (boundp 'tab-line-mode)
+       (symbol-value 'tab-line-mode)
+       (fboundp 'tab-line-tabs-window-buffers)
+       (let ((tabs (ignore-errors (funcall 'tab-line-tabs-window-buffers))))
+         (and (consp tabs) tabs))))
+
+(defun pro-tabs-line-next ()
+  "Move to the next tab-line tab in the current window.
+No-op if tab-line is disabled or the window has no tab-line tabs."
+  (interactive)
+  (when (pro-tabs--line-tabs)
+    (call-interactively #'tab-line-switch-to-next-tab)))
+
+(defun pro-tabs-line-prev ()
+  "Move to the previous tab-line tab in the current window.
+No-op if tab-line is disabled or the window has no tab-line tabs."
+  (interactive)
+  (when (pro-tabs--line-tabs)
+    (call-interactively #'tab-line-switch-to-prev-tab)))
+
 (defun pro-tabs-select-tab-1 ()
   "Переключиться на вкладку 1."
   (interactive) (tab-bar-select-tab 1))

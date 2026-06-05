@@ -88,6 +88,8 @@
 | Tabs       | C-c t n       | pro-tabs-open-new-tab                 | Открыть новую вкладку                |
 | Tabs       | C-c t k       | pro-tabs-close-tab-and-buffer         | Закрыть вкладку и буфер              |
 | Tabs       | C-c t s       | tab-bar-switch-to-tab                 | Переключиться на вкладку             |
+| Tabs       | <C-tab>       | pro-tabs-line-next                    | Следующая tab-line вкладка (в окне)  |
+| Tabs       | <C-S-tab>     | pro-tabs-line-prev                    | Предыдущая tab-line вкладка (в окне) |
 | Package    | C-c P p       | pro-packages-menu                     | Список пакетов                       |
 | Package    | C-c P i       | pro-packages-install                  | Установить пакет из ELPA             |
 | Package    | C-c P v       | pro-packages-install-vc               | Установить пакет из VC               |
