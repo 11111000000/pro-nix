@@ -5,8 +5,15 @@
 ;;  2. EXWM startup — exwm-wm-mode, systemtray, X input method
 ;;  3. Global keys — s-1..s-6 для вкладок; прочие из emacs-keys.org
 ;;  4. Buffer naming — exwm-update-title-hook → «TITLE — CLASS»
+;;  5. Input methods — настраивает default-input-method для Emacs-IM
+;;     (toggle по C-\) и пробрасывает XKB-layout в X-клиенты через
+;;     exwm-xim. Эти два слоя НЕ пересекаются:
+;;     - Emacs-IM (russian-computer) работает в Emacs-окнах, переключается
+;;       по C-\ (toggle-input-method; см. emacs-keys.org).
+;;     - XKB-раскладка (us,ru с grp:shifts_toggle из session-base.nix)
+;;       работает в X-приложениях через exwm-xim.
 ;;
-;; EXWM is provided via Nix (emacsPackages.exwm + emacsPackages.xelb)
+;; EXWM is provided via Nix (emacsPackages.exwm + emacsPackages.exwm-xim)
 ;; so require succeeds immediately — no MELPA fallback needed.
 
 ;; ── Buffer naming ────────────────────────────────────────────────────────
@@ -124,11 +131,25 @@ GDM может добавлять префикс \='none+' к имени сес�
 
     ;; Enable X Input Method (IME) for multi-language text input in X apps.
     ;; This is what makes layout switching work in Firefox, terminals, etc.
+    ;; Note: exwm-xim bridges the *system XKB layout* into X clients — it does
+    ;; NOT expose Emacs' own `input-method' (russian-computer etc.) to X apps.
+    ;; For Emacs-internal text input, set `default-input-method' below.
     (condition-case nil
         (require 'exwm-xim)
       (error nil))
     (when (fboundp 'exwm-xim-mode)
       (exwm-xim-mode 1))
+
+    ;; Pick an Emacs-side input method so that `C-\' (toggle-input-method)
+    ;; has something to toggle inside Emacs buffers.  We default to
+    ;; `russian-computer' (the standard ЙЦУКЕН layout from leim) but only
+    ;; if the user has not set one explicitly and the quail/cyrillic
+    ;; package is available on load-path.  X clients are unaffected — see
+    ;; the exwm-xim comment above for why the system XKB layout is what
+    ;; X apps use, not this Emacs input method.
+    (when (and (not (default-value 'default-input-method))
+               (locate-library "quail/cyrillic"))
+      (setq default-input-method 'russian-computer))
 
     ;; Start the window manager.  exwm-wm-mode is idempotent — calling it
     ;; when already enabled is a no-op.
