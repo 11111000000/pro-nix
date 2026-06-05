@@ -136,11 +136,29 @@ let
       fi
     }
 
-    # ALSA-fallback: один тон нужной частоты, 0.6 сек
+    # Гарантированно поднять все каналы нужной карты: проходим по всем
+    # simple mixer controls (Master, Speaker, Headphone, PCM, …) и
+    # выставляем 80% + unmute за один вызов. Игнорируем ошибки отдельных
+    # каналов — на разных картах/доках состав разный.
+    alsa_ensure_unmuted() {
+      if ! [ -x ${pkgs.alsa-utils}/bin/amixer ]; then
+        return 0
+      fi
+      local ctl
+      for ctl in $(${pkgs.alsa-utils}/bin/amixer scontrols 2>/dev/null \
+                   | sed -n "s/^Simple mixer control '\([^']*\)',.*$/\1/p"); do
+        ${pkgs.alsa-utils}/bin/amixer -q set "$ctl" 80% unmute >/dev/null 2>&1 || true
+      done
+    }
+
+    # ALSA-fallback: один тон нужной частоты, 0.6 сек.
+    # Перед проигрыванием принудительно поднимаем все каналы — на многих
+    # ноутбуках и в док-станциях канал по умолчанию приглушён, и без
+    # unmute speaker-test отыгрывает тишину.
     play_alsa() {
       local freq="$1"
-      if [ -x ${pkgs.alsa-utils}/bin/amixer ] && [ -x ${pkgs.alsa-utils}/bin/speaker-test ]; then
-        ${pkgs.alsa-utils}/bin/amixer -q set Master 80% unmute 2>/dev/null || true
+      if [ -x ${pkgs.alsa-utils}/bin/speaker-test ]; then
+        alsa_ensure_unmuted
         (${pkgs.alsa-utils}/bin/speaker-test -t sine -f "$freq" -l 1 >/dev/null 2>&1 &) || true
         ${pkgs.coreutils}/bin/sleep 0.6
       fi
