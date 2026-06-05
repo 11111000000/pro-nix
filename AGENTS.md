@@ -12,11 +12,25 @@ flake.nix                  # Flake: hosts, nixpkgs pin, checks
 local.nix                  # Секреты (НЕ КОММИТИТЬ)
 emacs-keys.org             # Глобальные Emacs-биндинги (код, не docs)
 justfile                   # just switch, just build, …
-modules/                   # NixOS-модули (sessions, profiles, services, packages)
-hosts/                     # Хост-специфичные конфигурации
+modules/                   # См. §1a — не только NixOS-модули
+hosts/<name>/
+  configuration.nix        # NixOS-модуль хоста
+  composition.nix          # Слой пакетов: import ../../modules/system-package-sets-*.nix
 emacs/base/modules/        # Emacs Lisp модули (pro-*.el)
 emacs/base/site-init.el    # Загрузчик модулей Emacs
 ```
+
+### 1a. Структура `modules/`
+
+`modules/` шире, чем кажется по имени. Реальные подкатегории:
+
+| Паттерн | Что это | Как удалять |
+|---------|---------|-------------|
+| `modules/pro-*.nix` | Обычные NixOS-модули | Убрать из `imports = [ … ]` в `configuration.nix` / `hosts/*/configuration.nix` |
+| `modules/session-*.nix` | Оконные менеджеры / DM | То же |
+| `modules/system-package-sets-*.nix` | **НЕ NixOS-модули** — функции `{ pkgs }: { somePackages = [ … ]; }`, импортируются из `hosts/*/composition.nix` | Удалить файл + `import` + `++ X.somePackages` в обоих `hosts/*/composition.nix` |
+| `modules/system-*.nix` | Низкоуровневые политики (boot, systemd) | Стандартно через imports |
+| `modules/nix-*.nix` (nix-cuda-compat и т.п.) | Кастомные пакеты/юниты | Стандартно |
 
 ## 2. NixOS: приоритеты пакетных списков
 
@@ -32,6 +46,10 @@ environment.systemPackages = with pkgs; [ pavucontrol playerctl ];
 `lib.mkDefault` имеет приоритет 100 — любое обычное присвоение в другом модуле
 молча вытесняет эти пакеты. Уместен только для опциональных наборов, которые
 пользователь может захотеть переопределить.
+
+Пустой `environment.systemPackages = with pkgs; [ ];` — сигнал «модуль не
+дописан». Не наполнять ради наполнения, а удалить модуль целиком вместе с
+импортом.
 
 ## 3. Emacs: биндинги
 
@@ -82,9 +100,31 @@ nix flake check
 git status && git diff
 ```
 
+### Cleanup-коммиты (при удалении мёртвого кода)
+
+Не «один большой сweep», а по домену:
+
+- `nix: remove X` — flake.nix + `configuration.nix` + `composition.nix` + удаляемый модуль. **Один коммит**, потому что промежуточное состояние сломано.
+- `chore: drop unused Y` — `conf/`, тесты, артефакты, `.gitignore`.
+- `emacs: …` — только `.el`.
+
+Заголовок: `nix: <что>`. В теле — список всех затронутых файлов и почему
+удаляется.
+
 ## 6. Проверка изменений
 
 ```bash
+# Синтаксис (после любой правки .nix)
+nix-instantiate --parse <изменённый-файл.nix>
+
+# Flake ещё живой (атрибуты резолвятся)
+nix eval .#nixosConfigurations --apply builtins.attrNames
+
+# Конкретные output'ы — ловят то, что flake show не ловит (см. §6a)
+nix eval .#checks.x86_64-linux.huawei-boot.outPath
+nix eval .#apps.x86_64-linux.check-all.program
+nix eval .#devShells.x86_64-linux.default.shellHook
+
 # NixOS: проверить, что пакет попал в сборку (без rebuild)
 nix eval --json .#nixosConfigurations.cf19.config.environment.systemPackages | jq -r '.[]' | rg <пакет>
 
@@ -93,6 +133,37 @@ just headless-tests && just headless-report
 
 # Emacs: pending-биндинги
 # M-x pro-keys-report-pending
+```
+
+### 6a. Что `nix flake check` НЕ ловит
+
+- `cp -r ${./dir}/*` в derivation — flake eval не упадёт, build ленивый.
+- `import ./path/script.py` внутри `writeShellScript` / `apps.${system}.X.program` — fail только при `nix run`.
+- `toString ./missing` — то же.
+- `imports = [ ./broken.nix ]` в test-файле, **не подключённом** в `flake.nix#checks` — никогда не выполнится, но `nix-instantiate --parse` пройдёт.
+- Submodule-пути, на которые ссылается home-manager / fontconfig — падают только на build конкретных output'ов, не на eval flake.nix.
+
+Контрмера: после правки flake.nix прогонять eval конкретных атрибутов (см. §6),
+а не только `nix flake check`.
+
+### 6b. Детекторы мёртвого кода
+
+Сигналы, по которым файл/модуль можно удалять (после ритуала ниже):
+
+- Сам модуль/файл содержит `placeholder` / `заглушка` / `stub` / `not populated yet` / `not implemented` / `WIP` в description, имени или шапке
+- `environment.systemPackages = with pkgs; [ ];` (пустой)
+- Тело модуля — `lib.mkIf false { … }`
+- `sha256 = "0000…000"` в `fetchurl` / `fetchFromGitHub` / `fetchTarball`
+- `submodule { options = {}; }` без полей
+- `enable = false;` по умолчанию + `mkIf cfg.enable` оборачивает всё тело
+- Файл импортируется, но его публичные атрибуты никем не используются (`rg "<attributeName>"` пусто)
+
+Ритуал перед удалением:
+
+```bash
+rg -l "<filename>"          # прямые импорты
+rg "<attributeName>"        # использования экспортов
+nix-instantiate --parse <каждый файл, который трогаем>
 ```
 
 ## 7. Запреты (кратко)
