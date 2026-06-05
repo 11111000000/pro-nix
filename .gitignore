@@ -19,6 +19,7 @@ worktree-*
 logs/
 result-devshell
 .tmp
+.tmp.org
 backup
 logs
 result-devshell
