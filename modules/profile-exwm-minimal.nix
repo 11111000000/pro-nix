@@ -42,7 +42,6 @@ in {
       xorg.setxkbmap
       xorg.xsetroot
       wmname
-      xbindkeys
       xdotool
       xclip
       xauth
