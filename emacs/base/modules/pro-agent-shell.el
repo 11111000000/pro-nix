@@ -78,7 +78,7 @@
 Аргументы передаются в FN напрямую." (apply (if (fboundp fn) fn (lambda (&rest _) (message "[pro-agent-shell] %s недоступна" fn))) args))
 
       (defun pro-agent-shell--setup-keys ()
-        "Установить локальные клавиши в буфере agent-shell, если режим доступен." 
+        "Установить локальные клавиши в буфере agent-shell, если режим доступен."
         (when (derived-mode-p 'agent-shell-mode)
           (when (fboundp 'agent-shell-set-session-model)
             (local-set-key (kbd "C-c m") #'agent-shell-set-session-model))))
@@ -93,14 +93,117 @@
           "Re-apply setup keys after `agent-shell' starts. Defun form keeps
 `advice-add' idempotent across `pro/reload-config' reloads."
           (pro-agent-shell--setup-keys))
-        (advice-add #'agent-shell :after #'pro-agent-shell--after-start)))
+        (advice-add #'agent-shell :after #'pro-agent-shell--after-start))
+
+      ;; ---- Project / branch / worktree info in header ----
+      ;; Project name: append ":<branch>" and "+wt:<name>" when in a git repo
+      ;; and a worktree. We wrap `agent-shell--project-name' so the existing
+      ;; header rendering picks up the enriched name automatically.
+      (defun pro-agent-shell--project-name ()
+        "Return current project name, with branch and worktree info if available.
+
+Uses `pro-project-root' when available, otherwise falls back to
+`default-directory'. The returned string is concise, e.g. \"proj:main\" or
+\"proj:feature/foo+wt:adoring-hawking\" when in a git worktree." 
+        (let* ((root (if (and (fboundp 'pro-project-root)
+                              (pro-project-root))
+                          (pro-project-root)
+                        default-directory))
+               (dir (and root (directory-file-name (expand-file-name root))))
+               (proj (file-name-nondirectory (or dir ""))))
+          (when proj
+            (condition-case _err
+                (let* ((default-directory (or dir default-directory))
+                       (branch (string-trim (shell-command-to-string "git rev-parse --abbrev-ref HEAD 2>/dev/null")))
+                       (gitdir-out (string-trim (shell-command-to-string "git rev-parse --git-dir 2>/dev/null")))
+                       (gitdir (and (not (string-empty-p gitdir-out))
+                                    ;; Make absolute and normalize
+                                    (expand-file-name gitdir-out default-directory)))
+                       (worktree-name (when (and gitdir (string-match "/worktrees/\\([^/]+\\)$" gitdir))
+                                        (match-string 1 gitdir))))
+                  (if (not (string-empty-p branch))
+                      (if worktree-name
+                          (format "%s:%s+wt:%s" proj branch worktree-name)
+                        (format "%s:%s" proj branch))
+                    proj))
+              (error proj)))))
+
+      (when (fboundp 'agent-shell--project-name)
+        (defun pro-agent-shell--project-name-wrapper (orig-fn)
+          "Return project name enriched with branch and worktree info."
+          (let ((base (funcall orig-fn)))
+            (if (and base (not (string-empty-p base)))
+                (let* ((dir default-directory)
+                       (enriched (let ((default-directory dir))
+                                   (pro-agent-shell--project-name))))
+                  (if (and enriched (not (string-empty-p enriched)))
+                      enriched
+                    base))
+              base)))
+        (advice-add #'agent-shell--project-name :override #'pro-agent-shell--project-name-wrapper))
+
+      ;; ---- Strip provider name from text header ----
+      ;; The default text header starts with the buffer-name (provider, e.g.
+      ;; "OpenCode"). We want only " <model> @ <project>". Strip the leading
+      ;; propertized buffer-name token by trimming up to the first " ➤ " or
+      ;; " @ ".
+      (defun pro-agent-shell--strip-provider (header)
+        "Strip leading provider (buffer-name) from HEADER text.
+HEADER is the text header produced by `agent-shell--make-header'."
+        (when (and header (stringp header))
+          (let* ((trimmed (string-trim-left header)))
+            (cond
+             ;; Drop everything before the first " ➤ " (model name follows).
+             ((string-match " ➤ " trimmed)
+              (concat " " (substring trimmed (match-end 0))))
+             ;; No model: drop everything before " @ " (project follows).
+             ((string-match " @ " trimmed)
+              (concat " " (substring trimmed (match-end 0))))
+             (t trimmed)))))
+
+      (when (fboundp 'agent-shell--make-header)
+        (defun pro-agent-shell--header-wrapper (orig-fn state &rest args)
+          "Strip provider name from agent-shell text header."
+          (let ((result (apply orig-fn state args)))
+            (if (and agent-shell-header-style
+                     (eq agent-shell-header-style 'text))
+                (pro-agent-shell--strip-provider result)
+              result)))
+        (advice-add #'agent-shell--make-header :around #'pro-agent-shell--header-wrapper))
+
+      ;; ---- Periodic refresh of header so branch/worktree stay current ----
+      (defun pro-agent-shell--refresh-timer-fn ()
+        "Timer callback: re-render the agent-shell header in the current buffer."
+        (when (derived-mode-p 'agent-shell-mode)
+          (ignore-errors (agent-shell--update-header-and-mode-line))))
+
+      (defun pro-agent-shell--install-refresh-timer ()
+        "Install a buffer-local timer that re-renders the header every 5s."
+        (when (and (derived-mode-p 'agent-shell-mode)
+                   (fboundp 'agent-shell--update-header-and-mode-line)
+                   (not (timerp pro-agent-shell--refresh-timer)))
+          (setq pro-agent-shell--refresh-timer
+                (run-at-time 5 5 #'pro-agent-shell--refresh-timer-fn))))
+
+      (defvar-local pro-agent-shell--refresh-timer nil
+        "Buffer-local timer that re-renders the agent-shell header.")
+
+      (defun pro-agent-shell--cancel-refresh-timer ()
+        "Cancel the agent-shell header refresh timer in the current buffer."
+        (when (timerp pro-agent-shell--refresh-timer)
+          (cancel-timer pro-agent-shell--refresh-timer)
+          (setq pro-agent-shell--refresh-timer nil)))
+
+      (when (boundp 'agent-shell-mode-hook)
+        (add-hook 'agent-shell-mode-hook #'pro-agent-shell--install-refresh-timer))
+      (add-hook 'kill-buffer-hook #'pro-agent-shell--cancel-refresh-timer nil t))
   (error (message "[pro-agent-shell] agent-shell integration skipped: %S" err)))
 
 (defun pro-agent-install ()
   "Убедиться, что пакет `agent-shell' доступен.
 
 Если пакет отсутствует в runtime, попытаемся установить его из MELPA
-через политику `pro/packages-ensure' с разрешением fallback (allow-melpa).
+через политику `pro/packages-ensure` с разрешением fallback (allow-melpa).
 Команда безопасна для вызова вручную и выводит читаемое сообщение о результате.
 "
   (interactive)
