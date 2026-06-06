@@ -62,8 +62,25 @@ echo "[simple-helper] Running switch for $HOST_ARG..."
 SWITCH_LOG="/tmp/switch-$(date +%s).log"
 echo "[simple-helper] Logs will be saved to $SWITCH_LOG"
 
-if sudo nixos-rebuild switch --flake "$FLAKE_REF#$HOST_ARG" 2>&1 | tee "$SWITCH_LOG"; then
-  echo "[simple-helper] Switch completed successfully."
+  if sudo nixos-rebuild switch --flake "$FLAKE_REF#$HOST_ARG" 2>&1 | tee "$SWITCH_LOG"; then
+    echo "[simple-helper] Switch completed successfully."
+
+    # Home-manager activation performed during nixos-rebuild may have written
+    # files into the user's $HOME as root (this happens when the command is
+    # executed via sudo). Fix common Emacs-related paths so files are owned by
+    # the user — otherwise Emacs warns that modules are "not owned by current
+    # user" and falls back to system modules.
+    echo "[simple-helper] Ensuring ownership of Emacs user files in $HOME"
+    if sudo test -d "$HOME/.config/emacs" >/dev/null 2>&1; then
+      sudo chown -R "$USER:$USER" "$HOME/.config/emacs" || true
+    fi
+    # Also adjust auxiliary pro-emacs state/cache dirs if present
+    if sudo test -d "$HOME/.local/state/pro-emacs" >/dev/null 2>&1; then
+      sudo chown -R "$USER:$USER" "$HOME/.local/state/pro-emacs" || true
+    fi
+    if sudo test -d "$HOME/.cache/pro-emacs" >/dev/null 2>&1; then
+      sudo chown -R "$USER:$USER" "$HOME/.cache/pro-emacs" || true
+    fi
 
   # Пост-обработка: установить локальные утилиты в ~/bin чтобы были в PATH
   deploy_local_scripts(){
