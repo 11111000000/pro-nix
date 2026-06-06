@@ -72,14 +72,15 @@ echo "[simple-helper] Logs will be saved to $SWITCH_LOG"
     # user" and falls back to system modules.
     echo "[simple-helper] Ensuring ownership of Emacs user files in $HOME"
     if sudo test -d "$HOME/.config/emacs" >/dev/null 2>&1; then
-      sudo chown -R "$USER:$USER" "$HOME/.config/emacs" || true
+      # Change owner only (avoid specifying group which may not exist on some systems)
+      sudo chown -R "$USER" "$HOME/.config/emacs" || true
     fi
     # Also adjust auxiliary pro-emacs state/cache dirs if present
     if sudo test -d "$HOME/.local/state/pro-emacs" >/dev/null 2>&1; then
-      sudo chown -R "$USER:$USER" "$HOME/.local/state/pro-emacs" || true
+      sudo chown -R "$USER" "$HOME/.local/state/pro-emacs" || true
     fi
     if sudo test -d "$HOME/.cache/pro-emacs" >/dev/null 2>&1; then
-      sudo chown -R "$USER:$USER" "$HOME/.cache/pro-emacs" || true
+      sudo chown -R "$USER" "$HOME/.cache/pro-emacs" || true
     fi
 
   # Пост-обработка: установить локальные утилиты в ~/bin чтобы были в PATH
