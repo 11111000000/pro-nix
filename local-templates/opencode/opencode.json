@@ -1,0 +1,63 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "aitunnel/gpt-5-mini",
+  "provider": {
+    "aitunnel": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "AITUNNEL",
+      "options": {
+        "baseURL": "https://api.aitunnel.ru/v1",
+        "apiKeyEnv": "AITUNNEL_KEY"
+      },
+      "models": {
+        "gpt-5.4-nano": { "name": "GPT-5.4 Nano" },
+        "gpt-5.4-mini": { "name": "GPT-5.4 Mini" },
+        "gpt-5.5": { "name": "GPT-5.5" },
+        "gpt-5.4": { "name": "GPT-5.4" },
+        "gpt-5.4-pro": { "name": "GPT-5.4 Pro" },
+        "gpt-5-mini": { "name": "GPT-5 Mini" },
+        "gpt-5": { "name": "GPT-5" },
+        "gpt-5-pro": { "name": "GPT-5 Pro" },
+        "gpt-5-codex": { "name": "GPT-5 Codex" },
+        "qwen3-coder-next": { "name": "Qwen3 Coder Next" },
+        "qwen3-30b-a3b": { "name": "Qwen3 30B A3B" },
+        "qwen3.6-27b": { "name": "Qwen3.6 27B" },
+        "qwen3.6-max-preview": { "name": "Qwen3.6 Max Preview" },
+        "deepseek-r1": { "name": "DeepSeek R1" },
+        "deepseek-chat": { "name": "DeepSeek Chat" },
+        "codestral-2508": { "name": "Codestral 2508" },
+        "devstral-small": { "name": "Devstral Small" },
+        "mistral-small-3.2-24b-instruct": { "name": "Mistral Small 3.2" },
+        "claude-sonnet-4.6": { "name": "Claude Sonnet 4.6" },
+        "claude-haiku-4.5": { "name": "Claude Haiku 4.5" },
+        "gemini-2.5-flash": { "name": "Gemini 2.5 Flash" },
+        "gemini-2.5-pro": { "name": "Gemini 2.5 Pro" },
+        "qwen3-235b-a22b-2507": { "name": "Qwen3 235b A22b 2507" },
+        "gpt-5.1": { "name": "GPT 5.1" },
+        "gpt-5.2": { "name": "GPT 5.2" },
+        "deepseek-v4-pro": { "name": "DeepSeek V4 PRO" },
+        "deepseek-v4-flash": { "name": "DeepSeek V4 Flash" },
+        "mimo-v2.5-pro": { "name": "Mimo v2.5 pro" },
+        "mimo-v2.5": { "name": "Mimo v2.5" },
+        "kimi k2.6": { "name": "Kimi k2.6" },
+        "glm-5.1": { "name": "GLM 5.1" },
+        "gemini-3.5-flash": { "name": "Gemini 3.5 Flash" },
+        "gemini-3.1-flash-lite": { "name": "Gemini 3.1 Flash Lite" },
+        "glm-5v-turbo": { "name": "GLM 5v Turbo" },
+        "qwen3.7-max": { "name": "Qwen3.7 Max" },
+        "qwen3.5-plus-20260420": { "name": "Qwen3.5 Plus" },
+        "grok-build-01": { "name": "Grok build 0.1" },
+        "mistral-medium-3.1": { "name": "Mistral Medium 3.1" },
+        "minimax/minimax-m2.7": { "name": "Minimax m2.7" }
+      }
+    }
+  },
+  "mcp": {
+    "chrome-devtools": {
+      "type": "local",
+      "command": ["npx", "-y", "chrome-devtools-mcp@latest", "--browser-url=http://127.0.0.1:9222"],
+      "enabled": true,
+      "env": {}
+    }
+  }
+}

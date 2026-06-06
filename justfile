@@ -21,6 +21,10 @@ build HOST:
 switch HOST='':
 	scripts/switch.sh "{{HOST}}"
 
+# Deploy local agent configs (pi/opencode) if missing before switch
+switch-with-agents HOST='':
+	./scripts/deploy-agent-configs.sh && scripts/switch.sh "{{HOST}}"
+
 test HOST:
 	sudo nixos-rebuild test --flake .#{{HOST}}
 
