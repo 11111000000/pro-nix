@@ -37,6 +37,11 @@
               ++ (if builtins.hasAttr "acapella" epkgs then [ epkgs.acapella ] else [ ])
               ++ (if builtins.hasAttr "atlas" epkgs then [ epkgs.atlas ] else [ ])
               ++ (if builtins.hasAttr "shaoline" epkgs then [ epkgs.shaoline ] else [ ]);
+            # Hunspell + русский словарь (см. modules/pro-spellcheck.nix):
+            # обёртка pro-hunspell проксирует DICPATH на ru_RU/en_US, чтобы
+            # flyspell в Emacs находил словари без ручной настройки.
+            spellPackages = lib.optional config.pro.spellcheck.enable
+              config.pro.spellcheck.hunspellPackage;
           in piAcp ++ [
             pkgs.emacsPackages.ace-window pkgs.emacsPackages.avy pkgs.emacsPackages.cape pkgs.emacsPackages.consult
             pkgs.emacsPackages.consult-dash pkgs.emacsPackages.consult-eglot pkgs.emacsPackages.consult-projectile pkgs.emacsPackages.consult-yasnippet
@@ -45,7 +50,7 @@
             pkgs.emacsPackages.kind-icon pkgs.emacsPackages.magit pkgs.emacsPackages.marginalia pkgs.emacsPackages.nix-mode
             pkgs.emacsPackages.orderless pkgs.emacsPackages.org pkgs.emacsPackages.projectile pkgs.emacsPackages.rainbow-delimiters
             pkgs.emacsPackages.treemacs pkgs.emacsPackages.vertico pkgs.emacsPackages.vterm pkgs.emacsPackages.yasnippet
-          ] ++ extraEmacs;
+          ] ++ extraEmacs ++ spellPackages;
         };
 
         # OpenCode TUI config disabled: no plugins, no generated files.

@@ -58,8 +58,10 @@
      ./modules/pro-desktop.nix
      ./modules/pro-exwm-desktop.nix
      ./modules/pro-profiles.nix
-     ./modules/session-exwm.nix
-     ./modules/nix-cuda-compat.nix
+      ./modules/pro-spellcheck.nix
+      ./modules/session-exwm.nix
+      ./modules/pro-emacs-rescue.nix
+      ./modules/nix-cuda-compat.nix
      ./modules/zram-slice.nix
      ./modules/searxng.nix
 
@@ -144,6 +146,11 @@
   # LAN advertise via mDNS and can receive centrally-managed authorized_keys.
   pro-peer.enable = true;
   pro-peer.enableKeySync = true;
+
+  # Русская проверка орфографии на лету в Emacs (flyspell в org/markdown/
+  # agent-shell и т.п.). Словарь ru_RU вендорен в dictionaries/hunspell/.
+  pro.spellcheck.enable = true;
+  pro.spellcheck.secondaryDicts = [ "en_US" ];
 
   # hermes removed
 
