@@ -89,6 +89,23 @@ emacs/base/nix-emacs-paths.el с переменной `pro/nix-site-lisp-paths'.
       (message "pro: spawned new Emacs to restore session; exiting current Emacs")
       (kill-emacs))))
 
+(defun pro/revert-buffer ()
+  "Revert current buffer without asking for confirmation.
+This is a thin wrapper around `revert-buffer' that suppresses the
+y-or-n-p prompt by temporarily setting `revert-without-query' to a
+catch-all regex and then restoring the previous value.  Safe to call
+from any buffer; if `revert-buffer' errors (e.g. no file is associated
+or the buffer is non-revertable) the error is surfaced as a message
+without aborting the calling command."
+  (interactive)
+  (let ((prev revert-without-query))
+    (condition-case err
+        (let ((revert-without-query '(".")))
+          (revert-buffer))
+      (error
+       (setq revert-without-query prev)
+       (message "pro/revert-buffer: %S" err)))))
+
 (defun pro/reload-config (&optional full)
   "Reload the whole pro Emacs configuration to apply changes without restarting.
 

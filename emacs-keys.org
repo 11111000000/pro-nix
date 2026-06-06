@@ -2,10 +2,12 @@
 
 | Секция     | Клавиша       | Команда                               | Примечание                           |
 |------------+---------------+---------------------------------------+--------------------------------------|
-| Навигация  | C-s           | consult-line                          | Поиск по текущему буферу             |
+| Поиск      | C-s           | isearch-forward                       | Обычный isearch (вперёд)             |
+| Поиск      | C-r           | pro/revert-buffer                     | Revert буфера без подтверждения      |
+| Поиск      | C-M-s         | isearch-backward                      | isearch назад (без regex)            |
+| Поиск      | M-s s         | consult-line                          | Поиск по буферу (alias)              |
 | Навигация  | C-x b         | pro/consult-buffer                    | Смена буфера (helper)                |
 | Навигация  | C-x C-b       | pro/consult-buffer-other-window       | Смена буфера в другом окне           |
-| Навигация  | M-s s         | consult-line                          | Поиск по буферу (alias)              |
 | Навигация  | M-s M-s       | consult-line-multi                    | Поиск по нескольким буферам          |
 | Навигация  | C-x y         | consult-yank-from-kill-ring           | Вставка из истории kill-ring         |
 | Навигация  | M-g i         | consult-imenu                         | Символы файла                        |
