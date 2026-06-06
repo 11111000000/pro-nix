@@ -381,6 +381,13 @@ message with recommendations (manual and Home-Manager snippets).
     (when (fboundp 'pro-ui-apply-theme)
       (pro-ui-apply-theme))))
 
+(ignore-errors
+  ;; Wire up dynamic cursor color (russian -> orange, english -> black,
+  ;; read-only -> black box). Implemented in pure Elisp; no `cursor-chg'
+  ;; package required.
+  (when (fboundp 'pro-ui-apply-cursor-chg)
+    (pro-ui-apply-cursor-chg)))
+
 (provide 'pro-ui)
 
 ;;; pro-ui.el ends here
