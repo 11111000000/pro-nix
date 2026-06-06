@@ -7,7 +7,7 @@ let
     "text" "nav" "keys" "org" "lisp" "python" "c" "java" "haskell"
     "project" "git" "ai" "feeds" "chat" "agent" "exwm"
     "ui-tty" "ui-improvements" "ui-icons" "ui-fringes" "ui-modeline"
-    "history" "dashboard" "help" "windows-popups"
+    "history" "dashboard" "help" "windows-popups" "spell"
   ];
   defaultModulesText = lib.concatStringsSep " " defaultModules;
   treeSitterBundle = pkgs.runCommand "pro-emacs-tree-sitter-langs" { nativeBuildInputs = [ pkgs.gnutar ]; } ''
