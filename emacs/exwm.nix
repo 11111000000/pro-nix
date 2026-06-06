@@ -18,7 +18,7 @@ lib.mkIf cfg.gui.enable {
 
   home.file.".xprofile".text = ''
     [ -f "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources" || true
-    pgrep -x xbindkeys >/dev/null 2>&1 || /run/current-system/sw/bin/xbindkeys >/dev/null 2>&1 &
+    pgrep -x xbindkeys >/dev/null 2>&1 || /run/current-system/sw/bin/xbindkeys -f /etc/pro/emacs-rescue/xbindkeysrc >/dev/null 2>&1 &
   '';
 
   home.file.".config/autostart/systemd-user-import-env.desktop".text = ''
@@ -110,6 +110,14 @@ lib.mkIf cfg.gui.enable {
       # Merge Xresources early so Emacs/EXWM inherits fullscreen and font
       # settings to avoid visual flicker when the first frame appears.
       xrdb -merge ~/.Xresources
+
+      # Start the rescue kill-switch daemon BEFORE Emacs/EXWM grabs any keys.
+      # modules/pro-emacs-rescue.nix renders /etc/pro/emacs-rescue/xbindkeysrc
+      # with Super+Scroll_Lock -> pro-emacs-rescue.  Starting it here guarantees
+      # the X server grants xbindkeys the global grab on that key, even
+      # when Emacs is stuck in event-loop and cannot process C-g.
+      pgrep -x xbindkeys >/dev/null 2>&1 \
+        || /run/current-system/sw/bin/xbindkeys -f /etc/pro/emacs-rescue/xbindkeysrc >/dev/null 2>&1 &
 
       export XDG_CURRENT_DESKTOP=EXWM
       printf '%s\n' "[exwm-session-start $(date '+%F %T%z')] importing env and launching emacs"
