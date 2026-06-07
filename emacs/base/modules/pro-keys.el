@@ -108,6 +108,7 @@
   (pcase section
     ((or "EXWM" "EXWM-S") :exwm)
     ((or "ORG" "ORG-MODE") :org)
+    ((or "SUGGESTED" "SUGGEST" "SUGGESTION" "SUGGESTIONS") :suggested)
     (_ :global)))
 
 (defun pro-keys--apply-row (section key command)
@@ -123,6 +124,7 @@
          (with-eval-after-load 'org
            (define-key org-mode-map (kbd k) cmd)))
         (t (push (list :org k cmd) pro-keys-pending-bindings)))))
+    (:suggested nil)
     (_ (pro-keys-apply-binding key command))))
 
 (defun pro-keys-load-org-file (file)
@@ -181,7 +183,11 @@
                 ((memq sym '(undo-tree-visualize)) (ignore-errors (require 'undo-tree nil t)))
                 ((memq sym '(buf-move-left buf-move-right buf-move-up buf-move-down)) (ignore-errors (require 'buffer-move nil t)))
                 ((memq sym '(cape-ispell cape-line cape-wrap-prefix)) (ignore-errors (require 'cape nil t)))
-                ((memq sym '(exwm-reset exwm-workspace-switch)) (when (display-graphic-p) (ignore-errors (require 'exwm nil t)))))
+                 ((memq sym '(exwm-reset exwm-workspace-switch)) (when (display-graphic-p) (ignore-errors (require 'exwm nil t))))
+                 ((memq sym '(goto-last-point goto-last-change)) (ignore-errors (require 'goto-chg nil t)))
+                 ((memq sym '(pro-chat-open pro-chat-send pro-chat-toggle)) (ignore-errors (require 'pro-chat nil t)))
+                 ((memq sym '(pro/vterm-yank pro/vterm-interrupt pro/vterm-copy-mode)) (ignore-errors (require 'pro-terminals nil t)))
+                 ((memq sym '(pro/clipboard-yank-pop pro/clipboard-yank-region)) (ignore-errors (require 'pro-clipboard nil t))))
              ;; If symbol contains a slash (eg. er/expand-region), try requiring
              ;; both parts as packages: before and after the slash.
              (unless (or (fboundp sym) (not (string-match-p "/" (symbol-name sym))))

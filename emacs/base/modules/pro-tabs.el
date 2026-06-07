@@ -21,13 +21,30 @@ This does not install global keybindings; use emacs-keys.org for that."
     (setq tab-bar-show 1)
     (setq tab-bar-format '(tab-bar-format-tabs tab-bar-separator))))
 
+(defvar pro-tabs--upstream-available nil
+  "Non-nil when the upstream `pro-tabs' package was loaded successfully.")
+
+(defun pro-tabs--maybe-enable-upstream ()
+  "Try to load the upstream `pro-tabs' package from `load-path'.
+Returns non-nil if the package was loaded. Used by the integration
+wrapper so we delegate to the upstream library when it is on the
+load path (Nix-provided case) and fall back to built-in tab-bar
+when it is not." 
+  (ignore-errors
+    (when (locate-library "pro-tabs")
+      (require 'pro-tabs)
+      (when (fboundp 'pro-tabs-mode)
+        (pro-tabs-mode 1)
+        (setq pro-tabs--upstream-available t)
+        t))))
+
 (defun pro-tabs-open-new-tab ()
   "Open a new tab (wrapper).
 If `pro-tabs' package is present, delegate to it; otherwise use `tab-bar-new-tab'." 
   (interactive)
-  (if (fboundp 'pro-tabs-mode)
-      (when (fboundp 'pro-tabs-open-new-tab) (pro-tabs-open-new-tab))
-    (tab-bar-new-tab)))
+  (if (and (fboundp 'pro-tabs-mode) pro-tabs--upstream-available)
+      (call-interactively #'pro-tabs-new-tab)
+    (call-interactively #'tab-bar-new-tab)))
 
 ;; Register suggested keys only after keys module has loaded to avoid
 ;; evaluation-time ordering issues when modules are loaded in different contexts.
@@ -140,10 +157,10 @@ silently falls through to `tab-bar' switching."
   (interactive) (tab-bar-select-tab 6))
 
 (when pro-pro-tabs-enable
-  ;; attempt to use pro-tabs package if available, otherwise enable built-in
-  (if (require 'pro-tabs nil t)
-      (when (fboundp 'pro-tabs-mode) (pro-tabs-mode 1))
-    (pro-tabs--enable-built-in-tabs)))
+  ;; Prefer the upstream `pro-tabs' package (Nix-provided) when available;
+  ;; otherwise fall back to enabling the built-in tab-bar.
+  (or (pro-tabs--maybe-enable-upstream)
+      (pro-tabs--enable-built-in-tabs)))
 
 ;; Bind C-<tab> / C-S-<tab> to tab-line navigation only.
 ;; Must run AFTER tab-bar-mode activation above so we win over the
