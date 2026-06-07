@@ -5,14 +5,16 @@
 ;;   Поведение: после запуска приложения возвращает фокус EXWM-фрейму, чтобы
 ;;     новое X-окно гарантированно получило фокус и поднялось над Emacs.
 ;;
-;; Last reviewed: 2026-06-04
-
-(require 'consult)
+;; Last reviewed: 2026-06-08
 
 (defun pro/app-launcher ()
   "Consult-style запуск Xorg-приложений по .desktop-файлам.
 EXWM-френдли: после выбора приложения фокус возвращается текущему фрейму."
   (interactive)
+  (unless (or (pro--package-provided-p 'consult)
+              (pro-packages--maybe-install 'consult t)
+              (require 'consult nil t))
+    (user-error "counsel-linux-app недоступен — пакет consult не загружен"))
   (unless (fboundp 'counsel-linux-app)
     (user-error "counsel-linux-app недоступен — пакет consult не загружен"))
   (counsel-linux-app)
