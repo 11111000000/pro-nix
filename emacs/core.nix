@@ -5,9 +5,9 @@ let
   defaultModules = [
     "core" "ui" "packages" "package-bootstrap"
     "text" "nav" "keys" "org" "lisp" "python" "c" "java" "haskell"
-    "project" "git" "ai" "feeds" "chat" "agent" "exwm"
+    "project" "git" "ai" "feeds" "chat" "telega" "agent" "exwm"
     "ui-tty" "ui-improvements" "ui-icons" "ui-fringes" "ui-modeline"
-    "history" "dashboard" "help" "windows-popups" "spell"
+    "history" "dashboard" "help" "windows-popups" "spell" "clipboard"
   ];
   defaultModulesText = lib.concatStringsSep " " defaultModules;
   treeSitterBundle = pkgs.runCommand "pro-emacs-tree-sitter-langs" { nativeBuildInputs = [ pkgs.gnutar ]; } ''
@@ -38,8 +38,7 @@ in
 
     providedPackages = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [ "magit" "consult" "vertico" "orderless" "marginalia" "gptel" "consult-dash" "dash-docs" "consult-eglot" "consult-yasnippet" "corfu" "cape" "kind-icon" "avy" "expand-region" "yasnippet" "projectile" "treemacs" "consult-projectile" "elfeed" "eglot" "rainbow-delimiters" "nix-mode" "mmm-mode" "org" "ob-mermaid" "vterm" "multi-vterm" "eshell-toggle" "ace-window" "undo-tree" "which-key" "which-key-posframe" "eldoc-box" "keyfreq" "helpful" "popper" "buffer-expose" "buffer-move" "embark" "embark-consult" "exwm" "xelb" "agent-shell" "acp" "telega" ];
-      description = "List of Emacs package names (symbols) provided by Nix and exposed to the runtime as pro-packages-provided-by-nix.";
+      default = [ "magit" "consult" "vertico" "orderless" "marginalia" "gptel" "consult-dash" "dash-docs" "consult-eglot" "consult-yasnippet" "corfu" "cape" "kind-icon" "avy" "expand-region" "yasnippet" "projectile" "treemacs" "consult-projectile" "elfeed" "eglot" "rainbow-delimiters" "nix-mode" "mmm-mode" "org" "ob-mermaid" "vterm" "multi-vterm" "eshell-toggle" "ace-window" "undo-tree" "haskell-mode" "haskell-snippets" "which-key" "which-key-posframe" "eldoc-box" "keyfreq" "helpful" "popper" "buffer-expose" "buffer-move" "embark" "embark-consult" "exwm" "xelb" "agent-shell" "acp" "telega" "transient" "visual-fill-column" "pro-tabs" "goto-chg" ];
     };
 
     defaultModules = lib.mkOption {
@@ -94,6 +93,19 @@ in
 
 (provide 'user-custom)
 EOF
+      fi
+      # Activation runs as root under `nixos-rebuild switch', so anything
+      # we just created or rewrote above is owned by root. Hand ownership
+      # back to the invoking user so subsequent Emacs sessions do not see
+      # files inside their own $HOME owned by another user.
+      target_user="''${SUDO_USER:-''${USER:-$(id -un)}}"
+      target_group="''${SUDO_GID:-$(id -g)}"
+      if [ -n "$target_user" ] && [ "$target_user" != "root" ]; then
+        chown "$target_user:$target_group" \
+          "$HOME/.config/emacs" \
+          "$HOME/.config/emacs/custom.el" \
+          "$HOME/.local/state/pro-emacs" \
+          "$HOME/.cache/pro-emacs" || true
       fi
     '';
 
