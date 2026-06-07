@@ -28,7 +28,10 @@
     (setq fast-but-imprecise-scrolling t
           redisplay-skip-fontification-on-input t
           jit-lock-defer-time 0.05)
-    (setq gc-cons-threshold (* 20 1024 1024)) ; TTY-friendly GC
+    ;; Note: gc-cons-threshold is set globally by pro-core (see
+    ;; `pro-core-gc-cons-threshold'). TTY runs use the same value; if
+    ;; running on memory-constrained hardware, customize
+    ;; `pro-core-gc-cons-threshold' rather than lowering it here.
     (when (fboundp 'show-paren-mode) (show-paren-mode -1))
     (when (fboundp 'global-display-line-numbers-mode) (global-display-line-numbers-mode -1))
     (column-number-mode -1)
