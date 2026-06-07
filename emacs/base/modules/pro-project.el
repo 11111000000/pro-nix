@@ -16,23 +16,45 @@
                                       (pro-project-open-dired "Dired"))
   "Команды проекта в стиле PRO.")
 
+(defvar-local pro-project-root--cache nil
+  "Buffer-local cache for `pro-project-root': (DIR . ROOT).
+DIR is the `default-directory' at the time of computation; ROOT is the
+resolved project root (or nil).  Refreshed automatically when
+`default-directory' changes.  Call `pro-project-root-invalidate' to
+force a recompute (e.g. after creating a new repository).")
+
+(defun pro-project-root-invalidate ()
+  "Drop the cached project root for the current buffer."
+  (interactive)
+  (setq pro-project-root--cache nil))
+
+(defun pro-project-root--compute ()
+  "Uncached worker for `pro-project-root'."
+  (cond
+   ((and (fboundp 'projectile-project-root)
+         (projectile-project-root))
+    (projectile-project-root))
+   ((and (fboundp 'project-current))
+    (when-let ((project (project-current)))
+      (project-root project)))
+   (t nil)))
+
 (defun pro-project-root ()
   "Return project root.
 
 Prefer projectile when available (projectile-project-root), otherwise use
 the built-in project.el's project-current/project-root. Return nil when no
-project can be determined. This makes the project layer adaptive to either
-backend." 
-  (cond
-   ;; Projectile preferred for its richer UX when installed
-   ((and (fboundp 'projectile-project-root)
-         (projectile-project-root))
-    (projectile-project-root))
-   ;; Fallback to project.el
-   ((and (fboundp 'project-current))
-    (when-let ((project (project-current)))
-      (project-root project)))
-   (t nil)))
+project can be determined.
+
+Cached per buffer keyed on `default-directory'; hot callers (header timers,
+mode-line) avoid the projectile/file-truename chain on every invocation."
+  (let ((dir default-directory))
+    (if (and pro-project-root--cache
+             (equal (car pro-project-root--cache) dir))
+        (cdr pro-project-root--cache)
+      (let ((root (pro-project-root--compute)))
+        (setq pro-project-root--cache (cons dir root))
+        root))))
 
 (defun pro-project-ripgrep ()
   "Искать в текущем проекте через Consult."
