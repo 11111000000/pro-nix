@@ -114,18 +114,22 @@ Disable if you observe frame jitter on your setup."
   (setq pro-completion--kind-icon-installed t)
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
-;; Minibuffer: enable Corfu only when Vertico/MCT aren't active
+;; Minibuffer: disable Corfu completely when Vertico/MCT are active
 (defun pro-completion--maybe-enable-corfu-in-minibuffer ()
   "Configure Corfu in minibuffer unless Vertico/MCT is active.
 
 We intentionally do NOT enable `corfu-mode' in the minibuffer here — the
-minibuffer UX is better served by Vertico/Consult. We only disable automatic
-popup behaviour (corfu-auto) when Corfu is present, to avoid accidental
-in-buffer style popups during minibuffer commands when Vertico isn't active.
-"
-  (unless (or (bound-and-true-p vertico--input) (bound-and-true-p mct--active))
+minibuffer UX is better served by Vertico/Consult. We disable both
+corfu-auto and corfu-mode when any minibuffer completion UI is active."
+  (cond
+   ((or (bound-and-true-p vertico--input) (bound-and-true-p mct--active))
+    (when (boundp 'corfu-mode)
+      (corfu-mode -1))
     (when (boundp 'corfu-auto)
-      (setq-local corfu-auto nil))))
+      (setq-local corfu-auto nil)))
+   (t
+    (when (boundp 'corfu-auto)
+      (setq-local corfu-auto t)))))
 (add-hook 'minibuffer-setup-hook #'pro-completion--maybe-enable-corfu-in-minibuffer)
 
 ;; Orderless включаем только после успешной загрузки стиля, чтобы не получать ошибку `invalid completion style orderless' на старте.

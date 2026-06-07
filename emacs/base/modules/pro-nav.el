@@ -18,7 +18,9 @@
   ;; проверяем наличие определения функции и безопасно включаем режим.
   (when (fboundp 'vertico-mode)
     (vertico-mode 1)
-    (setq vertico-cycle t))
+    (setq vertico-cycle t
+          vertico-count 10
+          vertico-resize-width nil))
   ;; Install navigation keys after vertico is loaded to avoid timing issues.
   (with-eval-after-load 'vertico
     (when (and (boundp 'vertico-map) (keymapp vertico-map))
@@ -30,6 +32,7 @@
       ;; is often `C-i', so bind that too — this makes TAB/C-i behave like C-n.
       (define-key vertico-map (kbd "TAB") #'vertico-next)
       (define-key vertico-map (kbd "<backtab>") #'vertico-previous)
+      (define-key vertico-map (kbd "S-TAB") #'vertico-previous)
       (define-key vertico-map (kbd "C-i") #'vertico-next)
       ;; Accept candidate with RET but keep original behavior in certain contexts
       (define-key vertico-map (kbd "RET") #'vertico-exit))))
@@ -46,11 +49,13 @@
 
 ;; Universal minibuffer TAB behaviour: cycle candidates where appropriate.
 (defun pro/minibuffer-tab ()
-  "TAB behaviour in minibuffer: cycle Vertico/MCT candidates if active, else fallback to minibuffer-complete." 
+  "TAB behaviour in minibuffer: cycle Vertico/MCT candidates if active, else fallback to minibuffer-complete."
   (interactive)
   (cond
    ;; Vertico active: go to next candidate
-   ((and (boundp 'vertico--input) vertico--input (fboundp 'vertico-next))
+   ((and (fboundp 'vertico-next)
+         (boundp 'vertico--input)
+         vertico--input)
     (vertico-next))
    ;; MCT (minibuffer completion at point) support if present
    ((and (boundp 'mct--active) mct--active (fboundp 'mct-next))
@@ -60,10 +65,12 @@
     (minibuffer-complete))))
 
 (defun pro/minibuffer-backtab ()
-  "Shift-TAB behaviour in minibuffer: previous candidate or minibuffer-complete-backward." 
+  "Shift-TAB behaviour in minibuffer: previous candidate or minibuffer-complete-backward."
   (interactive)
   (cond
-   ((and (boundp 'vertico--input) vertico--input (fboundp 'vertico-previous))
+   ((and (fboundp 'vertico-previous)
+         (boundp 'vertico--input)
+         vertico--input)
     (vertico-previous))
    ((and (boundp 'mct--active) mct--active (fboundp 'mct-previous))
     (mct-previous))
@@ -123,6 +130,8 @@
       (when (keymapp m)
         (define-key m (kbd "C-n") #'pro/minibuffer-next)
         (define-key m (kbd "C-p") #'pro/minibuffer-previous)
+        (define-key m (kbd "M-n") #'pro/minibuffer-next)
+        (define-key m (kbd "M-p") #'pro/minibuffer-previous)
         ;; Also accept C-j/C-k as navigation aliases (common preference)
         (define-key m (kbd "C-j") #'pro/minibuffer-next)
         (define-key m (kbd "C-k") #'pro/minibuffer-previous)))))
@@ -160,13 +169,15 @@
       (setq consult-preview-key "M-."
             consult-line-start-from-top t)))
 
+  ;; Ensure the minibuffer shows candidates immediately when there are few
+  (setq minibuffer-eldef-shorten-default t)
+
   ;; Embark integration (без глобальных клавиш; бинды — через emacs-keys.org)
   (when (require 'embark nil t)
     (ignore (fboundp 'embark-act)))
 
   ;; Load and enable embark-consult integration if present
   (when (require 'embark-consult nil t)
-    ;; embark-consult auto-registers; nothing else required here
     )
 
   ;; Useful consult extensions and tweaks (lazy, non-fatal requires)
@@ -185,7 +196,6 @@
 
   ;; consult-yasnippet: allow searching snippets via consult UI when available
   (when (require 'consult-yasnippet nil t)
-    ;; no extra config required; binding is provided in completion-keys module
     )
 
   ;; consult-eglot: bind a convenient key in eglot-mode if available
@@ -198,9 +208,9 @@
   (when (and (boundp 'consult-buffer-sources) (fboundp 'cl-remove))
     (setq consult-buffer-sources
           (cl-remove 'consult--source-project-buffer consult-buffer-sources :test #'eq)))
+
   ;; Provide helper functions (small and defensive); no global remaps here.
-    (require 'pro-consult-helpers nil t)
-  )
+  (require 'pro-consult-helpers nil t))
 
 (defun pro-nav-search-project ()
   "Искать в текущем проекте, если доступен project root."

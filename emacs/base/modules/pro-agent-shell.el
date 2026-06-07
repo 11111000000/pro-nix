@@ -140,7 +140,12 @@ Uses `pro-project-root' when available, otherwise falls back to
                       enriched
                     base))
               base)))
-        (advice-add #'agent-shell--project-name :override #'pro-agent-shell--project-name-wrapper))
+        ;; Use :around so the wrapper receives the original function as the
+        ;; first argument (orig-fn). The wrapper calls it to obtain the base
+        ;; name and enriches it. Using :override here caused the wrapper to be
+        ;; called with the original's arguments (none), leading to a wrong-
+        ;; arity error when the wrapper expected orig-fn.
+        (advice-add #'agent-shell--project-name :around #'pro-agent-shell--project-name-wrapper))
 
       ;; ---- Strip provider name from text header ----
       ;; The default text header starts with the buffer-name (provider, e.g.

@@ -1,0 +1,99 @@
+pro-packages: ensure candidate consult (provided-by-nix=(consult consult-dash consult-eglot consult-projectile consult-yasnippet corfu corfu-terminal dash-docs eglot elfeed expand-region gptel kind-icon magit marginalia nix-mode orderless org ob-mermaid projectile rainbow-delimiters treemacs vertico vterm yasnippet embark-consult dash-docs consult-dash multi-vterm eshell-toggle acapella atlas shaoline tao-theme))
+pro-packages: ensure candidate corfu (provided-by-nix=(corfu corfu-terminal dash-docs eglot elfeed expand-region gptel kind-icon magit marginalia nix-mode orderless org ob-mermaid projectile rainbow-delimiters treemacs vertico vterm yasnippet embark-consult dash-docs consult-dash multi-vterm eshell-toggle acapella atlas shaoline tao-theme))
+pro-packages: ensure candidate cape (provided-by-nix=(cape consult consult-dash consult-eglot consult-projectile consult-yasnippet corfu corfu-terminal dash-docs eglot elfeed expand-region gptel kind-icon magit marginalia nix-mode orderless org ob-mermaid projectile rainbow-delimiters treemacs vertico vterm yasnippet embark-consult dash-docs consult-dash multi-vterm eshell-toggle acapella atlas shaoline tao-theme))
+pro-packages: ensure candidate treemacs (provided-by-nix=(treemacs vertico vterm yasnippet embark-consult dash-docs consult-dash multi-vterm eshell-toggle acapella atlas shaoline tao-theme))
+pro-packages: ensure candidate projectile (provided-by-nix=(projectile rainbow-delimiters treemacs vertico vterm yasnippet embark-consult dash-docs consult-dash multi-vterm eshell-toggle acapella atlas shaoline tao-theme))
+pro-packages: ensure candidate expand-region (provided-by-nix=(expand-region gptel kind-icon magit marginalia nix-mode orderless org ob-mermaid projectile rainbow-delimiters treemacs vertico vterm yasnippet embark-consult dash-docs consult-dash multi-vterm eshell-toggle acapella atlas shaoline tao-theme))
+pro-packages: ensure candidate yasnippet (provided-by-nix=(yasnippet embark-consult dash-docs consult-dash multi-vterm eshell-toggle acapella atlas shaoline tao-theme))
+pro-packages: ensure candidate consult-yasnippet (provided-by-nix=(consult-yasnippet corfu corfu-terminal dash-docs eglot elfeed expand-region gptel kind-icon magit marginalia nix-mode orderless org ob-mermaid projectile rainbow-delimiters treemacs vertico vterm yasnippet embark-consult dash-docs consult-dash multi-vterm eshell-toggle acapella atlas shaoline tao-theme))
+pro-packages: ensure candidate consult-eglot (provided-by-nix=(consult-eglot consult-projectile consult-yasnippet corfu corfu-terminal dash-docs eglot elfeed expand-region gptel kind-icon magit marginalia nix-mode orderless org ob-mermaid projectile rainbow-delimiters treemacs vertico vterm yasnippet embark-consult dash-docs consult-dash multi-vterm eshell-toggle acapella atlas shaoline tao-theme))
+pro-packages: ensure candidate kind-icon (provided-by-nix=(kind-icon magit marginalia nix-mode orderless org ob-mermaid projectile rainbow-delimiters treemacs vertico vterm yasnippet embark-consult dash-docs consult-dash multi-vterm eshell-toggle acapella atlas shaoline tao-theme))
+pro-packages: ensure candidate vterm (provided-by-nix=(vterm yasnippet embark-consult dash-docs consult-dash multi-vterm eshell-toggle acapella atlas shaoline tao-theme))
+pro-packages: ensure candidate eldoc-box (provided-by-nix=nil)
+pro-packages: ensure candidate mmm-mode (provided-by-nix=nil)
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-core.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-ui.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-packages.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-package-bootstrap.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-project.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-git.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-nix.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-js.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-ai.el exists but is not owned by current user; preferring system module if available
+[pro-ai] carriage loaded from /home/az/Code/carriage
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-agent-shell.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-c.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-chat.el exists but is not owned by current user; preferring system module if available
+[pro-chat] telega недоступен; пропускаю инициализацию
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-telega.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-compat.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-completion.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-completion-keys.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-consult-helpers.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-dired.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-app-launcher.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-emacs-check-fonts.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-exwm-sim.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-exwm.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-feeds.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-fix-corfu.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-haskell.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-java.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-key-utils.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-keys.el exists but is not owned by current user; preferring system module if available
+pro-ui: failed to register embark suggestion
+[pro-emacs] failed to load module /home/az/.config/emacs/modules/pro-keys.el: (void-variable KEY)
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-lisp.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-nix-refresh.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-org.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-python.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-reload.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-session.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-history.el exists but is not owned by current user; preferring system module if available
+[pro-history] failed to register suggested keys
+Loading /home/az/.local/state/pro-emacs/recentf.el (source)...done
+Desktop is not restored automatically. Restore with M-x pro-history-restore-last-session
+pro-history: initialized (state=/home/az/.local/state/pro-emacs/ cache=/home/az/.cache/pro-emacs/)
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-spell.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-startup-metrics.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-tabs.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-terminals.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-test-helpers.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-tests.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-tests-keys.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-text.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-ui-completion.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-ui-fonts.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-ui-fringes.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-ui-icons.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-ui-improvements.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-ui-modeline.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-ui-theme.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-ui-tty.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-dashboard.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-help.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-windows-popups.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-vterm-theme.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-windows.el exists but is not owned by current user; preferring system module if available
+[pro-emacs] user module /home/az/.config/emacs/modules/pro-nav.el exists but is not owned by current user; preferring system module if available
+Entering debugger...
+[pro-ai] default backend: Aitunnel
+Mark set
+Copied text from "Debugger entered--Lisp error: (void-vari"
+apply: Wrong number of arguments: #[(orig-fn) ((let ((base (funcall orig-fn))) (if (and base (not (string-empty-p base))) (let* ((dir default-directory) (enriched (let ((default-directory dir)) (pro-agent-shell--project-name)))) (if (and enriched (not (string-empty-p enriched))) enriched base)) base))) (t) nil "Return project name enriched with branch and worktree info."], 0
+next-line: End of buffer [3 times]
+apply: Wrong number of arguments: #[(orig-fn) ((let ((base (funcall orig-fn))) (if (and base (not (string-empty-p base))) (let* ((dir default-directory) (enriched (let ((default-directory dir)) (pro-agent-shell--project-name)))) (if (and enriched (not (string-empty-p enriched))) enriched base)) base))) (t) nil "Return project name enriched with branch and worktree info."], 0 [2 times]
+C-x C-g is undefined
+
+Debugger entered--Lisp error: (void-variable modules)
+  (message "[pro-emacs] loaded modules: %S" modules)
+  pro-emacs-base-start()
+  (let ((base-dir (file-name-directory (or load-file-name buffer-file-name)))) (setq user-emacs-directory (file-name-as-directory (expand-file-name "~/.config/emacs/"))) (setq custom-file (expand-file-name "custom.el" user-emacs-directory)) (if (file-exists-p custom-file) (progn (load custom-file nil t))) (setq pro-emacs-base-system-modules-dir (expand-file-name "modules" base-dir)) (if (file-readable-p (expand-file-name "pro-compat.el" pro-emacs-base-system-modules-dir)) (progn (load (expand-file-name "pro-compat.el" pro-emacs-base-system-modules-dir) nil t))) (if (file-readable-p (expand-file-name "pro-packages.el" pro-emacs-base-system-modules-dir)) (progn (load (expand-file-name "pro-packages.el" pro-emacs-base-system-modules-dir) nil t))) (if (fboundp 'pro-packages-configure-archives) (progn (pro-packages-configure-archives))) (if (fboundp 'pro-packages-initialize) (progn (pro-packages-initialize))) (if (file-directory-p pro-emacs-base-system-modules-dir) (progn (add-to-list 'load-path pro-emacs-base-system-modules-dir))) (load (expand-file-name "site-init.el" base-dir) nil t) (if (require 'pro-packages nil t) (progn (condition-case nil (progn (if (fboundp 'pro-packages-ensure-required) (progn (pro-packages-ensure-required)))) (error nil)))) (pro-emacs-base-start))
+  load-with-code-conversion("/home/az/.config/emacs/init.el" "/home/az/.config/emacs/init.el" t t)
+  load("/home/az/.config/emacs/init" noerror nomessage)
+  #f(compiled-function () #<bytecode 0x171a5d6e67745691>)()
+  #f(compiled-function () #<bytecode -0x4307d7bb01d2857>)()
+  handler-bind-1(#f(compiled-function () #<bytecode -0x4307d7bb01d2857>) (error) startup--debug)
+  startup--load-user-init-file(#f(compiled-function () #<bytecode 0x1811db1183833972>) #f(compiled-function () #<bytecode -0x15951949e52b234f>) t)
+  command-line()
+  normal-top-level()

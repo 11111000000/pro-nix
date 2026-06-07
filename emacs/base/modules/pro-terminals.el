@@ -57,15 +57,39 @@ vterm доступен в вашей системе (Nix/Home-Manager или ELP
                  ;; Escape from copy mode back to prompt
                  (define-key vterm-copy-mode-map (kbd "C-g")
                    (lambda () (interactive) (when (bound-and-true-p vterm-copy-mode) (vterm-copy-mode -1) (when (and (boundp 'vterm--process-marker) vterm--process-marker) (goto-char vterm--process-marker))))))
-               ;; Move up in line-mode or enter copy-mode then move
-               (define-key vterm-mode-map (kbd "C-p")
-                 (lambda () (interactive)
-                   (unless (bound-and-true-p vterm-copy-mode)
-                     (vterm-copy-mode 1))
-                   (when (bound-and-true-p vterm-copy-mode)
-                     (let ((cmd (or (lookup-key vterm-copy-mode-map (kbd "<up>") )
-                                    (lookup-key vterm-copy-mode-map (kbd "p")))))
-                       (when cmd (call-interactively cmd))))))
+                ;; Move up in line-mode or enter copy-mode then move
+                (define-key vterm-mode-map (kbd "C-p")
+                  (lambda () (interactive)
+                    (unless (bound-and-true-p vterm-copy-mode)
+                      (vterm-copy-mode 1))
+                    (when (bound-and-true-p vterm-copy-mode)
+                      (let ((cmd (or (lookup-key vterm-copy-mode-map (kbd "<up>") )
+                                     (lookup-key vterm-copy-mode-map (kbd "p")))))
+                        (when cmd (call-interactively cmd))))))
+                ;; History navigation: M-p / M-n should traverse shell history
+                (defun pro/vterm-history-previous ()
+                  "Send Meta-p to the underlying vterm (previous history)."
+                  (interactive)
+                  (when (derived-mode-p 'vterm-mode)
+                    (if (fboundp 'vterm-send-key)
+                        ;; try to use vterm-send-key when available
+                        (ignore-errors (vterm-send-key ?p '(meta)))
+                      ;; fallback: send ESC p
+                      (vterm-send-string "\ep"))))
+
+                (defun pro/vterm-history-next ()
+                  "Send Meta-n to the underlying vterm (next history)."
+                  (interactive)
+                  (when (derived-mode-p 'vterm-mode)
+                    (if (fboundp 'vterm-send-key)
+                        (ignore-errors (vterm-send-key ?n '(meta)))
+                      (vterm-send-string "\en"))))
+
+                (define-key vterm-mode-map (kbd "M-p") #'pro/vterm-history-previous)
+                (define-key vterm-mode-map (kbd "M-n") #'pro/vterm-history-next)
+                ;; Yank into vterm: C-y should insert last kill-ring entry
+                (when (fboundp 'pro/vterm-yank)
+                  (define-key vterm-mode-map (kbd "C-y") #'pro/vterm-yank))
                ;; Optional consult integration: provide a yank-pop that works in vterm
                (when (and (fboundp 'consult-yank-pop) (fboundp 'vterm-send-string))
                  (defun pro/vterm-consult-yank-pop ()
