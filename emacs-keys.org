@@ -24,15 +24,15 @@
 | UI         | C-0           | pro-ui-zoom-reset                     | Сбросить масштаб                     |
 | UI         | C-\           | toggle-input-method                   | Переключить Emacs-IM (ru/en)         |
 | UI         | C-x M-c       | pro/reload-config                     | Перечитать весь конфиг (soft reload) |
-| History    | C-_           | undo-tree-undo                        | Шаг назад (undo)                     |
-| History    | M-_           | undo-tree-redo                        | Шаг вперёд (redo)                    |
-| History    | C-z           | undo-tree-undo                        | Шаг назад (дубль)                    |
-| History    | C-M-z         | undo-tree-redo                        | Шаг вперёд (дубль)                   |
-| History    | C-c u         | undo-tree-visualize                   | Дерево отмен                         |
-| History    | C-c z         | undo-tree-visualize                   | Дерево отмен (дубль)                 |
-| History    | C-c C-,       | goto-last-point                       | К последней позиции курсора          |
+| History    | C-_           | pro-history-undo                      | Шаг назад (undo)                     |
+| History    | M-_           | pro-history-redo                      | Шаг вперёд (redo)                    |
+| History    | C-z           | pro-history-undo                      | Шаг назад (дубль)                    |
+| History    | C-M-z         | pro-history-redo                      | Шаг вперёд (дубль)                   |
+| History    | C-c u         | pro-history-time-machine              | Дерево отмен                         |
+| History    | C-c z         | pro-history-time-machine              | Дерево отмен (дубль)                 |
+| History    | C-c C-,       | goto-last-change-reverse              | К предыдущей правке                  |
 | History    | C-c .         | goto-last-change                      | К последней правке                   |
-| History    | C-c ,         | goto-last-point                       | К предыдущей позиции                 |
+| History    | C-c ,         | goto-last-change-reverse              | К предыдущей правке                  |
 | History    | <XF86Back>    | winner-undo                           | Откат раскладки окон                 |
 | History    | <XF86Forward> | winner-redo                           | Повтор раскладки окон                |
 | History    | C-c M-h       | pro-history-transient                 | Меню истории (transient)             |
@@ -71,9 +71,8 @@
 | Completion | C-c o .       | completion-at-point                   | Вызвать CAPF                         |
 | Completion | C-c o p       | completion-at-point                   | CAPF (alias из pro)                  |
 | Completion | C-c o t       | complete-tag                          | Дополнить тег                        |
-| Completion | C-c o i       | cape-ispell                           | Орфография                           |
+| Completion | C-c o i       | cape-dict                             | Словарь                              |
 | Completion | C-c o l       | cape-line                             | Строка из буфера                     |
-| Completion | C-c o w       | cape-wrap-prefix                      | Обёртка префикса                     |
 | Snippet    | C-c y y       | consult-yasnippet                     | Выбор сниппета                       |
 | LSP        | C-c C-.       | consult-eglot-symbols                 | Поиск символов LSP                   |
 | Навигация  | M-g g         | avy-goto-char                         | Прыжок к символу                     |
@@ -87,7 +86,7 @@
 | Окна       | C-x -         | pro-windows-shrink                    | Уменьшить окно                       |
 | AI         | C-c a         | pro-ai-open-entry                     | Вход в AI                            |
 | AI         | C-c A         | pro-agent-open                        | agent-shell                          |
-| Чат        | C-c T         | pro-chat-open                         | Telegram                             |
+| Чат        | C-c T         | pro/chat-open                         | Telegram                             |
 | Чат        | C-c t o       | pro/chat-open                         | Open Telegram (telega)               |
 | Чат        | C-c t k       | pro/chat-close-idle-chats             | Close idle telega chat buffers       |
 | Чат        | C-c t e       | pro/chat-reload-emojis                | Reload telega emoji tables           |
