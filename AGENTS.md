@@ -146,6 +146,21 @@ just headless-tests && just headless-report
 Контрмера: после правки flake.nix прогонять eval конкретных атрибутов (см. §6),
 а не только `nix flake check`.
 
+### 6c. Submodules и URL флейка
+
+`nix flake check` / `nix build` с локальным флейком через `path:` URL **не
+включают git-сабмодули в captured source**. Рецепты в `nix/emacs-recipes/*.nix`
+берут `src = ../../submodules/<name>`; с `path:`-URL это `path does not exist`.
+
+**Всегда** использовать `git+file://$(pwd)?submodules=1` для:
+- `nix flake check` / `nix flake show`
+- `nix build` / `nixos-rebuild build|switch|test`
+- `nix run .#check-all`
+
+Это уже зашито в `justfile` (recipes `build`, `test`, `flake-check`,
+`check-all`) и `scripts/helper-switch.sh` (`FLAKE_REF`). Для прямого
+вызова из shell — копируй URL из этих мест.
+
 ### 6b. Детекторы мёртвого кода
 
 Сигналы, по которым файл/модуль можно удалять (после ритуала ниже):

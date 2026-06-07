@@ -11,7 +11,10 @@
 
 HOST_ARG="${1:-}"
 HOST_ARG="${HOST_ARG#HOST=}"
-FLAKE_REF="path:$PWD"
+# Use git+file:// with submodules=1 so nix captures submodules into the store
+# source. Local path: URLs do not include submodules, which breaks the emacs
+# recipes that read `../../submodules/<name>` as their source.
+FLAKE_REF="git+file://$PWD?submodules=1"
 
 if [ -z "$HOST_ARG" ]; then
   if [ -r /etc/hostname ]; then

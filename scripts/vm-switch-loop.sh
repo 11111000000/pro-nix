@@ -8,7 +8,7 @@ mkdir -p "$LOG_DIR"
 
 export PATH="/run/current-system/sw/bin:/run/wrappers/bin:$PATH"
 
-CHECK=".#checks.x86_64-linux.cf19-switch-dbus-regression"
+CHECK="git+file://$ROOT?submodules=1#checks.x86_64-linux.cf19-switch-dbus-regression"
 
 log_status() {
   printf '%s\n' "$1" | tee -a "$LOG_DIR/status.log"

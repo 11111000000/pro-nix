@@ -16,7 +16,9 @@ install-plain:
 	./scripts/dev-emacs-sync.sh
 
 build HOST:
-	sudo nixos-rebuild build --flake .#{{HOST}}
+	# `git+file://...?submodules=1` нужен чтобы emacs-recipes видели submodules
+	# (см. flake-check ниже). `path:` и `.` НЕ включают submodules в captured source.
+	sudo nixos-rebuild build --flake "git+file://$(pwd)?submodules=1#{{HOST}}"
 
 switch HOST='':
 	scripts/switch.sh "{{HOST}}"
@@ -26,10 +28,13 @@ switch-with-agents HOST='':
 	./scripts/deploy-agent-configs.sh && scripts/switch.sh "{{HOST}}"
 
 test HOST:
-	sudo nixos-rebuild test --flake .#{{HOST}}
+	sudo nixos-rebuild test --flake "git+file://$(pwd)?submodules=1#{{HOST}}"
 
 flake-check:
-	nix flake check
+	# Используем git+file://...?submodules=1 чтобы submodules попали в nix-store
+	# source. `path:` и `.` НЕ включают submodules в captured source, что ломает
+	# emacs-recipes, читающие `../../submodules/<name>`.
+	nix flake check "git+file://$(pwd)?submodules=1"
 check-fast:
 	./tools/holo-verify.sh --help >/dev/null
 

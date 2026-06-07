@@ -132,9 +132,12 @@
           meta.description = "Build all machine configurations explicitly";
           program = toString (pkgs.writeShellScript "check-all-hosts" ''
             set -eu
-            nix build .#nixosConfigurations.cf19.config.system.build.toplevel
-            nix build .#nixosConfigurations.huawei.config.system.build.toplevel
-            nix build .#nixosConfigurations.desktop.config.system.build.toplevel
+            # Используем git+file://...?submodules=1 — path: и . НЕ включают
+            # submodules в captured source (см. AGENTS.md §6a).
+            FLAKE="git+file://$PWD?submodules=1"
+            nix build "$FLAKE#nixosConfigurations.cf19.config.system.build.toplevel"
+            nix build "$FLAKE#nixosConfigurations.huawei.config.system.build.toplevel"
+            nix build "$FLAKE#nixosConfigurations.desktop.config.system.build.toplevel"
           '');
         };
 
