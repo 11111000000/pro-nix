@@ -78,10 +78,16 @@
 Аргументы передаются в FN напрямую." (apply (if (fboundp fn) fn (lambda (&rest _) (message "[pro-agent-shell] %s недоступна" fn))) args))
 
       (defun pro-agent-shell--setup-keys ()
-        "Установить локальные клавиши в буфере agent-shell, если режим доступен."
+        "Установить локальные клавиши и локальные опции в буфере agent-shell, если режим доступен."
         (when (derived-mode-p 'agent-shell-mode)
           (when (fboundp 'agent-shell-set-session-model)
-            (local-set-key (kbd "C-c m") #'agent-shell-set-session-model))))
+            (local-set-key (kbd "C-c m") #'agent-shell-set-session-model))
+          ;; comint переопределяет truncate-lines в t, из-за чего длинные
+          ;; строки вывода (markdown, код, json) режутся по правому краю
+          ;; окна. Включаем мягкий перенос по словам, чтобы конец вывода
+          ;; был виден целиком.
+          (setq-local word-wrap t)
+          (setq-local truncate-lines nil)))
 
       (when (boundp 'agent-shell-mode-hook)
         (add-hook 'agent-shell-mode-hook #'pro-agent-shell--setup-keys))
@@ -99,52 +105,86 @@
       ;; Project name: append ":<branch>" and "+wt:<name>" when in a git repo
       ;; and a worktree. We wrap `agent-shell--project-name' so the existing
       ;; header rendering picks up the enriched name automatically.
-      (defun pro-agent-shell--project-name ()
-        "Return current project name, with branch and worktree info if available.
+      ;;
+      ;; Performance: the wrapper fires on a 5-second timer per agent-shell
+      ;; buffer. Doing fork+exec of git here showed up as ~35% of total CPU in
+      ;; profiles. We replace the shell-outs with direct reads of `.git/HEAD'
+      ;; and cache the result keyed on the HEAD file mtime so we recompute only
+      ;; when the user actually switches branch.
+      (defun pro-agent-shell--read-trimmed (path)
+        "Return PATH contents trimmed, or nil if unreadable."
+        (when (and path (file-readable-p path))
+          (condition-case _err
+              (with-temp-buffer
+                (insert-file-contents-literally path)
+                (string-trim (buffer-string)))
+            (error nil))))
 
-Uses `pro-project-root' when available, otherwise falls back to
-`default-directory'. The returned string is concise, e.g. \"proj:main\" or
-\"proj:feature/foo+wt:adoring-hawking\" when in a git worktree." 
-        (let* ((root (if (and (fboundp 'pro-project-root)
-                              (pro-project-root))
-                          (pro-project-root)
-                        default-directory))
+      (defun pro-agent-shell--resolve-gitdir (dir)
+        "Return absolute gitdir for working tree DIR, or nil.
+Handles both regular repos (.git is a directory) and worktrees
+(.git is a file with `gitdir: <path>')."
+        (let ((dot-git (expand-file-name ".git" dir)))
+          (cond
+           ((file-directory-p dot-git) dot-git)
+           ((file-regular-p dot-git)
+            (let ((c (pro-agent-shell--read-trimmed dot-git)))
+              (when (and c (string-match "\\`gitdir:[ \t]*\\(.+\\)\\'" c))
+                (expand-file-name (match-string 1 c) dir))))
+           (t nil))))
+
+      (defun pro-agent-shell--branch-from-head (head)
+        "Extract branch name (or short SHA) from raw HEAD file contents."
+        (cond
+         ((null head) nil)
+         ((string-match "\\`ref:[ \t]*refs/heads/\\(.+\\)\\'" head)
+          (match-string 1 head))
+         ((string-match "\\`[0-9a-f]\\{7,40\\}\\'" head)
+          (substring head 0 7))
+         (t nil)))
+
+      (defvar-local pro-agent-shell--project-name-cache nil
+        "Cached enriched project name: (CACHE-KEY . VALUE).
+CACHE-KEY is (DIR . HEAD-MTIME); refreshed only when HEAD changes.")
+
+      (defun pro-agent-shell--project-name ()
+        "Return enriched project name (`proj:branch+wt:name').
+Reads `.git/HEAD' directly, caches result by HEAD mtime. No fork/exec." 
+        (let* ((root (or (and (fboundp 'pro-project-root) (pro-project-root))
+                         default-directory))
                (dir (and root (directory-file-name (expand-file-name root))))
-               (proj (file-name-nondirectory (or dir ""))))
-          (when proj
-            (condition-case _err
-                (let* ((default-directory (or dir default-directory))
-                       (branch (string-trim (shell-command-to-string "git rev-parse --abbrev-ref HEAD 2>/dev/null")))
-                       (gitdir-out (string-trim (shell-command-to-string "git rev-parse --git-dir 2>/dev/null")))
-                       (gitdir (and (not (string-empty-p gitdir-out))
-                                    ;; Make absolute and normalize
-                                    (expand-file-name gitdir-out default-directory)))
-                       (worktree-name (when (and gitdir (string-match "/worktrees/\\([^/]+\\)$" gitdir))
-                                        (match-string 1 gitdir))))
-                  (if (not (string-empty-p branch))
-                      (if worktree-name
-                          (format "%s:%s+wt:%s" proj branch worktree-name)
-                        (format "%s:%s" proj branch))
-                    proj))
-              (error proj)))))
+               (proj (and dir (file-name-nondirectory dir))))
+          (when (and proj (not (string-empty-p proj)))
+            (let* ((gitdir (pro-agent-shell--resolve-gitdir dir))
+                   (head-path (and gitdir (expand-file-name "HEAD" gitdir)))
+                   (mtime (and head-path
+                               (file-attribute-modification-time
+                                (file-attributes head-path))))
+                   (key (cons dir mtime)))
+              (if (and pro-agent-shell--project-name-cache
+                       (equal (car pro-agent-shell--project-name-cache) key))
+                  (cdr pro-agent-shell--project-name-cache)
+                (let* ((worktree (and gitdir
+                                      (string-match
+                                       "/worktrees/\\([^/]+\\)/?\\'" gitdir)
+                                      (match-string 1 gitdir)))
+                       (branch (pro-agent-shell--branch-from-head
+                                (pro-agent-shell--read-trimmed head-path)))
+                       (value (cond
+                               ((and branch worktree)
+                                (format "%s:%s+wt:%s" proj branch worktree))
+                               (branch (format "%s:%s" proj branch))
+                               (t proj))))
+                  (setq pro-agent-shell--project-name-cache (cons key value))
+                  value))))))
 
       (when (fboundp 'agent-shell--project-name)
-        (defun pro-agent-shell--project-name-wrapper (orig-fn)
-          "Return project name enriched with branch and worktree info."
-          (let ((base (funcall orig-fn)))
-            (if (and base (not (string-empty-p base)))
-                (let* ((dir default-directory)
-                       (enriched (let ((default-directory dir))
-                                   (pro-agent-shell--project-name))))
-                  (if (and enriched (not (string-empty-p enriched)))
-                      enriched
-                    base))
-              base)))
-        ;; Use :around so the wrapper receives the original function as the
-        ;; first argument (orig-fn). The wrapper calls it to obtain the base
-        ;; name and enriches it. Using :override here caused the wrapper to be
-        ;; called with the original's arguments (none), leading to a wrong-
-        ;; arity error when the wrapper expected orig-fn.
+        (defun pro-agent-shell--project-name-wrapper (orig-fn &rest args)
+          "Return enriched project name; fall back to ORIG-FN on failure.
+Skips ORIG-FN (which itself runs projectile-project-root) when our
+fast path produces a valid name." 
+          (or (condition-case _err (pro-agent-shell--project-name) (error nil))
+              (apply orig-fn args)))
         (advice-add #'agent-shell--project-name :around #'pro-agent-shell--project-name-wrapper))
 
       ;; ---- Strip provider name from text header ----
@@ -177,18 +217,35 @@ HEADER is the text header produced by `agent-shell--make-header'."
         (advice-add #'agent-shell--make-header :around #'pro-agent-shell--header-wrapper))
 
       ;; ---- Periodic refresh of header so branch/worktree stay current ----
+      ;; Performance: the timer fires per buffer; firing while the buffer is
+      ;; not visible or while the user is in the minibuffer wastes CPU during
+      ;; flyspell's `accept-process-output' window and inside completing-read.
+      ;; Profiles showed this path consuming ~35% of total CPU.
       (defun pro-agent-shell--refresh-timer-fn ()
-        "Timer callback: re-render the agent-shell header in the current buffer."
-        (when (derived-mode-p 'agent-shell-mode)
+        "Timer callback: re-render header only when worth doing.
+Skips when the buffer is not displayed in any visible window or when
+the minibuffer is active (user is interacting with completion)." 
+        (when (and (derived-mode-p 'agent-shell-mode)
+                   (get-buffer-window (current-buffer) 'visible)
+                   (not (active-minibuffer-window)))
           (ignore-errors (agent-shell--update-header-and-mode-line))))
 
+      (defcustom pro-agent-shell-refresh-interval 15
+        "Seconds between agent-shell header refreshes.
+Branch/worktree information rarely changes; a longer interval reduces
+CPU and GC pressure while keeping the header fresh enough to be useful."
+        :type 'number
+        :group 'pro)
+
       (defun pro-agent-shell--install-refresh-timer ()
-        "Install a buffer-local timer that re-renders the header every 5s."
+        "Install a buffer-local timer that re-renders the header."
         (when (and (derived-mode-p 'agent-shell-mode)
                    (fboundp 'agent-shell--update-header-and-mode-line)
                    (not (timerp pro-agent-shell--refresh-timer)))
           (setq pro-agent-shell--refresh-timer
-                (run-at-time 5 5 #'pro-agent-shell--refresh-timer-fn))))
+                (run-at-time pro-agent-shell-refresh-interval
+                             pro-agent-shell-refresh-interval
+                             #'pro-agent-shell--refresh-timer-fn))))
 
       (defvar-local pro-agent-shell--refresh-timer nil
         "Buffer-local timer that re-renders the agent-shell header.")
