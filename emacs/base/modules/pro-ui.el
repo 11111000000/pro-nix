@@ -263,8 +263,10 @@ is set accordingly."
   :type 'string
   :group 'pro-ui)
 
-(defcustom pro-ui-cursor-english-color "#000000"
-  "Цвет курсора для стандартного (английского) ввода."
+(defcustom pro-ui-cursor-english-color "#00ff00"
+  "Цвет курсора для стандартного (английского) ввода.
+
+По умолчанию зелёный — чтобы было заметно при возврате из русского раскладки."
   :type 'string
   :group 'pro-ui)
 
@@ -300,8 +302,11 @@ is set accordingly."
   (when (display-graphic-p)
     (pcase state
       ('readonly
-       (setq cursor-type 'box)
-       (set-face-attribute 'cursor nil :background pro-ui-cursor-readonly-color))
+        ;; Use a hollow box for read-only buffers: no fill (:background nil)
+        ;; and draw a 1px box of the readonly color. This renders an
+        ;; empty rectangle cursor instead of a filled box.
+        (setq cursor-type 'box)
+        (set-face-attribute 'cursor nil :background nil :box `(:line-width 1 :color ,pro-ui-cursor-readonly-color)))
       ('russian
        (setq cursor-type `(bar . ,pro-ui-cursor-bar-width))
        (set-face-attribute 'cursor nil :background pro-ui-cursor-russian-color))
