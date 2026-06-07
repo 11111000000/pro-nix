@@ -22,25 +22,34 @@
     (should (eq (pro-ui--cursor-state-from-input-method "ru-kbd") 'russian))
     (should (eq (pro-ui--cursor-state-from-input-method nil) 'english))))
 
-(ert-deftest pro-ui-cursor-english-applies-black-bar ()
-  "Английский ввод должен дать чёрный бар-курсор."
+(ert-deftest pro-ui-cursor-english-applies-bar-and-color ()
+  "Английский ввод должен дать бар-курсор заданного цвета."
   (when (fboundp 'pro-ui--apply-cursor-for-state)
     (let (calls cursor-type)
-      (cl-letf (((symbol-function 'set-face-attribute)
-                 (lambda (&rest args) (setq calls args))))
+      (cl-letf (((symbol-function 'display-graphic-p) (lambda (&rest _) t))
+                ((symbol-function 'set-face-attribute)
+                 (lambda (&rest args) (push args calls))))
         (pro-ui--apply-cursor-for-state 'english)
-        (should (equal cursor-type '(bar . 2)))
-        (should (equal calls '(cursor nil :background "#000000")))))))
+        (should (equal cursor-type `(bar . ,pro-ui-cursor-bar-width)))
+        ;; Были обновлены оба лица: `cursor' и `cursor-read-only'.
+        (let ((cursor-call (assq 'cursor calls))
+              (ro-call (assq 'cursor-read-only calls)))
+          (should cursor-call)
+          (should ro-call)
+          (should (equal (plist-get (cddr cursor-call) :background) pro-ui-cursor-english-color))
+          (should (eq (plist-get (cddr cursor-call) :box) nil)))))))
 
 (ert-deftest pro-ui-cursor-state-english-uses-bar-and-black-color ()
-  "Английский ввод должен возвращать состояние 'english и чёрный цвет курсора."
+  "Английский ввод должен возвращать состояние 'english и зелёный цвет курсора."
   (when (fboundp 'pro-ui--apply-cursor-for-state)
-    (let ((cursor-type nil))
-      (cl-letf (((symbol-function 'set-face-attribute)
+    (let ((cursor-type nil)
+          pro-ui--test-last-set-face)
+      (cl-letf (((symbol-function 'display-graphic-p) (lambda (&rest _) t))
+                ((symbol-function 'set-face-attribute)
                  (lambda (&rest args)
                    (setq pro-ui--test-last-set-face args))))
         (pro-ui--apply-cursor-for-state 'english)
-        (should (equal cursor-type '(bar . 2)))
+        (should (equal cursor-type `(bar . ,pro-ui-cursor-bar-width)))
         (should (equal (plist-get (cddr pro-ui--test-last-set-face) :background) pro-ui-cursor-english-color))))))
 
 (ert-deftest pro-ui-detect-cursor-state-prefers-readonly ()
@@ -50,6 +59,45 @@
       (let ((buffer-read-only t)
             (current-input-method "russian-computer"))
         (should (eq (pro-ui--detect-cursor-state) 'readonly))))))
+
+(ert-deftest pro-ui-cursor-readonly-sets-hollow-gray-box ()
+  "Read-only состояние должно ставить полый серый прямоугольник на оба лица."
+  (when (fboundp 'pro-ui--apply-cursor-for-state)
+    (let (face-calls cursor-type)
+      (cl-letf (((symbol-function 'display-graphic-p) (lambda (&rest _) t))
+                ((symbol-function 'set-face-attribute)
+                 (lambda (&rest args) (push args face-calls))))
+        (pro-ui--apply-cursor-for-state 'readonly))
+      (should (equal cursor-type 'box))
+      ;; Должны быть обновлены оба лица — `cursor' и `cursor-read-only'.
+      (let ((cursor-call (assq 'cursor face-calls))
+            (ro-call (assq 'cursor-read-only face-calls)))
+        (should cursor-call)
+        (should ro-call)
+        (should (eq (plist-get (cddr cursor-call) :background) nil))
+        (should (eq (plist-get (cddr ro-call) :background) nil))
+        ;; Цвет рамки — серый по умолчанию.
+        (let ((cursor-box (plist-get (cddr cursor-call) :box))
+              (ro-box (plist-get (cddr ro-call) :box)))
+          (should (equal (plist-get cursor-box :color) pro-ui-cursor-readonly-color))
+          (should (equal (plist-get ro-box :color) pro-ui-cursor-readonly-color))
+          (should (equal (plist-get cursor-box :line-width) pro-ui-cursor-readonly-line-width)))))))
+
+(ert-deftest pro-ui-cursor-russian-resets-box ()
+  "Русское состояние должно сбрасывать :box на nil (иначе рамка из readonly висит)."
+  (when (fboundp 'pro-ui--apply-cursor-for-state)
+    (let (face-calls cursor-type)
+      (cl-letf (((symbol-function 'display-graphic-p) (lambda (&rest _) t))
+                ((symbol-function 'set-face-attribute)
+                 (lambda (&rest args) (push args face-calls))))
+        (pro-ui--apply-cursor-for-state 'russian))
+      (let ((cursor-call (assq 'cursor face-calls))
+            (ro-call (assq 'cursor-read-only face-calls)))
+        (should cursor-call)
+        (should ro-call)
+        (should (eq (plist-get (cddr cursor-call) :box) nil))
+        (should (eq (plist-get (cddr ro-call) :box) nil))
+        (should (equal (plist-get (cddr cursor-call) :background) pro-ui-cursor-russian-color))))))
 
 (ert-deftest pro-ui-tty-cleanup-disables-prettify ()
   "pro-ui-tty-setup disables prettify in TTY emulation."

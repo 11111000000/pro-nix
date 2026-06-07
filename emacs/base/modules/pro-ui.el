@@ -108,14 +108,17 @@ is set accordingly."
         (require feature nil t))))
 
 (defun pro-ui-apply-icons ()
-  "Подключить полезные иконки без обязательной зависимости."
+  "Подключить полезные иконки без обязательной зависимости.
+
+Стратегия: nerd-icons (BMP/PUA глифы из Nerd Font) пробуется первым;
+all-the-icons — fallback, если nerd-icons недоступен. Семейства НЕ
+смешиваются: `all-the-icons-scale-factor' имеет смысл только когда
+выбран all-the-icons."
   (when (and pro-ui-enable-icons (display-graphic-p))
     (cond
      ((pro-ui--try-require 'nerd-icons)
       (when (pro-ui--try-require 'nerd-icons-ibuffer)
-        (add-hook 'ibuffer-mode-hook #'nerd-icons-ibuffer-mode))
-      (when (pro-ui--try-require 'all-the-icons)
-        (setq all-the-icons-scale-factor 1.0)))
+        (add-hook 'ibuffer-mode-hook #'nerd-icons-ibuffer-mode)))
      ((pro-ui--try-require 'all-the-icons)
       (setq all-the-icons-scale-factor 1.0)))
 
@@ -256,8 +259,21 @@ is set accordingly."
 ;; Cursor appearance helpers
 ;; Небольшая утилита: менять цвет и тип курсора в зависимости от
 ;; текущего метода ввода и режима read-only. Требование: при русском
-;; вводе — оранжевый вертикальный бар; при английском — чёрный бар;
-;; при read-only — чёрный прямоугольник.
+;; вводе — оранжевый вертикальный бар; при английском — зелёный бар;
+;; при read-only — серый полый прямоугольник.
+;;
+;; Caveat по хукам:
+;; - `input-method-activate-hook' срабатывает ПОСЛЕ того, как
+;;   `current-input-method' уже выставлен, так что внутри хука видно
+;;   актуальное значение.
+;; - `input-method-deactivate-hook' срабатывает ДО того, как
+;;   `current-input-method' сбрасывается в nil (см. `deactivate-input-method'
+;;   в mule-cmds.el: внутренний unwind-protect сначала прогоняет хуки, а
+;;   уже затем setq-ит current-input-method в nil). Из-за этого хук
+;;   видит старое значение и триггерит «ложный» state, поэтому обновление
+;;   откладывается через idle-timer.
+;; - В read-only буферах Emacs рисует курсор лицом `cursor-read-only', а
+;;   не `cursor'. Нужно обновлять оба лица, иначе наш `:box' игнорируется.
 (defcustom pro-ui-cursor-russian-color "#ff8800"
   "Цвет курсора, когда активен русский метод ввода."
   :type 'string
@@ -270,9 +286,16 @@ is set accordingly."
   :type 'string
   :group 'pro-ui)
 
-(defcustom pro-ui-cursor-readonly-color "#000000"
-  "Цвет курсора в режиме только чтения."
+(defcustom pro-ui-cursor-readonly-color "#808080"
+  "Цвет полого прямоугольника в read-only буферах.
+
+Серый по умолчанию — визуально сигнализирует «писать нельзя»."
   :type 'string
+  :group 'pro-ui)
+
+(defcustom pro-ui-cursor-readonly-line-width 1
+  "Толщина рамки полого прямоугольника в read-only буферах."
+  :type 'integer
   :group 'pro-ui)
 
 (defcustom pro-ui-cursor-bar-width 2
@@ -299,20 +322,39 @@ is set accordingly."
 
 (defun pro-ui--apply-cursor-for-state (state)
   "Применить визуальные настройки курсора для STATE."
-  (when (display-graphic-p)
-    (pcase state
-      ('readonly
-        ;; Use a hollow box for read-only buffers: no fill (:background nil)
-        ;; and draw a 1px box of the readonly color. This renders an
-        ;; empty rectangle cursor instead of a filled box.
-        (setq cursor-type 'box)
-        (set-face-attribute 'cursor nil :background nil :box `(:line-width 1 :color ,pro-ui-cursor-readonly-color)))
-      ('russian
-       (setq cursor-type `(bar . ,pro-ui-cursor-bar-width))
-       (set-face-attribute 'cursor nil :background pro-ui-cursor-russian-color))
-      ('english
-       (setq cursor-type `(bar . ,pro-ui-cursor-bar-width))
-       (set-face-attribute 'cursor nil :background pro-ui-cursor-english-color))))))
+  (pcase state
+    ('readonly
+     ;; `cursor-type' ставим в обоих режимах (TTY понимает 'box), а
+     ;; `:box' на лицах — только в графике: в TTY :box игнорируется,
+     ;; и без варнинга оборачивать всё в `display-graphic-p' удобнее
+     ;; для headless-тестов.
+     (setq cursor-type 'box)
+     (when (display-graphic-p)
+       (let ((box `(:line-width ,pro-ui-cursor-readonly-line-width
+                    :color ,pro-ui-cursor-readonly-color)))
+         ;; Полый прямоугольник: :background nil, и только рамка через
+         ;; :box. В read-only буфере Emacs использует лицо
+         ;; `cursor-read-only', поэтому обновляем и его.
+         (set-face-attribute 'cursor nil :background nil :box box)
+         (set-face-attribute 'cursor-read-only nil :background nil :box box))))
+    ('russian
+     (setq cursor-type `(bar . ,pro-ui-cursor-bar-width))
+     (when (display-graphic-p)
+       (set-face-attribute 'cursor nil
+                           :background pro-ui-cursor-russian-color
+                           :box nil)
+       (set-face-attribute 'cursor-read-only nil
+                           :background pro-ui-cursor-russian-color
+                           :box nil)))
+    ('english
+     (setq cursor-type `(bar . ,pro-ui-cursor-bar-width))
+     (when (display-graphic-p)
+       (set-face-attribute 'cursor nil
+                           :background pro-ui-cursor-english-color
+                           :box nil)
+       (set-face-attribute 'cursor-read-only nil
+                           :background pro-ui-cursor-english-color
+                           :box nil))))))
 
 (defun pro-ui--maybe-update-cursor (&rest _args)
   "Обновить курсор в текущем буфере, если состояние изменилось."
@@ -321,13 +363,27 @@ is set accordingly."
       (setq pro-ui--cursor-last-state new-state)
       (pro-ui--apply-cursor-for-state new-state))))
 
+(defun pro-ui--force-update-cursor ()
+  "Сбросить кеш состояния и применить курсор для текущего буфера."
+  (setq pro-ui--cursor-last-state nil)
+  (pro-ui--maybe-update-cursor))
+
+(defun pro-ui--on-input-method-deactivate ()
+  "Хук для input-method-deactivate-hook: отложенное обновление.
+  `input-method-deactivate-hook' срабатывает ДО того, как
+  `current-input-method' сбрасывается в nil, поэтому немедленный
+  re-check увидит прежнее значение. Откладываем на ближайший idle-тик."
+  (run-with-idle-timer 0 nil #'pro-ui--force-update-cursor))
+
 (defun pro-ui-apply-cursor-chg ()
   "Инициализировать динамический курсор."
-  (add-hook 'input-method-activate-hook #'pro-ui--maybe-update-cursor)
-  (add-hook 'input-method-inactivate-hook #'pro-ui--maybe-update-cursor)
-  (add-hook 'read-only-mode-hook #'pro-ui--maybe-update-cursor)
-  (add-hook 'buffer-list-update-hook #'pro-ui--maybe-update-cursor)
-  (pro-ui--maybe-update-cursor))
+  (add-hook 'input-method-activate-hook #'pro-ui--force-update-cursor)
+  (add-hook 'input-method-deactivate-hook #'pro-ui--on-input-method-deactivate)
+  (add-hook 'read-only-mode-hook #'pro-ui--force-update-cursor)
+  (when (fboundp 'window-buffer-change-functions)
+    (add-hook 'window-buffer-change-functions
+              (lambda (&optional _frame) (pro-ui--force-update-cursor))))
+  (pro-ui--force-update-cursor))
 
 (when (fboundp 'add-hook)
   (when (and (boundp 'vertico-map) (keymapp vertico-map))
