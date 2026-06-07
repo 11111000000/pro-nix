@@ -9,6 +9,12 @@
     noto-fonts-cjk-sans
     noto-fonts-color-emoji
     emacs-all-the-icons-fonts
+    # Nerd Fonts: required by `nerd-icons` (consult/ibuffer/dired/completion).
+    # FiraCode — primary; Hack и DejaVuSansMono — резерв на случай смены code-font
+    # (кандидаты в pro-ui-fonts.el ищутся именно в этом порядке).
+    nerd-fonts.fira-code
+    nerd-fonts.hack
+    nerd-fonts.dejavu-sans-mono
     # aporetic-fonts removed to avoid impure local path during eval
     # If needed, package fonts via a derivation in the flake inputs or use --impure eval
     liberation_ttf
