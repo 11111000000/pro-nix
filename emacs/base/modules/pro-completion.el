@@ -33,7 +33,10 @@ Disable if you observe frame jitter on your setup."
               (remq #'ispell-completion-at-point completion-at-point-functions)))
 
 ;; Corfu: in-buffer popup completion
-(when (or (pro--package-provided-p 'corfu) (pro-packages--maybe-install 'corfu t) (require 'corfu nil t))
+(when (and (or (pro--package-provided-p 'corfu)
+               (pro-packages--maybe-install 'corfu t)
+               (require 'corfu nil t))
+           (require 'corfu nil t))
   (setq corfu-auto t
         corfu-auto-prefix pro-completion-auto-prefix
         corfu-auto-delay pro-completion-auto-delay
@@ -57,16 +60,21 @@ Disable if you observe frame jitter on your setup."
 
 ;; Corfu in TTY
 (when (and (not (display-graphic-p))
-           (or (pro--package-provided-p 'corfu-terminal) (pro-packages--maybe-install 'corfu-terminal t) (require 'corfu-terminal nil t)))
+           (or (pro--package-provided-p 'corfu-terminal) (pro-packages--maybe-install 'corfu-terminal t) (require 'corfu-terminal nil t))
+           (require 'corfu-terminal nil t))
   (when (fboundp 'corfu-terminal-mode) (corfu-terminal-mode 1)))
 
 ;; Optional posframe backend for GUI
 (when (and pro-completion-enable-posframe (display-graphic-p))
-  (when (or (pro--package-provided-p 'corfu-posframe) (pro-packages--maybe-install 'corfu-posframe t) (require 'corfu-posframe nil t))
+  (when (and (or (pro--package-provided-p 'corfu-posframe) (pro-packages--maybe-install 'corfu-posframe t) (require 'corfu-posframe nil t))
+             (require 'corfu-posframe nil t))
     (when (fboundp 'corfu-posframe-mode) (corfu-posframe-mode 1))))
 
 ;; Cape: add useful CAPF backends
-(when (or (pro--package-provided-p 'cape) (pro-packages--maybe-install 'cape t) (require 'cape nil t))
+(when (and (or (pro--package-provided-p 'cape)
+               (pro-packages--maybe-install 'cape t)
+               (require 'cape nil t))
+           (require 'cape nil t))
   ;; Ensure common cape submodules are loaded so their symbols (cape-keyword,
   ;; cape-symbol etc.) are defined immediately. Some cape helpers are in
   ;; separate files (cape-keyword) and may not be autoloaded in all setups.
@@ -108,6 +116,7 @@ Disable if you observe frame jitter on your setup."
 
 ;; Optional candidate icons in Corfu margin
 (when (and (or (pro--package-provided-p 'kind-icon) (pro-packages--maybe-install 'kind-icon t) (require 'kind-icon nil t))
+           (require 'kind-icon nil t)
            (boundp 'corfu-margin-formatters)
            (fboundp 'kind-icon-margin-formatter)
            (not pro-completion--kind-icon-installed))

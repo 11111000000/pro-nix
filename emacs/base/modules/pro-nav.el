@@ -13,9 +13,12 @@
 (defvar pro-nav--consult-loaded nil
   "Non-nil when consult-specific defaults were applied.")
 
-(when (or (pro--package-provided-p 'vertico) (pro-packages--maybe-install 'vertico t) (require 'vertico nil t))
-  ;; vertico-mode может быть не загружен на этапе инициализации; поэтому
-  ;; проверяем наличие определения функции и безопасно включаем режим.
+(when (and (or (pro--package-provided-p 'vertico)
+               (pro-packages--maybe-install 'vertico t)
+               (require 'vertico nil t))
+           (require 'vertico nil t))
+  ;; `pro--package-provided-p' only checks availability; load Vertico before
+  ;; testing `vertico-mode', otherwise Nix-provided packages stay inactive.
   (when (fboundp 'vertico-mode)
     (vertico-mode 1)
     (setq vertico-cycle t
@@ -37,12 +40,13 @@
       ;; Accept candidate with RET but keep original behavior in certain contexts
       (define-key vertico-map (kbd "RET") #'vertico-exit))))
 
-;; Prefer consult's M-x if available for a richer M-x UX. Fall back to the
-;; built-in `execute-extended-command' when consult is not present. We avoid
-;; requiring consult eagerly; `pro--package-provided-p' and
-;; `pro-packages--maybe-install' are used to attempt to make consult
-;; available when the environment permits.
-(when (or (pro--package-provided-p 'consult) (pro-packages--maybe-install 'consult t) (require 'consult nil t))
+;; Prefer consult's M-x if the installed Consult still provides it. Recent
+;; Consult versions removed `consult-M-x'; plain `execute-extended-command'
+;; plus Vertico gives live M-x candidates.
+(when (and (or (pro--package-provided-p 'consult)
+               (pro-packages--maybe-install 'consult t)
+               (require 'consult nil t))
+           (require 'consult nil t))
   (when (fboundp 'consult-M-x)
     (global-set-key (kbd "M-x") #'consult-M-x)))
 
@@ -147,7 +151,10 @@
   (setq completion-styles '(orderless basic)
         completion-category-defaults nil))
 
-(when (or (pro--package-provided-p 'marginalia) (pro-packages--maybe-install 'marginalia t) (require 'marginalia nil t))
+(when (and (or (pro--package-provided-p 'marginalia)
+               (pro-packages--maybe-install 'marginalia t)
+               (require 'marginalia nil t))
+           (require 'marginalia nil t))
   ;; marginalia-mode может не иметь автозагрузки; включаем только при наличии.
   (when (fboundp 'marginalia-mode)
     (marginalia-mode 1)))
@@ -215,7 +222,7 @@
 (defun pro-nav-search-project ()
   "Искать в текущем проекте, если доступен project root."
   (interactive)
-  (if (or (pro--package-provided-p 'consult) (require 'consult nil t))
+  (if (require 'consult nil t)
       (if (fboundp 'pro-project-root)
           (consult-ripgrep (or (pro-project-root) default-directory))
         (consult-ripgrep default-directory))
@@ -226,7 +233,7 @@
 (defun pro-nav-open-line ()
   "Открыть строковый поиск."
   (interactive)
-  (if (or (pro--package-provided-p 'consult) (require 'consult nil t))
+  (if (require 'consult nil t)
       (consult-line)
     (pro-compat--notify-once "consult" "consult missing — pro-nav-open-line fallback to isearch")
     (call-interactively #'isearch-forward)))
