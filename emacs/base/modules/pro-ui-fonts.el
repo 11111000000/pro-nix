@@ -21,7 +21,7 @@
 
 (defun pro-ui-apply-fonts ()
   "Применяет настройки шрифтов и набор для emoji. Безопасна для
-повторного вызова; GUI-действия выполняются только при графическом дисплее." 
+повторного вызова; GUI-действия выполняются только при графическом дисплее."
   (when (display-graphic-p)
     (let* ((code-font (or (pro-ui--first-available-font
                            '("Fira Code" "JetBrains Mono" "Aporetic Sans Mono" "DejaVu Sans Mono"))
@@ -40,16 +40,19 @@
       ;; Emoji support
       (when (and (display-graphic-p) (fboundp 'set-fontset-font))
         (set-fontset-font "fontset-default" 'unicode "Noto Emoji" nil 'prepend)
-        ;; Prefer an icon / nerd font for symbol/private-use ranges so
-        ;; packages like `nerd-icons' and `all-the-icons' render using a
-        ;; patched icon font instead of falling back to an unrelated family.
+        ;; Подключаем иконочный шрифт ТОЛЬКО для Private Use Area — иначе
+        ;; prepend'ом перебьём CJK/Latin fallback на основной шрифт.
+        ;; Nerd Fonts v2 живёт в BMP PUA (U+E000..U+EFFF);
+        ;; Nerd Fonts v3 дополнительно в Supplementary PUA-B (U+100000..U+10FFFD).
         (let ((icon-candidates '("FiraCode Nerd Font" "Fira Code Nerd Font" "Hack Nerd Font"
                                   "DejaVu Sans Mono Nerd Font" "Nerd Font" "Symbols Nerd Font")))
-          (when-let ((icon-font (pro-ui--first-available-font icon-candidates)))
-            ;; Apply the icon font to unicode and symbol charsets and
-            ;; prepend it so icon glyphs prefer patched families.
-            (set-fontset-font "fontset-default" 'unicode icon-font nil 'prepend)
-            (set-fontset-font "fontset-default" 'symbol icon-font nil 'prepend))))
+          (if-let ((icon-font (pro-ui--first-available-font icon-candidates)))
+              (progn
+                (set-fontset-font "fontset-default" '(#xe000 . #xefff) icon-font nil 'append)
+                (set-fontset-font "fontset-default" '(#x100000 . #x10fffd) icon-font nil 'append))
+            (when pro-ui-enable-icons
+              (message "pro-ui-fonts: ни один Nerd Font не найден (%s); иконки nerd-icons/all-the-icons не отрендерятся. Проверьте `fonts.packages' в modules/session-fonts.nix и `fc-list | grep -i nerd'."
+                       (mapconcat #'identity icon-candidates ", "))))))
       ;; Mixed-pitch opt-in
       (when pro-ui-enable-mixed-pitch
         (when (pro-ui--try-require 'mixed-pitch)
