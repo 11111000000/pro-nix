@@ -108,7 +108,7 @@
   (pcase section
     ((or "EXWM" "EXWM-S") :exwm)
     ((or "ORG" "ORG-MODE") :org)
-    ((or "SUGGESTED" "SUGGEST" "SUGGESTION" "SUGGESTIONS") :suggested)
+    ((or "SUGGESTED" "SUGGEST" "SUGGESTION" "SUGGESTIONS" "Suggested" "Suggest" "Suggestion" "Suggestions") :suggested)
     (_ :global)))
 
 (defun pro-keys--apply-row (section key command)
