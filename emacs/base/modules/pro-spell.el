@@ -1,6 +1,6 @@
 ;;; pro-spell.el --- проверка орфографии на лету (ru_RU) -*- lexical-binding: t; -*-
 ;;
-;; Назначение: flyspell в text/prog/comint-режимах с русским hunspell-словарём.
+;; Назначение: flyspell в text/prog-режимах с русским hunspell-словарём.
 ;;
 ;; Контракт:
 ;; - ispell-program-name указывает на `pro-hunspell` (см. modules/pro-spellcheck.nix).
@@ -9,7 +9,10 @@
 ;;   в `pro-spell-dictionary' или через переменную `ispell-dictionary'.
 ;; - Включает flyspell-mode для text-режимов (org, markdown, message, …).
 ;; - Включает flyspell-prog-mode для prog-режимов (комментарии/строки).
-;; - Включает flyspell-mode для comint-режимов (agent-shell, eshell, vterm).
+;; - НЕ включает flyspell в comint/agent-shell автоматически: stdout агентов
+;;   и shell-вывод не нуждаются в орфографии, а flyspell-post-command-hook
+;;   создаёт заметную CPU+GC нагрузку в потоковых буферах (см. профиль 2026-06).
+;;   Пользователь может включить вручную через M-x flyspell-mode.
 ;; - Публичные команды: pro-spell-toggle, pro-spell-change-dictionary.
 ;;
 ;; Побочные эффекты: включает flyspell-mode глобально через хуки; изменяет
@@ -122,11 +125,12 @@ ispell-flyspell-verdict корректно классифицировал кир
     (flyspell-prog-mode)))
 
 (defun pro-spell--enable-comint ()
-  "Включить flyspell-mode для comint-производных буферов.
-Покрывает agent-shell, eshell, vterm, shell и т.п. — везде, где
-пользователь пишет свободный текст в ответ агенту или в командной
-строке. Не включаем в term/vterm-char-mode, чтобы не ломать
-позиционирование курсора в терминальных escape-последовательностях."
+  "Опционально включить flyspell для comint-буфера.
+Не подключается через хук по умолчанию: в потоковых shell-буферах
+(agent-shell, eshell) `flyspell-post-command-hook' даёт ощутимую CPU+GC
+нагрузку. Функция остаётся доступной для ручного вызова или подключения
+к узким хукам (например, только eshell-mode-hook через пользовательский
+конфиг)."
   (when (and (derived-mode-p 'comint-mode)
              (not (derived-mode-p 'term-mode)))
     (flyspell-mode 1)))
@@ -169,8 +173,8 @@ ispell-flyspell-verdict корректно классифицировал кир
   (add-hook 'text-mode-hook #'pro-spell--enable-text)
   ;; Prog-режимы: проверяем только комментарии и строки (не идентификаторы).
   (add-hook 'prog-mode-hook #'pro-spell--enable-prog)
-  ;; Comint-режимы: agent-shell, eshell, shell, multi-vterm (comint-производный).
-  (add-hook 'comint-mode-hook #'pro-spell--enable-comint)
+  ;; Comint-режимы намеренно не подключаются: см. шапку модуля и docstring
+  ;; `pro-spell--enable-comint'. Пользователь может включить вручную.
   ;; На случай, если в системе включён global-flyspell-mode.
   (with-eval-after-load 'flyspell
     (setq flyspell-issue-welcome-flag nil)
