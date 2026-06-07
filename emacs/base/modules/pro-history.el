@@ -461,7 +461,22 @@ If FILE is nil, use `pro-history-kill-ring-snapshot-file'."
     (undo-tree-visualize))
    ((fboundp 'vundo)
     (vundo))
-   (t (user-error "undo-tree-mode or vundo is not available!"))))
+    (t (user-error "undo-tree-mode or vundo is not available!"))))
+
+(defun pro-history-undo ()
+  "Undo using undo-tree when available, otherwise Emacs built-in undo."
+  (interactive)
+  (if (fboundp 'undo-tree-undo)
+      (undo-tree-undo)
+    (call-interactively #'undo)))
+
+(defun pro-history-redo ()
+  "Redo using undo-tree when available, otherwise Emacs built-in redo."
+  (interactive)
+  (cond
+   ((fboundp 'undo-tree-redo) (undo-tree-redo))
+   ((fboundp 'undo-redo) (call-interactively #'undo-redo))
+   (t (user-error "Redo is not available in this Emacs"))))
 
 ;; ═══════════════════════════════════════════════════════════════════════════
 ;; 13. Transient menu
@@ -648,15 +663,15 @@ pro-history — part of pro-nix")))
   (condition-case _err
       (when (fboundp 'pro/register-module-keys)
         (pro/register-module-keys 'history
-                                  '(("C-c u"   . undo-tree-visualize)
-                                    ("C-_"     . undo-tree-undo)
-                                    ("M-_"     . undo-tree-redo)
-                                    ("C-z"     . undo-tree-undo)
-                                    ("C-M-z"   . undo-tree-redo)
-                                    ("C-c z"   . undo-tree-visualize)
-                                    ("C-c C-," . goto-last-point)
+                                  '(("C-c u"   . pro-history-time-machine)
+                                    ("C-_"     . pro-history-undo)
+                                    ("M-_"     . pro-history-redo)
+                                    ("C-z"     . pro-history-undo)
+                                    ("C-M-z"   . pro-history-redo)
+                                    ("C-c z"   . pro-history-time-machine)
+                                    ("C-c C-," . goto-last-change-reverse)
                                     ("C-c ."   . goto-last-change)
-                                    ("C-c ,"   . goto-last-point)
+                                    ("C-c ,"   . goto-last-change-reverse)
                                     ("<XF86Back>"    . winner-undo)
                                     ("<XF86Forward>" . winner-redo)
                                     ("C-c M-h" . pro-history-transient))))
