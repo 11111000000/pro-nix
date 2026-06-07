@@ -26,4 +26,24 @@ so the key is intercepted by Emacs before vterm sends it to the pty."
       (let ((key (lookup-key vterm-mode-map (kbd "C-\\"))))
         (should (eq key #'toggle-input-method))))))
 
+(ert-deftest pro-terminals-binds-m-p-and-m-n-history-navigation ()
+  "M-p and M-n must be bound to history navigation helpers in vterm-mode-map,
+even when `vterm-copy-mode' is unavailable. They should be defined
+regardless of `vterm-copy-mode' presence (regression test)."
+  (ignore-errors (require 'vterm nil t))
+  (when (fboundp 'vterm-mode)
+    (load-file pro-terminals-test--module)
+    (with-temp-buffer
+      (delay-mode-hooks (vterm-mode))
+      (run-hooks 'vterm-mode-hook)
+      (let ((prev (lookup-key vterm-mode-map (kbd "M-p")))
+            (next (lookup-key vterm-mode-map (kbd "M-n"))))
+        (should (commandp prev))
+        (should (commandp next))
+        ;; M-p / M-n must send Meta-p / Meta-n to the pty.
+        (should (string= (documentation prev)
+                         "Send Meta-p to the underlying vterm (previous history)."))
+        (should (string= (documentation next)
+                         "Send Meta-n to the underlying vterm (next history)."))))))
+
 (provide 'test-terminals)
