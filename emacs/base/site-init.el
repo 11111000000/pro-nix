@@ -10,9 +10,9 @@
 ;; гарантирует, что все помощники и адаптеры будут загружены при старте.
 (defvar pro-emacs-base-default-modules
     '(pro-core pro-ui pro-packages pro-package-bootstrap pro-project pro-git
-    pro-nix pro-js pro-ai pro-agent-shell pro-c pro-chat pro-compat
+    pro-nix pro-js pro-ai pro-agent-shell pro-c pro-chat pro-telega pro-compat
     pro-completion pro-completion-keys pro-consult-helpers pro-dired
-    pro-app-launcher
+    pro-app-launcher pro-clipboard
     pro-emacs-check-fonts pro-exwm-sim pro-exwm pro-feeds pro-fix-corfu
     pro-haskell pro-java pro-key-utils pro-keys pro-lisp pro-nix-refresh
     pro-org pro-python pro-reload pro-session pro-history pro-spell pro-startup-metrics pro-tabs
@@ -116,16 +116,16 @@ NAME может быть 'core' или 'pro-core' — функция норма�
   (let ((user-file (pro-emacs-base--module-file pro-emacs-base-user-modules-dir name))
         (system-file (and pro-emacs-base-system-modules-dir
                           (pro-emacs-base--module-file pro-emacs-base-system-modules-dir name))))
-    ;; Prefer a user module only when it is readable and owned by the current
-    ;; user. This avoids accidentally loading repository-local copies that are
-    ;; owned by root (for example, deployed by an operator) which can cause
-    ;; confusing startup-time failures and make debugging harder. If the user
-    ;; file exists but is not owned by the current user, prefer the system
-    ;; module when available and emit a diagnostic message.
     (let* ((user-readable (file-readable-p user-file))
-           (user-owner-ok (when user-readable
-                            (let ((attrs (file-attributes user-file)))
-                              (and attrs (= (nth 2 attrs) (user-uid)))))))
+           (user-dir-symlink (and pro-emacs-base-user-modules-dir
+                                  (file-symlink-p pro-emacs-base-user-modules-dir)))
+           (user-file-symlink (and user-readable (file-symlink-p user-file)))
+           (user-attrs (when (and user-readable (null user-file-symlink))
+                         (file-attributes user-file)))
+           (user-owner-ok (or user-dir-symlink
+                              user-file-symlink
+                              (and user-attrs
+                                   (= (nth 2 user-attrs) (user-uid))))))
       (cond
        ((and user-readable user-owner-ok) user-file)
        ((and user-readable (not user-owner-ok))
@@ -145,39 +145,16 @@ NAME может быть 'core' или 'pro-core' — функция норма�
   (let ((modules (pro-emacs-base--manifest-modules)))
     (dolist (module modules)
       (let* ((module-name (if (symbolp module) (symbol-name module) module))
-             (user-file (pro-emacs-base--module-file pro-emacs-base-user-modules-dir module-name))
-             (system-file (and pro-emacs-base-system-modules-dir
-                               (pro-emacs-base--module-file pro-emacs-base-system-modules-dir module-name))))
-        ;; If the feature is already provided by an installed package (for
-        ;; example org from ELPA), prefer the package's feature and skip
-        ;; loading the repository-local module unless the user explicitly
-        ;; manages a local module file. This avoids shadowing full-featured
-        ;; packages with lightweight local config files that do not provide
-        ;; the expected symbols.
-        (cond
-         ((and (not (file-readable-p user-file))
-               (condition-case nil (require (intern module-name) nil t) (error nil)))
-          (message "[pro-emacs] skipping module %s; feature provided by package" module-name))
-          ((file-readable-p user-file)
-           ;; Load user module defensively: a user-local file may contain
-           ;; syntax/runtime errors which would abort the whole init. If
-           ;; loading the user file fails, try to fall back to the system
-           ;; module when available and emit a clear diagnostic.
-           (condition-case err
-               (load user-file nil t)
-             (error
-              (message "[pro-emacs] failed to load user module %s: %S" user-file err)
-              (when (and pro-emacs-base-system-modules-dir
-                         (file-readable-p system-file))
-                (message "[pro-emacs] falling back to system module %s" system-file)
-                (load system-file nil t)))))
-         ((and pro-emacs-base-system-modules-dir
-               (not (file-exists-p pro-emacs-base-disable-marker))
-               (file-readable-p system-file))
-          (load system-file nil t))
-         (t
+             ;; Use the centralized resolver which implements the owner/readable
+             ;; heuristics. This avoids loading files from the Nix store or
+             ;; other locations that are readable but not owned by the user.
+             (resolved-file (pro-emacs-base--resolve-module module-name)))
+        (if resolved-file
+            (condition-case err
+                (load resolved-file nil t)
+              (error
+               (message "[pro-emacs] failed to load module %s: %S" resolved-file err)))
           (message "[pro-emacs] missing module: %s" module-name)))))
-    (message "[pro-emacs] loaded modules: %S" modules)
     ;; After all modules loaded: reconstruct epistemic state
     (let ((epistemology-file (expand-file-name "pro-epistemology.el" pro-emacs-base-system-modules-dir)))
       (when (file-readable-p epistemology-file)
@@ -189,6 +166,10 @@ NAME может быть 'core' или 'pro-core' — функция норма�
     (when (fboundp 'pro-keys-apply-pending)
       (ignore-errors (pro-keys-apply-pending)))
     (when (fboundp 'pro-keys-report-pending)
-      (ignore-errors (pro-keys-report-pending)))))
+      (ignore-errors (pro-keys-report-pending))))
+
+(defun pro-emacs-base-report-loaded-modules (modules)
+  "Log the module list after startup using MODULES from the caller."
+  (message "[pro-emacs] loaded modules: %S" modules))
 
 (provide 'pro-site-init)
