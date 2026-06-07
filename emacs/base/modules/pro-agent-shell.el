@@ -18,6 +18,13 @@
          (expand-file-name "submodules/emcp" repo-root)))
   "Путь к EMCP submodule. Вычисляется относительно расположения этого файла в репозитории.")
 
+(defvar-local pro-agent-shell--project-name-cache nil
+  "Cached enriched project name: (CACHE-KEY . VALUE).
+CACHE-KEY is (DIR . HEAD-MTIME); refreshed only when HEAD changes.")
+
+(defvar-local pro-agent-shell--refresh-timer nil
+  "Buffer-local timer that re-renders the agent-shell header.")
+
 (defun pro-agent-open ()
   "Открыть agent-shell, если он доступен в runtime.
 
@@ -143,10 +150,6 @@ Handles both regular repos (.git is a directory) and worktrees
           (substring head 0 7))
          (t nil)))
 
-      (defvar-local pro-agent-shell--project-name-cache nil
-        "Cached enriched project name: (CACHE-KEY . VALUE).
-CACHE-KEY is (DIR . HEAD-MTIME); refreshed only when HEAD changes.")
-
       (defun pro-agent-shell--project-name ()
         "Return enriched project name (`proj:branch+wt:name').
 Reads `.git/HEAD' directly, caches result by HEAD mtime. No fork/exec." 
@@ -246,9 +249,6 @@ CPU and GC pressure while keeping the header fresh enough to be useful."
                 (run-at-time pro-agent-shell-refresh-interval
                              pro-agent-shell-refresh-interval
                              #'pro-agent-shell--refresh-timer-fn))))
-
-      (defvar-local pro-agent-shell--refresh-timer nil
-        "Buffer-local timer that re-renders the agent-shell header.")
 
       (defun pro-agent-shell--cancel-refresh-timer ()
         "Cancel the agent-shell header refresh timer in the current buffer."
