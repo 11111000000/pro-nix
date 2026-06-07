@@ -19,9 +19,10 @@
           providedPackages = [
             "ace-window" "avy" "cape" "consult" "consult-dash" "consult-eglot" "consult-projectile" "consult-yasnippet"
             "corfu" "corfu-posframe" "corfu-terminal" "dash-docs" "eglot" "elfeed" "expand-region" "gptel"
+            "eldoc-box" "goto-chg"
             "kind-icon" "magit" "marginalia" "nix-mode" "orderless" "org" "ob-mermaid" "projectile" "rainbow-delimiters"
             "treemacs" "vertico" "vterm" "yasnippet" "embark-consult" "dash-docs" "consult-dash"
-            "multi-vterm" "eshell-toggle" "acapella" "atlas" "shaoline" "tao-theme"
+            "multi-vterm" "eshell-toggle" "acapella" "atlas" "shaoline" "tao-theme" "pro-tabs"
           ];
 
           extraPackages = let
