@@ -10,7 +10,7 @@
 ;;     exwm-xim. Эти два слоя НЕ пересекаются:
 ;;     - Emacs-IM (russian-computer) работает в Emacs-окнах, переключается
 ;;       по C-\ (toggle-input-method; см. emacs-keys.org).
-;;     - XKB-раскладка (us,ru с grp:shifts_toggle из session-base.nix)
+;;     - XKB-раскладка (us,ru с grp:toggle из session-base.nix — Right Alt)
 ;;       работает в X-приложениях через exwm-xim.
 ;;
 ;; EXWM is provided via Nix (emacsPackages.exwm + emacsPackages.exwm-xim)

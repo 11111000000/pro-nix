@@ -1,18 +1,24 @@
 { pkgs, lib, config, ... }:
 
 # Change Gate
-# Intent: Упростить конфигурацию TTY-раскладки: использовать XKB для виртуальной
-# консоли и переключать en/ru через Right Alt (RAlt). Убрать генерирование и
-# патчи keymap-скриптов — это излишне.
+# Intent: TTY-раскладка наследуется из XKB (services.xserver.xkb), переключение
+# на русскую и обратно — Right Alt (XKB option grp:toggle). Шрифт — Unicode-PSF
+# с кириллицей (LatArCyrHeb-16), чтобы UTF-8 локаль ru_RU.UTF-8 рисовалась
+# правильно. Никаких ручных loadkeys-патчей.
 # Pressure: Debt
-# Surface impact: NixOS Base Configuration — поведение TTY для раскладок будет
-#                совпадать с X11/XKB: layout = "us,ru", options = "grp:ralt_toggle".
-# Proof: Проверка systemd-vconsole-setup и простая ручная проверка переключения
-#        раскладки на виртуальной консоли (RAlt).
+# Surface impact: NixOS Base Configuration — поведение TTY для раскладок
+#                совпадает с X11/XKB: layout = "us,ru", options = "grp:toggle".
+# Proof: systemd-vconsole-setup стартует без ошибок; на виртуальной консоли
+#        Right Alt переключает группу, кириллица отображается.
 # Migration: none.
 
 let
-  ttyFont = "${pkgs.kbd}/share/consolefonts/Cyr_a8x14.psfu.gz";
+  # Unicode PSF font с кириллицей (Latin/Arabic/Cyrillic/Hebrew, 8x16).
+  # Старый Cyr_a8x14.psfu.gz основан на cp866 (см. README.Cyrillic в pkgs.kbd)
+  # и не работает с UTF-8 локалью: позиции 0200-0257 содержат глифы по
+  # кодам cp866, а не Unicode, поэтому UTF-8 байты Cyrillic не находят
+  # глиф. LatArCyrHeb-* использует Unicode-таблицу и рисует UTF-8 напрямую.
+  ttyFont = "${pkgs.kbd}/share/consolefonts/LatArCyrHeb-16.psfu.gz";
 in
 {
   console = {
@@ -20,8 +26,8 @@ in
     useXkbConfig = lib.mkDefault true;
     earlySetup = lib.mkDefault true;
     font = lib.mkDefault ttyFont;
-    # Не генерируем кастомные loadkeys-таблицы —XKB обработает группу раскладок
-    # и переключение по Right Alt согласно services.xserver.xkb.
+    # Не генерируем кастомные loadkeys-таблицы — XKB обработает группу
+    # раскладок и переключение по Right Alt согласно services.xserver.xkb.
   };
 
   services.gpm = {

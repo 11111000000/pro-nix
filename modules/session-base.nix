@@ -10,10 +10,11 @@
 
   services.xserver.xkb = {
     layout = "us,ru";
-    # Caps работает как Ctrl; одновременное нажатие обоих Shift переключает
-    # раскладку (XKB: grp:shifts_toggle); LED CapsLock показывает активную группу.
-    # Конфликта с ctrl:nocaps нет: опция grp_led:caps управляет только LED,
-    # сами нажатия Caps уже переназначены в Ctrl, что нам и нужно.
-    options = "ctrl:nocaps,grp:shifts_toggle,grp_led:caps";
+    # Caps работает как Ctrl; Right Alt переключает раскладку (XKB: grp:toggle);
+    # LED CapsLock показывает активную группу. Конфликта с ctrl:nocaps нет:
+    # опция grp_led:caps управляет только LED, сами нажатия Caps уже
+    # переназначены в Ctrl, что нам и нужно. Для TTY эта же конфигурация
+    # подхватывается через console.useXkbConfig (см. modules/tty-console.nix).
+    options = "ctrl:nocaps,grp:toggle,grp_led:caps";
   };
 }
