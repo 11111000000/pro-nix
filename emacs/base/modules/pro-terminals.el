@@ -53,22 +53,27 @@ vterm доступен в вашей системе (Nix/Home-Manager или ELP
               ;; These do NOT depend on `vterm-copy-mode' — they send Meta-p/Meta-n
               ;; to the pty so the underlying shell (bash/zsh readline) handles
               ;; history navigation. Must be defined outside the copy-mode block.
-              (defun pro/vterm-history-previous ()
-                "Send Meta-p to the underlying vterm (previous history)."
-                (interactive)
-                (when (derived-mode-p 'vterm-mode)
-                  (if (fboundp 'vterm-send-key)
-                      ;; try to use vterm-send-key when available
-                      (ignore-errors (vterm-send-key ?p '(meta)))
-                    ;; fallback: send ESC p
-                    (vterm-send-string "\ep"))))
-              (defun pro/vterm-history-next ()
-                "Send Meta-n to the underlying vterm (next history)."
-                (interactive)
-                (when (derived-mode-p 'vterm-mode)
-                  (if (fboundp 'vterm-send-key)
-                      (ignore-errors (vterm-send-key ?n '(meta)))
-                    (vterm-send-string "\en"))))
+               (defun pro/vterm-history-previous ()
+                 "Send Up to the underlying vterm (previous history).
+
+Use the terminal Up key so shells navigate history the same as pressing
+the physical Up arrow." 
+                 (interactive)
+                 (when (derived-mode-p 'vterm-mode)
+                   (if (fboundp 'vterm-send-key)
+                       ;; prefer sending the actual Up key event
+                       (ignore-errors (vterm-send-key "<up>"))
+                     ;; fallback: send ANSI sequence for Up
+                     (vterm-send-string "\e[A"))))
+               (defun pro/vterm-history-next ()
+                 "Send Down to the underlying vterm (next history)."
+                 (interactive)
+                 (when (derived-mode-p 'vterm-mode)
+                   (if (fboundp 'vterm-send-key)
+                       ;; prefer sending the actual Down key event
+                       (ignore-errors (vterm-send-key "<down>"))
+                     ;; fallback: send ANSI sequence for Down
+                     (vterm-send-string "\e[B"))))
               (define-key vterm-mode-map (kbd "M-p") #'pro/vterm-history-previous)
               (define-key vterm-mode-map (kbd "M-n") #'pro/vterm-history-next)
               ;; Yank into vterm: C-y should insert last kill-ring entry
