@@ -64,15 +64,23 @@
 
 (defcustom pro-buffer-banner-max-text-chars 80
   "Maximum length of the banner text. If the composed text exceeds this,
-it is truncated with a trailing \"…\" so the frame stays narrow and
+it is truncated with a trailing \"...\" so the frame stays narrow and
 predictable. Set to 0 to disable truncation."
   :type 'integer :group 'pro-buffer-banner)
 
+(defcustom pro-buffer-banner-font-scale 0.7
+  "Scale factor for the banner font relative to the parent frame.
+0.7 means ~70% the size of the default font (≈ 1/1.5 reduction).
+1.0 means same size as the default."
+  :type 'number :group 'pro-buffer-banner)
+
 (defface pro-buffer-banner-face
-  '((t :foreground "#ffffff" :background "#222222" :weight bold
+  `((t :foreground "#ffffff" :background "#222222" :weight bold
+       :height ,pro-buffer-banner-font-scale
        :extend t))
   "Face for the banner text. `:extend t' makes the background fill the
-whole window/line so no default-colored padding shows around the text."
+whole window/line so no default-colored padding shows around the text.
+`:height' is set from `pro-buffer-banner-font-scale'."
   :group 'pro-buffer-banner)
 
 ;; ---------------------------------------------------------------------------
@@ -121,9 +129,9 @@ whole window/line so no default-colored padding shows around the text."
         (file-name-nondirectory (directory-file-name root))))))
 
 (defun pro-buffer-banner--truncate (s max)
-  "Truncate S to at most MAX chars. If shortened, append \"…\"."
+  "Truncate S to at most MAX chars. If shortened, append \"...\"."
   (if (and (stringp s) (> (length s) max))
-      (concat (substring s 0 (max 0 (1- max))) "…")
+      (concat (substring s 0 (max 0 (- max 3))) "...")
     s))
 
 (defun pro-buffer-banner--compose-text (buffer)
