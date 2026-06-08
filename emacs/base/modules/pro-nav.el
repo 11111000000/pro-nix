@@ -40,17 +40,6 @@
       ;; Accept candidate with RET but keep original behavior in certain contexts
       (define-key vertico-map (kbd "RET") #'vertico-exit))))
 
-;; Prefer consult's M-x if the installed Consult still provides it. Recent
-;; Consult versions removed `consult-M-x'; plain `execute-extended-command'
-;; plus Vertico gives live M-x candidates.
-(when (and (or (pro--package-provided-p 'consult)
-               (pro-packages--maybe-install 'consult t)
-               (require 'consult nil t))
-           (require 'consult nil t))
-  (when (fboundp 'consult-M-x)
-    (global-set-key (kbd "M-x") #'consult-M-x)))
-
-
 ;; Universal minibuffer TAB behaviour: cycle candidates where appropriate.
 (defun pro/minibuffer-tab ()
   "TAB behaviour in minibuffer: cycle Vertico/MCT candidates if active, else fallback to minibuffer-complete."
@@ -176,6 +165,10 @@
 ;; ВАЖНО: Глобальные клавиши не назначаем здесь — они живут в emacs-keys.org
 ;; и применяются модулем keys.el. Здесь только настройки поведения/интеграции.
 (with-eval-after-load 'consult
+  ;; Use patched consult-execute-extended-command (frecency-sorted M-x)
+  (when (fboundp 'consult-execute-extended-command)
+    (fset 'execute-extended-command #'consult-execute-extended-command))
+
   ;; consult-xref handlers
   (when (require 'consult-xref nil t)
     (when (fboundp 'consult-xref)
@@ -251,7 +244,6 @@
     (pro-compat--notify-once "consult" "consult missing — pro-nav-open-line fallback to isearch")
     (call-interactively #'isearch-forward)))
 
-(provide 'pro-nav)
 (provide 'pro-nav)
 
 ;;; pro-nav.el ends here
