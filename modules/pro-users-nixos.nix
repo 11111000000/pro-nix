@@ -20,7 +20,7 @@
             "ace-window" "avy" "cape" "consult" "consult-dash" "consult-eglot" "consult-projectile" "consult-yasnippet"
             "corfu" "corfu-posframe" "corfu-terminal" "dash-docs" "eglot" "elfeed" "expand-region" "gptel"
             "eldoc-box" "goto-chg"
-            "kind-icon" "magit" "marginalia" "nerd-icons" "nerd-icons-ibuffer" "nerd-icons-completion"
+            "kind-icon" "magit" "marginalia" "markdown-mode" "nerd-icons" "nerd-icons-ibuffer" "nerd-icons-completion"
             "nix-mode" "orderless" "org" "ob-mermaid" "projectile" "rainbow-delimiters"
             "treemacs" "vertico" "vterm" "yasnippet" "embark-consult" "dash-docs" "consult-dash"
             "multi-vterm" "eshell-toggle" "acapella" "atlas" "shaoline" "tao-theme" "pro-tabs"
@@ -49,7 +49,7 @@
             pkgs.emacsPackages.consult-dash pkgs.emacsPackages.consult-eglot pkgs.emacsPackages.consult-projectile pkgs.emacsPackages.consult-yasnippet
             pkgs.emacsPackages.corfu pkgs.emacsPackages.dash-docs pkgs.emacsPackages.consult-dash pkgs.emacsPackages.embark-consult
             pkgs.emacsPackages.eglot pkgs.emacsPackages.elfeed pkgs.emacsPackages.expand-region pkgs.emacsPackages.gptel
-            pkgs.emacsPackages.kind-icon pkgs.emacsPackages.magit pkgs.emacsPackages.marginalia pkgs.emacsPackages.nix-mode
+            pkgs.emacsPackages.kind-icon pkgs.emacsPackages.magit pkgs.emacsPackages.marginalia pkgs.emacsPackages.markdown-mode pkgs.emacsPackages.nix-mode
             pkgs.emacsPackages.orderless pkgs.emacsPackages.org pkgs.emacsPackages.projectile pkgs.emacsPackages.rainbow-delimiters
             pkgs.emacsPackages.treemacs pkgs.emacsPackages.vertico pkgs.emacsPackages.vterm pkgs.emacsPackages.yasnippet
           ] ++ extraEmacs ++ spellPackages;
