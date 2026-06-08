@@ -95,13 +95,21 @@
         (define-key m (kbd "C-i") #'pro/minibuffer-tab)
         (define-key m (kbd "<backtab>") #'pro/minibuffer-backtab)))))
 
-;; Navigation bindings in minibuffer: C-n / C-p should move between candidates
+;; Navigation bindings in minibuffer: C-n / C-p / C-j / C-k move between
+;; candidates. M-n / M-p intentionally remain `next-history-element' /
+;; `previous-history-element' (the default in `minibuffer-local-map') so
+;; users can step through their input history (saved by `savehist-mode'
+;; in pro-history, including consult's per-command history lists).
 (defun pro/minibuffer-next ()
   "Move to next candidate in minibuffer completion UIs (Vertico/MCT/other)."
   (interactive)
   (cond
-   ((and (boundp 'vertico--input) vertico--input (fboundp 'vertico-next))
+   ;; Vertico active: go to next candidate
+   ((and (fboundp 'vertico-next)
+         (boundp 'vertico--input)
+         vertico--input)
     (vertico-next))
+   ;; MCT (minibuffer completion at point) support if present
    ((and (boundp 'mct--active) mct--active (fboundp 'mct-next))
     (mct-next))
    ;; In some modes completion-list-mode may be used; use next-line there.
@@ -115,7 +123,9 @@
   "Move to previous candidate in minibuffer completion UIs (Vertico/MCT/other)."
   (interactive)
   (cond
-   ((and (boundp 'vertico--input) vertico--input (fboundp 'vertico-previous))
+   ((and (fboundp 'vertico-previous)
+         (boundp 'vertico--input)
+         vertico--input)
     (vertico-previous))
    ((and (boundp 'mct--active) mct--active (fboundp 'mct-previous))
     (mct-previous))
@@ -132,11 +142,14 @@
   (when (boundp (intern (symbol-name map)))
     (let ((m (symbol-value (intern (symbol-name map)))))
       (when (keymapp m)
+        ;; Candidate navigation. M-n / M-p deliberately NOT remapped here:
+        ;; they keep their default `next-history-element' /
+        ;; `previous-history-element' binding, which walks through
+        ;; `extended-command-history' on M-x, `file-name-history' on
+        ;; C-x C-f, and the consult per-command history lists.
         (define-key m (kbd "C-n") #'pro/minibuffer-next)
         (define-key m (kbd "C-p") #'pro/minibuffer-previous)
-        (define-key m (kbd "M-n") #'pro/minibuffer-next)
-        (define-key m (kbd "M-p") #'pro/minibuffer-previous)
-        ;; Also accept C-j/C-k as navigation aliases (common preference)
+        ;; Also accept C-j/C-k as navigation aliases (common preference).
         (define-key m (kbd "C-j") #'pro/minibuffer-next)
         (define-key m (kbd "C-k") #'pro/minibuffer-previous)))))
 

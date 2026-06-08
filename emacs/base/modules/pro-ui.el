@@ -322,6 +322,8 @@ all-the-icons — fallback, если nerd-icons недоступен. Семей
 
 (defun pro-ui--apply-cursor-for-state (state)
   "Применить визуальные настройки курсора для STATE."
+  ;; `cursor-read-only' может быть не определён в некоторых контекстах
+  ;; (isearch, ранний init), поэтому проверяем `facep' перед записью.
   (pcase state
     ('readonly
      ;; `cursor-type' ставим в обоих режимах (TTY понимает 'box), а
@@ -336,25 +338,28 @@ all-the-icons — fallback, если nerd-icons недоступен. Семей
          ;; :box. В read-only буфере Emacs использует лицо
          ;; `cursor-read-only', поэтому обновляем и его.
          (set-face-attribute 'cursor nil :background nil :box box)
-         (set-face-attribute 'cursor-read-only nil :background nil :box box))))
+         (when (facep 'cursor-read-only)
+           (set-face-attribute 'cursor-read-only nil :background nil :box box)))))
     ('russian
      (setq cursor-type `(bar . ,pro-ui-cursor-bar-width))
      (when (display-graphic-p)
        (set-face-attribute 'cursor nil
                            :background pro-ui-cursor-russian-color
                            :box nil)
-       (set-face-attribute 'cursor-read-only nil
-                           :background pro-ui-cursor-russian-color
-                           :box nil)))
+       (when (facep 'cursor-read-only)
+         (set-face-attribute 'cursor-read-only nil
+                             :background pro-ui-cursor-russian-color
+                             :box nil))))
     ('english
      (setq cursor-type `(bar . ,pro-ui-cursor-bar-width))
      (when (display-graphic-p)
        (set-face-attribute 'cursor nil
                            :background pro-ui-cursor-english-color
                            :box nil)
-       (set-face-attribute 'cursor-read-only nil
-                           :background pro-ui-cursor-english-color
-                           :box nil))))))
+       (when (facep 'cursor-read-only)
+         (set-face-attribute 'cursor-read-only nil
+                             :background pro-ui-cursor-english-color
+                             :box nil)))))))
 
 (defun pro-ui--maybe-update-cursor (&rest _args)
   "Обновить курсор в текущем буфере, если состояние изменилось."
@@ -364,9 +369,14 @@ all-the-icons — fallback, если nerd-icons недоступен. Семей
       (pro-ui--apply-cursor-for-state new-state))))
 
 (defun pro-ui--force-update-cursor ()
-  "Сбросить кеш состояния и применить курсор для текущего буфера."
-  (setq pro-ui--cursor-last-state nil)
-  (pro-ui--maybe-update-cursor))
+  "Сбросить кеш состояния и применить курсор для текущего буфера.
+Оборачиваем в `condition-case': таймер не должен ронять Emacs,
+если face временно недоступен (isearch, ранний init)."
+  (condition-case nil
+      (progn
+        (setq pro-ui--cursor-last-state nil)
+        (pro-ui--maybe-update-cursor))
+    (error nil)))
 
 (defun pro-ui--on-input-method-deactivate ()
   "Хук для input-method-deactivate-hook: отложенное обновление.
@@ -389,8 +399,11 @@ all-the-icons — fallback, если nerd-icons недоступен. Семей
   (when (and (boundp 'vertico-map) (keymapp vertico-map))
     (define-key vertico-map (kbd "C-n") #'vertico-next)
     (define-key vertico-map (kbd "C-p") #'vertico-previous)
-    (define-key vertico-map (kbd "M-n") #'vertico-next)
-    (define-key vertico-map (kbd "M-p") #'vertico-previous))
+    ;; M-n / M-p intentionally left to fall through to
+    ;; `next-history-element' / `previous-history-element' (the standard
+    ;; minibuffer bindings) so users can step through their input history.
+    (define-key vertico-map (kbd "M-n") nil)
+    (define-key vertico-map (kbd "M-p") nil))
 
   (when (and (boundp 'corfu-map) (keymapp corfu-map))
     (define-key corfu-map (kbd "C-n") #'corfu-next)
