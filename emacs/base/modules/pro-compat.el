@@ -77,6 +77,35 @@
       (pro-compat--notify-once "magit" "'magit' missing — falling back to vc-dir")
       (call-interactively #'vc-dir))))
 
+;; Idempotency helpers for soft reload
+;; pro/reload-config (pro-reload.el) re-runs top-level code of every module
+;; via `load-file'. Without guards, every reload would add-hook the same
+;; callback again, advice-add the same advice again, add-to-list the same
+;; item again. Use these helpers in module top-level code.
+(defun pro-compat--add-hook-once (hook function &optional depth local)
+  "Add FUNCTION to HOOK only if not already there. Like `add-hook',
+but idempotent across `load-file'. LOCAL/DEPTH forwarded.
+`symbol-value' returns the local binding when LOCAL is t and the
+default value otherwise — correct for both cases.
+No-op if HOOK is not bound (e.g. mode-specific hook whose mode is
+not loaded yet); the next module reload, or the mode's own init,
+will pick it up."
+  (when (boundp hook)
+    (unless (memq function (symbol-value hook))
+      (add-hook hook function depth local))))
+
+(defun pro-compat--add-to-list-once (symbol element &optional append compare-fn)
+  "Add ELEMENT to SYMBOL's list only if not present. Idempotent.
+APPEND/COMPARE-FN forwarded to `add-to-list'."
+  (unless (member element (symbol-value symbol))
+    (add-to-list symbol element append compare-fn)))
+
+(defun pro-compat--advice-add-once (function where advice &optional props)
+  "Add ADVICE to FUNCTION/WHERE only if not already there. Idempotent.
+PROPS forwarded to `advice-add'. Uses `advice-member-p' for the check."
+  (unless (advice-member-p advice function)
+    (apply #'advice-add function where advice (and props (list props)))))
+
 (provide 'pro-compat)
 
 ;;; pro-compat.el ends here

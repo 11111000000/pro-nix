@@ -19,13 +19,14 @@
 ;; Last reviewed: 2026-06-06
 
 (require 'cl-lib)
+(require 'pro-compat)
 
 ;;; File extensions and mode mapping
 
-(add-to-list 'auto-mode-alist '("\\.hs\\'" . haskell-mode))
-(add-to-list 'auto-mode-alist '("\\.lhs\\'" . literate-haskell-mode))
-(add-to-list 'auto-mode-alist '("\\.cabal\\'" . haskell-cabal-mode))
-(add-to-list 'auto-mode-alist '("\\.stack\\.yaml\\'" . haskell-stack-yaml-mode))
+(pro-compat--add-to-list-once 'auto-mode-alist '("\\.hs\\'" . haskell-mode))
+(pro-compat--add-to-list-once 'auto-mode-alist '("\\.lhs\\'" . literate-haskell-mode))
+(pro-compat--add-to-list-once 'auto-mode-alist '("\\.cabal\\'" . haskell-cabal-mode))
+(pro-compat--add-to-list-once 'auto-mode-alist '("\\.stack\\.yaml\\'" . haskell-stack-yaml-mode))
 
 ;;; Lazy package loading
 
@@ -175,8 +176,8 @@ Falls back to a friendly message if fourmolu is not on PATH."
 (with-eval-after-load 'eglot
   (pro-haskell--register-eglot-server))
 
-(add-hook 'haskell-mode-hook #'pro-haskell-setup)
-(add-hook 'literate-haskell-mode-hook #'pro-haskell-setup)
+(pro-compat--add-hook-once 'haskell-mode-hook #'pro-haskell-setup)
+(pro-compat--add-hook-once 'literate-haskell-mode-hook #'pro-haskell-setup)
 
 ;; Try to load haskell-mode eagerly at startup so the buffer is ready when
 ;; the user opens a .hs file. Failures are non-fatal: e.g. in containerized

@@ -1,8 +1,10 @@
 ;;; python.el --- Python -*- lexical-binding: t; -*-
 
+(require 'pro-compat)
+
 ;; Этот модуль настраивает Python как рабочий язык для скриптов и блоков org-babel.
 
-(add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))
+(pro-compat--add-to-list-once 'auto-mode-alist '("\\.py\\'" . python-ts-mode))
 
 (defun pro-python-setup ()
   "Сделать Python более предсказуемым для редактирования и запуска."
@@ -18,8 +20,8 @@
 (when (or (pro--package-provided-p 'eglot) (pro-packages--maybe-install 'eglot t) (require 'eglot nil t))
   ;; Only add the hook if eglot-ensure is available to avoid unbound function errors.
   (when (fboundp 'eglot-ensure)
-    (add-hook 'python-ts-mode-hook #'eglot-ensure)))
+    (pro-compat--add-hook-once 'python-ts-mode-hook #'eglot-ensure)))
 
-(add-hook 'python-ts-mode-hook #'pro-python-setup)
+(pro-compat--add-hook-once 'python-ts-mode-hook #'pro-python-setup)
 
 (provide 'pro-python)

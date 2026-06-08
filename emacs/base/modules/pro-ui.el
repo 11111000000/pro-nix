@@ -107,6 +107,8 @@ is set accordingly."
                  (pro-packages--maybe-install feature t))
         (require feature nil t))))
 
+(require 'pro-compat)
+
 (defun pro-ui-apply-icons ()
   "Подключить полезные иконки без обязательной зависимости.
 
@@ -117,8 +119,8 @@ all-the-icons — fallback, если nerd-icons недоступен. Семей
   (when (and pro-ui-enable-icons (display-graphic-p))
     (cond
      ((pro-ui--try-require 'nerd-icons)
-      (when (pro-ui--try-require 'nerd-icons-ibuffer)
-        (add-hook 'ibuffer-mode-hook #'nerd-icons-ibuffer-mode)))
+       (when (pro-ui--try-require 'nerd-icons-ibuffer)
+         (pro-compat--add-hook-once 'ibuffer-mode-hook #'nerd-icons-ibuffer-mode)))
      ((pro-ui--try-require 'all-the-icons)
       (setq all-the-icons-scale-factor 1.0)))
 
@@ -144,7 +146,7 @@ all-the-icons — fallback, если nerd-icons недоступен. Семей
       (unless pro--minibuffer-hint-shown
         (message "TAB/C-i: next • S-TAB: prev • C-n/C-p/C-j/C-k: navigate • C-.: actions • M-.: preview")
         (setq pro--minibuffer-hint-shown t)))
-    (add-hook 'minibuffer-setup-hook #'pro--show-minibuffer-hint-once)))
+    (pro-compat--add-hook-once 'minibuffer-setup-hook #'pro--show-minibuffer-hint-once)))
 
 ;; Wire ui subsystems implemented in separate files (pro-nix style).
 (when (file-readable-p (expand-file-name "ui-fonts.el" (file-name-directory (or load-file-name buffer-file-name))))
@@ -196,7 +198,7 @@ all-the-icons — fallback, если nerd-icons недоступен. Семей
     (ignore-errors
       (unless (boundp 'embark-consult-sources)
         (defvar embark-consult-sources nil))
-      (add-to-list 'embark-consult-sources 'consult--source-project-buffer))))
+      (pro-compat--add-to-list-once 'embark-consult-sources 'consult--source-project-buffer))))
 
 (defun pro-ui-apply-tabs ()
   "Подключить pro-tabs, если пакет доступен."
@@ -231,19 +233,19 @@ all-the-icons — fallback, если nerd-icons недоступен. Семей
         "Add `cape-dabbrev' to `completion-at-point-functions' in prog-mode buffers."
         (unless (member #'cape-dabbrev completion-at-point-functions)
           (add-to-list 'completion-at-point-functions #'cape-dabbrev)))
-      (add-hook 'prog-mode-hook #'pro-ui--add-cape-dabbrev)
+      (pro-compat--add-hook-once 'prog-mode-hook #'pro-ui--add-cape-dabbrev)
       (defun pro-ui--disable-ispell-capf ()
         "Remove `ispell-completion-at-point' from `completion-at-point-functions'."
         (setq-local completion-at-point-functions
                     (remq #'ispell-completion-at-point completion-at-point-functions)))
-      (add-hook 'prog-mode-hook #'pro-ui--disable-ispell-capf)
-      (add-hook 'text-mode-hook #'pro-ui--disable-ispell-capf))
+      (pro-compat--add-hook-once 'prog-mode-hook #'pro-ui--disable-ispell-capf)
+      (pro-compat--add-hook-once 'text-mode-hook #'pro-ui--disable-ispell-capf))
 
     (defun pro-ui--maybe-enable-corfu-in-minibuffer ()
       "Configure minibuffer completion without enabling Corfu there."
       (unless (or (bound-and-true-p vertico--input) (bound-and-true-p mct--active))
         (setq-local corfu-auto nil)))
-    (add-hook 'minibuffer-setup-hook #'pro-ui--maybe-enable-corfu-in-minibuffer)
+    (pro-compat--add-hook-once 'minibuffer-setup-hook #'pro-ui--maybe-enable-corfu-in-minibuffer)
 
     (when (and (pro-ui--try-require 'kind-icon)
                (boundp 'corfu-margin-formatters)

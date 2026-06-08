@@ -1,5 +1,6 @@
 ;;; pro-exwm.el --- EXWM session glue for pro-nix -*- lexical-binding: t; -*-
 ;;
+(require 'pro-compat)
 ;; Layers:
 ;;  1. Session detection — XDG_CURRENT_DESKTOP must contain "exwm"
 ;;  2. EXWM startup — exwm-wm-mode, systemtray, X input method
@@ -233,9 +234,9 @@ If the session isn't EXWM, this becomes a no-op.
 ;; and finally emacs-startup-hook as a fallback. This aims to start EXWM
 ;; as early as possible to reduce flicker.
 (when (boundp 'early-window-setup-hook)
-  (add-hook 'early-window-setup-hook #'pro-exwm--start-when-ready))
-(add-hook 'window-setup-hook #'pro-exwm--start-when-ready)
-(add-hook 'emacs-startup-hook #'pro-exwm--start-when-ready)
+  (pro-compat--add-hook-once 'early-window-setup-hook #'pro-exwm--start-when-ready))
+(pro-compat--add-hook-once 'window-setup-hook #'pro-exwm--start-when-ready)
+(pro-compat--add-hook-once 'emacs-startup-hook #'pro-exwm--start-when-ready)
 
 ;; When pro-keys module finishes loading, re-apply global keys so any
 ;; keys registered via pro/register-module-keys (exwm layer) take effect.

@@ -15,6 +15,7 @@
 
 (require 'cl-lib)
 (require 'subr-x)
+(require 'pro-compat)
 
 (defgroup pro/chat nil
   "Настройки telega/Telegram для pro-конфигурации."
@@ -77,27 +78,29 @@
           telega-emoji-font-family pro/chat-emoji-font-family)))
 
 (defun pro/chat--install-hooks ()
-  "Подключить локальные хуки telega. Вызывать после (require 'telega)."
+  "Подключить локальные хуки telega. Вызывать после (require 'telega).
+Идемпотентен: каждый хук добавляется через `pro-compat--add-hook-once',
+поэтому повторные вызовы (например, после soft reload) не дублируют."
   (condition-case err
       (progn
         (when (boundp 'telega-load-hook)
-          (add-hook 'telega-load-hook #'global-telega-url-shorten-mode))
+          (pro-compat--add-hook-once 'telega-load-hook #'global-telega-url-shorten-mode))
         (when (boundp 'telega-root-mode-hook)
-          (add-hook 'telega-root-mode-hook #'telega-notifications-mode)
-          (add-hook 'telega-root-mode-hook #'hl-line-mode)
-          (add-hook 'telega-root-mode-hook
-                    (lambda () (when (fboundp 'telega-root-auto-fill-mode)
-                                 (telega-root-auto-fill-mode -1)))))
+          (pro-compat--add-hook-once 'telega-root-mode-hook #'telega-notifications-mode)
+          (pro-compat--add-hook-once 'telega-root-mode-hook #'hl-line-mode)
+          (pro-compat--add-hook-once 'telega-root-mode-hook
+                                     (lambda () (when (fboundp 'telega-root-auto-fill-mode)
+                                                  (telega-root-auto-fill-mode -1)))))
         (when (boundp 'telega-chat-mode-hook)
-          (add-hook 'telega-chat-mode-hook
-                    (lambda () (when (fboundp 'telega-chat-auto-fill-mode)
-                                 (telega-chat-auto-fill-mode -1))))
+          (pro-compat--add-hook-once 'telega-chat-mode-hook
+                                     (lambda () (when (fboundp 'telega-chat-auto-fill-mode)
+                                                  (telega-chat-auto-fill-mode -1))))
           ;; TAB в чатах → completion-at-point (для CAPF-упоминаний).
-          (add-hook 'telega-chat-mode-hook
-                    (lambda ()
-                      (when (derived-mode-p 'telega-chat-mode)
-                        (local-set-key (kbd "TAB") #'completion-at-point)
-                        (local-set-key [tab] #'completion-at-point))))))
+          (pro-compat--add-hook-once 'telega-chat-mode-hook
+                                     (lambda ()
+                                       (when (derived-mode-p 'telega-chat-mode)
+                                         (local-set-key (kbd "TAB") #'completion-at-point)
+                                         (local-set-key [tab] #'completion-at-point))))))
     (error (message "[pro-chat] install hooks failed: %S" err))))
 
 (defun pro/chat--bootstrap ()

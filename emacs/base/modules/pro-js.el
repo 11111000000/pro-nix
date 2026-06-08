@@ -1,5 +1,7 @@
 ;;; js.el --- JavaScript/TypeScript -*- lexical-binding: t; -*-
 
+(require 'pro-compat)
+
 (defun pro-js--setup-buffer ()
   "Подготовить JS/TS буфер к работе."
   (setq-local indent-tabs-mode nil)
@@ -9,16 +11,16 @@
     (when (fboundp 'eglot-format-buffer)
       (add-hook 'before-save-hook #'eglot-format-buffer nil t))))
 
-(add-to-list 'auto-mode-alist '("\\.js\\'" . js-ts-mode))
-(add-to-list 'auto-mode-alist '("\\.mjs\\'" . js-ts-mode))
-(add-to-list 'auto-mode-alist '("\\.cjs\\'" . js-ts-mode))
-(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
-(add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
-(add-to-list 'auto-mode-alist '("\\.json\\'" . json-ts-mode))
+(pro-compat--add-to-list-once 'auto-mode-alist '("\\.js\\'" . js-ts-mode))
+(pro-compat--add-to-list-once 'auto-mode-alist '("\\.mjs\\'" . js-ts-mode))
+(pro-compat--add-to-list-once 'auto-mode-alist '("\\.cjs\\'" . js-ts-mode))
+(pro-compat--add-to-list-once 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+(pro-compat--add-to-list-once 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
+(pro-compat--add-to-list-once 'auto-mode-alist '("\\.json\\'" . json-ts-mode))
 
-(add-hook 'js-ts-mode-hook #'pro-js--setup-buffer)
-(add-hook 'typescript-ts-mode-hook #'pro-js--setup-buffer)
-(add-hook 'tsx-ts-mode-hook #'pro-js--setup-buffer)
+(pro-compat--add-hook-once 'js-ts-mode-hook #'pro-js--setup-buffer)
+(pro-compat--add-hook-once 'typescript-ts-mode-hook #'pro-js--setup-buffer)
+(pro-compat--add-hook-once 'tsx-ts-mode-hook #'pro-js--setup-buffer)
 
 (defun pro-js-open-package-json ()
   "Открыть ближайший package.json в проекте."

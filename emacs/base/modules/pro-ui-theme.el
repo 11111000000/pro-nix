@@ -8,6 +8,8 @@
 ;; Proof: headless ERT и manual smoke checks via ./scripts/emacs-pro-wrapper.sh
 ;; Last reviewed: 2026-05-03
 
+(require 'pro-compat)
+
 (defgroup pro-ui-theme nil
   "Theme helpers for pro UI"
   :group 'pro-ui)
@@ -28,7 +30,7 @@ Works in both GUI and TTY frames."
   (run-hooks 'pro-ui-after-load-theme-hook))
 
 ;; Attach advice to load-theme so modules can reset caches
-(advice-add 'load-theme :after #'pro-ui--run-after-load-theme-hook)
+(pro-compat--advice-add-once 'load-theme :after #'pro-ui--run-after-load-theme-hook)
 
 (defun pro-ui-apply-theme ()
   "Apply `pro-ui-default-theme' if it is set and the package is available.

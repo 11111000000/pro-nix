@@ -24,6 +24,8 @@
 ;; - PRO_SPELL_DISABLE=1                 → отключить авто-включение.
 ;;
 ;; Proof: headless ERT (emacs/base/tests/) и ручной smoke на org/markdown буферах.
+
+(require 'pro-compat)
 ;; Last reviewed: 2026-06-06
 
 (require 'ispell)
@@ -170,9 +172,9 @@ ispell-flyspell-verdict корректно классифицировал кир
 (when (and pro-spell-auto-enable
            (not (pro-spell--maybe-disabled-p)))
   ;; Text-режимы: org, markdown, message, fundamental-with-text, и т.д.
-  (add-hook 'text-mode-hook #'pro-spell--enable-text)
+  (pro-compat--add-hook-once 'text-mode-hook #'pro-spell--enable-text)
   ;; Prog-режимы: проверяем только комментарии и строки (не идентификаторы).
-  (add-hook 'prog-mode-hook #'pro-spell--enable-prog)
+  (pro-compat--add-hook-once 'prog-mode-hook #'pro-spell--enable-prog)
   ;; Comint-режимы намеренно не подключаются: см. шапку модуля и docstring
   ;; `pro-spell--enable-comint'. Пользователь может включить вручную.
   ;; На случай, если в системе включён global-flyspell-mode.

@@ -19,6 +19,7 @@
 ;; Проверка: emacs/base/tests/test-history.el (headless ERT)
 
 (require 'subr-x)
+(require 'pro-compat)
 
 ;; ═══════════════════════════════════════════════════════════════════════════
 ;; 1. Customization group
@@ -228,7 +229,7 @@ If DAYS is nil use `pro-history-session-retention-days'. Returns removed files."
            (cl-letf (((symbol-function 'y-or-n-p) (lambda (&rest _) t))
                      ((symbol-function 'yes-or-no-p) (lambda (&rest _) t)))
              (apply orig-fun (list (car args))))))))
-    (advice-add 'undo-tree-save-history :around #'pro-history--undo-tree-save-silently)
+    (pro-compat--advice-add-once 'undo-tree-save-history :around #'pro-history--undo-tree-save-silently)
 
     ;; Silent load: suppress prompts when restoring undo history
     (defun pro-history--undo-tree-load-silently (orig-fun &rest args)
@@ -241,7 +242,7 @@ If DAYS is nil use `pro-history-session-retention-days'. Returns removed files."
          (cl-letf (((symbol-function 'y-or-n-p) (lambda (&rest _) t))
                    ((symbol-function 'yes-or-no-p) (lambda (&rest _) t)))
            (apply orig-fun (list (car args)))))))
-    (advice-add 'undo-tree-load-history :around #'pro-history--undo-tree-load-silently)
+    (pro-compat--advice-add-once 'undo-tree-load-history :around #'pro-history--undo-tree-load-silently)
 
     ;; Auto-load undo history when a file is opened, auto-save after save
     (defun pro-history--undo-tree-load-and-save ()
@@ -257,7 +258,7 @@ idempotent across `pro/reload-config' reloads (lambdas would accumulate)."
     (defun pro-history--undo-tree-save-after-save ()
       "Buffer-local `after-save-hook' that saves undo history silently."
       (ignore-errors (undo-tree-save-history nil t)))
-    (add-hook 'undo-tree-mode-hook #'pro-history--undo-tree-load-and-save)
+    (pro-compat--add-hook-once 'undo-tree-mode-hook #'pro-history--undo-tree-load-and-save)
 
     ;; Save undo history for all buffers on exit
     (defun pro-history--save-all-undo-on-exit ()
@@ -266,13 +267,13 @@ idempotent across `pro/reload-config' reloads (lambdas would accumulate)."
         (with-current-buffer buf
           (when (and (bound-and-true-p undo-tree-mode) buffer-file-name)
             (ignore-errors (undo-tree-save-history nil t))))))
-    (add-hook 'kill-emacs-hook #'pro-history--save-all-undo-on-exit)
+    (pro-compat--add-hook-once 'kill-emacs-hook #'pro-history--save-all-undo-on-exit)
 
     ;; Auto-save all modified buffers on exit, no prompts
     (defun pro-history--save-buffers-kill-emacs-silently (orig-fun &optional arg)
       "Wrap `save-buffers-kill-emacs' to skip the yes-or-no prompt."
       (apply orig-fun (list t)))
-    (advice-add 'save-buffers-kill-emacs :around #'pro-history--save-buffers-kill-emacs-silently)))
+    (pro-compat--advice-add-once 'save-buffers-kill-emacs :around #'pro-history--save-buffers-kill-emacs-silently)))
 
 (defun pro-history-clear-undo (&optional confirm)
   "Delete all files under undo history directory. Prompts unless CONFIRM is nil.
@@ -592,7 +593,7 @@ pro-history — part of pro-nix")))
         desktop-restore-frames t
         desktop-files-not-to-save (concat "^$" (regexp-opt '("TAGS" "core" "dired"))))
   (when (and (fboundp 'desktop-save) (fboundp 'add-hook))
-    (add-hook 'kill-emacs-hook #'pro-history-save-desktop-silently))
+    (pro-compat--add-hook-once 'kill-emacs-hook #'pro-history-save-desktop-silently))
   (message "Desktop is not restored automatically. Restore with M-x pro-history-restore-last-session")
   ;; Winner mode for window configuration undo/redo
   (when (fboundp 'winner-mode)

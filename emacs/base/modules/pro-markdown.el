@@ -1,5 +1,7 @@
 ;;; pro-markdown.el --- Markdown-режим и локальные привычки -*- lexical-binding: t; -*-
 
+(require 'pro-compat)
+
 ;; Назначение: подключить markdown-mode для *.md / *.markdown / *.mdown и задать
 ;; минимальный набор локальных привычек, согласованных со стилем pro-org.el.
 
@@ -17,7 +19,7 @@
     "Локальные настройки для буфера markdown-mode."
     (setq-local truncate-lines nil)
     (setq-local word-wrap t))
-  (add-hook 'markdown-mode-hook #'pro-markdown-setup))
+  (pro-compat--add-hook-once 'markdown-mode-hook #'pro-markdown-setup))
 
 (provide 'pro-markdown)
 

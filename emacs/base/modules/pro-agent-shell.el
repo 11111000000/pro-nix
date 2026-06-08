@@ -92,14 +92,14 @@ CACHE-KEY is (DIR . HEAD-MTIME); refreshed only when HEAD changes.")
       ;; get-variable, set-variable, screenshot.
       (when (require 'emcp nil t)
         (setq emcp-default-profile 'develop)
-        (add-to-list 'agent-shell-mcp-servers
-                     '((name . "emcp")
-                       (type . "http")
-                       (headers . ())
-                       (url . (lambda ()
-                                (require 'emcp)
-                                (let ((server (emcp-start emcp-default-profile)))
-                                  (emcp-server-url server)))))))
+        (pro-compat--add-to-list-once 'agent-shell-mcp-servers
+                                     '((name . "emcp")
+                                       (type . "http")
+                                       (headers . ())
+                                       (url . (lambda ()
+                                                (require 'emcp)
+                                                (let ((server (emcp-start emcp-default-profile)))
+                                                  (emcp-server-url server)))))))
       (defun pro-agent-shell--maybe-call (fn &rest args)
         "Вызвать FN если он определён, иначе показать сообщение.
 Аргументы передаются в FN напрямую." (apply (if (fboundp fn) fn (lambda (&rest _) (message "[pro-agent-shell] %s недоступна" fn))) args))
@@ -117,16 +117,16 @@ CACHE-KEY is (DIR . HEAD-MTIME); refreshed only when HEAD changes.")
           (setq-local truncate-lines nil)))
 
       (when (boundp 'agent-shell-mode-hook)
-        (add-hook 'agent-shell-mode-hook #'pro-agent-shell--setup-keys))
+        (pro-compat--add-hook-once 'agent-shell-mode-hook #'pro-agent-shell--setup-keys))
       (when (boundp 'agent-shell-hook)
-        (add-hook 'agent-shell-hook #'pro-agent-shell--setup-keys))
+        (pro-compat--add-hook-once 'agent-shell-hook #'pro-agent-shell--setup-keys))
       ;; На крайний случай — добавим advice на команду открытия, если она есть.
       (when (fboundp 'agent-shell)
         (defun pro-agent-shell--after-start (&rest _)
           "Re-apply setup keys after `agent-shell' starts. Defun form keeps
 `advice-add' idempotent across `pro/reload-config' reloads."
           (pro-agent-shell--setup-keys))
-        (advice-add #'agent-shell :after #'pro-agent-shell--after-start))
+        (pro-compat--advice-add-once #'agent-shell :after #'pro-agent-shell--after-start))
 
       ;; ---- Project / branch / worktree info in header ----
       ;; Project name: append ":<branch>" and "+wt:<name>" when in a git repo
@@ -208,7 +208,7 @@ Skips ORIG-FN (which itself runs projectile-project-root) when our
 fast path produces a valid name." 
           (or (condition-case _err (pro-agent-shell--project-name) (error nil))
               (apply orig-fn args)))
-        (advice-add #'agent-shell--project-name :around #'pro-agent-shell--project-name-wrapper))
+        (pro-compat--advice-add-once #'agent-shell--project-name :around #'pro-agent-shell--project-name-wrapper))
 
       ;; ---- Strip provider name from text header ----
       ;; The default text header starts with the buffer-name (provider, e.g.
@@ -237,7 +237,7 @@ HEADER is the text header produced by `agent-shell--make-header'."
                      (eq agent-shell-header-style 'text))
                 (pro-agent-shell--strip-provider result)
               result)))
-        (advice-add #'agent-shell--make-header :around #'pro-agent-shell--header-wrapper))
+        (pro-compat--advice-add-once #'agent-shell--make-header :around #'pro-agent-shell--header-wrapper))
 
       ;; ---- Periodic refresh of header so branch/worktree stay current ----
       ;; Performance: the timer fires per buffer; firing while the buffer is
@@ -277,7 +277,7 @@ CPU and GC pressure while keeping the header fresh enough to be useful."
           (setq pro-agent-shell--refresh-timer nil)))
 
       (when (boundp 'agent-shell-mode-hook)
-        (add-hook 'agent-shell-mode-hook #'pro-agent-shell--install-refresh-timer))
+        (pro-compat--add-hook-once 'agent-shell-mode-hook #'pro-agent-shell--install-refresh-timer))
       (add-hook 'kill-buffer-hook #'pro-agent-shell--cancel-refresh-timer nil t))
   (error (message "[pro-agent-shell] agent-shell integration skipped: %S" err)))
 

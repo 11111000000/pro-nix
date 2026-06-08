@@ -4,6 +4,8 @@
 ;; via `pro-packages--maybe-install' when allowed, and enables sensible
 ;; defaults for both GUI and TTY sessions.
 
+(require 'pro-compat)
+
 (defgroup pro-completion nil
   "Completion stack configuration for pro Emacs profile."
   :group 'pro-ui)
@@ -139,7 +141,7 @@ corfu-auto and corfu-mode when any minibuffer completion UI is active."
    (t
     (when (boundp 'corfu-auto)
       (setq-local corfu-auto t)))))
-(add-hook 'minibuffer-setup-hook #'pro-completion--maybe-enable-corfu-in-minibuffer)
+(pro-compat--add-hook-once 'minibuffer-setup-hook #'pro-completion--maybe-enable-corfu-in-minibuffer)
 
 ;; Orderless включаем только после успешной загрузки стиля, чтобы не получать ошибку `invalid completion style orderless' на старте.
 (when (boundp 'completion-category-overrides)

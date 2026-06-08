@@ -9,6 +9,8 @@
 ;; Last reviewed: 2026-05-03
 ;;
 
+(require 'pro-compat)
+
 (defgroup pro-ui-icons nil
   "Обработка иконок для pro UI")
 
@@ -24,6 +26,6 @@
                      (treemacs-icons-dired-mode -1)
                      (treemacs-icons-dired-mode 1)))))
 
-(add-hook 'pro-ui-after-load-theme-hook #'pro-ui-reset-icons-cache)
+(pro-compat--add-hook-once 'pro-ui-after-load-theme-hook #'pro-ui-reset-icons-cache)
 
 (provide 'pro-ui-icons)

@@ -1,9 +1,11 @@
 ;;; c.el --- C -*- lexical-binding: t; -*-
 
+(require 'pro-compat)
+
 ;; Этот модуль даёт минимальные, но надёжные настройки для C.
 
-(add-to-list 'auto-mode-alist '("\\.[ch]\\'" . c-ts-mode))
-(add-to-list 'auto-mode-alist '("\\.h\\'" . c-ts-mode))
+(pro-compat--add-to-list-once 'auto-mode-alist '("\\.[ch]\\'" . c-ts-mode))
+(pro-compat--add-to-list-once 'auto-mode-alist '("\\.h\\'" . c-ts-mode))
 
 (defun pro-c-setup ()
   "Сделать C-редактирование строгим и предсказуемым."
@@ -15,6 +17,6 @@
   (interactive)
   (message "[pro-c] formatting hook is intentionally minimal"))
 
-(add-hook 'c-ts-mode-hook #'pro-c-setup)
+(pro-compat--add-hook-once 'c-ts-mode-hook #'pro-c-setup)
 
 (provide 'pro-c)

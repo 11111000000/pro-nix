@@ -1,8 +1,10 @@
 ;;; java.el --- Java -*- lexical-binding: t; -*-
 
+(require 'pro-compat)
+
 ;; Этот модуль оставляет Java без лишнего шума, но с полезной поддержкой.
 
-(add-to-list 'auto-mode-alist '("\\.java\\'" . java-ts-mode))
+(pro-compat--add-to-list-once 'auto-mode-alist '("\\.java\\'" . java-ts-mode))
 
 (defun pro-java-setup ()
   "Сделать Java-редактирование спокойным и аккуратным."
@@ -15,8 +17,8 @@
   (message "[pro-java] project entrypoint is intentionally minimal"))
 
 (when (or (pro--package-provided-p 'eglot) (pro-packages--maybe-install 'eglot t) (require 'eglot nil t))
-  (add-hook 'java-ts-mode-hook #'eglot-ensure))
+  (pro-compat--add-hook-once 'java-ts-mode-hook #'eglot-ensure))
 
-(add-hook 'java-ts-mode-hook #'pro-java-setup)
+(pro-compat--add-hook-once 'java-ts-mode-hook #'pro-java-setup)
 
 (provide 'pro-java)

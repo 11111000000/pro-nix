@@ -1,5 +1,7 @@
 ;;; pro-org.el --- орг-работа и таблицы -*- lexical-binding: t; -*-
 
+(require 'pro-compat)
+
 (declare-function org-redisplay-inline-images "org")
 (declare-function org-modern-mode "org-modern")
 
@@ -22,7 +24,7 @@
         org-confirm-babel-evaluate nil
         org-support-shift-select nil)
 
-  (add-hook 'org-babel-after-execute-hook #'org-redisplay-inline-images)
+  (pro-compat--add-hook-once 'org-babel-after-execute-hook #'org-redisplay-inline-images)
 
   (setq org-babel-default-header-args '((:results . "value")))
 
@@ -48,7 +50,7 @@
           org-modern-statistics nil
           org-modern-progress nil
           org-modern-invisible-editing 'show-and-error)
-    (add-hook 'org-mode-hook #'org-modern-mode))
+    (pro-compat--add-hook-once 'org-mode-hook #'org-modern-mode))
 
   (when (or (pro--package-provided-p 'plantuml-mode)
             (pro-packages--maybe-install 'plantuml-mode t)
@@ -56,16 +58,16 @@
     (setq plantuml-default-exec-mode 'jar
           org-plantuml-jar-path "/usr/share/plantuml/plantuml.jar"
           plantuml-jar-path "/usr/share/plantuml/plantuml.jar")
-    (add-to-list 'org-src-lang-modes '(plantuml . plantuml))
+    (pro-compat--add-to-list-once 'org-src-lang-modes '(plantuml . plantuml))
     (when (boundp 'org-structure-template-alist)
-      (add-to-list 'org-structure-template-alist '("uml" . "src plantuml :file ./diagram.svg"))))
+      (pro-compat--add-to-list-once 'org-structure-template-alist '("uml" . "src plantuml :file ./diagram.svg"))))
 
   ;; Mermaid — обязательное расширение для этого профиля: при отсутствии
   ;; Nix-пакета пробуем автодоставку через package.el.
   (when (or (pro--package-provided-p 'ob-mermaid)
             (pro-packages--maybe-install 'ob-mermaid t)
             (require 'ob-mermaid nil t))
-    (add-to-list 'org-src-lang-modes '(mermaid . mermaid))))
+    (pro-compat--add-to-list-once 'org-src-lang-modes '(mermaid . mermaid))))
 
 (when (or (pro--package-provided-p 'org-tempo) (pro-packages--maybe-install 'org-tempo t) (require 'org-tempo nil t))
   ;; org-tempo registers templates; ensure functions exist before setting the alist.
@@ -92,18 +94,24 @@
   (setq-local truncate-lines nil)
   (setq-local word-wrap t))
 
+(defun pro-org--bind-keys ()
+  "Локальные биндинги для org-буфера. Идемпотентен: local-set-key
+перезаписывает, и `pro-compat--add-hook-once' защищает от дублей
+при soft reload."
+  (local-set-key (kbd "C-c |") #'org-table-create-or-convert-from-region)
+  (local-set-key (kbd "C-c t") #'org-table-transpose-table-at-point)
+  (local-set-key (kbd "C-c K") #'pro-org-open-keys-file)
+  (local-set-key (kbd "C-c M") #'pro-org-open-module-list))
+
 (with-eval-after-load 'org
   ;; Ensure we bind keys after org-mode is loaded. Use `org-mode-hook` to
   ;; avoid assuming `org-mode-map' exists at `with-eval-after-load' time
-  ;; which can happen with some load orders.
-  (add-hook 'org-mode-hook
-            (lambda ()
-              (local-set-key (kbd "C-c |") #'org-table-create-or-convert-from-region)
-              (local-set-key (kbd "C-c t") #'org-table-transpose-table-at-point)
-              (local-set-key (kbd "C-c K") #'pro-org-open-keys-file)
-              (local-set-key (kbd "C-c M") #'pro-org-open-module-list))))
+  ;; which can happen with some load orders. `pro-compat--add-hook-once'
+  ;; is what makes soft reload safe: lambda inside `with-eval-after-load'
+  ;; is replaced with a named function so idempotency check works.
+  (pro-compat--add-hook-once 'org-mode-hook #'pro-org--bind-keys))
 
-(add-hook 'org-mode-hook #'pro-org-setup)
+(pro-compat--add-hook-once 'org-mode-hook #'pro-org-setup)
 
 ;; Provide both pro-prefixed and the traditional `org' feature so external
 ;; packages (consult/embark etc.) that `require` 'org' still work when the

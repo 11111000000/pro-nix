@@ -3,6 +3,7 @@
 (require 'json)
 (require 'seq)
 (require 'subr-x)
+(require 'pro-compat)
 
 (defun pro-ai--ensure-gptel-openai ()
   "Load gptel OpenAI backend support if available."
@@ -311,7 +312,7 @@ by providers and prints a short status message."
               (file-directory-p pro-ai-carriage-path))
     (let ((carriage-lisp-directory (pro-ai--carriage-lisp-directory)))
       (when (file-directory-p carriage-lisp-directory)
-        (add-to-list 'load-path carriage-lisp-directory)
+        (pro-compat--add-to-list-once 'load-path carriage-lisp-directory)
         (condition-case _err
             (when (require 'carriage nil t)
               (when (boundp 'carriage-i18n-locale)
@@ -349,7 +350,7 @@ by providers and prints a short status message."
 
 (if after-init-time
     (pro-ai--maybe-auto-load-gptel)
-  (add-hook 'emacs-startup-hook #'pro-ai--maybe-auto-load-gptel))
+  (pro-compat--add-hook-once 'emacs-startup-hook #'pro-ai--maybe-auto-load-gptel))
 
 (provide 'pro-ai)
 ;;; pro-ai.el ends here
