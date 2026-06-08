@@ -50,8 +50,11 @@
   "Show VCS branch (magit or vc) in the banner."
   :type 'boolean :group 'pro-buffer-banner)
 
-(defcustom pro-buffer-banner-debounce 0.10
-  "Minimum seconds between successive banners. Prevents flicker."
+(defcustom pro-buffer-banner-debounce 0
+  "Minimum seconds between successive banners. 0 means no debounce —
+the banner re-shows on every buffer/window switch so the visible time
+stays constant regardless of how fast you switch. Set to a positive
+value to throttle re-shows (e.g. 0.05) if you see flicker."
   :type 'number :group 'pro-buffer-banner)
 
 (defcustom pro-buffer-banner-initial-alpha 95
@@ -370,29 +373,35 @@ WIDTH-CHARS wide and 1 char tall — passing (width . N) (height . 1) to
 ;; ---------------------------------------------------------------------------
 
 (defun pro-buffer-banner--start-fade ()
-  "Start the alpha fade-out for the current banner frame."
+  "Start the alpha fade-out for the current banner frame.
+The total visible time is exactly `pro-buffer-banner-duration' seconds,
+divided into `pro-buffer-banner-fade-steps' steps."
   (when (and pro-buffer-banner--timer (timerp pro-buffer-banner--timer))
     (cancel-timer pro-buffer-banner--timer))
+  (setq pro-buffer-banner--timer nil)
   (let* ((frame pro-buffer-banner--frame)
          (steps (max 1 pro-buffer-banner-fade-steps))
          (initial pro-buffer-banner-initial-alpha)
          (step 0)
-         (step-ms (max 16 pro-buffer-banner-fade-step-ms)))
-    (setq pro-buffer-banner--timer
-          (run-at-time
-           nil step-ms
-           (lambda ()
-             (cond
-              ((not (frame-live-p frame))
-               (setq pro-buffer-banner--timer nil))
-              ((>= step steps)
-               (set-frame-parameter frame 'visibility nil)
-               (setq pro-buffer-banner--timer nil))
-              (t
-               (let* ((frac (/ (float (- steps step)) (float steps)))
-                      (a (max 0 (min 100 (round (* frac initial))))))
-                 (set-frame-parameter frame 'alpha a))
-               (setq step (1+ step)))))))))
+         ;; Total visible time = duration seconds, split into `steps' ticks.
+         (step-ms (max 16 (round (* 1000.0 pro-buffer-banner-duration)
+                                (float steps)))))
+    (when (frame-live-p frame)
+      (setq pro-buffer-banner--timer
+            (run-at-time
+             nil step-ms
+             (lambda ()
+               (cond
+                ((not (frame-live-p frame))
+                 (setq pro-buffer-banner--timer nil))
+                ((>= step steps)
+                 (set-frame-parameter frame 'visibility nil)
+                 (setq pro-buffer-banner--timer nil))
+                (t
+                 (let* ((frac (/ (float (- steps step)) (float steps)))
+                        (a (max 0 (min 100 (round (* frac initial))))))
+                   (set-frame-parameter frame 'alpha a))
+                 (setq step (1+ step))))))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Show
