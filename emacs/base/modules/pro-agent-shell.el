@@ -54,6 +54,22 @@ CACHE-KEY is (DIR . HEAD-MTIME); refreshed only when HEAD changes.")
   (require 'transient nil t)
   (require 'agent-shell nil t))
 
+;; ---- Buffer name: drop the "OpenCode Agent" prefix ----
+;; Default format produces names like "OpenCode Agent @ proj:branch+wt:name"
+;; (see `agent-shell--format-buffer-name'). The provider portion is identical
+;; across every agent-shell tab, which is wasted space in tab-bar / tab-line
+;; / modeline / `C-x b'. The public defcustom `agent-shell-buffer-name-format'
+;; accepts a function (AGENT PROJECT) -> STRING; we keep project (already
+;; enriched by the advice below) and prepend a single visual marker.
+;;
+;; Emoji works in TTY and graphical frames without nerd-fonts. If you want
+;; the nerd-icons robot, swap for: (all-the-icons-faicon "robot" :height 0.9)
+(when (require 'agent-shell nil t)
+  (setq agent-shell-buffer-name-format
+        (lambda (agent project)
+          (format "🤖 %s" (or (and (stringp project) (not (string-empty-p project)))
+                              "agent")))))
+
 ;; Если пакет доступен — зарегистрируем небольшие обёртки и локальные клавиши.
 (condition-case err
     (when (require 'agent-shell nil t)
