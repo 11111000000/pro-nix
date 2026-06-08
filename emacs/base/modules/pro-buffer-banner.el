@@ -38,8 +38,18 @@
   "Milliseconds between fade steps."
   :type 'integer :group 'pro-buffer-banner)
 
-(defcustom pro-buffer-banner-margin-top 8
-  "Pixel margin from the top of the selected window."
+(defcustom pro-buffer-banner-position :bottom
+  "Where to show the banner relative to the selected window.
+`:top'    — at the top of the window.
+`:bottom' — at the bottom of the window."
+  :type '(choice (const :tag "Top" :top)
+                 (const :tag "Bottom" :bottom))
+  :group 'pro-buffer-banner)
+
+(defcustom pro-buffer-banner-margin 0
+  "Pixel margin from the window edge (top or bottom, depending on
+`pro-buffer-banner-position'). 0 means \"one line height\" of the parent
+frame's font — enough to clear the mode-line or first line of text."
   :type 'integer :group 'pro-buffer-banner)
 
 (defcustom pro-buffer-banner-show-project t
@@ -169,12 +179,13 @@ than `pro-buffer-banner-max-text-chars'."
   "Return a plist with :x :y :w-chars :h-chars :font for a banner showing TEXT above WIN."
   (let* ((parent (selected-frame))
          ;; Position in pixels
-         (left 0) (top 0) (right 0))
+         (left 0) (top 0) (right 0) (bottom 0))
     (when (fboundp 'window-pixel-edges)
       (let ((edges (window-pixel-edges win)))
-        (setq left  (or (nth 0 edges) 0)
-              top   (or (nth 1 edges) 0)
-              right (or (nth 2 edges) left))))
+        (setq left   (or (nth 0 edges) 0)
+              top    (or (nth 1 edges) 0)
+              right  (or (nth 2 edges) left)
+              bottom (or (nth 3 edges) top))))
     ;; Width in characters: pad + text + pad + safety margin.
     ;; The safety margin guards against sub-pixel rounding when the banner
     ;; uses a font scaled by `pro-buffer-banner-font-scale'.
@@ -189,7 +200,18 @@ than `pro-buffer-banner-max-text-chars'."
            ;; draw past the window edges.
            (x-raw (+ left (max 0 (/ (- parent-pixel-w frame-pixel-w) 2))))
            (x (min x-raw (max left (- right frame-pixel-w))))
-           (y (+ top pro-buffer-banner-margin-top))
+           ;; Margin: 0 → "one line height" of the parent's default font.
+           (margin (if (> pro-buffer-banner-margin 0)
+                       pro-buffer-banner-margin
+                     (frame-char-height parent)))
+           ;; Banner pixel height (1 line of the scaled font).
+           (banner-pixel-h (* pro-buffer-banner-font-scale
+                              (frame-char-height parent)))
+           ;; Pick y based on `pro-buffer-banner-position'.
+           (y-raw (if (eq pro-buffer-banner-position :bottom)
+                      (- bottom banner-pixel-h margin)
+                    (+ top margin)))
+           (y (max top (min y-raw (- bottom banner-pixel-h))))
            ;; Build a scaled font for the banner so that `width' (in chars)
            ;; and the rendered text use the same metrics.
            (font (pro-buffer-banner--scaled-font parent)))
