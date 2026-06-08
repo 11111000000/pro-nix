@@ -409,20 +409,29 @@ all-the-icons — fallback, если nerd-icons недоступен. Семей
   (run-with-idle-timer 0 nil #'pro-ui--force-update-cursor))
 
 (defun pro-ui-apply-cursor-chg ()
-  "Инициализировать динамический курсор."
-  (add-hook 'input-method-activate-hook #'pro-ui--force-update-cursor)
-  (add-hook 'input-method-deactivate-hook #'pro-ui--on-input-method-deactivate)
-  (add-hook 'read-only-mode-hook #'pro-ui--force-update-cursor)
+  "Инициализировать динамический курсор.
+Идемпотентно: повторный вызов (например, после soft reload через
+`pro/reload-config', который перечитывает файл) не дублирует хуки.
+Все `add-hook' обёрнуты в `unless (memq ...)'."
+  (unless (memq #'pro-ui--force-update-cursor input-method-activate-hook)
+    (add-hook 'input-method-activate-hook #'pro-ui--force-update-cursor))
+  (unless (memq #'pro-ui--on-input-method-deactivate input-method-deactivate-hook)
+    (add-hook 'input-method-deactivate-hook #'pro-ui--on-input-method-deactivate))
+  (unless (memq #'pro-ui--force-update-cursor read-only-mode-hook)
+    (add-hook 'read-only-mode-hook #'pro-ui--force-update-cursor))
   ;; `post-command-hook' + `after-change-major-mode-hook' — главный
   ;; путь обновления при открытии буфера: `find-file' ставит major-mode
   ;; через after-change-major-mode-hook, и наш хук сразу применяет курсор.
   ;; `post-command-hook' страхует для C-x b, мыши и других способов
   ;; смены буфера. Оба хука дешёвые: один eq-сравнение + редкое обновление.
-  (add-hook 'post-command-hook #'pro-ui--cursor-on-buffer-change)
-  (add-hook 'after-change-major-mode-hook #'pro-ui--cursor-on-buffer-change)
+  (unless (memq #'pro-ui--cursor-on-buffer-change post-command-hook)
+    (add-hook 'post-command-hook #'pro-ui--cursor-on-buffer-change))
+  (unless (memq #'pro-ui--cursor-on-buffer-change after-change-major-mode-hook)
+    (add-hook 'after-change-major-mode-hook #'pro-ui--cursor-on-buffer-change))
   (when (fboundp 'window-buffer-change-functions)
-    (add-hook 'window-buffer-change-functions
-              (lambda (&optional _frame) (pro-ui--force-update-cursor))))
+    (unless (memq #'pro-ui--force-update-cursor (symbol-value 'window-buffer-change-functions))
+      (add-hook 'window-buffer-change-functions
+                (lambda (&optional _frame) (pro-ui--force-update-cursor)))))
   (pro-ui--force-update-cursor))
 
 (when (fboundp 'add-hook)
