@@ -163,7 +163,7 @@ than `pro-buffer-banner-max-text-chars'."
 ;; ---------------------------------------------------------------------------
 
 (defun pro-buffer-banner--compute-geometry (win text)
-  "Return a plist with :x :y :w-chars :h-chars for a banner showing TEXT above WIN."
+  "Return a plist with :x :y :w-chars :h-chars :font for a banner showing TEXT above WIN."
   (let* ((parent (selected-frame))
          ;; Position in pixels
          (left 0) (top 0) (right 0))
@@ -172,10 +172,12 @@ than `pro-buffer-banner-max-text-chars'."
         (setq left  (or (nth 0 edges) 0)
               top   (or (nth 1 edges) 0)
               right (or (nth 2 edges) left))))
-    ;; Width in characters: pad + text + pad.
+    ;; Width in characters: pad + text + pad + safety margin.
+    ;; The safety margin guards against sub-pixel rounding when the banner
+    ;; uses a font scaled by `pro-buffer-banner-font-scale'.
     (let* ((text-len (length text))
            (pad (max 0 pro-buffer-banner-pad-chars))
-           (w-chars (+ text-len pad pad))
+           (w-chars (+ text-len pad pad 2))
            (h-chars 1)
            (parent-pixel-w (max 1 (- right left)))
            (char-w (max 1 (frame-char-width parent)))
@@ -184,10 +186,32 @@ than `pro-buffer-banner-max-text-chars'."
            ;; draw past the window edges.
            (x-raw (+ left (max 0 (/ (- parent-pixel-w frame-pixel-w) 2))))
            (x (min x-raw (max left (- right frame-pixel-w))))
-           (y (+ top pro-buffer-banner-margin-top)))
+           (y (+ top pro-buffer-banner-margin-top))
+           ;; Build a scaled font for the banner so that `width' (in chars)
+           ;; and the rendered text use the same metrics.
+           (font (pro-buffer-banner--scaled-font parent)))
       (list :x x :y y
             :w-chars w-chars :h-chars h-chars
-            :parent parent))))
+            :parent parent
+            :font font))))
+
+(defun pro-buffer-banner--scaled-font (&optional frame)
+  "Return a font-spec for FRAME (default `selected-frame') scaled by
+`pro-buffer-banner-font-scale'. This is what we set as the banner frame's
+`font' so that `width' in chars matches the rendered text width."
+  (let* ((parent-font (face-attribute 'default :font frame))
+         (parent-pt-size
+          (cond
+           ((and parent-font (fontp parent-font))
+            (font-get parent-font :size))
+           ((and (stringp parent-font)
+                 (string-match "[0-9.]+" parent-font))
+            (string-to-number (match-string 0 parent-font)))
+           (t 10.0)))
+         (new-pt-size (* pro-buffer-banner-font-scale parent-pt-size)))
+    (font-spec :size new-pt-size
+               :weight 'normal
+               :slant 'normal)))
 
 (defun pro-buffer-banner--frame-params (geom)
   "Build a minimal, popup-only frame parameter alist for the banner frame."
@@ -195,11 +219,14 @@ than `pro-buffer-banner-max-text-chars'."
         (x (plist-get geom :x))
         (y (plist-get geom :y))
         (w (plist-get geom :w-chars))
-        (h (plist-get geom :h-chars)))
+        (h (plist-get geom :h-chars))
+        (font (plist-get geom :font)))
     `((parent-frame . ,parent)
       (left . ,x)
       (top . ,y)
-      ;; width/height are in CHARACTERS, not pixels.
+      ;; Use the scaled font so char width matches the rendered text.
+      (font . ,font)
+      ;; width/height are in CHARACTERS of the frame's font.
       (width . ,w)
       (height . ,h)
       (minibuffer . nil)
