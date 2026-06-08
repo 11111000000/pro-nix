@@ -27,3 +27,7 @@
 [submodule "submodules/shaoline"]
 	path = submodules/shaoline
 	url = https://github.com/11111000000/shaoline
+[submodule "submodules/agent-shell-hud"]
+	path = submodules/agent-shell-hud
+	url = git@github.com:11111000000/agent-shell-hud.git
+	branch = main

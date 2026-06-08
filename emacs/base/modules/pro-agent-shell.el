@@ -52,7 +52,11 @@ CACHE-KEY is (DIR . HEAD-MTIME); refreshed only when HEAD changes.")
 (ignore-errors
   ;; transient не обязателен; пытаемся загрузить без ошибки.
   (require 'transient nil t)
-  (require 'agent-shell nil t))
+  (require 'agent-shell nil t)
+  ;; agent-shell-hud — многоязычный пульт и индикатор состояния.
+  ;; Подключается через global minor mode, который сам ставит
+  ;; локальную клавишу в `agent-shell-mode-map'.
+  (require 'agent-shell-hud nil t))
 
 ;; ---- Buffer name: drop the "OpenCode Agent" prefix ----
 ;; Default format produces names like "OpenCode Agent @ proj:branch+wt:name"
@@ -276,6 +280,30 @@ CPU and GC pressure while keeping the header fresh enough to be useful."
         (add-hook 'agent-shell-mode-hook #'pro-agent-shell--install-refresh-timer))
       (add-hook 'kill-buffer-hook #'pro-agent-shell--cancel-refresh-timer nil t))
   (error (message "[pro-agent-shell] agent-shell integration skipped: %S" err)))
+
+;; ---- agent-shell-hud integration ----
+;; Если HUD загружен (см. require выше) — включим его глобально.
+;; Клавиша `C-c a' (настраивается в `agent-shell-hud-menu-key')
+;; ставится автоматически в `agent-shell-mode-map' при входе в шелл.
+(condition-case err
+    (when (fboundp 'agent-shell-hud-mode)
+      (agent-shell-hud-mode 1))
+  (error (message "[pro-agent-shell] HUD enable skipped: %S" err)))
+
+;; Регистрация предлагаемых клавиш HUD (попадают в emacs-keys.org
+;; через `pro/export-registered-keys-to-org'). Локальная клавиша
+;; C-c a ставится самим HUD только в agent-shell-mode, глобального
+;; конфликта с `pro-ai-open-entry' (тоже C-c a) не возникает,
+;; потому что приоритет у mode-local.
+(condition-case _err
+    (with-eval-after-load 'pro-keys
+      (when (fboundp 'pro/register-module-keys)
+        (pro/register-module-keys
+         'agent-shell-hud
+         `(("C-c a" . agent-shell-hud-menu)
+           ("C-c i" . agent-shell-hud-info)
+           ("C-c r" . agent-shell-hud-refresh)))))
+  (error nil))
 
 (defun pro-agent-install ()
   "Убедиться, что пакет `agent-shell' доступен.

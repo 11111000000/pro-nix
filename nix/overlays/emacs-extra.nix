@@ -52,6 +52,7 @@ let
     };
     telega = super.callPackage ../emacs-recipes/telega.nix {};
     agent-shell = super.callPackage ../emacs-recipes/agent-shell.nix {};
+    agent-shell-hud = super.callPackage ../emacs-recipes/agent-shell-hud.nix {};
     acapella = super.callPackage ../emacs-recipes/acapella.nix {};
     atlas = super.callPackage ../emacs-recipes/atlas.nix {};
     tao-theme = super.callPackage ../emacs-recipes/tao-theme.nix {};

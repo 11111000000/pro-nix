@@ -154,6 +154,7 @@
           pkgs.emacsPackages.dash-docs pkgs.emacsPackages.embark-consult
           # Try overlay-provided packages when available (agent-shell, acp, treemacs-icons-dired, eldoc-box)
           (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "agent-shell" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.agent-shell else null)
+          (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "agent-shell-hud" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.agent-shell-hud else null)
           (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "acp" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.acp else null)
           (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "telega" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.telega else null)
           (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "treemacs-icons-dired" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages."treemacs-icons-dired" else null)

@@ -86,6 +86,9 @@
 | Окна       | C-x -         | pro-windows-shrink                    | Уменьшить окно                       |
 | AI         | C-c a         | pro-ai-open-entry                     | Вход в AI                            |
 | AI         | C-c A         | pro-agent-open                        | agent-shell                          |
+| AI         | C-c a (hud)   | agent-shell-hud-menu                  | Пульт агента (в agent-shell-mode)    |
+| AI         | C-c i (hud)   | agent-shell-hud-info                  | HUD-инфо (в agent-shell-mode)        |
+| AI         | C-c r (hud)   | agent-shell-hud-refresh               | Обновить HUD (в agent-shell-mode)    |
 | Чат        | C-c T         | pro/chat-open                         | Telegram                             |
 | Чат        | C-c t o       | pro/chat-open                         | Open Telegram (telega)               |
 | Чат        | C-c t k       | pro/chat-close-idle-chats             | Close idle telega chat buffers       |
