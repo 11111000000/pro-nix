@@ -378,6 +378,29 @@ all-the-icons — fallback, если nerd-icons недоступен. Семей
         (pro-ui--maybe-update-cursor))
     (error nil)))
 
+(defvar pro-ui--cursor-prev-buffer nil
+  "Буфер, в котором курсор обновлялся в последний раз.
+Используется хуком `pro-ui--cursor-on-buffer-change' для детекта
+смены буфера между командами. Глобальная (не per-buffer), потому что
+нам нужно сравнивать current-buffer между вызовами.")
+
+(defun pro-ui--cursor-on-buffer-change ()
+  "Применить курсор сразу, если current-buffer сменился.
+Срабатывает на `post-command-hook' и `after-change-major-mode-hook'.
+Гарантирует корректный цвет/форму курсора при открытии файла
+(find-file ставит major-mode через `after-change-major-mode-hook') —
+раньше это требовало двух нажатий, потому что
+`window-buffer-change-functions' срабатывал до того, как
+`pro-ui--cursor-last-state' сбрасывался."
+  (let ((cur (current-buffer)))
+    (unless (eq cur pro-ui--cursor-prev-buffer)
+      (setq pro-ui--cursor-prev-buffer cur)
+      ;; В новом буфере `pro-ui--cursor-last-state' уже nil (defvar-local),
+      ;; но `maybe-update-cursor' всё равно сравнит и применит.
+      (condition-case nil
+          (pro-ui--maybe-update-cursor)
+        (error nil)))))
+
 (defun pro-ui--on-input-method-deactivate ()
   "Хук для input-method-deactivate-hook: отложенное обновление.
   `input-method-deactivate-hook' срабатывает ДО того, как
@@ -390,6 +413,13 @@ all-the-icons — fallback, если nerd-icons недоступен. Семей
   (add-hook 'input-method-activate-hook #'pro-ui--force-update-cursor)
   (add-hook 'input-method-deactivate-hook #'pro-ui--on-input-method-deactivate)
   (add-hook 'read-only-mode-hook #'pro-ui--force-update-cursor)
+  ;; `post-command-hook' + `after-change-major-mode-hook' — главный
+  ;; путь обновления при открытии буфера: `find-file' ставит major-mode
+  ;; через after-change-major-mode-hook, и наш хук сразу применяет курсор.
+  ;; `post-command-hook' страхует для C-x b, мыши и других способов
+  ;; смены буфера. Оба хука дешёвые: один eq-сравнение + редкое обновление.
+  (add-hook 'post-command-hook #'pro-ui--cursor-on-buffer-change)
+  (add-hook 'after-change-major-mode-hook #'pro-ui--cursor-on-buffer-change)
   (when (fboundp 'window-buffer-change-functions)
     (add-hook 'window-buffer-change-functions
               (lambda (&optional _frame) (pro-ui--force-update-cursor))))
