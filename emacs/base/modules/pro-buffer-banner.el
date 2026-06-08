@@ -62,6 +62,12 @@
   "Number of blank chars to pad around the text on each side."
   :type 'integer :group 'pro-buffer-banner)
 
+(defcustom pro-buffer-banner-max-text-chars 80
+  "Maximum length of the banner text. If the composed text exceeds this,
+it is truncated with a trailing \"…\" so the frame stays narrow and
+predictable. Set to 0 to disable truncation."
+  :type 'integer :group 'pro-buffer-banner)
+
 (defface pro-buffer-banner-face
   '((t :foreground "#ffffff" :background "#222222" :weight bold
        :extend t))
@@ -114,17 +120,28 @@ whole window/line so no default-colored padding shows around the text."
       (when (and root (stringp root) (not (string= root "")))
         (file-name-nondirectory (directory-file-name root))))))
 
+(defun pro-buffer-banner--truncate (s max)
+  "Truncate S to at most MAX chars. If shortened, append \"…\"."
+  (if (and (stringp s) (> (length s) max))
+      (concat (substring s 0 (max 0 (1- max))) "…")
+    s))
+
 (defun pro-buffer-banner--compose-text (buffer)
-  "Compose the banner text for BUFFER."
+  "Compose the banner text for BUFFER. Truncates with \"…\" if longer
+than `pro-buffer-banner-max-text-chars'."
   (let* ((bname (buffer-name buffer))
          (proj  (pro-buffer-banner--project-name))
          (branch (and pro-buffer-banner-show-branch
                       (pro-buffer-banner--branch)))
+         (max (if (and (integerp pro-buffer-banner-max-text-chars)
+                       (> pro-buffer-banner-max-text-chars 0))
+                  pro-buffer-banner-max-text-chars
+                most-positive-fixnum))
          (parts (delq nil
-                      (list bname
-                            (and proj (format "[%s]" proj))
-                            (and branch (format "(%s)" branch))))))
-    (string-join parts "  ")))
+                      (list (pro-buffer-banner--truncate bname max)
+                            (and proj (pro-buffer-banner--truncate (format "[%s]" proj) max))
+                            (and branch (pro-buffer-banner--truncate (format "(%s)" branch) max))))))
+    (pro-buffer-banner--truncate (string-join parts "  ") max)))
 
 (defun pro-buffer-banner--bufname ()
   "Return the name of the buffer backing the banner, creating it lazily."
@@ -307,7 +324,11 @@ WIDTH-CHARS wide and 1 char tall — passing (width . N) (height . 1) to
     (setq-local window-size-fixed t)
     (setq-local mode-line-format nil)
     (setq-local header-line-format nil)
-    (setq-local line-spacing 0)))
+    (setq-local line-spacing 0)
+    ;; Prevent wrapping/truncation ambiguity: lines past width are simply
+    ;; not visible (but the frame is sized to fit, so this shouldn't trigger).
+    (setq-local truncate-lines t)
+    (setq-local word-wrap nil)))
 
 ;; ---------------------------------------------------------------------------
 ;; Fade animation
