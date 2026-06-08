@@ -213,10 +213,20 @@ whole window/line so no default-colored padding shows around the text."
           '((child-frame-border-width . 0))))))
 
 (defun pro-buffer-banner--strip-decoration (frame)
-  "Force FRAME's window to render no mode/header/tab lines and no dividers."
+  "Make FRAME look like a bare label. All changes are FRAME-LOCAL — they
+must NOT touch the parent frame's `tab-bar-mode', `tool-bar-mode', etc.,
+because those are global modes that would affect every frame."
   (when (frame-live-p frame)
+    ;; Frame-local parameters (do not use `tab-bar-mode 0' etc. — those are
+    ;; global toggles and would hide bars on the main frame too).
     (set-frame-parameter frame 'line-spacing 0)
     (set-frame-parameter frame 'default-line-spacing 0)
+    (set-frame-parameter frame 'tab-bar-lines 0)
+    (set-frame-parameter frame 'tool-bar-lines 0)
+    (set-frame-parameter frame 'menu-bar-lines 0)
+    (set-frame-parameter frame 'name "")
+    (set-frame-parameter frame 'title "")
+    (set-frame-parameter frame 'icon-name "")
     (with-selected-frame frame
       (setq mode-line-format nil
             header-line-format nil
@@ -227,13 +237,7 @@ whole window/line so no default-colored padding shows around the text."
         (setq window-divider nil
               window-divider-width 0
               right-divider-width 0
-              left-divider-width 0))
-      (when (fboundp 'tab-bar-mode) (tab-bar-mode 0))
-      (when (fboundp 'tool-bar-mode) (tool-bar-mode 0))
-      (when (fboundp 'menu-bar-mode) (menu-bar-mode 0)))
-    ;; Belt and braces against WMs that show the frame name.
-    (set-frame-parameter frame 'name "")
-    (set-frame-parameter frame 'title "")))
+              left-divider-width 0)))))
 
 ;; ---------------------------------------------------------------------------
 ;; Single persistent frame

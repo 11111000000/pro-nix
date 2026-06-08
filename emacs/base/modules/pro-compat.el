@@ -106,6 +106,19 @@ PROPS forwarded to `advice-add'. Uses `advice-member-p' for the check."
   (unless (advice-member-p advice function)
     (apply #'advice-add function where advice (and props (list props)))))
 
+;; Compatibility: org-plist-delete was removed from org-macs in newer
+;; org versions, but svg-lib (svg-lib-button-mode) still calls it.
+(unless (fboundp 'org-plist-delete)
+  (defun org-plist-delete (plist property)
+    "Delete PROPERTY from PLIST.
+This is in contrast to merely setting it to 0."
+    (let (p)
+      (while plist
+        (if (not (eq property (car plist)))
+            (setq p (plist-put p (car plist) (nth 1 plist))))
+        (setq plist (cddr plist)))
+      p)))
+
 (provide 'pro-compat)
 
 ;;; pro-compat.el ends here
