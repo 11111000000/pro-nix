@@ -243,13 +243,28 @@ because those are global modes that would affect every frame."
 ;; Single persistent frame
 ;; ---------------------------------------------------------------------------
 
-(defun pro-buffer-banner--ensure-frame (params)
-  "Return the banner frame, creating it with PARAMS only if it doesn't exist."
+(defun pro-buffer-banner--ensure-frame (params width-chars)
+  "Return the banner frame, creating it with PARAMS only if it doesn't exist.
+After creation, explicitly resize the frame and window to be exactly
+WIDTH-CHARS wide and 1 char tall — passing (width . N) (height . 1) to
+`make-frame' is unreliable on some toolkits."
   (if (frame-live-p pro-buffer-banner--frame)
       pro-buffer-banner--frame
     (condition-case err
-        (let ((f (make-frame params)))
+        (let* ((f (make-frame params))
+               (win (frame-selected-window f)))
           (pro-buffer-banner--strip-decoration f)
+          ;; Lock the window: it must not grow to fit buffer content.
+          (set-window-parameter win 'window-size-fixed t)
+          (when (fboundp 'window-no-other-windows)
+            (set-window-parameter win 'no-other-windows t))
+          ;; Force the exact pixel size. `set-frame-size' takes CHAR-HEIGHT
+          ;; units only on some platforms, so we also set min-* to clamp.
+          (set-frame-parameter f 'min-width 1)
+          (set-frame-parameter f 'min-height 1)
+          (set-frame-parameter f 'width  width-chars)
+          (set-frame-parameter f 'height 1)
+          (condition-case _ (set-frame-size f width-chars 1) (error nil))
           ;; Hide it after creation; we'll show explicitly on each switch.
           (set-frame-parameter f 'visibility nil)
           (setq pro-buffer-banner--frame f)
@@ -342,7 +357,7 @@ because those are global modes that would affect every frame."
                (params (pro-buffer-banner--frame-params geom))
                (width-chars (plist-get geom :w-chars))
                (bufname (pro-buffer-banner--bufname))
-               (frame (pro-buffer-banner--ensure-frame params)))
+               (frame (pro-buffer-banner--ensure-frame params width-chars)))
           (when frame
             ;; 1. Update text in-place (no recreation).
             (let ((b (get-buffer-create bufname)))
@@ -353,11 +368,16 @@ because those are global modes that would affect every frame."
                 (save-selected-window
                   (select-frame frame)
                   (set-window-buffer (selected-window) b))))
-            ;; 3. Apply geometry in one shot.
+            ;; 3. Force exact geometry on the window: 1 line, no growth.
+            (let ((win (frame-selected-window frame)))
+              (set-window-parameter win 'window-size-fixed t))
             (set-frame-parameter frame 'left (plist-get geom :x))
             (set-frame-parameter frame 'top  (plist-get geom :y))
+            (set-frame-parameter frame 'min-width 1)
+            (set-frame-parameter frame 'min-height 1)
             (set-frame-parameter frame 'width  width-chars)
-            (set-frame-parameter frame 'height (plist-get geom :h-chars))
+            (set-frame-parameter frame 'height 1)
+            (condition-case _ (set-frame-size frame width-chars 1) (error nil))
             ;; 4. Show with full alpha, then start fade.
             (set-frame-parameter frame 'alpha pro-buffer-banner-initial-alpha)
             (set-frame-parameter frame 'visibility t)
