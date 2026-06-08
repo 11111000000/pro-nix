@@ -122,7 +122,6 @@ whole window/line so no default-colored padding shows around the text.
 ;; bound in older Emacsen.
 (defvar window-divider) (defvar window-divider-width)
 (defvar right-divider-width) (defvar left-divider-width)
-(defvar tool-bar-format) (defvar tab-bar-format)
 
 ;; ---------------------------------------------------------------------------
 ;; Helpers
@@ -281,8 +280,6 @@ than `pro-buffer-banner-max-text-chars'."
       (tab-bar-lines . 0)
       (tool-bar-lines . 0)
       (menu-bar-lines . 0)
-      (tab-bar-format . nil)
-      (tool-bar-format . nil)
       (window-divider . nil)
       (window-divider-width . 0)
       (line-spacing . 0)
@@ -294,8 +291,10 @@ than `pro-buffer-banner-max-text-chars'."
 must NOT touch the parent frame's `tab-bar-mode', `tool-bar-mode', etc.,
 because those are global modes that would affect every frame."
   (when (frame-live-p frame)
-    ;; Frame-local parameters (do not use `tab-bar-mode 0' etc. — those are
-    ;; global toggles and would hide bars on the main frame too).
+    ;; Frame-local parameters only. Do NOT use `tab-bar-mode 0' etc.
+    ;; (those are global toggles). Do NOT `setq' `tab-bar-format' or
+    ;; `tool-bar-format' — those are global defvar variables and setting
+    ;; them via `setq' would clobber them for the main frame too.
     (set-frame-parameter frame 'line-spacing 0)
     (set-frame-parameter frame 'default-line-spacing 0)
     (set-frame-parameter frame 'tab-bar-lines 0)
@@ -307,9 +306,7 @@ because those are global modes that would affect every frame."
     (with-selected-frame frame
       (setq mode-line-format nil
             header-line-format nil
-            tab-line-format nil
-            tab-bar-format nil
-            tool-bar-format nil)
+            tab-line-format nil)
       (when (boundp 'window-divider)
         (setq window-divider nil
               window-divider-width 0
