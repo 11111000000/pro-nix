@@ -559,7 +559,11 @@ pro-history — part of pro-nix")))
   (setq savehist-additional-variables
         '(search-ring regexp-search-ring extended-command-history
                       projectile-project-command-history kill-ring compile-command
-                      file-name-history shell-command-history))
+                      file-name-history shell-command-history
+                      consult--path-history consult--grep-history consult--find-history
+                      consult--man-history consult--line-history consult--line-multi-history
+                      consult--theme-history consult--minor-mode-menu-history
+                      consult--buffer-history))
   (when (fboundp 'savehist-mode)
     (savehist-mode 1)))
 
