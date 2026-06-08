@@ -149,6 +149,18 @@ corfu-auto and corfu-mode when any minibuffer completion UI is active."
                   '((command (styles orderless basic))
                     (symbol (styles orderless basic)))))))
 
+;; Sort M-x (and other command-category completion) by usage frequency via
+;; keyfreq. Applied only to the `command' category so file paths and other
+;; categories keep their default ordering.
+(when (and (require 'vertico nil t)
+           (pro-ui--try-require 'keyfreq)
+           (fboundp 'keyfreq-sort)
+           (require 'vertico-multiform nil t)
+           (fboundp 'vertico-multiform-mode))
+  (vertico-multiform-mode 1)
+  (setq vertico-multiform-categories
+        '((command (vertico-sort-function . keyfreq-sort)))))
+
 (provide 'pro-completion)
 
 ;;; pro-completion.el ends here
