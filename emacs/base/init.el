@@ -27,6 +27,21 @@
     (pro-packages-configure-archives))
   (when (fboundp 'pro-packages-initialize)
     (pro-packages-initialize))
+  ;; Allow package.el to upgrade Emacs built-in packages when needed.
+  ;; Magit and other packages sometimes require newer releases of built-ins
+  ;; (notably `transient`). Setting this here makes non-interactive upgrades
+  ;; possible during startup when we explicitly request them below.
+  (setq package-install-upgrade-built-in t)
+
+  ;; Ensure `transient' is available/upgraded so Magit does not complain.
+  ;; Use pro-packages helper which refreshes archives when necessary.
+  (when (and (require 'pro-packages nil t) (fboundp 'pro-packages--do-install))
+    (ignore-errors
+      (pro-packages--do-install 'transient)
+      ;; Reload the feature if an upgraded version was installed.
+      (when (featurep 'transient)
+        (unload-feature 'transient t)
+        (require 'transient))))
   ;; Обязательно добавляем каталог модулей в `load-path' — это делает
   ;; локальные вспомогательные пакеты (pro-*) доступными для `require' и
   ;; `locate-library' в ранней стадии загрузки.

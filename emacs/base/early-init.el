@@ -29,6 +29,19 @@
 (unless (getenv "PRO_PACKAGES_AUTO_INSTALL")
   (setenv "PRO_PACKAGES_AUTO_INSTALL" "1"))
 
+;; Ensure package.el is allowed to upgrade built-in packages. Some built-in
+;; packages (notably transient) are shipped with Emacs but need a newer
+;; release for third-party packages like Magit. Setting this here makes the
+;; behaviour explicit early in the startup sequence.
+(setq package-install-upgrade-built-in t)
+
+;; Try to load Tree-sitter early so that symbols like `treesit-node-at' are
+;; available to native-comp during compilation of third-party packages
+;; (some packages reference tree-sitter functions at compile-time). This is
+;; best-effort and non-fatal if Tree-sitter is not present in the running
+;; Emacs build.
+(ignore-errors (require 'treesit nil t))
+
 (provide 'pro-early-init)
 
 ;; Early GUI hygiene: hide distracting GUI chrome as soon as possible.
