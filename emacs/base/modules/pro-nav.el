@@ -165,9 +165,11 @@
 ;; ВАЖНО: Глобальные клавиши не назначаем здесь — они живут в emacs-keys.org
 ;; и применяются модулем keys.el. Здесь только настройки поведения/интеграции.
 (with-eval-after-load 'consult
-  ;; Use patched consult-execute-extended-command (frecency-sorted M-x)
-  (when (fboundp 'consult-execute-extended-command)
-    (fset 'execute-extended-command #'consult-execute-extended-command))
+  ;; M-x history-based sorting is the default `vertico-sort-function'
+  ;; (`vertico-sort-history-length-alpha'), driven by
+  ;; `extended-command-history'. The earlier
+  ;; `(fset 'execute-extended-command #'consult-execute-extended-command)'
+  ;; form was dead — that symbol does not exist in upstream consult 3.x.
 
   ;; consult-xref handlers
   (when (require 'consult-xref nil t)

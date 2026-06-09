@@ -151,17 +151,19 @@ corfu-auto and corfu-mode when any minibuffer completion UI is active."
                   '((command (styles orderless basic))
                     (symbol (styles orderless basic)))))))
 
-;; Sort M-x (and other command-category completion) by usage frequency via
-;; keyfreq. Applied only to the `command' category so file paths and other
-;; categories keep their default ordering.
-(when (and (require 'vertico nil t)
-           (pro-ui--try-require 'keyfreq)
-           (fboundp 'keyfreq-sort)
-           (require 'vertico-multiform nil t)
-           (fboundp 'vertico-multiform-mode))
-  (vertico-multiform-mode 1)
-  (setq vertico-multiform-categories
-        '((command (vertico-sort-function . keyfreq-sort)))))
+;; M-x recency sorting is handled by vertico's default sort function
+;; (`vertico-sort-history-length-alpha' from vertico-sort.el), which ranks
+;; candidates by `minibuffer-history-variable' — for `execute-extended-command'
+;; that is `extended-command-history'. Two conditions must hold for the
+;; ranking to be visible:
+;;   1. `vertico-mode' is enabled (see pro-nav).
+;;   2. `savehist-mode' is enabled and `extended-command-history' is in
+;;      `savehist-additional-variables' (see pro-history, which already
+;;      configures both).
+;; No vertico-multiform / keyfreq-sort glue is needed: the earlier
+;; `vertico-multiform-categories' form referenced a non-existent
+;; `keyfreq-sort' function (keyfreq only tracks stats via `keyfreq-show',
+;; it does not ship a sort predicate) and was therefore dead code.
 
 (provide 'pro-completion)
 
