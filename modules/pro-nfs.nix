@@ -82,10 +82,9 @@ in
         enable = true;
         # nfsd 8 потоков — адекватно для 1GbE с 3-4 клиентами.
         nfsdThreads = 8;
-        # lockd для POSIX-блокировок через NFS.
-        lockd.enable = true;
-        # Mountd для NFSv3.
-        mountd.enable = true;
+        # Note: modern NixOS `services.nfs.server` may not expose nested
+        # `lockd`/`mountd` options; leaving defaults and relying on
+        # `services.nfs.server` to manage helper daemons automatically.
         # Стандартный порт 2049. Менять не нужно — firewalld открывает по
         # `openFirewall = true` ниже.
         port = 2049;
