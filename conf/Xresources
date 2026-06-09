@@ -1,54 +1,116 @@
-Emacs.font: Aporetic Sans Mono 12
-Emacs.fullscreen: maximized
-Emacs.menuBar: 0
-Emacs.toolBar: 0
-Emacs.verticalScrollBars: off
-Emacs.FontBackend: xft
-Emacs.background:   #262626
-Emacs.foreground:   #e5e5e5
-Emacs.cursorColor:  #007700
+! ══════════════════════════════════════════════════════════════════════
+! Xresources для pro-nix (Emacs/EXWM + URxvt)
+!
+! Назначение: единый визуальный слой для графических приложений
+! (Emacs/EXWM, URxvt, XTerm, Xmessage, Xpdf).  Xresources-цвета
+! применяются ДО загрузки темы Emacs (см. pro-ui-theme.el), поэтому
+! именно они определяют «как выглядит сразу при старте».
+!
+! Текущая палитра: чёрный фон + серый текст (#b0b0b0) + зелёный
+! курсор.  Это совпадает с настройкой URxvt и применяется как fallback
+! для Emacs-фрейма до того, как `tao-yang' (светлая) тема переопределит
+! face'ы.  Если нужна тёмная Emacs-тема — см. docs/analyse/.
+! ══════════════════════════════════════════════════════════════════════
+
+! ── Xft defaults (применяется ко всем Xft-приложениям) ───────────────
+Xft.antialias:   true
+Xft.autohint:    0
+Xft.hintstyle:   hintfull
+Xft.hinting:     true
+Xft.lcdfilter:   lcddefault
+Xft.rgba:        rgb
+
+! ── Emacs (EXWM как оконный менеджер) ───────────────────────────────
+! 14px Aporetic Sans Mono — на уровне urxvt-Terminus-14, чтобы
+! визуально не было «прыжка» при переключении между окнами.
+Emacs.font:              Aporetic Sans Mono 14
+Emacs.FontBackend:       xft
+Emacs.geometry:          132x40
+Emacs.fullscreen:        maximized
+Emacs.menuBar:           0
+Emacs.toolBar:           0
+Emacs.verticalScrollBars:   off
+Emacs.horizontalScrollBars: off
+Emacs.internalBorder:    0
+Emacs.borderWidth:       0
+Emacs.cursorBlink:       0
+! Цвета — чёрный фон, серый текст.  Совпадают с URxvt.
+Emacs.background:        #000000
+Emacs.foreground:        #b0b0b0
+Emacs.cursorColor:       #88ff88
+Emacs.visualBell:        false
 ! Disable Emacs' own XIM client so that EXWM (exwm-xim) can act as the
 ! sole XIM server; otherwise the two negotiate recursively and may
 ! deadlock.  See exwm-xim.el::exwm-xim--deadlock-warning.
-Emacs.useXIM: false
+Emacs.useXIM:            false
 
-*international: true
-Xft.antialias: true
-Xft.autohint: 0
-Xft.hintstyle: hintfull
-Xft.hinting: true
-Xft.lcdfilter: lcddefault
-Xft.rgba: rgb
+*international:           true
 
-! Терминал/служебное
-! Terminus 14px — «нормальный» размер; чёрный фон + серый (#b0b0b0) текст.
-XTerm*faceName: Terminus:size=14
-XTerm*font: xft:Terminus:size=14
-URxvt*font: xft:Terminus:size=14
-URxvt.perl-ext-common: default,clipboard
-URxvt.keysym.C-y: perl:clipboard:paste
-URxvt.keysym.C-plus: perl:font-size:increase
-URxvt.keysym.C-minus: perl:font-size:decrease
-URxvt.keysym.C-0: perl:font-size:reset
+! ── URxvt (rxvt-unicode) ────────────────────────────────────────────
+! Terminus 14px — bitmap-шрифт, читаемый в TUI.  В xft-нотации size
+! задаётся в пикселях, что и нужно для bitmap-шрифтов.
+URxvt.font:              xft:Terminus:size=14
+URxvt.foreground:        #b0b0b0
+URxvt.background:        #000000
+URxvt.cursorColor:       #88ff88
+URxvt.cursorBlink:       true
+URxvt.pointerBlank:      false
+URxvt.geometry:          132x40
+URxvt.internalBorder:    4
+URxvt.borderLess:        false
+URxvt.borderColor:       #000000
+URxvt.scrollBar:         false
+URxvt.saveLines:         2000
+URxvt.urgentOnBell:      true
+URxvt.visualBell:        false
+URxvt.termName:          rxvt-unicode-256color
+! Монохромная палитра с приглушёнными цветами: `ls --color', `git
+! status' и т.п. не «вырвиглазные», но цвета различимы.
+URxvt.color0:            #1c1c1c
+URxvt.color1:            #c25c5c
+URxvt.color2:            #5cc25c
+URxvt.color3:            #c2c25c
+URxvt.color4:            #5c5cc2
+URxvt.color5:            #c25cc2
+URxvt.color6:            #5cc2c2
+URxvt.color7:            #c0c0c0
+URxvt.color8:            #666666
+URxvt.color9:            #d87575
+URxvt.color10:           #75d875
+URxvt.color11:           #d8d875
+URxvt.color12:           #7575d8
+URxvt.color13:           #d875d8
+URxvt.color14:           #75d8d8
+URxvt.color15:           #e5e5e5
+URxvt.colorBD:           #ffffff
+URxvt.colorUL:           #5cc25c
+
+! Perl-расширения
+URxvt.perl-ext-common:   default,clipboard,font-size
+URxvt.keysym.C-y:        perl:clipboard:paste
+URxvt.keysym.C-plus:     perl:font-size:increase
+URxvt.keysym.C-minus:    perl:font-size:decrease
+URxvt.keysym.C-0:        perl:font-size:reset
 URxvt.keysym.C-underscore: perl:font-size:increase
-URxvt*background: #000000
-URxvt*foreground: #b0b0b0
-URxvt*cursorColor: #88ff88
-URxvt*scrollBar: false
-URxvt*saveLines: 2000
-URxvt.scrollBar: false
-URxvt.saveLines: 2000
 
-! Xpdf и прочие для чтения
-Xpdf*font: xft:Aporetic Sans:size=12
+! ── XTerm (fallback) ────────────────────────────────────────────────
+XTerm*faceName:          Terminus:size=14
+XTerm*font:              xft:Terminus:size=14
+XTerm*foreground:        #b0b0b0
+XTerm*background:        #000000
+XTerm*cursorColor:       #88ff88
+XTerm*geometry:          132x40
 
-! Xmessage для служебных окон
-Xmessage*font: xft:Aporetic Sans Mono:size=12
-Xmessage*background: #3c3c3c
-Xmessage*foreground: #c2c2c2
+! ── Xmessage (служебные диалоги) ────────────────────────────────────
+Xmessage*font:              xft:Aporetic Sans Mono:size=14
+Xmessage*background:        #3c3c3c
+Xmessage*foreground:        #c2c2c2
 Xmessage*form.*.shapeStyle: rectangle
-Xmessage*Scrollbar.width: 1
+Xmessage*Scrollbar.width:   1
 Xmessage*Scrollbar.borderWidth: 0
-Xmessage*Buttons: Quit
-Xmessage*defaultButton: Quit
-Xmessage*international: true
+Xmessage*Buttons:           Quit
+Xmessage*defaultButton:     Quit
+Xmessage*international:     true
+
+! ── Xpdf (читалка PDF) ──────────────────────────────────────────────
+Xpdf*font:                  xft:Aporetic Sans:size=12
