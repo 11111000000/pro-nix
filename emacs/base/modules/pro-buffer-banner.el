@@ -185,12 +185,15 @@ than `pro-buffer-banner-max-text-chars'."
               top    (or (nth 1 edges) 0)
               right  (or (nth 2 edges) left)
               bottom (or (nth 3 edges) top))))
-    ;; Width in characters: pad + text + pad + safety margin.
-    ;; The safety margin guards against sub-pixel rounding when the banner
-    ;; uses a font scaled by `pro-buffer-banner-font-scale'.
+    ;; Width in characters: pad + text + pad.  No safety margin: the
+    ;; banner font is set explicitly via `pro-buffer-banner--scaled-font'
+    ;; so the frame's char-width matches the rendered text width, and
+    ;; `pro-buffer-banner--populate' uses this exact width for padding.
+    ;; A non-zero safety margin would add trailing/leading spaces to the
+    ;; banner text.
     (let* ((text-len (length text))
            (pad (max 0 pro-buffer-banner-pad-chars))
-           (w-chars (+ text-len pad pad 2))
+           (w-chars (+ text-len pad pad))
            (h-chars 1)
            (parent-pixel-w (max 1 (- right left)))
            (char-w (max 1 (frame-char-width parent)))
@@ -293,13 +296,17 @@ because those are global modes that would affect every frame."
   (when (frame-live-p frame)
     ;; Frame-local parameters only. Do NOT use `tab-bar-mode 0' etc.
     ;; (those are global toggles). Do NOT `setq' `tab-bar-format' or
-    ;; `tool-bar-format' — those are global defvar variables and setting
-    ;; them via `setq' would clobber them for the main frame too.
+    ;; `tool-bar-format' globally — those are global defvar variables
+    ;; and setting them via `setq' would clobber them for the main
+    ;; frame too.  We instead set them as frame parameters, which Emacs
+    ;; respects on a per-frame basis.
     (set-frame-parameter frame 'line-spacing 0)
     (set-frame-parameter frame 'default-line-spacing 0)
     (set-frame-parameter frame 'tab-bar-lines 0)
     (set-frame-parameter frame 'tool-bar-lines 0)
     (set-frame-parameter frame 'menu-bar-lines 0)
+    (set-frame-parameter frame 'tab-bar-format nil)
+    (set-frame-parameter frame 'tool-bar-format nil)
     (set-frame-parameter frame 'name "")
     (set-frame-parameter frame 'title "")
     (set-frame-parameter frame 'icon-name "")
@@ -381,6 +388,7 @@ WIDTH-CHARS wide and 1 char tall — passing (width . N) (height . 1) to
     (setq-local window-size-fixed t)
     (setq-local mode-line-format nil)
     (setq-local header-line-format nil)
+    (setq-local tab-line-format nil)
     (setq-local line-spacing 0)
     ;; Prevent wrapping/truncation ambiguity: lines past width are simply
     ;; not visible (but the frame is sized to fit, so this shouldn't trigger).
@@ -462,7 +470,14 @@ divided into `pro-buffer-banner-fade-steps' steps."
             (set-frame-parameter frame 'width  width-chars)
             (set-frame-parameter frame 'height 1)
             (condition-case _ (set-frame-size frame width-chars 1) (error nil))
-            ;; 4. Show with full alpha, then start fade.
+            ;; 4. Re-apply decoration stripping on every show: the
+            ;; `set-frame-size'/parameter calls above can otherwise let
+            ;; the tab/tool/menu bars grow back if the global
+            ;; `tab-bar-mode' is enabled (it is, via pro-tabs). Doing
+            ;; this here keeps the banner a pure text label even after
+            ;; repeated buffer switches.
+            (pro-buffer-banner--strip-decoration frame)
+            ;; 5. Show with full alpha, then start fade.
             (set-frame-parameter frame 'alpha pro-buffer-banner-initial-alpha)
             (set-frame-parameter frame 'visibility t)
             (pro-buffer-banner--start-fade)
@@ -528,6 +543,38 @@ Plain `M-x pro-buffer-banner-mode' toggles."
 ;; Auto-enable when loaded if the user hasn't disabled it.
 (when pro-buffer-banner-enable
   (pro-buffer-banner--install))
+
+;; ---------------------------------------------------------------------------
+;; Soft reload integration
+;; ---------------------------------------------------------------------------
+;; The banner frame is created ONCE and reused on every show. After a
+;; `pro/reload-config' the .el file is re-evaluated, but the existing
+;; frame keeps its old geometry (width/height/font) because those were
+;; baked in at creation time. Hook the after-reload teardown so the
+;; next show rebuilds the frame from the freshly loaded code.
+
+(defun pro-buffer-banner--reload-reset ()
+  "Teardown function for `pro--after-reload-hook'.
+Destroys the persistent banner frame and the backing buffer so the
+next `pro-buffer-banner--show' recreates them using the freshly
+loaded module's parameters (font scale, width calc, decoration
+stripping, etc.)."
+  (when (fboundp 'pro-buffer-banner--destroy)
+    (ignore-errors (pro-buffer-banner--destroy)))
+  ;; Backing buffer keeps the same name across reloads; kill it so the
+  ;; next show gets a clean slate.
+  (when (and (boundp 'pro-buffer-banner--bufname)
+             pro-buffer-banner--bufname
+             (get-buffer pro-buffer-banner--bufname))
+    (ignore-errors (kill-buffer pro-buffer-banner--bufname)))
+  (setq pro-buffer-banner--bufname nil
+        pro-buffer-banner--last-buf nil
+        pro-buffer-banner--last-win nil
+        pro-buffer-banner--last-shown-at 0.0))
+
+(ignore-errors
+  (when (fboundp 'pro/after-reload)
+    (pro/after-reload #'pro-buffer-banner--reload-reset)))
 
 (provide 'pro-buffer-banner)
 
