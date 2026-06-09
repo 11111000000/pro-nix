@@ -21,9 +21,10 @@ Xft.lcdfilter: lcddefault
 Xft.rgba: rgb
 
 ! Терминал/служебное
-XTerm*faceName: Terminus:size=12
-XTerm*font: xft:Terminus:size=12
-URxvt*font: xft:Terminus:size=12
+! Terminus 14px — «нормальный» размер; чёрный фон + серый (#b0b0b0) текст.
+XTerm*faceName: Terminus:size=14
+XTerm*font: xft:Terminus:size=14
+URxvt*font: xft:Terminus:size=14
 URxvt.perl-ext-common: default,clipboard
 URxvt.keysym.C-y: perl:clipboard:paste
 URxvt.keysym.C-plus: perl:font-size:increase
@@ -31,8 +32,8 @@ URxvt.keysym.C-minus: perl:font-size:decrease
 URxvt.keysym.C-0: perl:font-size:reset
 URxvt.keysym.C-underscore: perl:font-size:increase
 URxvt*background: #000000
-URxvt*foreground: #e5e5e5
-URxvt*cursorColor: #007700
+URxvt*foreground: #b0b0b0
+URxvt*cursorColor: #88ff88
 URxvt*scrollBar: false
 URxvt*saveLines: 2000
 URxvt.scrollBar: false
