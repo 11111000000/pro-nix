@@ -126,3 +126,8 @@
 | Haskell    | C-c h f       | pro-haskell-format-buffer             | Форматировать (fourmolu)             |
 | Haskell    | C-c h i       | pro-haskell-lint                      | Линтер (hlint)                       |
 | Haskell    | C-c h d       | pro-haskell-browse-haddock            | Документация символа под курсором    |
+| Profiler   | <f8>          | pro/profiler-quick                    | Профиль 15 сек + автоматический отчёт |
+| Profiler   | C-<f8>        | pro/profiler-start                    | Запустить профайлер (CPU)            |
+| Profiler   | S-<f8>        | pro/profiler-stop                     | Остановить профайлер                 |
+| Profiler   | M-<f8>        | pro/profiler-report                   | Открыть отчёт профайлера             |
+| Profiler   | C-S-<f8>      | pro/profiler-reset                    | Сбросить данные профайлера           |
