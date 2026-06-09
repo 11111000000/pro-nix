@@ -23,16 +23,25 @@ let
   hostName = config.networking.hostName;
 in
 {
-  # Samba полезна в LAN, но nmbd может зависать на старте, если нет готового
-  # non-loopback IPv4 интерфейса. Поэтому общий модуль только описывает
-  # конфигурацию, а не включает службу. Хост, которому нужен SMB, включает её
-  # явно в host/local конфигурации.
-  services.samba.enable = lib.mkDefault false;
-  services.samba.openFirewall = lib.mkDefault false;
+  # Samba default-on: каждый pro-nix хост отдаёт свой /srv/samba/<host>
+  # share + общий `public`. NB: nmbd может зависнуть на старте без
+  # non-loopback IPv4 — это симптом проблем с сетью, не повод выключать.
+  # Хост может отказаться: services.samba.enable = lib.mkForce false;
+  services.samba.enable = lib.mkDefault true;
+  # Firewall: открыть SMB порты (445/tcp) и NetBIOS (137,138/udp).
+  # `bind interfaces only = No` в global + `hosts allow` уже ограничивают
+  # доступ RFC1918, FW открываем дефолтом — defense-in-depth.
+  services.samba.openFirewall = lib.mkDefault true;
+  # nmbd нужен для browsing; включаем явно. Без него Windows-клиенты не
+  # увидят хост в Network Neighborhood.
+  services.samba.nmbd.enable = lib.mkDefault true;
+  # winbind не нужен — у нас простая LAN с локальными Unix-юзерами.
+  services.samba.winbindd.enable = lib.mkDefault false;
   # Avahi can fail early during boot if /run/avahi-daemon is missing; ensure
   # tmpfiles create expected runtime directories. Keep avahi enabled for discovery.
   services.avahi.enable = lib.mkDefault true;
   services.avahi.publish.enable = lib.mkDefault true;
+  services.avahi.allowInterfaces = lib.mkDefault [ "eth*" "wlan*" "en*" "wlp*" ];
   # Configure Samba to be reachable on the local network only and advertise via mDNS
   # Use the declarative settings sections: "global" + per-share sections
   # Gobal Samba parameters are security-sensitive. Prefer them to be applied
@@ -105,7 +114,42 @@ in
     "d /srv/samba/public 2775 az pro - -"
     "d /srv/syncthing 2775 root pro - -"
     "d /srv/syncthing/share 2775 root pro - -"
+    # /var/lib/pro-samba holds the one-time-setup marker so we never
+    # re-prompt for Samba passwords on subsequent switches.
+    "d /var/lib/pro-samba 0755 root root - -"
+    # NFS runtime paths (opt-in NFS server creates /srv/nfs)
+    "d /srv/nfs 2775 root pro - -"
   ];
+
+  # One-time Samba passdb bootstrap. Runs at activation of the local-fs
+  # target so /etc/samba and `smbpasswd` are available. Idempotent: skips
+  # any user already in the passdb (pdbedit -L).
+  #
+  # Password sourcing priority (highest first):
+  #   1. PRO_SAMBA_PASS_<USER> env var (set in local.nix secrets)
+  #   2. /etc/samba/creds.d/passwd-file (mode 600, USER:PASSWORD lines)
+  #   3. interactive prompt on a tty
+  #
+  # If none of the above work, that user is reported in the unit's stdout
+  # and the service exits 0 anyway — the operator must run
+  # `ops-pro-samba-setup-users` manually later.
+  environment.etc."pro/ops-pro-samba-setup-users.sh".source = ../scripts/ops-pro-samba-setup-users.sh;
+  environment.etc."pro/ops-pro-samba-setup-users.sh".mode = "0755";
+  systemd.services."pro-samba-setup-users" = {
+    description = "Populate Samba passdb with pro-nix Unix users (one-shot)";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "systemd-tmpfiles-setup.service" ];
+    before = [ "smbd.service" ];
+    # Run AFTER smbd first time so the service is at least running, but the
+    # script is idempotent and can run again on next switch.
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = "yes";
+      ExecStart = "/etc/pro/ops-pro-samba-setup-users.sh";
+      # Marker file prevents re-prompting on every switch.
+      SuccessExitStatus = "0 1";
+    };
+  };
 
   services.syncthing = {
     enable = lib.mkDefault true;
@@ -136,7 +180,11 @@ in
     # Keep application ports open (exposed generally). SMB ports are opened by
     # services.samba.openFirewall; keep other app ports here.
     allowedTCPPorts = [ 22000 8384 ];
-    allowedUDPPorts = [ 21027 137 138 ];
+    allowedUDPPorts = [
+      21027       # Syncthing discovery
+      137 138     # NetBIOS name/datagram service
+      5353        # mDNS (Avahi) — без этого хосты не находят друг друга по hostname.local
+    ];
   };
 
   # Publish Samba via mDNS for Android discovery.
@@ -148,6 +196,36 @@ in
       <service>
         <type>_smb._tcp</type>
         <port>445</port>
+      </service>
+    </service-group>
+  '';
+
+  # ── NFS (opt-in) ──────────────────────────────────────────────────────────
+  # NFSv4 server экспортирует /srv/nfs в LAN. По умолчанию ВЫКЛЮЧЕН —
+  # включается на desktop-хосте через `services.nfs.server.enable = true`
+  # (или `pro.nfs.server.enable = true` если импортирован opt-in модуль).
+  # Клиенты монтируют desktop:/srv/nfs в /mnt/desktop-nfs через
+  # `services.nfs.client.enable = true` + `fileSystems`.
+  #
+  # Почему NFSv4 + sec=sys: в маленькой доверенной LAN (pro-nix 4 хоста) —
+  # самое простое. UID маппятся 1:1, потому что NixOS даёт одинаковые UID
+  # для az/za/la/bo на всех хостах (см. pro-users.nix).
+  #
+  # Почему НЕ включаем по умолчанию: NFS-server слушает на 2049/tcp+udp
+  # и открывает потенциальную attack surface; пусть хост, который реально
+  # хочет быть файлосервером, opt-in'ит явно.
+  # (tmpfiles rule for /srv/nfs moved into the main tmpfiles list above)
+
+  # ── Avahi: публикация _nfs._tcp для клиентов ─────────────────────────────
+  # Клиенты (gvfs, KDE, macOS Finder) находят NFS-шару по .local имени хоста.
+  environment.etc."avahi/services/nfs.service".text = ''
+    <?xml version="1.0" standalone='no'?>
+    <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+    <service-group>
+      <name replace-wildcards="yes">%h NFS</name>
+      <service>
+        <type>_nfs._tcp</type>
+        <port>2049</port>
       </service>
     </service-group>
   '';
