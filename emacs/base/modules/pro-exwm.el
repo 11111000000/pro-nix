@@ -196,10 +196,6 @@ GDM может добавлять префикс \='none+' к имени сес�
     ;; When EXWM exits, kill Emacs — we ARE the session.
     (add-hook 'exwm-exit-hook #'kill-emacs)
     (exwm-wm-mode 1)
-    (message "[pro-exwm] session started (workspaces: %d, systemtray: %s, xim: %s)"
-             exwm-workspace-number
-             (if (and (boundp 'exwm-systemtray-mode) exwm-systemtray-mode) "on" "off")
-             (if (and (boundp 'exwm-xim-mode) exwm-xim-mode) "on" "off"))
 
     ;; Autostart small userland helpers (tray icons, clipboard daemon, udisks)
     ;; Start them only in a graphical session and only if the variable is set.
@@ -211,7 +207,123 @@ GDM может добавлять префикс \='none+' к имени сес�
             (condition-case err
                 (start-process-shell-command name nil cmd)
               (error (message "[pro-exwm] failed to autostart '%s': %s" cmd err)))))))
-    ))
+
+    ;; Start the initial frame in fullscreen so EXWM doesn't show a small
+    ;; window on first paint.  Works even when xrdb didn't apply the
+    ;; `Emacs.fullscreen: maximized' line (eg. exwm-session started before
+    ;; xrdb ran).
+    (when (display-graphic-p)
+      (set-frame-parameter nil 'fullscreen 'fullscreen))
+
+    ;; Install the urxvt-sidebar management hook (idempotent).
+    (pro-exwm--install-urxvt-sidebar-hook)
+
+    (message "[pro-exwm] session started (workspaces: %d, systemtray: %s, xim: %s)"
+             exwm-workspace-number
+             (if (and (boundp 'exwm-systemtray-mode) exwm-systemtray-mode) "on" "off")
+             (if (and (boundp 'exwm-xim-mode) exwm-xim-mode) "on" "off"))))
+
+;; ── Urxvt bottom-sidebar toggle ────────────────────────────────────────────
+;;
+;; Spawns `urxvt' as a child X window and, after EXWM manages it, uses
+;; `xdotool' to position it as a sidebar at the bottom of the screen.  A
+;; second invocation closes the X client and clears the state.
+;;
+;; Why xdotool:  EXWM manages X windows itself and does not expose a
+;; built-in "set position/size" function for non-floating windows.  A
+;; shell-out to xdotool after `exwm-manage-finish-hook' is the most
+;; reliable and least invasive way to override the WM's tiling decision.
+;;
+;; Naming:  urxvt is invoked with `-name pro-urxvt-sidebar -title
+;; pro-urxvt-sidebar' so we can find the window unambiguously even if the
+;; user has other urxvt instances running.
+
+(defvar pro-exwm-urxvt--id nil
+  "X11 window id of the toggled urxvt sidebar, or nil if not running.")
+
+(defvar pro-exwm-urxvt--program "urxvt"
+  "Program used by `pro/exwm-urxvt-toggle' to spawn the urxvt sidebar.")
+
+(defcustom pro-exwm-urxvt--height-fraction 0.40
+  "Height of the urxvt bottom sidebar as a fraction of the display height.
+0.40 ⇒ sidebar занимает 40% высоты экрана снизу.  Минимум — 200px."
+  :type 'float :group 'pro-exwm)
+
+(defun pro-exwm-urxvt--read-display ()
+  "Return (W H) of the current X display root window, or sensible defaults."
+  (let ((w (ignore-errors (x-display-pixel-width)))
+        (h (ignore-errors (x-display-pixel-height))))
+    (list (or w 1920) (or h 1080))))
+
+(defun pro-exwm-urxvt--run-xdotool (&rest args)
+  "Run xdotool with ARGS.  Returns non-nil on exit-code 0."
+  (when-let ((bin (executable-find "xdotool")))
+    (zerop (apply #'call-process bin nil nil nil args))))
+
+(defun pro-exwm-urxvt--find-by-name (name)
+  "Return the integer X window id of the X window whose name matches NAME."
+  (when-let ((bin (executable-find "xdotool")))
+    (with-temp-buffer
+      (when (zerop (call-process bin nil t nil "search" "--name" name ""))
+        (goto-char (point-min))
+        (skip-syntax-forward " ")
+        (when (looking-at "[0-9a-fA-F]+")
+          (string-to-number (match-string 0) 16))))))
+
+(defun pro-exwm-urxvt--position (id)
+  "Move/resize the X window ID to occupy the bottom sidebar slot."
+  (when (and id (integerp id))
+    (let* ((geom (pro-exwm-urxvt--read-display))
+           (w (car geom))
+           (h (cadr geom))
+           (sidebar-h (max 200 (floor (* h pro-exwm-urxvt--height-fraction))))
+           (sidebar-y (max 0 (- h sidebar-h)))
+           (hex (format "0x%x" id)))
+      (pro-exwm-urxvt--run-xdotool "windowmove" hex "0" (number-to-string sidebar-y))
+      (pro-exwm-urxvt--run-xdotool "windowsize" hex (number-to-string w) (number-to-string sidebar-h))
+      (pro-exwm-urxvt--run-xdotool "windowraise" hex))))
+
+(defun pro-exwm-urxvt--on-manage ()
+  "Hook: reposition the urxvt sidebar after EXWM has finished managing it."
+  (when (and (boundp 'exwm-class-name) (string= exwm-class-name "URxvt")
+             (boundp 'exwm-title) (string= exwm-title "pro-urxvt-sidebar")
+             (boundp 'exwm-id) (integerp exwm-id))
+    (setq pro-exwm-urxvt--id exwm-id)
+    ;; Defer the move/resize a tick: the window may not be mapped yet
+    ;; when `exwm-manage-finish-hook' fires.
+    (run-with-timer 0.05 nil
+                    (lambda () (pro-exwm-urxvt--position pro-exwm-urxvt--id)))))
+
+(defun pro-exwm--install-urxvt-sidebar-hook ()
+  "Idempotently install the urxvt sidebar management hook."
+  (when (and (boundp 'exwm-manage-finish-hook)
+             (not (memq #'pro-exwm-urxvt--on-manage exwm-manage-finish-hook)))
+    (add-hook 'exwm-manage-finish-hook #'pro-exwm-urxvt--on-manage)))
+
+(defun pro/exwm-urxvt-toggle ()
+  "Toggle the urxvt bottom sidebar in EXWM.
+First call: spawns `urxvt' (`-name pro-urxvt-sidebar -title pro-urxvt-sidebar')
+and positions it as a 40% bottom sidebar.
+Second call: closes the running X client and clears state.
+No-op outside EXWM."
+  (interactive)
+  (unless (and (fboundp 'exwm-wm-mode) exwm-wm-mode)
+    (user-error "pro/exwm-urxvt-toggle: EXWM is not running"))
+  (let* ((id pro-exwm-urxvt--id)
+         (hex (and id (format "0x%x" id)))
+         (still-there (and hex
+                           (pro-exwm-urxvt--run-xdotool "getwindowname" hex))))
+    (if still-there
+        (progn
+          (pro-exwm-urxvt--run-xdotool "windowclose" hex)
+          (setq pro-exwm-urxvt--id nil)
+          (message "[pro-exwm] urxvt sidebar closed"))
+      (setq pro-exwm-urxvt--id nil)
+      (start-process-shell-command
+       "pro-urxvt-sidebar" nil
+       (concat pro-exwm-urxvt--program
+               " -name pro-urxvt-sidebar -title pro-urxvt-sidebar"))
+      (message "[pro-exwm] urxvt sidebar spawned"))))
 
 ;; ── Init hooks ───────────────────────────────────────────────────────────
 ;;
