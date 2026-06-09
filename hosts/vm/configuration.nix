@@ -21,4 +21,7 @@
   users.users.root.password = "";
 
   # VM follows the same shared package policy, including Tor Browser.
+
+  # NFS-клиент: монтируем desktop:/srv/nfs автоматически по обращению.
+  pro.nfs.client.enable = true;
 }

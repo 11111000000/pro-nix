@@ -123,4 +123,7 @@ in
   services.xserver.desktopManager.cinnamon.enable = lib.mkForce false;
   # fbterm отключён: он занимает tty2 и может конфликтовать с запуском display manager.
   systemd.services."fbterm-tty2".enable = lib.mkForce false;
+
+  # NFS-клиент: монтируем desktop:/srv/nfs автоматически по обращению.
+  pro.nfs.client.enable = true;
 }

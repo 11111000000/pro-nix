@@ -53,6 +53,7 @@
      ./modules/pro-privacy.nix
      ./modules/pro-dev.nix
      ./modules/pro-peer.nix
+     ./modules/pro-nfs.nix
      ./modules/host-policies.nix
      ./modules/headscale.nix
      ./modules/pro-desktop.nix

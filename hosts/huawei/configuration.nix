@@ -55,4 +55,7 @@
   # All hosts should expose the same browser/runtime stack unless hardware
   # forces an exception. Tor Browser lives in the shared package composition.
 
+  # NFS-клиент: монтируем desktop:/srv/nfs автоматически по обращению.
+  pro.nfs.client.enable = true;
+
 }
