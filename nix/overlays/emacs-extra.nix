@@ -61,4 +61,8 @@ let
   };
 in {
   emacsPackages = super.emacsPackages // repoExtras // localRecipes;
+  # telega-server: a CLI binary used by telega.el as a TDLib JSON bridge.
+  # Exposed as a regular package (not under emacsPackages) so that
+  # `home.packages` can include it. The elisp side references it via PATH.
+  telega-server = super.callPackage ../emacs-recipes/telega-server.nix {};
 }

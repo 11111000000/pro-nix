@@ -12,7 +12,8 @@
       # Опционально: можно включить sandboxed wrapper через programs.opencode-bwrap,
       # но он может тащить плагины. Поэтому оставляем только бинарь.
       # programs.opencode-bwrap.enable = lib.mkDefault false;
-      home.packages = lib.mkAfter [ pkgs.opencode ];
+      home.packages = lib.mkAfter ([ pkgs.opencode ]
+        ++ lib.optional (builtins.hasAttr "telega-server" pkgs) pkgs.telega-server);
         pro.emacs = {
           enable = true;
           gui.enable = false;
@@ -22,6 +23,7 @@
             "eldoc-box" "goto-chg"
             "kind-icon" "magit" "marginalia" "markdown-mode" "nerd-icons" "nerd-icons-ibuffer" "nerd-icons-completion"
             "nix-mode" "orderless" "org" "ob-mermaid" "projectile" "rainbow-delimiters"
+            "telega"
             "treemacs" "vertico" "vterm" "yasnippet" "embark-consult" "dash-docs" "consult-dash"
             "multi-vterm" "eshell-toggle" "acapella" "atlas" "shaoline" "tao-theme" "pro-tabs"
           ];
