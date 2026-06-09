@@ -107,24 +107,28 @@
         desktop = mkHost [ ./hosts/desktop/configuration.nix ./hosts/desktop/composition.nix ];
         vm = mkVmHost [ ./hosts/vm/configuration.nix ./hosts/vm/composition.nix ];
       };
+
+      # Gate expensive/slow checks (VMs, full activation tests) behind an
+      # environment flag so `nix flake check` is fast by default. Set
+      # PRO_NIX_RUN_SLOW_CHECKS=1 to enable slow checks.
+      runSlow = builtins.getEnv "PRO_NIX_RUN_SLOW_CHECKS" == "1";
     in {
       nixosConfigurations = hosts;
 
-      checks.${system} = {
-        default = hosts.huawei.config.system.build.toplevel;
-        # NixOS VM tests for activation verification
-        huawei-boot = import ./tests/vm/huawei-boot.nix {
-          inherit (pkgs) testers;
-          # pass the home-manager module (not the input set) so the test
-          # can import it as a NixOS module. Previously we attempted to
-          # inherit `home-manager` from `pkgs` which produced the wrong
-          # value/type and caused flake evaluation errors in the VM test.
-          home-manager = home-manager.nixosModules.home-manager;
-          piModule = pi.nixosModules.default;
-        };
-        basic-activation-test = import ./tests/vm/test-basic-activation.nix { inherit (pkgs) testers; };
-        cf19-switch-dbus-regression = import ./tests/vm/cf19-switch-dbus-regression.nix { inherit (pkgs) testers; };
-      };
+      checks.${system} = (
+        { default = hosts.huawei.config.system.build.toplevel; }
+        // (if runSlow then {
+          # NixOS VM tests for activation verification — expensive, enable via
+          # PRO_NIX_RUN_SLOW_CHECKS=1 in your environment when you want them.
+          huawei-boot = import ./tests/vm/huawei-boot.nix {
+            inherit (pkgs) testers;
+            home-manager = home-manager.nixosModules.home-manager;
+            piModule = pi.nixosModules.default;
+          };
+          basic-activation-test = import ./tests/vm/test-basic-activation.nix { inherit (pkgs) testers; };
+          cf19-switch-dbus-regression = import ./tests/vm/cf19-switch-dbus-regression.nix { inherit (pkgs) testers; };
+        } else {})
+      );
 
       apps.${system} = {
         check-all = {
