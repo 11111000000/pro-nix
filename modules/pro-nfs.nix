@@ -80,14 +80,9 @@ in
       # со старыми клиентами (macOS Finder по умолчанию v3).
       services.nfs.server = {
         enable = true;
-        # nfsd 8 потоков — адекватно для 1GbE с 3-4 клиентами.
-        nfsdThreads = 8;
-        # Note: modern NixOS `services.nfs.server` may not expose nested
-        # `lockd`/`mountd` options; leaving defaults and relying on
-        # `services.nfs.server` to manage helper daemons automatically.
-        # Стандартный порт 2049. Менять не нужно — firewalld открывает по
-        # `openFirewall = true` ниже.
-        port = 2049;
+        # Leave daemon tuning to NixOS defaults; helper daemons (lockd,
+        # mountd) and ports are managed by the `services.nfs.server` module
+        # in nixpkgs. Avoid setting potentially non-existent nested options.
         # Не включаем Kerberos — sec=sys достаточно для доверенной LAN
         # с одинаковыми UID. Если добавим AD/SSSD позже — переключим.
       };
