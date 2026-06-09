@@ -71,8 +71,9 @@ CACHE-KEY is (DIR . HEAD-MTIME); refreshed only when HEAD changes.")
 (when (require 'agent-shell nil t)
   (setq agent-shell-buffer-name-format
         (lambda (agent project)
-          (format "🤖 %s" (or (and (stringp project) (not (string-empty-p project)))
-                              "agent")))))
+          (format "🤖 %s" (if (and (stringp project) (not (string-empty-p project)))
+                              project
+                            "agent")))))
 
 ;; Если пакет доступен — зарегистрируем небольшие обёртки и локальные клавиши.
 (condition-case err
@@ -171,15 +172,45 @@ Handles both regular repos (.git is a directory) and worktrees
          (t nil)))
 
       (defun pro-agent-shell--project-name ()
-        "Return enriched project name (`proj:branch+wt:name').
-Reads `.git/HEAD' directly, caches result by HEAD mtime. No fork/exec." 
+        "Return enriched project name (`proj:branch+wt:name' or `proj:branch').
+
+Prefer the *main* project directory (not the worktree directory) when
+`dir' resolves to a git worktree under `…/.git/worktrees/<name>/'.  This
+keeps the project anchor stable in `C-x b' / tab-bar / modeline even
+when the user is parked in a single-letter worktree like `t'.
+
+Reads `.git/HEAD' directly, caches result by HEAD mtime. No fork/exec."
         (let* ((root (or (and (fboundp 'pro-project-root) (pro-project-root))
                          default-directory))
                (dir (and root (directory-file-name (expand-file-name root))))
-               (proj (and dir (file-name-nondirectory dir))))
+               (gitdir (and dir (pro-agent-shell--resolve-gitdir dir)))
+               ;; For worktrees (`…/.git/worktrees/<wt>/HEAD'), the main
+               ;; project lives at the `commondir' sibling — the parent
+               ;; of the worktree's gitdir, minus the `worktrees/' segment.
+               ;; Fall back to `dir' when commondir is missing.
+               (worktree (and gitdir
+                             (string-match
+                              "/worktrees/\\([^/]+\\)/?\\'" gitdir)
+                             (match-string 1 gitdir)))
+               (main-dir (if worktree
+                             (let* ((gitdir-parent (file-name-directory
+                                                    (directory-file-name gitdir)))
+                                    (commondir (expand-file-name
+                                                ".." gitdir-parent)))
+                               (if (and (file-directory-p commondir)
+                                        (string-match
+                                         "/\\.git/?\\'" commondir))
+                                   (directory-file-name
+                                    (expand-file-name ".." commondir))
+                                 dir))
+                           dir))
+               (proj (and main-dir
+                          (not (string-equal
+                                (expand-file-name main-dir)
+                                (expand-file-name "~/")))
+                          (file-name-nondirectory main-dir))))
           (when (and proj (not (string-empty-p proj)))
-            (let* ((gitdir (pro-agent-shell--resolve-gitdir dir))
-                   (head-path (and gitdir (expand-file-name "HEAD" gitdir)))
+            (let* ((head-path (and gitdir (expand-file-name "HEAD" gitdir)))
                    (mtime (and head-path
                                (file-attribute-modification-time
                                 (file-attributes head-path))))
@@ -187,11 +218,7 @@ Reads `.git/HEAD' directly, caches result by HEAD mtime. No fork/exec."
               (if (and pro-agent-shell--project-name-cache
                        (equal (car pro-agent-shell--project-name-cache) key))
                   (cdr pro-agent-shell--project-name-cache)
-                (let* ((worktree (and gitdir
-                                      (string-match
-                                       "/worktrees/\\([^/]+\\)/?\\'" gitdir)
-                                      (match-string 1 gitdir)))
-                       (branch (pro-agent-shell--branch-from-head
+                (let* ((branch (pro-agent-shell--branch-from-head
                                 (pro-agent-shell--read-trimmed head-path)))
                        (value (cond
                                ((and branch worktree)
@@ -321,6 +348,24 @@ CPU and GC pressure while keeping the header fresh enough to be useful."
               (message "[pro-agent-shell] пакет установлен, но не найден в load-path — перезапустите Emacs"))
           (message "[pro-agent-shell] не удалось обеспечить agent-shell (pro/packages-ensure вернул nil)")))
     (error (message "[pro-agent-shell] ошибка при попытке обеспечить agent-shell: %S" err))))
+
+;; ---------------------------------------------------------------------------
+;; Soft reload integration
+;; ---------------------------------------------------------------------------
+;; Advice on `agent-shell--project-name' is re-applied via
+;; `pro-compat--advice-add-once' on every reload, so the wrapper will use
+;; the freshly loaded `pro-agent-shell--project-name' the next time it's
+;; called. The buffer-name-format lambda is also re-set at top level
+;; during reload, so NEW agent-shell buffers get the new format.
+;;
+;; Existing buffers keep their old names — that's intrinsic to Emacs
+;; (renaming user buffers is invasive).  The reload-evaluated code will
+;; produce the new format on the next `agent-shell' call.
+;;
+;; The cache `pro-agent-shell--project-name-cache' is buffer-local and
+;; keyed on (DIR . HEAD-MTIME); if a user edits the project's
+;; `pro-agent-shell--project-name' logic, the next call will compute
+;; fresh against the new code and the new key.
 
 (provide 'pro-agent-shell)
 
