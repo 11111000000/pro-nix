@@ -119,10 +119,11 @@ in
 
     # ─── CLIENT ────────────────────────────────────────────────────────────
     (lib.mkIf cfg.client.enable {
-      services.nfs.client.enable = true;
 
       # Mount: NFSv4.2, soft (не зависаем при обрыве), _netdev (ждём сети),
       # x-systemd.automount (монтируем по обращению), noatime (меньше IO).
+      # Note: do not set non-existent `services.nfs.client` option; only
+      # declare the filesystem mount which is a valid NixOS option.
       fileSystems.${cfg.client.mountPoint} = {
         device = "${cfg.client.server}.local:${cfg.client.remotePath}";
         fsType = "nfs";
