@@ -124,4 +124,18 @@ dedicated or is the minibuffer."
   (interactive)
   (shrink-window 4))
 
+;; --- Window balance (C-x =) ----------------------------------------------
+;; Поведение в духе golden-ratio:
+;;   1) выровнять все окна одинаково (`balance-windows');
+;;   2) подогнать текущее окно под золотое сечение (`golden-ratio'),
+;;      если пакет `golden-ratio' загружен (см. `pro-windows-enable' выше).
+;; Fallback: если `golden-ratio' не загружен — только `balance-windows'.
+(defun pro-windows-balance ()
+  "Выровнять все окна, затем (если доступен) применить golden-ratio.
+Биндинг: C-x = (см. emacs-keys.org)."
+  (interactive)
+  (balance-windows)
+  (when (fboundp 'golden-ratio)
+    (golden-ratio)))
+
 (provide 'pro-windows)
