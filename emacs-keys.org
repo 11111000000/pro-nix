@@ -49,10 +49,10 @@
 | EXWM       | s-j           | windmove-down                         | Переместить фокус вниз               |
 | EXWM       | s-k           | windmove-up                           | Переместить фокус вверх              |
 | EXWM       | s-l           | windmove-right                        | Переместить фокус вправо             |
-| EXWM       | s-H           | pro-windows-buf-move-left                         | Переместить буфер влево              |
-| EXWM       | s-J           | pro-windows-buf-move-down                         | Переместить буфер вниз               |
-| EXWM       | s-K           | pro-windows-buf-move-up                           | Переместить буфер вверх              |
-| EXWM       | s-L           | pro-windows-buf-move-right                        | Переместить буфер вправо             |
+| EXWM       | s-H           | pro-windows-buf-move-left             | Переместить буфер влево              |
+| EXWM       | s-J           | pro-windows-buf-move-down             | Переместить буфер вниз               |
+| EXWM       | s-K           | pro-windows-buf-move-up               | Переместить буфер вверх              |
+| EXWM       | s-L           | pro-windows-buf-move-right            | Переместить буфер вправо             |
 | EXWM       | s-1           | pro-tabs-select-tab-1                 | Вкладка 1                            |
 | EXWM       | s-2           | pro-tabs-select-tab-2                 | Вкладка 2                            |
 | EXWM       | s-3           | pro-tabs-select-tab-3                 | Вкладка 3                            |
@@ -84,6 +84,7 @@
 | Дерево     | s-d           | treemacs                              | Открыть дерево                       |
 | Окна       | C-x +         | pro-windows-enlarge                   | Увеличить окно                       |
 | Окна       | C-x -         | pro-windows-shrink                    | Уменьшить окно                       |
+| Окна       | C-x =         | pro-windows-balance                   | Выровнять окна (balance + golden-ratio) |
 | AI         | C-c a         | pro-ai-open-entry                     | Вход в AI                            |
 | AI         | C-c A         | pro-agent-open                        | agent-shell                          |
 | AI         | C-c a (hud)   | agent-shell-hud-menu                  | Пульт агента (в agent-shell-mode)    |

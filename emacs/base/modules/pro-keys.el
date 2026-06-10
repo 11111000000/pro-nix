@@ -183,7 +183,6 @@
                 ((memq sym '(consult-dash)) (ignore-errors (require 'consult-dash nil t)))
                 ((memq sym '(eldoc-box-help-at-point)) (ignore-errors (require 'eldoc-box nil t)))
                 ((memq sym '(undo-tree-visualize)) (ignore-errors (require 'undo-tree nil t)))
-                ((memq sym '(buf-move-left buf-move-right buf-move-up buf-move-down)) (ignore-errors (require 'buffer-move nil t)))
                 ((memq sym '(cape-dict cape-line)) (ignore-errors (require 'cape nil t)))
                  ((memq sym '(exwm-reset exwm-workspace-switch)) (when (display-graphic-p) (ignore-errors (require 'exwm nil t))))
                   ((memq sym '(goto-last-change goto-last-change-reverse)) (ignore-errors (require 'goto-chg nil t)))
