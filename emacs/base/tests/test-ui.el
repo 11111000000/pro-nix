@@ -39,8 +39,8 @@
           (should (equal (plist-get (cddr cursor-call) :background) pro-ui-cursor-english-color))
           (should (eq (plist-get (cddr cursor-call) :box) nil)))))))
 
-(ert-deftest pro-ui-cursor-state-english-uses-bar-and-black-color ()
-  "Английский ввод должен возвращать состояние 'english и зелёный цвет курсора."
+(ert-deftest pro-ui-cursor-state-english-uses-bar-and-dark-green-color ()
+  "Английский ввод должен возвращать состояние 'english и тёмно-зелёный цвет курсора."
   (when (fboundp 'pro-ui--apply-cursor-for-state)
     (let ((cursor-type nil)
           pro-ui--test-last-set-face)
@@ -51,6 +51,37 @@
         (pro-ui--apply-cursor-for-state 'english)
         (should (equal cursor-type `(bar . ,pro-ui-cursor-bar-width)))
         (should (equal (plist-get (cddr pro-ui--test-last-set-face) :background) pro-ui-cursor-english-color))))))
+
+(ert-deftest pro-ui-cursor-english-color-is-not-bright-green ()
+  "Цвет english-ввода по умолчанию — тёмно-зелёный, не яркий #00ff00.
+Прежнее значение #00ff00 «кричало» и плохо смотрелось рядом с
+оранжевым русского ввода; тёмно-зелёный (#0d7a32) спокойнее и
+виднее на тёмном фоне."
+  (when (boundp 'pro-ui-cursor-english-color)
+    (should-not (equal pro-ui-cursor-english-color "#00ff00")) ; защита от регрессии
+    (should (string-prefix-p "#" pro-ui-cursor-english-color))
+    ;; Зелёный канал должен доминировать — это всё-таки зелёный,
+    ;; просто тёмный (а не синий/красный акцент).
+    (when (string-match "^#\\([0-9a-fA-F]\\{2\\}\\)\\([0-9a-fA-F]\\{2\\}\\)\\([0-9a-fA-F]\\{2\\}\\)$"
+                        pro-ui-cursor-english-color)
+      (let* ((r (string-to-number (match-string 1 pro-ui-cursor-english-color) 16))
+             (g (string-to-number (match-string 2 pro-ui-cursor-english-color) 16))
+             (b (string-to-number (match-string 3 pro-ui-cursor-english-color) 16)))
+        (should (> g r))
+        (should (> g b))))))
+
+(ert-deftest pro-ui-cursor-deactivate-advice-is-installed ()
+  "pro-ui-apply-cursor-chg устанавливает :after-advice на
+`deactivate-input-method'. Без этого advice курсор не обновлялся бы
+сразу при выключении русского ввода — приходилось ждать idle-тика
+(т.е. ещё одно нажатие C-\\), что и приводило к жалобе «надо два
+раза переключить»."
+  (when (and (fboundp 'pro-ui-apply-cursor-chg)
+             (fboundp 'deactivate-input-method)
+             (fboundp 'advice-member-p))
+    (pro-ui-apply-cursor-chg)
+    (should (advice-member-p #'pro-ui--force-update-cursor
+                             'deactivate-input-method))))
 
 (ert-deftest pro-ui-detect-cursor-state-prefers-readonly ()
   "Read-only буфер должен переопределять input method."

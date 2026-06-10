@@ -261,19 +261,23 @@ all-the-icons — fallback, если nerd-icons недоступен. Семей
 ;; Cursor appearance helpers
 ;; Небольшая утилита: менять цвет и тип курсора в зависимости от
 ;; текущего метода ввода и режима read-only. Требование: при русском
-;; вводе — оранжевый вертикальный бар; при английском — зелёный бар;
-;; при read-only — серый полый прямоугольник.
+;; вводе — оранжевый вертикальный бар; при английском — тёмно-зелёный
+;; бар; при read-only — серый полый прямоугольник.
 ;;
-;; Caveat по хукам:
+;; Caveat по хукам (Emacs 28+):
 ;; - `input-method-activate-hook' срабатывает ПОСЛЕ того, как
 ;;   `current-input-method' уже выставлен, так что внутри хука видно
 ;;   актуальное значение.
 ;; - `input-method-deactivate-hook' срабатывает ДО того, как
 ;;   `current-input-method' сбрасывается в nil (см. `deactivate-input-method'
 ;;   в mule-cmds.el: внутренний unwind-protect сначала прогоняет хуки, а
-;;   уже затем setq-ит current-input-method в nil). Из-за этого хук
-;;   видит старое значение и триггерит «ложный» state, поэтому обновление
-;;   откладывается через idle-timer.
+;;   уже затем setq-ит current-input-method в nil). Поэтому прямо из хука
+;;   пересчитывать state бесполезно — он видит прежнее значение и ничего
+;;   не меняет. Решение: :after-advice на самой `deactivate-input-method',
+;;   чтобы ход срабатывал ПОСЛЕ unwind-protect, когда `current-input-method'
+;;   уже nil. Это даёт обновление курсора в той же команде (без
+;;   run-with-idle-timer, из-за которого раньше требовалось «два
+;;   переключения»).
 ;; - В read-only буферах Emacs рисует курсор лицом `cursor-read-only', а
 ;;   не `cursor'. Нужно обновлять оба лица, иначе наш `:box' игнорируется.
 (defcustom pro-ui-cursor-russian-color "#ff8800"
@@ -281,10 +285,12 @@ all-the-icons — fallback, если nerd-icons недоступен. Семей
   :type 'string
   :group 'pro-ui)
 
-(defcustom pro-ui-cursor-english-color "#00ff00"
+(defcustom pro-ui-cursor-english-color "#0d7a32"
   "Цвет курсора для стандартного (английского) ввода.
 
-По умолчанию зелёный — чтобы было заметно при возврате из русского раскладки."
+По умолчанию тёмно-зелёный — хорошо виден на тёмном фоне, не «кричит»
+и отличается от оранжевого русского ввода. Если хочется ярче —
+поменяйте через `M-x customize-variable'."
   :type 'string
   :group 'pro-ui)
 
@@ -403,22 +409,28 @@ all-the-icons — fallback, если nerd-icons недоступен. Семей
           (pro-ui--maybe-update-cursor)
         (error nil)))))
 
-(defun pro-ui--on-input-method-deactivate ()
-  "Хук для input-method-deactivate-hook: отложенное обновление.
-  `input-method-deactivate-hook' срабатывает ДО того, как
-  `current-input-method' сбрасывается в nil, поэтому немедленный
-  re-check увидит прежнее значение. Откладываем на ближайший idle-тик."
-  (run-with-idle-timer 0 nil #'pro-ui--force-update-cursor))
-
 (defun pro-ui-apply-cursor-chg ()
   "Инициализировать динамический курсор.
 Идемпотентно: повторный вызов (например, после soft reload через
 `pro/reload-config', который перечитывает файл) не дублирует хуки.
 Все `add-hook' обёрнуты в `unless (memq ...)'."
+  ;; Activate: hook fires после того, как `current-input-method' уже
+  ;; выставлен — прямое обновление без задержки.
   (unless (memq #'pro-ui--force-update-cursor input-method-activate-hook)
     (add-hook 'input-method-activate-hook #'pro-ui--force-update-cursor))
-  (unless (memq #'pro-ui--on-input-method-deactivate input-method-deactivate-hook)
-    (add-hook 'input-method-deactivate-hook #'pro-ui--on-input-method-deactivate))
+  ;; Deactivate: `input-method-deactivate-hook' стреляет ДО того, как
+  ;; `current-input-method' сброшен в nil, поэтому напрямую из хука
+  ;; пересчитывать state бесполезно. Используем :after-advice на самой
+  ;; `deactivate-input-method': он сработает после unwind-protect, где
+  ;; current-input-method уже nil, и курсор обновится в той же команде
+  ;; (без run-with-idle-timer, из-за которого раньше требовалось второе
+  ;; переключение, чтобы цвет «догнал»).
+  (when (and (fboundp 'deactivate-input-method)
+             (fboundp 'advice-add)
+             (not (advice-member-p #'pro-ui--force-update-cursor
+                                    'deactivate-input-method)))
+    (advice-add 'deactivate-input-method :after
+                #'pro-ui--force-update-cursor))
   (unless (memq #'pro-ui--force-update-cursor read-only-mode-hook)
     (add-hook 'read-only-mode-hook #'pro-ui--force-update-cursor))
   ;; `post-command-hook' + `after-change-major-mode-hook' — главный
@@ -497,9 +509,9 @@ message with recommendations (manual and Home-Manager snippets).
       (pro-ui-apply-theme))))
 
 (ignore-errors
-  ;; Wire up dynamic cursor color (russian -> orange, english -> black,
-  ;; read-only -> black box). Implemented in pure Elisp; no `cursor-chg'
-  ;; package required.
+  ;; Wire up dynamic cursor color (russian -> orange, english -> dark
+  ;; green, read-only -> gray box). Implemented in pure Elisp; no
+  ;; `cursor-chg' package required.
   (when (fboundp 'pro-ui-apply-cursor-chg)
     (pro-ui-apply-cursor-chg)))
 
