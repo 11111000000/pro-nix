@@ -57,8 +57,11 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Dedupe + trim
-USERS=$(echo "$USERS" | tr ' ' '\n' | awk 'NF && !seen[$0]++' | tr '\n' ' ')
+# Dedupe + trim. We avoid `awk` here: this script runs as a systemd
+# oneshot service with a minimal PATH, and `awk` is not always on it
+# (it lives in /usr/bin/awk on some distros but is not in the systemd
+# unit's default PATH under NixOS). Pure shell + tr + sort -u is enough.
+USERS=$(printf '%s\n' $USERS | sort -u | tr '\n' ' ')
 
 for cmd in smbpasswd pdbedit; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
@@ -78,8 +81,10 @@ if [[ -n "$PASS_FILE" ]]; then
   fi
 fi
 
-# Cache passdb listing once.
-EXISTING=$(pdbedit -L 2>/dev/null | awk -F: '{print $1}' | sort -u)
+# Cache passdb listing once. Avoid `awk` for the same reason as the
+# dedupe above: minimal PATH in the systemd unit. `cut -d:` reads the
+# first `:`-delimited field which is the username.
+EXISTING=$(pdbedit -L 2>/dev/null | cut -d: -f1 | sort -u)
 
 failed=()
 added=()
