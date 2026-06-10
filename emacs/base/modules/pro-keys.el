@@ -10,6 +10,7 @@
 ;; Proof: unit tests under emacs/base/tests/ (if present) and manual smoke tests.
 
 (require 'subr-x)
+(require 'cl-lib)
 
 (defgroup pro nil
   "Базовая группа настроек PRO.
@@ -29,18 +30,29 @@
 ;; instantiating the example. This avoids accidental commits of a
 ;; concrete user keys file and keeps per-user overrides local.
 
+(defun pro-keys--first-readable (&rest paths)
+  "Return the first path in PATHS that is readable, or nil."
+  (or (cl-find-if (lambda (p) (and (stringp p) (file-readable-p p))) paths)
+      nil))
+
 (defconst pro-keys-system-file
   (let* ((etc-file "/etc/pro/emacs-keys.org")
-         (repo-base (expand-file-name ".." (file-name-directory (or load-file-name buffer-file-name))))
-         (cand1 (expand-file-name "pro/emacs-keys.org" repo-base))
-         ;; Some repository layouts keep emacs-keys.org at the repo root.
-         (cand2 (expand-file-name "emacs-keys.org" (expand-file-name ".." repo-base))))
-    (or (and (file-readable-p etc-file) etc-file)
-        cand1
-        cand2))
-  "Путь к системному файлу клавиш PRO. По умолчанию ищем /etc/..., затем
-файл в репозитории (pro/emacs-keys.org), и в некоторых layout'ах — emacs-keys.org
-в корне репозитория. Пользовательский файл по-прежнему в ~/.config/emacs/keys.org.")
+         (this-dir (file-name-directory (or load-file-name buffer-file-name)))
+         (repo-root (or (and this-dir (locate-dominating-file this-dir "flake.nix"))
+                        (and this-dir (locate-dominating-file this-dir ".git"))))
+         (cand-repo-root (and repo-root (expand-file-name "emacs-keys.org" repo-root)))
+         (cand-pro-layout (and this-dir
+                               (expand-file-name
+                                "pro/emacs-keys.org"
+                                (expand-file-name ".." this-dir)))))
+    (pro-keys--first-readable
+     etc-file
+     cand-repo-root
+     cand-pro-layout))
+  "Путь к системному файлу клавиш PRO. По умолчанию ищем /etc/pro/emacs-keys.org,
+затем emacs-keys.org в корне репозитория (найденном через `locate-dominating-file'
+по `flake.nix' или `.git'), и в крайнем случае — файл pro/emacs-keys.org рядом
+с emacs/base. Пользовательский файл по-прежнему в ~/.config/emacs/keys.org.")
 
 (defvar pro-keys-exwm-global-keys nil
   "Список глобальных клавиш EXWM, собранный из Org-таблиц.")

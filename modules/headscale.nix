@@ -83,34 +83,59 @@ in
       };
     };
 
-    environment.etc."headscale/config.yaml".text = ''
-      # Minimal headscale config. Operator: override in host overlay at /etc/headscale/config.yaml
-      server_url: "http://0.0.0.0:8080"
-      listen: "${cfg.listenAddress}"
-      metrics_listen: "0.0.0.0:9090"
-      db_type: "sqlite3"
-      db_path: "/var/lib/headscale/headscale.db"
-      private_key_path: "/var/lib/headscale/private.key"
-      noise:
-        private_key_path: "/var/lib/headscale/noise_private.key"
-      prefix_v4: "100.64.0.0/10"
-      prefix_v6: "fd7a:115c:a1e0::/48"
-      base_domain: "${cfg.baseDomain}"
-      dns:
-        base_domain: "${cfg.baseDomain}"
-        nameservers.global: ${lib.concatStringsSep "," (map (s: "\"${s}\"") cfg.nameservers)}
-        extra_records_path: "/var/lib/headscale/extra-records.json"
-        magic_dns: true
-        use_username_in_magic_dns: false
-      ${lib.optionalString (cfg.derpUrls != []) "derp:"}
-      ${lib.optionalString (cfg.derpUrls != "") (lib.concatMapStringsSep "\n" (u: "  urls:\n    - \"${u}\"") cfg.derpUrls)}
-      # DERP embedded server is opt-in: only enable on hosts that explicitly
-      # need it (otherwise rely on a separate DERP instance or the public map).
-      derp.server:
-        enabled: false
-        region_id: 999
-        stun_listen_addr: "0.0.0.0:3478"
-    '';
+    # Generate config via `pkgs.formats.yaml` so list/boolean values are
+    # rendered correctly. Hand-rolled `lib.concatStringsSep "," (map ...
+    # "\"${s}\"")` produced `"1.1.1.1","8.8.8.8"` — a single string, not
+    # a YAML list, which headscale rejects with a parse error.
+    environment.etc."headscale/config.yaml".source =
+      let
+        yamlFormat = pkgs.formats.yaml {};
+        # DERP block: only present if there is at least one custom DERP URL.
+        # When derpUrls is empty, omit the whole `derp` key so headscale
+        # falls back to the public Tailscale DERP map.
+        derpBlock = if cfg.derpUrls == [] then {} else {
+          derp = {
+            urls = cfg.derpUrls;
+          };
+        };
+      in yamlFormat.generate "headscale-config.yaml" ({
+        server_url = "http://0.0.0.0:8080";
+        listen = cfg.listenAddress;
+        metrics_listen = "0.0.0.0:9090";
+        # In headscale 0.27+ the database settings moved under a
+        # `database:` mapping (`type` + `sqlite.path` or `postgres.*`).
+        # The flat `db_type` / `db_path` keys are still parsed but
+        # ignored by the server.
+        database = {
+          type = "sqlite3";
+          sqlite.path = "/var/lib/headscale/headscale.db";
+        };
+        private_key_path = "/var/lib/headscale/private.key";
+        noise.private_key_path = "/var/lib/headscale/noise_private.key";
+        # In headscale 0.27+ the IP prefix settings moved under a
+        # `prefixes:` mapping (previously `prefix_v4` / `prefix_v6`).
+        # The old keys are still accepted by the parser but are no longer
+        # used by the server, so we have to spell out the new shape.
+        prefixes = {
+          v4 = "100.64.0.0/10";
+          v6 = "fd7a:115c:a1e0::/48";
+        };
+        base_domain = cfg.baseDomain;
+        dns = {
+          base_domain = cfg.baseDomain;
+          nameservers.global = cfg.nameservers;
+          extra_records_path = "/var/lib/headscale/extra-records.json";
+          magic_dns = true;
+        };
+        # Embedded DERP server is opt-in: not started by this module. Hosts
+        # that need to terminate DERP for the cluster should run it
+        # separately (or override this attribute set).
+        derp.server = {
+          enabled = false;
+          region_id = 999;
+          stun_listen_addr = "0.0.0.0:3478";
+        };
+      } // derpBlock);
 
     systemd.tmpfiles.rules = [
       "d /var/lib/headscale 0755 root root -"

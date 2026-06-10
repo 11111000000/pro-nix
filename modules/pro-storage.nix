@@ -17,7 +17,7 @@
 #   `ss -tlnp | grep -E '445|8384'` или `systemctl status nmbd smbd`.
 #
 # Last reviewed: 2026-05-03
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 
 let
   hostName = config.networking.hostName;
@@ -136,7 +136,17 @@ in
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = "yes";
-      ExecStart = "/etc/pro/ops-pro-samba-setup-users.sh";
+      # Wrap ExecStart in `env -i ...` so the script sees the canonical
+      # NixOS system PATH (including samba's smbpasswd/pdbedit) and not
+      # the truncated one-shot PATH that systemd defaults to. The
+      # service's effective PATH is otherwise only coreutils/findutils/
+      # gnugrep/gnused/systemd — no samba, no awk, no /usr/bin.
+      #
+      # NB: `/run/current-system/sw/bin` is the per-system profile that
+      # symlinks every package enabled by `services.samba.*` and any
+      # other module in this configuration. It is the same path that
+      # user shells see, so this is the most predictable choice.
+      ExecStart = "/usr/bin/env -i PATH=/run/current-system/sw/bin:/run/current-system/sw/sbin:/run/current-system/sw/lib/kde4/libexec:/bin:/sbin LOCALE_ARCHIVE=${pkgs.glibcLocales}/lib/locale/locale-archive /etc/pro/ops-pro-samba-setup-users.sh";
       # Marker file prevents re-prompting on every switch.
       SuccessExitStatus = "0 1";
     };
