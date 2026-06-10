@@ -82,11 +82,20 @@ CACHE-KEY is (DIR . HEAD-MTIME); refreshed only when HEAD changes.")
       (setq agent-shell-header-style 'text
             agent-shell-show-welcome-message nil)
 
-      ;; Disable automatic transcript file creation/append to avoid
-      ;; frequent disk I/O from agent-shell (helps performance under
-      ;; heavy traffic). When nil, transcript saving is disabled.
-      (when (boundp 'agent-shell-transcript-file-path-function)
-        (setq agent-shell-transcript-file-path-function nil))
+      ;; Transcript: держим дефолт — `agent-shell--default-transcript-file-path'.
+      ;; При не-nil функции agent-shell:
+      ;;   1. сам выбирает имя файла (.agent-shell/transcripts/YYYY-MM-DD-HH-MM-SS.md),
+      ;;   2. fmakunbound-ит `agent-shell-save-session-transcript'
+      ;;      (убирает `read-file-name' на C-x C-s),
+      ;;   3. ставит `shell-maker-prompt-before-killing-buffer' в nil
+      ;;      (убирает "Save transcript for *Agent*?" в y-or-n-p при
+      ;;      kill-buffer и `save-buffers-kill-emacs').
+      ;; Раньше здесь стояло `nil' ради "перформанса при тяжёлом трафике",
+      ;; но фактический hot-path — это fork+exec git, который уже починен
+      ;; в `pro-agent-shell--project-name' (читает .git/HEAD напрямую).
+      ;; Запись `write-region APPEND' дёшева и не блокирует основной поток.
+      ;; Если всё-таки захочется выключить — `M-x agent-shell-hud-toggle-transcript'
+      ;; или `t' в HUD-меню (C-c a).
 
       ;; EMCP — MCP-сервер: даёт агенту доступ к Emacs (документация,
       ;; eval, скриншоты, переменные). Профиль develop даёт inspect +
