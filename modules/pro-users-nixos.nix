@@ -26,6 +26,9 @@
             "telega"
             "treemacs" "vertico" "vterm" "yasnippet" "embark-consult" "dash-docs" "consult-dash"
             "multi-vterm" "eshell-toggle" "acapella" "atlas" "shaoline" "tao-theme" "pro-tabs"
+            "agent-shell" "agent-shell-hud" "acp" "emcp" "shell-maker"
+            "all-the-icons-dired" "all-the-icons-completion" "treemacs-icons-dired"
+            "golden-ratio"
           ];
 
           extraPackages = let
@@ -40,14 +43,7 @@
               ++ (if builtins.hasAttr "carriage" epkgs then [ epkgs.carriage ] else [ ])
               ++ (if builtins.hasAttr "acapella" epkgs then [ epkgs.acapella ] else [ ])
               ++ (if builtins.hasAttr "atlas" epkgs then [ epkgs.atlas ] else [ ])
-              ++ (if builtins.hasAttr "shaoline" epkgs then [ epkgs.shaoline ] else [ ])
-              ++ (if builtins.hasAttr "agent-shell" epkgs then [ epkgs.agent-shell ] else [ ])
-              ++ (if builtins.hasAttr "agent-shell-hud" epkgs then [ epkgs.agent-shell-hud ] else [ ])
-              ++ (if builtins.hasAttr "acp" epkgs then [ epkgs.acp ] else [ ])
-              ++ (if builtins.hasAttr "emcp" epkgs then [ epkgs.emcp ] else [ ])
-              ++ (if builtins.hasAttr "treemacs-icons-dired" epkgs then [ epkgs."treemacs-icons-dired" ] else [ ])
-              ++ (if builtins.hasAttr "eldoc-box" epkgs then [ epkgs.eldoc-box ] else [ ])
-              ++ (if builtins.hasAttr "golden-ratio" epkgs then [ epkgs.golden-ratio ] else [ ]);
+              ++ (if builtins.hasAttr "shaoline" epkgs then [ epkgs.shaoline ] else [ ]);
             # Hunspell + русский словарь (см. modules/pro-spellcheck.nix):
             # обёртка pro-hunspell проксирует DICPATH на ru_RU/en_US, чтобы
             # flyspell в Emacs находил словари без ручной настройки.
