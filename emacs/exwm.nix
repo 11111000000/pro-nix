@@ -2,146 +2,174 @@
 
 let
   cfg = config.pro.emacs;
+
+  # The rescue xprofile is intentionally unconditional (only gated on
+  # pro.emacs.enable via the parent module): lightdm's xsession-wrapper
+  # sources ~/.xprofile before exec'ing the window manager, so the
+  # xbindkeys grab is in place BEFORE EXWM claims any key.  That is the
+  # whole point of modules/pro-emacs-rescue.nix.
+  rescueXprofile = ''
+    # pro-emacs-rescue: xbindkeys grab for the external kill-switch.
+    # modules/pro-emacs-rescue.nix renders /etc/pro/emacs-rescue/xbindkeysrc
+    # with the configured key (default Control+Alt+Shift+r).  Starting it
+    # here guarantees the X server grants xbindkeys the global grab BEFORE
+    # EXWM (or any other WM) is launched, so the key remains reachable
+    # even when Emacs/EXWM is stuck in its event loop and cannot run C-g.
+    pgrep -x xbindkeys >/dev/null 2>&1 \
+      || /run/current-system/sw/bin/xbindkeys -f /etc/pro/emacs-rescue/xbindkeysrc >/dev/null 2>&1 &
+  '';
 in
-lib.mkIf cfg.gui.enable {
-  # EXWM-specific user files are kept here so the Emacs-side session glue stays
-  # explicit and does not leak into the core editor runtime.
-  home.file.".config/gtk-3.0/settings.ini".source = ../conf/gtk-3.0-settings.ini;
-  home.file.".config/gtk-4.0/settings.ini".source = ../conf/gtk-4.0-settings.ini;
-  home.file.".gtkrc-2.0".source = ../conf/gtkrc-2.0;
-  home.file.".Xresources".source = ../conf/Xresources;
-  home.file.".config/qt5ct/qt5ct.conf".source = ../conf/qt5ct.conf;
-  home.file.".config/qt6ct/qt6ct.conf".source = ../conf/qt6ct.conf;
-  home.file.".config/dunst/dunstrc".source = ../conf/dunstrc;
-  home.file.".config/fontconfig/fonts.conf".source = ../conf/fonts.conf;
-  home.file.".tridactylrc".source = ../conf/tridactylrc;
+{
+  # ~/.xprofile is sourced by lightdm's xsession-wrapper BEFORE the window
+  # manager starts.  This is the only place the rescue key grab can be
+  # planted without depending on EXWM being up.  It runs even when
+  # gui.enable = false (e.g. on hosts where Emacs is launched manually
+  # from a TTY) so the rescue key is always available in the user's X
+  # session.
+  #
+  # The rest of the EXWM-specific glue (gtk/qt/xresources/dunst configs,
+  # pro-emacs-session, exwm-session launcher) is only meaningful on hosts
+  # where EXWM is the actual session, and is gated on cfg.gui.enable.
+  config = lib.mkMerge [
+    (lib.mkIf cfg.enable {
+      home.file.".xprofile".text = rescueXprofile;
+    })
 
-  home.file.".xprofile".text = ''
-    [ -f "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources" || true
-    pgrep -x xbindkeys >/dev/null 2>&1 || /run/current-system/sw/bin/xbindkeys -f /etc/pro/emacs-rescue/xbindkeysrc >/dev/null 2>&1 &
-  '';
+    (lib.mkIf cfg.gui.enable {
+    # EXWM-specific user files are kept here so the Emacs-side session glue stays
+    # explicit and does not leak into the core editor runtime.
+    home.file.".config/gtk-3.0/settings.ini".source = ../conf/gtk-3.0-settings.ini;
+    home.file.".config/gtk-4.0/settings.ini".source = ../conf/gtk-4.0-settings.ini;
+    home.file.".gtkrc-2.0".source = ../conf/gtkrc-2.0;
+    home.file.".Xresources".source = ../conf/Xresources;
+    home.file.".config/qt5ct/qt5ct.conf".source = ../conf/qt5ct.conf;
+    home.file.".config/qt6ct/qt6ct.conf".source = ../conf/qt6ct.conf;
+    home.file.".config/dunst/dunstrc".source = ../conf/dunstrc;
+    home.file.".config/fontconfig/fonts.conf".source = ../conf/fonts.conf;
+    home.file.".tridactylrc".source = ../conf/tridactylrc;
 
-  home.file.".config/autostart/systemd-user-import-env.desktop".text = ''
-    [Desktop Entry]
-    Type=Application
-    Name=Import systemd --user env
-    Exec=${config.home.homeDirectory}/.local/bin/pro-emacs-env-fix.sh
-    X-GNOME-Autostart-enabled=true
-  '';
-
-  home.file.".local/bin/pro-emacs-env-fix.sh" = {
-    text = ''
-      #!/usr/bin/env sh
-      set -eu
-      systemctl --user import-environment DISPLAY XAUTHORITY DBUS_SESSION_BUS_ADDRESS XDG_CURRENT_DESKTOP
-      systemctl --user stop gnome-terminal-server.service 2>/dev/null || true
+    home.file.".config/autostart/systemd-user-import-env.desktop".text = ''
+      [Desktop Entry]
+      Type=Application
+      Name=Import systemd --user env
+      Exec=${config.home.homeDirectory}/.local/bin/pro-emacs-env-fix.sh
+      X-GNOME-Autostart-enabled=true
     '';
-    executable = true;
-  };
 
-  home.file.".config/autostart/session-env-fix.desktop".text = ''
-    [Desktop Entry]
-    Type=Application
-    Name=Session env fix
-    Exec=${config.home.homeDirectory}/.local/bin/pro-emacs-env-fix.sh
-    X-GNOME-Autostart-enabled=true
-    OnlyShowIn=X-Cinnamon;
-  '';
+    home.file.".local/bin/pro-emacs-env-fix.sh" = {
+      text = ''
+        #!/usr/bin/env sh
+        set -eu
+        systemctl --user import-environment DISPLAY XAUTHORITY DBUS_SESSION_BUS_ADDRESS XDG_CURRENT_DESKTOP
+        systemctl --user stop gnome-terminal-server.service 2>/dev/null || true
+      '';
+      executable = true;
+    };
 
-  home.file.".local/share/applications/pro-emacs.desktop".text = ''
-    [Desktop Entry]
-    Type=Application
-    Name=Pro Emacs
-    Exec=${config.home.homeDirectory}/.config/pro/pro-emacs-session
-    Terminal=false
-    Categories=Development;Utility;
-    StartupNotify=false
-  '';
-
-  home.file.".config/pro/pro-emacs-session" = {
-    text = ''
-      #!/usr/bin/env bash
-      exec ${emacsPkg}/bin/emacs --init-directory "$HOME/.config/emacs" "$@"
+    home.file.".config/autostart/session-env-fix.desktop".text = ''
+      [Desktop Entry]
+      Type=Application
+      Name=Session env fix
+      Exec=${config.home.homeDirectory}/.local/bin/pro-emacs-env-fix.sh
+      X-GNOME-Autostart-enabled=true
+      OnlyShowIn=X-Cinnamon;
     '';
-    executable = true;
-  };
 
-  home.file.".config/pro/exwm-session" = {
-    text = ''
-      #!/usr/bin/env bash
-      # Canonical EXWM session launcher (generated by emacs/exwm.nix).
-      # Prepares user session, imports graphical env, starts Emacs under
-      # systemd scope with resource limits.
-      #
-      # XMODIFIERS / GTK_IM_MODULE / QT_IM_MODULE:
-      #   These enable the EXWM X Input Method (exwm-xim) for multi-language
-      #   text input (IME).  They are NOT related to Emacs keybinding
-      #   simulation (C-n/C-p in apps) — that is configured in
-      #   pro-exwm-sim.el via `exwm-input-simulation-keys'.
-      LOG_DIR="$HOME/.cache/emacs-startup"
-      LOG_FILE="$LOG_DIR/gdm-exwm.log"
-      mkdir -p "$LOG_DIR"
-      exec >>"$LOG_FILE" 2>&1
-
-      printf '%s\n' "[exwm-session-start $(date '+%F %T%z')] begin log_file=$LOG_FILE"
-      printf '%s\n' "[exwm-session-start $(date '+%F %T%z')] pwd=$PWD user=$USER display=$DISPLAY desktop_session=$DESKTOP_SESSION xdg_session=$XDG_SESSION_TYPE"
-      printf '%s\n' "[exwm-session-start $(date '+%F %T%z')] env EMACS_STARTUP_LOG_DIR=''${EMACS_STARTUP_LOG_DIR:-unset} EMACS_STARTUP_LOG_FILE=''${EMACS_STARTUP_LOG_FILE:-unset}"
-
-      eval $(ssh-agent -s)
-      export SSH_AUTH_SOCK
-      export NIX_LD_PRELOAD=""
-      xset -b
-      xhost +SI:localuser:$USER
-      xhost +SI:localuser:root
-
-      export QT_QPA_PLATFORMTHEME=qt5ct
-      export XMODIFIERS=@im=exwm-xim
-      export GTK_IM_MODULE=xim
-      export QT_IM_MODULE=xim
-      export CLUTTER_IM_MODULE=xim
-      export GTK_KEY_THEME=Emacs
-
-      export LSP_USE_PLISTS=true
-
-      xsetroot -cursor_name left_ptr
-      export VISUAL=emacsclient
-      export EDITOR="$VISUAL"
-
-      # Merge Xresources early so Emacs/EXWM inherits fullscreen and font
-      # settings to avoid visual flicker when the first frame appears.
-      xrdb -merge ~/.Xresources
-
-      # Start the rescue kill-switch daemon BEFORE Emacs/EXWM grabs any keys.
-      # modules/pro-emacs-rescue.nix renders /etc/pro/emacs-rescue/xbindkeysrc
-      # with Super+Scroll_Lock -> pro-emacs-rescue.  Starting it here guarantees
-      # the X server grants xbindkeys the global grab on that key, even
-      # when Emacs is stuck in event-loop and cannot process C-g.
-      pgrep -x xbindkeys >/dev/null 2>&1 \
-        || /run/current-system/sw/bin/xbindkeys -f /etc/pro/emacs-rescue/xbindkeysrc >/dev/null 2>&1 &
-
-      export XDG_CURRENT_DESKTOP=EXWM
-      printf '%s\n' "[exwm-session-start $(date '+%F %T%z')] importing env and launching emacs"
-      # Import critical env vars into systemd --user scope so Emacs inherits them
-      # even when run under systemd-run.  Without this, XDG_CURRENT_DESKTOP is
-      # lost and EXWM startup detection fails.
-      systemctl --user import-environment DISPLAY XAUTHORITY PATH DBUS_SESSION_BUS_ADDRESS XDG_RUNTIME_DIR XDG_CURRENT_DESKTOP
-      printf '%s\n' "[exwm-session-start $(date '+%F %T%z')] exec systemd-run emacs"
-      # Pass XDG_CURRENT_DESKTOP explicitly via -E to guarantee it reaches Emacs.
-      exec /run/current-system/sw/bin/systemd-run --user --scope \
-        -p MemoryMax=2G -p MemoryHigh=1800M -p CPUQuota=120% -p CPUWeight=200 \
-        -E XDG_CURRENT_DESKTOP=EXWM \
-        -E DISPLAY \
-        -E XAUTHORITY \
-        -E DBUS_SESSION_BUS_ADDRESS \
-        -E PATH \
-        -E HOME \
-        -E USER \
-        -E XMODIFIERS \
-        -E GTK_IM_MODULE \
-        -E QT_IM_MODULE \
-        -E SSH_AUTH_SOCK \
-        -- ${emacsPkg}/bin/emacs --init-directory "$HOME/.config/emacs"
+    home.file.".local/share/applications/pro-emacs.desktop".text = ''
+      [Desktop Entry]
+      Type=Application
+      Name=Pro Emacs
+      Exec=${config.home.homeDirectory}/.config/pro/pro-emacs-session
+      Terminal=false
+      Categories=Development;Utility;
+      StartupNotify=false
     '';
-    executable = true;
-  };
+
+    home.file.".config/pro/pro-emacs-session" = {
+      text = ''
+        #!/usr/bin/env bash
+        exec ${emacsPkg}/bin/emacs --init-directory "$HOME/.config/emacs" "$@"
+      '';
+      executable = true;
+    };
+
+    home.file.".config/pro/exwm-session" = {
+      text = ''
+        #!/usr/bin/env bash
+        # Canonical EXWM session launcher (generated by emacs/exwm.nix).
+        # Prepares user session, imports graphical env, starts Emacs under
+        # systemd scope with resource limits.
+        #
+        # XMODIFIERS / GTK_IM_MODULE / QT_IM_MODULE:
+        #   These enable the EXWM X Input Method (exwm-xim) for multi-language
+        #   text input (IME).  They are NOT related to Emacs keybinding
+        #   simulation (C-n/C-p in apps) — that is configured in
+        #   pro-exwm-sim.el via `exwm-input-simulation-keys'.
+        LOG_DIR="$HOME/.cache/emacs-startup"
+        LOG_FILE="$LOG_DIR/gdm-exwm.log"
+        mkdir -p "$LOG_DIR"
+        exec >>"$LOG_FILE" 2>&1
+
+        printf '%s\n' "[exwm-session-start $(date '+%F %T%z')] begin log_file=$LOG_FILE"
+        printf '%s\n' "[exwm-session-start $(date '+%F %T%z')] pwd=$PWD user=$USER display=$DISPLAY desktop_session=$DESKTOP_SESSION xdg_session=$XDG_SESSION_TYPE"
+        printf '%s\n' "[exwm-session-start $(date '+%F %T%z')] env EMACS_STARTUP_LOG_DIR=''${EMACS_STARTUP_LOG_DIR:-unset} EMACS_STARTUP_LOG_FILE=''${EMACS_STARTUP_LOG_FILE:-unset}"
+
+        eval $(ssh-agent -s)
+        export SSH_AUTH_SOCK
+        export NIX_LD_PRELOAD=""
+        xset -b
+        xhost +SI:localuser:$USER
+        xhost +SI:localuser:root
+
+        export QT_QPA_PLATFORMTHEME=qt5ct
+        export XMODIFIERS=@im=exwm-xim
+        export GTK_IM_MODULE=xim
+        export QT_IM_MODULE=xim
+        export CLUTTER_IM_MODULE=xim
+        export GTK_KEY_THEME=Emacs
+
+        export LSP_USE_PLISTS=true
+
+        xsetroot -cursor_name left_ptr
+        export VISUAL=emacsclient
+        export EDITOR="$VISUAL"
+
+        # Merge Xresources early so Emacs/EXWM inherits fullscreen and font
+        # settings to avoid visual flicker when the first frame appears.
+        xrdb -merge ~/.Xresources
+
+        # The xbindkeys rescue grab is launched from ~/.xprofile (lightdm
+        # sources that BEFORE exec'ing us).  No need to re-launch here, but
+        # we do a defensive pgrep in case this script is invoked outside
+        # of lightdm (e.g. `startx`).
+        pgrep -x xbindkeys >/dev/null 2>&1 \
+          || /run/current-system/sw/bin/xbindkeys -f /etc/pro/emacs-rescue/xbindkeysrc >/dev/null 2>&1 &
+
+        export XDG_CURRENT_DESKTOP=EXWM
+        printf '%s\n' "[exwm-session-start $(date '+%F %T%z')] importing env and launching emacs"
+        # Import critical env vars into systemd --user scope so Emacs inherits them
+        # even when run under systemd-run.  Without this, XDG_CURRENT_DESKTOP is
+        # lost and EXWM startup detection fails.
+        systemctl --user import-environment DISPLAY XAUTHORITY PATH DBUS_SESSION_BUS_ADDRESS XDG_RUNTIME_DIR XDG_CURRENT_DESKTOP
+        printf '%s\n' "[exwm-session-start $(date '+%F %T%z')] exec systemd-run emacs"
+        # Pass XDG_CURRENT_DESKTOP explicitly via -E to guarantee it reaches Emacs.
+        exec /run/current-system/sw/bin/systemd-run --user --scope \
+          -p MemoryMax=2G -p MemoryHigh=1800M -p CPUQuota=120% -p CPUWeight=200 \
+          -E XDG_CURRENT_DESKTOP=EXWM \
+          -E DISPLAY \
+          -E XAUTHORITY \
+          -E DBUS_SESSION_BUS_ADDRESS \
+          -E PATH \
+          -E HOME \
+          -E USER \
+          -E XMODIFIERS \
+          -E GTK_IM_MODULE \
+          -E QT_IM_MODULE \
+          -E SSH_AUTH_SOCK \
+          -- ${emacsPkg}/bin/emacs --init-directory "$HOME/.config/emacs"
+      '';
+      executable = true;
+    };
+    })
+  ];
 }

@@ -7,13 +7,16 @@
 #   that lives OUTSIDE Emacs:
 #
 #     1. xbindkeys (a tiny X11 daemon) grabs a dedicated key
-#        (Super+Scroll_Lock) BEFORE EXWM starts.
+#        (default: Control+Alt+Shift+r) BEFORE EXWM starts.
 #     2. On press, it runs `pro-emacs-rescue` (this file).
-#     3. The script first tries a 2-second emacsclient ping.
-#     4. If Emacs responds, it inspects the buffer list for stuck
-#        *Package* / *elpaca* / similar loaders and pokes them.
-#     5. If Emacs is unreachable, the script restarts it via the same
-#        `systemd-run --user --scope` mechanism that exwm-session uses.
+#     3. The script first sends SIGUSR2 to every emacs process.  Emacs
+#        handles USR2 in C and enters the recursive debugger at the next
+#        eval step, even mid tight loop, so the key always wins.
+#     4. If SIGUSR2 is rejected (no process / permissions), the script
+#        tries a 2-second emacsclient ping and, if that works, looks
+#        for a stuck *Package* / *elpaca* buffer and pokes it.
+#     5. Last resort: kill the old scope and relaunch via
+#        `systemd-run --user --scope`, the same path exwm-session uses.
 #
 # Lifecycle:
 #   - `pro-emacs-rescue` is shipped as a system package
@@ -22,13 +25,15 @@
 #   - `xbindkeysrc` is shipped as a share file
 #     (/run/current-system/sw/share/pro-emacs-rescue/xbindkeysrc)
 #     and points to the absolute path of the rescue binary.
-#   - emacs/exwm.nix launches `xbindkeys -f` against that absolute
-#     path in exwm-session, so the key grab happens BEFORE EXWM.
+#   - emacs/exwm.nix writes ~/.xprofile that launches `xbindkeys -f`
+#     against that absolute path; lightdm's xsession-wrapper sources
+#     ~/.xprofile BEFORE EXWM is started, so the grab is in place when
+#     Emacs is launched and remains reachable even if Emacs freezes.
 #
 # Activation:
 #   - The package is always installed (cheap; no harm on headless hosts).
-#   - The xbindkeys launch in exwm-session is gated by
-#     pro.emacs.gui.enable (only the EXWM host needs the grab).
+#   - The ~/.xprofile deployment is gated by pro.emacs.enable (HM),
+#     which is true for all NixOS users in pro-users-nixos.nix.
 { config, lib, pkgs, ... }:
 
 let
@@ -56,10 +61,35 @@ let
     EMACSCLIENT="$(command -v emacsclient || true)"
     TIMEOUT="$(command -v timeout || true)"
 
-    # 1) Soft probe: can Emacs answer at all?
+    # Primary action: SIGUSR2.  Emacs's C handler for USR2 invokes the
+    # recursive debugger at the next eval step, even mid tight loop, so
+    # the key always wins over a stuck event loop / native code.  In the
+    # *Backtrace* buffer the user can hit `q` to abort, `c` to continue,
+    # `e` to evaluate, etc.  This is what unblocks a frozen EXWM.
+    emacs_pids="$(pidof emacs 2>/dev/null || true)"
+    if [ -n "$emacs_pids" ]; then
+      sent=0
+      for pid in $emacs_pids; do
+        if kill -USR2 "$pid" 2>/dev/null; then
+          log "sent SIGUSR2 to emacs pid=$pid"
+          sent=$((sent + 1))
+        fi
+      done
+      if [ "$sent" -gt 0 ]; then
+        notify "Sent SIGUSR2 to emacs (pids: $emacs_pids); recursive debugger should open"
+        exit 0
+      fi
+      log "kill -USR2 failed for all emacs pids; falling through to restart"
+    else
+      log "no emacs process found; nothing to rescue"
+    fi
+
+    # Secondary: ask emacsclient whether a stuck *package* / *elpaca*
+    # buffer is the actual cause.  If yes, poke it.  This handles the
+    # case where USR2 somehow does not fire but Emacs is still answering
+    # emacsclient.  Best-effort only.
     if [ -n "$EMACSCLIENT" ] && [ -n "$TIMEOUT" ] \
        && "$TIMEOUT" 2 "$EMACSCLIENT" -e "(progn (message \"rescue-ping\") t)" >/dev/null 2>&1; then
-      # Emacs is alive.  Look for a stuck *package* / *elpaca* buffer.
       stuck="$(
         "$TIMEOUT" 2 "$EMACSCLIENT" -e \
           '(condition-case nil
@@ -78,15 +108,15 @@ let
           "(with-current-buffer \"$stuck\" (goto-char (point-max)) (insert \"\\n\") (sit-for 0.1))" \
           >/dev/null 2>&1 || true
       else
-        notify "Emacs responsive; nothing to do"
+        notify "Emacs answered emacsclient but USR2 failed; check manually"
       fi
       exit 0
     fi
 
-    # 2) Hard plan: kill the old scope + process, then relaunch in the same way
-    #    emacs/exwm.nix:exwm-session does.  systemd-run --user --scope creates
-    #    a transient unit whose name matches "emacs*.scope"; we stop it best-effort.
-    notify "Emacs unresponsive; restarting via systemd-run"
+    # Last resort: emacs is wedged beyond USR2 recovery (e.g. stuck in
+    # kernel I/O or native code without USR2 handler).  Restart it the
+    # same way emacs/exwm.nix:exwm-session does.
+    notify "Emacs unresponsive to USR2 and emacsclient; restarting via systemd-run"
     systemctl --user stop "emacs*.scope" 2>/dev/null || true
     pkill -TERM -x emacs 2>/dev/null || true
     sleep 1
@@ -115,10 +145,11 @@ let
     cat > $out/share/pro-emacs-rescue/xbindkeysrc <<EOF
     # xbindkeys config for pro-emacs-rescue.
     # Loaded by emacs/exwm.nix via `xbindkeys -f` against an absolute path.
-    # The key is grabbed BEFORE EXWM starts (xbindkeys is started at the top
-    # of exwm-session), so it remains reachable even when Emacs is frozen.
+    # The key is grabbed BEFORE EXWM starts (xbindkeys is started from
+    # ~/.xprofile which lightdm sources before exec'ing the window manager),
+    # so it remains reachable even when Emacs is frozen.
     "$out/bin/pro-emacs-rescue"
-        Mod4 + Scroll_Lock
+        ${cfg.key}
     EOF
   '';
 
@@ -130,6 +161,21 @@ in
       type = lib.types.bool;
       default = true;
       description = "external kill-switch for a stuck EXWM/Emacs (xbindkeys + pro-emacs-rescue)";
+    };
+
+    # xbindkeys "keystring" syntax (case-insensitive modifiers).
+    # Defaults to a combo present on every laptop keyboard and unlikely
+    # to be grabbed by EXWM (which only consumes s-<letter>).
+    key = lib.mkOption {
+      type = lib.types.str;
+      default = "Control+Alt+Shift+r";
+      example = "Mod4 + Scroll_Lock";
+      description = ''
+        Key combination that triggers pro-emacs-rescue.
+        Written verbatim into the generated xbindkeysrc, so any
+        xbindkeys keystring is accepted.  Keep it memorable and avoid
+        anything EXWM already grabs.
+      '';
     };
   };
 
