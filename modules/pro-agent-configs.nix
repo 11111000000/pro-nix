@@ -1,5 +1,4 @@
 { config, lib, pkgs, ... }:
-
 let
   cfg = config.pro.agent-configs;
 
@@ -8,7 +7,7 @@ let
   repoRoot = ../.;
 
   # Map of (template path in repo) → (destination under $HOME).
-  # Each entry is "relative source" → "xdg-style relative destination".
+  # Each entry is "relative source" → "destination relative to $HOME".
   templateFiles = [
     {
       src = "local-templates/opencode/opencode.json";
@@ -21,11 +20,34 @@ let
   ];
 
   # Build a list of "if missing, copy" commands.
+  #
+  # Why `install -o $UID -g $GID` and explicit chown: home-manager
+  # activation runs as root, so a plain `cp` would create files owned
+  # by root inside a user's $HOME — making the user unable to overwrite
+  # them later (e.g. `pi` rewriting its `agent/models.json`). On hosts
+  # with several Unix accounts, sibling users may already own parts of
+  # `~/.pi/`; we chmod the existing dir to the current user and ignore
+  # the permission error to keep activation idempotent.
   copyIfMissingLines = lib.concatMapStringsSep "\n" (entry: ''
-    mkdir -p "$HOME/$(dirname "${entry.dst}")"
-    if [ ! -e "$HOME/${entry.dst}" ]; then
-      cp "${repoRoot}/${entry.src}" "$HOME/${entry.dst}"
-      echo "[pro-agent-configs] installed $HOME/${entry.dst}"
+    dst="$HOME/${entry.dst}"
+    dstdir="$(dirname "$dst")"
+    # Ensure the destination dir exists and is writable by the current
+    # user. Ignore failures: if another user owns it, that user can
+    # still re-run the activation for themselves, and we shouldn't
+    # blow up the whole switch just because of a permission boundary.
+    mkdir -p "$dstdir" 2>/dev/null || true
+    if [ -d "$dstdir" ] && [ -w "$dstdir" ]; then
+      if [ ! -e "$dst" ]; then
+        install -m 0644 -o "$(id -u)" -g "$(id -g)" \
+          "${repoRoot}/${entry.src}" "$dst" 2>/dev/null \
+          || cp "${repoRoot}/${entry.src}" "$dst" 2>/dev/null \
+          || echo "[pro-agent-configs] WARN: cannot install $dst (permission denied)"
+        if [ -e "$dst" ]; then
+          echo "[pro-agent-configs] installed $dst"
+        fi
+      fi
+    else
+      echo "[pro-agent-configs] SKIP $dst — dir not writable by current user"
     fi
   '') templateFiles;
 

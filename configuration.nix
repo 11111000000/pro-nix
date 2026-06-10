@@ -69,6 +69,10 @@
     ./modules/pro-hosts.nix
     ./modules/pro-network.nix
     ./modules/pro-ssh-clients.nix
+    # Страховка владения $HOME: чинит ownership dotdirs при активации
+    # home-manager, чтобы несколько Unix-аккаунтов на одной машине
+    # не ломали деплой шаблонов (см. /home/az/.pi EACCES).
+    ./modules/pro-home-perms.nix
 
     # Локальные переопределения конкретного хоста остаются в файле local.nix.
   ] ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ];
