@@ -27,11 +27,12 @@ let
       revision = "master";
     };
 
-    golden-ratio = super.emacsPackages.emacsPackageFromRepository {
-      pname = "golden-ratio";
-      repository = "roman/golden-ratio.el";
-      revision = "v0.8";
-    };
+    # golden-ratio: pin roman/golden-ratio.el@v0.8 заменён на
+    # `super.emacsPackages.golden-ratio` (тот же derivation в nixpkgs 25.11,
+    # но без нашего pin на конкретный tag, который периодически не резолвится
+    # через git fetcher). Это эквивалентная пересборка, но без нашего
+    # внешнего pin'а.
+    golden-ratio = super.emacsPackages.golden-ratio;
   } else {};
 
   # Local recipes — always applied
