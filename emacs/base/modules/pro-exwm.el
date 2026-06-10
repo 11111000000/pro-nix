@@ -197,6 +197,17 @@ GDM может добавлять префикс \='none+' к имени сес�
     (add-hook 'exwm-exit-hook #'kill-emacs)
     (exwm-wm-mode 1)
 
+    ;; Start the Emacs server so that out-of-process tooling
+    ;; (emacsclient, pro-emacs-rescue, M-x handlers in scripts) can
+    ;; query and steer the running session.  This is what lets
+    ;; pro-emacs-rescue detect an already-open *Backtrace* / minibuffer
+    ;; and pop one level via `(exit-recursive-edit)' instead of stacking
+    ;; a new USR2 recursive edit.  server-start is idempotent — calling
+    ;; it when the server is already up is a no-op.
+    (require 'server)
+    (unless (and (boundp 'server-process) server-process)
+      (server-start))
+
     ;; Autostart small userland helpers (tray icons, clipboard daemon, udisks)
     ;; Start them only in a graphical session and only if the variable is set.
     (when (and (display-graphic-p) (boundp 'pro-exwm-autostart-apps))

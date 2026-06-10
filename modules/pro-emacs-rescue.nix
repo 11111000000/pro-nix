@@ -9,13 +9,19 @@
 #     1. xbindkeys (a tiny X11 daemon) grabs a dedicated key
 #        (default: Control+Alt+Shift+r) BEFORE EXWM starts.
 #     2. On press, it runs `pro-emacs-rescue` (this file).
-#     3. The script first sends SIGUSR2 to every emacs process.  Emacs
-#        handles USR2 in C and enters the recursive debugger at the next
-#        eval step, even mid tight loop, so the key always wins.
-#     4. If SIGUSR2 is rejected (no process / permissions), the script
-#        tries a 2-second emacsclient ping and, if that works, looks
-#        for a stuck *Package* / *elpaca* buffer and pokes it.
-#     5. Last resort: kill the old scope and relaunch via
+#     3. The script first tries the emacsclient server (if running).
+#        It asks Emacs whether a *Backtrace* / minibuffer is already
+#        open, and if so pops one level with exit-recursive-edit /
+#        abort-recursive-edit.  This is the "smart" C-g path.
+#     4. If Emacs is responsive at top level, the script looks for a
+#        stuck *Package* / *elpaca* buffer and pokes it.  No USR2 sent.
+#     5. If emacsclient does not answer (server down, emacs wedged),
+#        the script sends SIGUSR2 to every emacs process.  Emacs
+#        handles USR2 in C and enters the recursive debugger at the
+#        next eval step, even mid tight loop.
+#     6. A 3-second cooldown prevents the rescue key from stacking
+#        *Backtrace* levels when the user spams it.
+#     7. Last resort: kill the old scope and relaunch via
 #        `systemd-run --user --scope`, the same path exwm-session uses.
 #
 # Lifecycle:
@@ -61,11 +67,89 @@ let
     EMACSCLIENT="$(command -v emacsclient || true)"
     TIMEOUT="$(command -v timeout || true)"
 
-    # Primary action: SIGUSR2.  Emacs's C handler for USR2 invokes the
-    # recursive debugger at the next eval step, even mid tight loop, so
-    # the key always wins over a stuck event loop / native code.  In the
-    # *Backtrace* buffer the user can hit `q` to abort, `c` to continue,
-    # `e` to evaluate, etc.  This is what unblocks a frozen EXWM.
+    # Cooldown: rapid spam of the rescue key is almost always the user
+    # hitting it again while we are still resolving the previous press.
+    # We do NOT want to stack more *Backtrace* levels on top of an
+    # already-open one.  If the last successful action was < 3s ago,
+    # we drop this press on the floor with a log line.
+    COOLDOWN_FILE="$LOG_DIR/.rescue-cooldown"
+    COOLDOWN_SEC=3
+    now="$(date +%s)"
+    last="$(cat "$COOLDOWN_FILE" 2>/dev/null || echo 0)"
+    if [ "$now" -lt "$((last + COOLDOWN_SEC))" ]; then
+      log "cooldown active ($((last + COOLDOWN_SEC - now))s left); ignoring press"
+      exit 0
+    fi
+
+    # Try the emacsclient probe first.  If Emacs has a running server
+    # and answers, we can ask it to inspect its own state and pop a
+    # recursive-edit / minibuffer cleanly via Lisp, WITHOUT sending
+    # another USR2 (which would stack *Backtrace* levels).
+    if [ -n "$EMACSCLIENT" ] && [ -n "$TIMEOUT" ] \
+       && "$TIMEOUT" 2 "$EMACSCLIENT" -e "(progn (message \"rescue-ping\") t)" >/dev/null 2>&1; then
+      # Is the user already stuck inside a recursive edit (e.g. an
+      # open *Backtrace* buffer) or in the minibuffer?  If so, pop one
+      # level.  This is the safe counterpart of C-g.
+      state="$(
+        "$TIMEOUT" 2 "$EMACSCLIENT" -e \
+          '(condition-case nil
+             (let ((re-p (active-minibuffer-window))
+                   (re-l (and (get-buffer "\\*Backtrace\\*") (not (eq (selected-window) (minibuffer-window))))))
+               (cond (re-l "backtrace") (re-p "minibuffer") (t "ok")))
+             (error "no"))' 2>/dev/null
+      )"
+      state="$(printf '%s' "$state" | tr -d '"' | tr -d '\n')"
+      case "$state" in
+        backtrace)
+          notify "Recursive edit open; popping one *Backtrace* level"
+          "$TIMEOUT" 2 "$EMACSCLIENT" -e "(exit-recursive-edit)" >/dev/null 2>&1 || true
+          echo "$now" > "$COOLDOWN_FILE"
+          exit 0
+          ;;
+        minibuffer)
+          notify "Minibuffer active; aborting it"
+          "$TIMEOUT" 2 "$EMACSCLIENT" -e "(abort-recursive-edit)" >/dev/null 2>&1 || true
+          echo "$now" > "$COOLDOWN_FILE"
+          exit 0
+          ;;
+        ok)
+          # Emacs is responsive and at top level.  Look for a stuck
+          # *package* / *elpaca* loader and poke it.
+          stuck="$(
+            "$TIMEOUT" 2 "$EMACSCLIENT" -e \
+              '(condition-case nil
+                 (let ((re "\\\\*[a-z]*-\\(package\\|elpaca\\)\\(\\|<[0-9]+>\\)"))
+                   (seq-some
+                    (lambda (b)
+                      (and (string-match-p re (buffer-name b))
+                           (buffer-name b)))
+                    (buffer-list)))
+                 (error nil))' 2>/dev/null
+          )"
+          stuck="$(printf '%s' "$stuck" | tr -d '"' | tr -d '\n')"
+          if [ -n "$stuck" ]; then
+            notify "Emacs stuck on $stuck; sending RET to that buffer"
+            "$TIMEOUT" 3 "$EMACSCLIENT" -e \
+              "(with-current-buffer \"$stuck\" (goto-char (point-max)) (insert \"\\n\") (sit-for 0.1))" \
+              >/dev/null 2>&1 || true
+            echo "$now" > "$COOLDOWN_FILE"
+            exit 0
+          fi
+          # Responsive, no stuck buffer, no recursive edit: nothing to
+          # do.  Don't escalate to USR2 — that would be noisy.
+          notify "Emacs responsive at top level; nothing to do"
+          echo "$now" > "$COOLDOWN_FILE"
+          exit 0
+          ;;
+        *)
+          log "emacsclient probe returned '$state' (likely not the EXWM server); falling through to USR2"
+          ;;
+      esac
+    fi
+
+    # emacsclient unavailable or returned no-answer: emacs is wedged
+    # hard enough that the server socket does not respond.  Send USR2
+    # exactly once, even if there are multiple emacs pids.
     emacs_pids="$(pidof emacs 2>/dev/null || true)"
     if [ -n "$emacs_pids" ]; then
       sent=0
@@ -77,40 +161,12 @@ let
       done
       if [ "$sent" -gt 0 ]; then
         notify "Sent SIGUSR2 to emacs (pids: $emacs_pids); recursive debugger should open"
+        echo "$now" > "$COOLDOWN_FILE"
         exit 0
       fi
       log "kill -USR2 failed for all emacs pids; falling through to restart"
     else
       log "no emacs process found; nothing to rescue"
-    fi
-
-    # Secondary: ask emacsclient whether a stuck *package* / *elpaca*
-    # buffer is the actual cause.  If yes, poke it.  This handles the
-    # case where USR2 somehow does not fire but Emacs is still answering
-    # emacsclient.  Best-effort only.
-    if [ -n "$EMACSCLIENT" ] && [ -n "$TIMEOUT" ] \
-       && "$TIMEOUT" 2 "$EMACSCLIENT" -e "(progn (message \"rescue-ping\") t)" >/dev/null 2>&1; then
-      stuck="$(
-        "$TIMEOUT" 2 "$EMACSCLIENT" -e \
-          '(condition-case nil
-             (let ((re "\\\\*[a-z]*-\\(package\\|elpaca\\)\\(\\|<[0-9]+>\\)"))
-               (seq-some
-                (lambda (b)
-                  (and (string-match-p re (buffer-name b))
-                       (buffer-name b)))
-                (buffer-list)))
-             (error nil))' 2>/dev/null
-      )"
-      stuck="$(printf '%s' "$stuck" | tr -d '"' | tr -d '\n')"
-      if [ -n "$stuck" ]; then
-        notify "Emacs stuck on $stuck; sending RET to that buffer"
-        "$TIMEOUT" 3 "$EMACSCLIENT" -e \
-          "(with-current-buffer \"$stuck\" (goto-char (point-max)) (insert \"\\n\") (sit-for 0.1))" \
-          >/dev/null 2>&1 || true
-      else
-        notify "Emacs answered emacsclient but USR2 failed; check manually"
-      fi
-      exit 0
     fi
 
     # Last resort: emacs is wedged beyond USR2 recovery (e.g. stuck in
@@ -135,6 +191,7 @@ let
       </dev/null >/dev/null 2>&1 &
     disown 2>/dev/null || true
     log "restart dispatched; pid_candidate=$!"
+    echo "$now" > "$COOLDOWN_FILE"
     exit 0
   '';
 
