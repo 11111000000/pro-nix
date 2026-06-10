@@ -15,9 +15,45 @@
     (winner-mode 1))
 
   ;; Windmove: directional movement between windows. We do not bind keys here.
+  ;; The package `windmove' ships with Emacs; no external dependency required.
   (when (fboundp 'windmove-default-keybindings)
     ;; do not call windmove-default-keybindings to avoid setting global keys; ensure functions exist
     (ignore (boundp 'windmove-left)))
+
+  ;; buf-move: built-in buffer-swap helpers on top of `windmove'.
+  ;; No external package: the four interactive commands are defined below.
+  ;; Key bindings (s-H/J/K/L in the EXWM input map) live in emacs-keys.org.
+  (defun pro-windows--buf-snapshot (window)
+    "Capture WINDOW's buffer-related state for later restoration."
+    (list (window-buffer window)
+          (window-start window)
+          (window-hscroll window)
+          (window-point window)))
+  (defun pro-windows--buf-restore (window snapshot)
+    "Restore WINDOW from a SNAPSHOT produced by `pro-windows--buf-snapshot'."
+    (set-window-buffer window (nth 0 snapshot))
+    (set-window-start   window (nth 1 snapshot))
+    (set-window-hscroll window (nth 2 snapshot))
+    (set-window-point   window (nth 3 snapshot)))
+  (defun pro-windows--buf-move-to (direction)
+    "Swap the current window's buffer with the neighbour window in DIRECTION.
+DIRECTION is one of `up', `down', `left', `right' (a `windmove' direction).
+Signal an error if no neighbour exists, or the target window is
+dedicated or is the minibuffer."
+    (let* ((this-window (selected-window))
+           (other-window (windmove-find-other-window direction))
+           (this-snapshot (pro-windows--buf-snapshot this-window)))
+      (cond
+       ((null other-window)                (user-error "No window %s of the current one" direction))
+       ((window-dedicated-p other-window) (user-error "Window %s of the current one is dedicated" direction))
+       ((window-minibuffer-p other-window)(user-error "Window %s of the current one is the minibuffer" direction)))
+      (pro-windows--buf-restore this-window  (pro-windows--buf-snapshot other-window))
+      (pro-windows--buf-restore other-window this-snapshot)
+      (select-window other-window)))
+  (defun pro-windows-buf-move-up    () (interactive) (pro-windows--buf-move-to 'up))
+  (defun pro-windows-buf-move-down  () (interactive) (pro-windows--buf-move-to 'down))
+  (defun pro-windows-buf-move-left  () (interactive) (pro-windows--buf-move-to 'left))
+  (defun pro-windows-buf-move-right () (interactive) (pro-windows--buf-move-to 'right))
 
   ;; Golden ratio: optional cosmetic window sizing
   (when (require 'golden-ratio nil t)
@@ -25,11 +61,6 @@
     (setq golden-ratio-adjust-factor 1.0)
     (setq golden-ratio-wide-adjust-factor 1.0)
     (when (fboundp 'golden-ratio-mode) (golden-ratio-mode 1)))
-
-  ;; buf-move: optional buffer swapping helpers
-  (when (require 'buffer-move nil t)
-    ;; noop - buffer-move provides buffer move functions; keys controlled via emacs-keys.org
-    (ignore (fboundp 'buf-move-left)))
 
   ;; ace-window: optional fast window selection (no keys set here)
   (when (require 'ace-window nil t)
