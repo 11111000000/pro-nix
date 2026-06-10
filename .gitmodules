@@ -31,3 +31,6 @@
 	path = submodules/agent-shell-hud
 	url = https://github.com/11111000000/agent-shell-hud.git
 	branch = main
+[submodule "submodules/acp"]
+	path = submodules/acp
+	url = https://github.com/xenodium/acp.el

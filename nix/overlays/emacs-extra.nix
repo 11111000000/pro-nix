@@ -21,11 +21,10 @@ let
     };
 
 
-    acp = super.emacsPackages.emacsPackageFromRepository {
-      pname = "acp";
-      repository = "xenodium/acp.el";
-      revision = "master";
-    };
+    # acp/emcp intentionally NOT in repoExtras: they live in
+    # `localRecipes` below, sourced from submodules. This keeps the build
+    # reproducible without a network fetch at activation time (the flake
+    # URL has to capture submodules via `?submodules=1`, see AGENTS.md §6c).
 
     # golden-ratio: pin roman/golden-ratio.el@v0.8 заменён на
     # `super.emacsPackages.golden-ratio` (тот же derivation в nixpkgs 25.11,
@@ -54,6 +53,8 @@ let
     telega = super.callPackage ../emacs-recipes/telega.nix {};
     agent-shell = super.callPackage ../emacs-recipes/agent-shell.nix {};
     agent-shell-hud = super.callPackage ../emacs-recipes/agent-shell-hud.nix {};
+    acp = super.callPackage ../emacs-recipes/acp.nix {};
+    emcp = super.callPackage ../emacs-recipes/emcp.nix {};
     acapella = super.callPackage ../emacs-recipes/acapella.nix {};
     atlas = super.callPackage ../emacs-recipes/atlas.nix {};
     tao-theme = super.callPackage ../emacs-recipes/tao-theme.nix {};
