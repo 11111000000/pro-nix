@@ -55,11 +55,6 @@ in
   systemd.services."getty@tty2".enable = lib.mkDefault true;
   systemd.services."getty@tty3".enable = lib.mkDefault true;
 
-  # На cf19 live reload системной и пользовательской D-Bus шины во время
-  # switch может приводить к отказам org.freedesktop.systemd1.Manager.
-  # Источник риска — policy avahi с `group="netdev"`, которую dbus перечитывает
-  # в ходе активации. Гарантируем, что группа существует, и запрещаем live
-  # reload/restart dbus в процессе switch.
   users.groups.netdev = lib.mkForce { };
 
   systemd.services.dbus = {

@@ -43,6 +43,7 @@
    imports = [
       ./modules/system-boot.nix
       ./modules/packages-runtime.nix
+      ./modules/systemd-policy.nix
       ./modules/tty-console.nix
       ./modules/pro-power-beep.nix
 
@@ -53,27 +54,26 @@
      ./modules/pro-privacy.nix
      ./modules/pro-dev.nix
      ./modules/pro-peer.nix
-     ./modules/pro-nfs.nix
      ./modules/host-policies.nix
      ./modules/headscale.nix
      ./modules/pro-desktop.nix
      ./modules/pro-exwm-desktop.nix
      ./modules/pro-profiles.nix
-      ./modules/pro-spellcheck.nix
-      ./modules/session-exwm.nix
-      ./modules/pro-emacs-rescue.nix
-      ./modules/nix-cuda-compat.nix
+     ./modules/session-exwm.nix
+     ./modules/nix-cuda-compat.nix
      ./modules/zram-slice.nix
      ./modules/searxng.nix
 
      # Локальные переопределения конкретного хоста остаются в файле local.nix.
    ] ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ];
 
-  # SearXNG включён глобально (default = true в modules/searxng.nix).
-  # Отключить: services.searxng.enable = false;
+  # TEMP: SearXNG отключён до исправления схемы settings.yml. Невалидный
+  # settings.yml вызывал restart loop searxng.service и усиливал boot/switch
+  # таймауты D-Bus/systemd на cf19.
+  services.searxng.enable = lib.mkForce false;
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Раздел 2: Загрузчик системы и параметры ядра 
+# Раздел 2: Загрузчик системы и параметры ядра — пояснительный блок
 #
 # Цель раздела:
 # Объяснить, какие параметры загрузчика и ядра важны для предсказуемости системы.
@@ -102,7 +102,7 @@
    boot.kernel.sysctl."kernel.sysrq" = lib.mkDefault 1;               # Включить SysRq для аварийного доступа.
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Раздел 3: Сетевая конфигурация и имя машины 
+# Раздел 3: Сетевая конфигурация и имя машины — пояснительный блок
 #
 # Суть:
 # Здесь задаётся идентификация хоста (hostname) и базовые сетевые службы. В
@@ -123,19 +123,16 @@
   # lines (avoiding the `Include` directive that some tor builds reject
   # during `--verify-config`). Use lib.mkDefault so host-specific configs
   # can override these values if a host needs different behavior.
-  services.tor = lib.mkMerge [
-    (lib.mkDefault {
-      enable = true;
-      client.enable = true;
-      torsocks.enable = true;
-      settings = {
-        # Do not emit `Include /etc/tor/bridges.conf` globally here — the
-        # pro-privacy module handles bridges declaratively to avoid
-        # verify-config incompatibilities.
-      };
-    })
-
-  ];
+  services.tor = lib.mkDefault {
+    enable = true;
+    client.enable = true;
+    torsocks.enable = true;
+    settings = {
+      # Do not emit `Include /etc/tor/bridges.conf` globally here — the
+      # pro-privacy module handles bridges declaratively to avoid
+      # verify-config incompatibilities.
+    };
+  };
 
   # ADB нужен как системный инструмент на всех хостах этого профиля.
   programs.adb.enable = true;
@@ -148,18 +145,13 @@
   pro-peer.enable = true;
   pro-peer.enableKeySync = true;
 
-  # Русская проверка орфографии на лету в Emacs (flyspell в org/markdown/
-  # agent-shell и т.п.). Словарь ru_RU вендорен в dictionaries/hunspell/.
-  pro.spellcheck.enable = true;
-  pro.spellcheck.secondaryDicts = [ "en_US" ];
-
   # hermes removed
 
   # Старая схема беспроводной сети не используется.
   # networking.wireless.enable = true;
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Раздел 4: Часовой пояс и языковая локализация 
+# Раздел 4: Часовой пояс и языковая локализация — учебный блок
 #
 # Суть:
 # Локализация определяет представление даты/времени, формат чисел, локализацию
@@ -270,7 +262,7 @@
   # Включение flakes, регулярная очистка и оптимизация кэша пакетов.
   nix = {
     settings.experimental-features = [ "nix-command" "flakes" "cgroups" ];
-    settings.connect-timeout = 20;
+    settings.connect-timeout = 5;
     settings.fallback = true;
     # Use cgroups so Nix places build processes into cgroups and systemd
     # resource controls (CPUQuota/MemoryMax) can be applied per-build.
@@ -278,26 +270,29 @@
     # Limit parallel builds to a conservative number to avoid saturating CPU.
     # Set to 2 for interactive responsiveness on typical desktop machines.
     settings.max-jobs = 2;
-
-    # Загрузка исходников: GitHub и другие хостинги исходного кода
-    # могут быть недоступны из РФ. Передаём http_proxy/https_proxy в
-    # песочницу сборки — выставьте переменные в /etc/nixos/local.nix:
-    #   nix.daemonEnv = { http_proxy = "..."; https_proxy = "..."; };
-    settings.stalled-download-timeout = 900;
-    settings.download-attempts = 5;
-    # Основной бинарный кэш — cache.nixos.org (Fastly CDN, доступен из РФ).
-    # mkDefault позволяет хостам добавить свои substituters (локальные/региональные).
-    settings.substituters = [
-      "https://mirror.sjtu.edu.cn/nix-channels/store"
-      "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
+    # Сначала используем публичный кэш и его Fastly-зеркало, чтобы сборка быстрее уходила в готовые бинарники.
+    # pi-crew cache switch branch: pi-crew/cache-switch-20260520152216
+    # Временно предпочитаем fastly mirror; cache.nixos.org остаётся запасным.
+    settings.substituters = lib.mkForce [
+      "https://nix-mirror.freetls.fastly.net"
+      "https://cache.nixos.org"
     ];
 
-    settings.trusted-substituters = [
-      "https://mirror.sjtu.edu.cn/nix-channels/store"
-      "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
+    # Prefer the Fastly mirror as primary substituter and make cache.nixos.org
+    # a fallback by ordering. Also set trusted-substituters so Nix will prefer
+    # verified substitutes from the mirror. The public key for the mirror is
+    # unknown in this environment; the mirror advertises that it serves
+    # pre-signed cache.nixos.org binaries, so no extra key is strictly
+    # necessary. If you have a mirror public key, add it to
+    # settings.trusted-public-keys.
+    settings.trusted-substituters = lib.mkForce [
+      "https://nix-mirror.freetls.fastly.net"
+      "https://cache.nixos.org"
     ];
 
-    settings.trusted-public-keys = [
+    settings.trusted-public-keys = lib.mkForce [
+      # If you have the mirror's public key, place it here (format: name:key)
+      # Example placeholder removed for safety; leaving only cache.nixos.org key.
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     ];
     gc = {
@@ -331,7 +326,6 @@
 
   xdg.portal = {
     enable = true;
-    config.common.default = "*";
     # Allow modules to contribute portals additively.
     extraPortals = lib.mkDefault [ pkgs.xdg-desktop-portal-gtk ];
   };
@@ -341,7 +335,6 @@
     noto-fonts
     noto-fonts-cjk-sans
     noto-fonts-color-emoji
-    emacs-all-the-icons-fonts
     (stdenv.mkDerivation rec {
       name = "aporetic-fonts";
       src = ./fonts;
@@ -375,6 +368,10 @@
   environment.etc."xdg/qt5ct/qt5ct.conf".source = ./conf/qt5ct.conf;
   environment.etc."xdg/qt6ct/qt6ct.conf".source = ./conf/qt6ct.conf;
   environment.etc."xdg/kdeglobals".source = ./conf/kdeglobals;
+  # Use the file contents directly to avoid referencing a pre-existing
+  # /nix/store path that may be missing during live activation. Это защитная
+  # правка: храним содержимое как text, чтобы nix сам создал фиксированную
+  # деривацию из строкового содержимого файла.
   environment.etc."X11/Xresources".text = builtins.readFile ./conf/Xresources;
   environment.etc."xdg/dunst/dunstrc".source = ./conf/dunstrc;
 
@@ -384,17 +381,17 @@
     enableSystemSlice = lib.mkDefault true;
     enableUserSlices = lib.mkDefault true;
   };
+  # Prevent individual services (notably the nix daemon) from taking all CPU.
+  # Limit the nix-daemon service and enable default CPU accounting so user processes
+  # inherit reasonable defaults. Tweak values to taste (CPUQuota is a percentage).
   systemd.services."nix-daemon".serviceConfig = {
     # Do not let the daemon saturate the machine — allow up to 75% of total CPU.
     CPUQuota = "75%";
     # Lower CPUWeight so other services keep some proportionate share.
     CPUWeight = "200";
-    # Прокси для загрузки исходников (GitHub и др. заблокированы в РФ).
-    # Установите переменные через /etc/nixos/local.nix в environment.variables
-    # или systemd.services.nix-daemon.environment:
-    #   systemd.services.nix-daemon.environment = { http_proxy = "http://..."; };
-    EnvironmentFile = lib.mkBefore [ "-/etc/nixos/nix-daemon-proxy" ];
   };
+
+  # polkit/unit ordering handled in modules/systemd-policy.nix
 
   environment.variables = {
     LANG = "ru_RU.UTF-8";
