@@ -87,14 +87,118 @@ predictable. Set to 0 to disable truncation."
 1.0 means same size as the default."
   :type 'number :group 'pro-buffer-banner)
 
+(defcustom pro-buffer-banner-theme-aware t
+  "Non-nil derives banner colors from the current `default' face.
+The banner background is set to the default face's foreground (the
+text color of the parent frame) and the banner foreground to the
+default face's background (the frame color of the parent frame).
+The result is a high-contrast *inverted* banner that adapts to any
+theme.
+
+When nil, the colors from `pro-buffer-banner-face' (set via
+`M-x customize-face') are used as-is."
+  :type 'boolean :group 'pro-buffer-banner)
+
 (defface pro-buffer-banner-face
   `((t :foreground "#ffffff" :background "#222222" :weight bold
        :height ,pro-buffer-banner-font-scale
        :extend t))
   "Face for the banner text. `:extend t' makes the background fill the
 whole window/line so no default-colored padding shows around the text.
-`:height' is set from `pro-buffer-banner-font-scale'."
+
+By default the static white-on-dark colors above are *overridden*
+dynamically by `pro-buffer-banner--apply-theme-face' on load and on
+every theme change.  The dynamic face inverts the `default' face:
+- banner :background = default :foreground
+- banner :foreground = default :background
+so the banner is always high-contrast against the rest of the
+buffer.  The colors shown here are only used as a fallback when
+the `default' face has no colors set (e.g. very early in startup
+or in a headless test).  Disable the dynamic behavior by setting
+`pro-buffer-banner-theme-aware' to nil and customize this face."
   :group 'pro-buffer-banner)
+
+;; ---------------------------------------------------------------------------
+;; Theme-aware face
+;; ---------------------------------------------------------------------------
+;; The banner's background and foreground are derived from the current
+;; `default' face (inverted) so the banner is always high-contrast
+;; against the rest of the buffer, regardless of the active theme:
+;;
+;;   banner :background = default :foreground   (the text color of the
+;;                                                 parent frame)
+;;   banner :foreground = default :background   (the frame color of the
+;;                                                 parent frame)
+;;
+;; Updated on every theme change.  The static colors in the `defface'
+;; above are only a fallback for environments where the `default' face
+;; has no colors (e.g. very early in Emacs startup or headless tests).
+
+(defun pro-buffer-banner--resolve-default-colors ()
+  "Return a cons (FOREGROUND . BACKGROUND) derived from the `default' face.
+Falls back to the frame's `background-mode' when the default face's
+fg/bg attributes are not specified (e.g. before any theme loads)."
+  (let* ((dflt-fg (face-attribute 'default :foreground))
+         (dflt-bg (face-attribute 'default :background))
+         (bg-mode (frame-parameter nil 'background-mode))
+         (fallback-fg (if (eq bg-mode 'dark) "white" "black"))
+         (fallback-bg (if (eq bg-mode 'dark) "black" "white"))
+         (fg (if (and dflt-fg (stringp dflt-fg)
+                      (not (string= dflt-fg "unspecified")))
+                 dflt-fg
+               fallback-fg))
+         (bg (if (and dflt-bg (stringp dflt-bg)
+                      (not (string= dflt-bg "unspecified")))
+                 dflt-bg
+               fallback-bg)))
+    (cons fg bg)))
+
+(defun pro-buffer-banner--apply-theme-face ()
+  "Recompute `pro-buffer-banner-face' from the current `default' face.
+
+Banner background = default foreground (text color of the parent frame).
+Banner foreground = default background (frame color of the parent frame).
+
+The result is a high-contrast *inverted* banner that is always readable
+against the rest of the buffer regardless of the active theme.
+No-op when `pro-buffer-banner-theme-aware' is nil."
+  (when pro-buffer-banner-theme-aware
+    (pcase-let ((`(,default-fg . ,default-bg)
+                 (pro-buffer-banner--resolve-default-colors)))
+      (set-face-attribute
+       'pro-buffer-banner-face nil
+       :foreground default-bg
+       :background default-fg
+       :weight 'bold
+       :extend t
+       :height pro-buffer-banner-font-scale))
+    ;; The face symbol is used by `pro-buffer-banner--populate' via
+    ;; `propertize'; updating the face definition refreshes all text
+    ;; in the banner buffer automatically.  Force a redraw so the new
+    ;; colors are visible immediately.  The `boundp' guards make this
+    ;; callable before the Internal state section is loaded (e.g. from
+    ;; the top-level call right after the function is defined).
+    (when (and (boundp 'pro-buffer-banner--bufname)
+               (stringp pro-buffer-banner--bufname)
+               (get-buffer pro-buffer-banner--bufname))
+      (with-current-buffer (get-buffer pro-buffer-banner--bufname)
+        (force-mode-line-update t)))
+    (when (and (boundp 'pro-buffer-banner--frame)
+               (frame-live-p pro-buffer-banner--frame))
+      (force-mode-line-update t))))
+
+;; Apply on first load so the banner is theme-aware from the start.
+(pro-buffer-banner--apply-theme-face)
+
+;; Re-apply on every theme change.  `enable-theme-functions' is the
+;; Emacs 29+ hook; we also advise `load-theme'/`disable-theme' for
+;; older Emacsen and for the case where themes are toggled
+;; programmatically outside of `enable-theme-functions'.
+(when (boundp 'enable-theme-functions)
+  (add-hook 'enable-theme-functions #'pro-buffer-banner--apply-theme-face)
+  (add-hook 'disable-theme-functions #'pro-buffer-banner--apply-theme-face))
+(advice-add 'load-theme :after #'pro-buffer-banner--apply-theme-face)
+(advice-add 'disable-theme :after #'pro-buffer-banner--apply-theme-face)
 
 ;; ---------------------------------------------------------------------------
 ;; Internal state
@@ -399,6 +503,32 @@ WIDTH-CHARS wide and 1 char tall — passing (width . N) (height . 1) to
 ;; Fade animation
 ;; ---------------------------------------------------------------------------
 
+(defun pro-buffer-banner--restart-fade ()
+  "Cancel any in-flight fade, reset alpha to full, and start a fresh fade.
+
+Entry point called by every `pro-buffer-banner--show' invocation.
+Guarantees that:
+
+  • the existing fade timer (if any) is cancelled;
+  • the banner's alpha is reset to `pro-buffer-banner-initial-alpha';
+  • a new fade begins from the first step.
+
+The combined effect is that every (re-)show — in particular, every
+window change detected by `pro-buffer-banner--maybe-show' — gives
+the banner its full `pro-buffer-banner-duration' from the latest
+activity, so the visible time is never `eaten' by a half-finished
+fade from a previous show.  This is what fixes the
+\"disappears-too-fast-on-window-switch\" symptom: previously the
+timer could be deep into a fade when a new show arrived, and the
+banner could appear visibly half-faded before re-brightening."
+  (when (and pro-buffer-banner--timer (timerp pro-buffer-banner--timer))
+    (cancel-timer pro-buffer-banner--timer))
+  (setq pro-buffer-banner--timer nil)
+  (when (frame-live-p pro-buffer-banner--frame)
+    (set-frame-parameter pro-buffer-banner--frame 'alpha
+                         pro-buffer-banner-initial-alpha))
+  (pro-buffer-banner--start-fade))
+
 (defun pro-buffer-banner--start-fade ()
   "Start the alpha fade-out for the current banner frame.
 The total visible time is exactly `pro-buffer-banner-duration' seconds,
@@ -477,10 +607,14 @@ divided into `pro-buffer-banner-fade-steps' steps."
             ;; this here keeps the banner a pure text label even after
             ;; repeated buffer switches.
             (pro-buffer-banner--strip-decoration frame)
-            ;; 5. Show with full alpha, then start fade.
-            (set-frame-parameter frame 'alpha pro-buffer-banner-initial-alpha)
+            ;; 5. Show, then restart the fade.  `pro-buffer-banner--restart-fade'
+            ;;    is the single entry point that resets alpha + cancels the
+            ;;    old timer + starts a fresh fade, so every (re-)show
+            ;;    (including every window change) gives the banner its
+            ;;    full `pro-buffer-banner-duration' from the latest
+            ;;    activity.  See the docstring of that function.
             (set-frame-parameter frame 'visibility t)
-            (pro-buffer-banner--start-fade)
+            (pro-buffer-banner--restart-fade)
             (setq pro-buffer-banner--last-shown-at (float-time))))
       (error
        (message "[pro-buffer-banner] show failed: %S" err)
@@ -514,11 +648,25 @@ divided into `pro-buffer-banner-fade-steps' steps."
 (defun pro-buffer-banner--install ()
   "Install the watcher hook. Idempotent."
   (unless (memq #'pro-buffer-banner--maybe-show post-command-hook)
-    (add-hook 'post-command-hook #'pro-buffer-banner--maybe-show 90)))
+    (add-hook 'post-command-hook #'pro-buffer-banner--maybe-show 90))
+  ;; Emacs 27+: also listen to `window-selection-change-functions' so
+  ;; the banner is (re-)shown whenever the selected window changes,
+  ;; independently of `post-command-hook' firing.  This is the
+  ;; canonical signal for window switches and is more reliable than
+  ;; post-command-hook (which can be delayed or skipped in some edge
+  ;; cases — e.g. when a window switch is triggered by something other
+  ;; than an interactive command, or when commands fail before the
+  ;; hook fires).  The watcher is idempotent via its own change
+  ;; detection, so firing from both hooks is safe.
+  (when (boundp 'window-selection-change-functions)
+    (unless (memq #'pro-buffer-banner--maybe-show window-selection-change-functions)
+      (add-hook 'window-selection-change-functions #'pro-buffer-banner--maybe-show))))
 
 (defun pro-buffer-banner--uninstall ()
   "Uninstall the watcher hook and tear down any visible banner."
   (remove-hook 'post-command-hook #'pro-buffer-banner--maybe-show)
+  (when (boundp 'window-selection-change-functions)
+    (remove-hook 'window-selection-change-functions #'pro-buffer-banner--maybe-show))
   (pro-buffer-banner--destroy))
 
 (defun pro-buffer-banner-mode (&optional arg)
@@ -570,7 +718,13 @@ stripping, etc.)."
   (setq pro-buffer-banner--bufname nil
         pro-buffer-banner--last-buf nil
         pro-buffer-banner--last-win nil
-        pro-buffer-banner--last-shown-at 0.0))
+        pro-buffer-banner--last-shown-at 0.0)
+  ;; Re-apply the theme-aware face in case the user changed
+  ;; `pro-buffer-banner-font-scale' or the theme color in the
+  ;; reloaded code.  This must run after the frame is destroyed and
+  ;; before the next show.
+  (when (fboundp 'pro-buffer-banner--apply-theme-face)
+    (ignore-errors (pro-buffer-banner--apply-theme-face))))
 
 (ignore-errors
   (when (fboundp 'pro/after-reload)
