@@ -40,32 +40,33 @@
     rules = lib.mkDefault "";
   };
 
-   imports = [
-      ./modules/system-boot.nix
-      ./modules/packages-runtime.nix
-      ./modules/systemd-policy.nix
-      ./modules/tty-console.nix
-      ./modules/pro-power-beep.nix
+  imports = [
+    ./modules/system-boot.nix
+    ./modules/packages-runtime.nix
+    ./modules/tty-console.nix
+    ./modules/pro-power-beep.nix
 
-      # Общие модули формируют общую политику и не зависят от пользовательских настроек.
-     ./modules/pro-users.nix
-     ./modules/pro-services.nix
-     ./modules/pro-storage.nix
-     ./modules/pro-privacy.nix
-     ./modules/pro-dev.nix
-     ./modules/pro-peer.nix
-     ./modules/host-policies.nix
-     ./modules/headscale.nix
-     ./modules/pro-desktop.nix
-     ./modules/pro-exwm-desktop.nix
-     ./modules/pro-profiles.nix
-     ./modules/session-exwm.nix
-     ./modules/nix-cuda-compat.nix
-     ./modules/zram-slice.nix
-     ./modules/searxng.nix
+    # Общие модули формируют общую политику и не зависят от пользовательских настроек.
+    ./modules/pro-users.nix
+    ./modules/pro-services.nix
+    ./modules/pro-storage.nix
+    ./modules/pro-privacy.nix
+    ./modules/pro-dev.nix
+    ./modules/pro-peer.nix
+    ./modules/host-policies.nix
+    ./modules/headscale.nix
+    ./modules/pro-desktop.nix
+    ./modules/pro-exwm-desktop.nix
+    ./modules/pro-profiles.nix
+    ./modules/session-exwm.nix
+    ./modules/nix-cuda-compat.nix
+    ./modules/zram-slice.nix
+    ./modules/searxng.nix
+    ./modules/pro-nfs.nix
+    ./modules/pro-spellcheck.nix
 
-     # Локальные переопределения конкретного хоста остаются в файле local.nix.
-   ] ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ];
+    # Локальные переопределения конкретного хоста остаются в файле local.nix.
+  ] ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ];
 
   # TEMP: SearXNG отключён до исправления схемы settings.yml. Невалидный
   # settings.yml вызывал restart loop searxng.service и усиливал boot/switch
@@ -390,8 +391,6 @@
     # Lower CPUWeight so other services keep some proportionate share.
     CPUWeight = "200";
   };
-
-  # polkit/unit ordering handled in modules/systemd-policy.nix
 
   environment.variables = {
     LANG = "ru_RU.UTF-8";

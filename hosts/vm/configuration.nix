@@ -1,7 +1,12 @@
-{ lib, ... }:
-
+{ config, lib, pkgs, ... }:
 
 {
+  imports = [
+    ../../modules/pro-users.nix
+    ../../modules/pro-nfs.nix
+    ../../modules/pro-spellcheck.nix
+  ];
+
   networking.hostName = "vm";
 
   fileSystems."/" = {
@@ -22,6 +27,6 @@
 
   # VM follows the same shared package policy, including Tor Browser.
 
-  # NFS-клиент: монтируем desktop:/srv/nfs автоматически по обращению.
+  # NFS-клиент: монтируем desktop:/srv/nfs автоматически по обращение.
   pro.nfs.client.enable = true;
 }

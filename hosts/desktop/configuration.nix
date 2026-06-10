@@ -3,8 +3,13 @@
 {
   imports = [
     ../../modules/pro-users.nix
-    ../../modules/pro-haskell.nix
+    ../../modules/pro-desktop.nix
     ../../modules/pro-heavy-desktop.nix
+    ../../modules/profile-exwm-minimal.nix
+    ../../modules/session-exwm.nix
+    ../../modules/session-sway.nix
+    ../../modules/session-i3.nix
+    ./composition.nix
   ];
 
   networking.hostName = "desktop";
@@ -64,13 +69,14 @@
     enable = true;
     # LLMNR off — нам хватает mDNS (Avahi) для .local, LLMNR создаёт
     # конфликты с split-horizon DNS и не нужен в нашей сети.
-    llmnr = false;
+    llmnr = "false";
     extraConfig = builtins.readFile ../../conf/resolved-extra.conf;
   };
 
-  # Desktop — fileserver для LAN. NFS-export /srv/nfs (члены pro группы
-  # могут писать, setgid). Syncthing в pro-storage.nix уже шарит
-  # /srv/syncthing автоматически.
+# Desktop — fileserver для LAN. NFS-export /srv/nfs (члены pro группы
+# могут писать, setgid). Syncthing в pro-storage.nix уже шарит
+# /srv/syncthing автоматически.
   pro.nfs.server.enable = true;
   pro.nfs.server.exportPath = "/srv/nfs";
+  pro.nfs.client.enable = true;
 }

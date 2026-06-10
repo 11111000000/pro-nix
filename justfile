@@ -71,5 +71,8 @@ logs-latest:
 emacs-sync:
 	./scripts/dev-emacs-sync.sh
 
+submodules-ssh:
+	scripts/submodules-ssh.sh
+
 emacs-verify:
 	./scripts/emacs-verify.sh both

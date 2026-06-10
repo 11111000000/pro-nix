@@ -23,29 +23,11 @@ let
   hostName = config.networking.hostName;
 in
 {
-<<<<<<< HEAD
-  # Samba default-on: каждый pro-nix хост отдаёт свой /srv/samba/<host>
-  # share + общий `public`. NB: nmbd может зависнуть на старте без
-  # non-loopback IPv4 — это симптом проблем с сетью, не повод выключать.
-  # Хост может отказаться: services.samba.enable = lib.mkForce false;
-  services.samba.enable = lib.mkDefault true;
-  # Firewall: открыть SMB порты (445/tcp) и NetBIOS (137,138/udp).
-  # `bind interfaces only = No` в global + `hosts allow` уже ограничивают
-  # доступ RFC1918, FW открываем дефолтом — defense-in-depth.
-  services.samba.openFirewall = lib.mkDefault true;
-  # nmbd нужен для browsing; включаем явно. Без него Windows-клиенты не
-  # увидят хост в Network Neighborhood.
-  services.samba.nmbd.enable = lib.mkDefault true;
-  # winbind не нужен — у нас простая LAN с локальными Unix-юзерами.
-  services.samba.winbindd.enable = lib.mkDefault false;
-=======
-  # Samba полезна в LAN, но nmbd может зависать на старте, если нет готового
-  # non-loopback IPv4 интерфейса. Поэтому общий модуль только описывает
-  # конфигурацию, а не включает службу. Хост, которому нужен SMB, включает её
-  # явно в host/local конфигурации.
+  # Samba useful in LAN, but nmbd can hang on startup if there's no ready
+  # non-loopback IPv4 interface. So common module just describes
+  # configuration, host enables service explicitly in host/local config.
   services.samba.enable = lib.mkDefault true;
   services.samba.openFirewall = lib.mkDefault true;
->>>>>>> 2466080 (enable samba)
   # Avahi can fail early during boot if /run/avahi-daemon is missing; ensure
   # tmpfiles create expected runtime directories. Keep avahi enabled for discovery.
   services.avahi.enable = lib.mkDefault true;

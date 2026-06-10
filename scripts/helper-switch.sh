@@ -52,7 +52,7 @@ if [ -z "${PRO_NIX_NO_SUBMODULE_UPDATE:-}" ]; then
     exit 1
   fi
 
-  if ! git submodule update --remote --merge 2>&1 | sed 's/^/[simple-helper] submod: /'; then
+  if ! git submodule update --init --remote --merge 2>&1 | sed 's/^/[simple-helper] submod: /'; then
     echo "[simple-helper] ERROR: git submodule update --remote --merge failed" >&2
     exit 1
   fi
@@ -66,6 +66,11 @@ SWITCH_LOG="/tmp/switch-$(date +%s).log"
 echo "[simple-helper] Logs will be saved to $SWITCH_LOG"
 
   if sudo nixos-rebuild switch --flake "$FLAKE_REF#$HOST_ARG" 2>&1 | tee "$SWITCH_LOG"; then
+    switch_status=${PIPESTATUS[0]}
+    if [ "$switch_status" -ne 0 ]; then
+      echo "[simple-helper] ERROR: nixos-rebuild switch failed (see $SWITCH_LOG)" >&2
+      exit "$switch_status"
+    fi
     echo "[simple-helper] Switch completed successfully."
 
     # Home-manager activation performed during nixos-rebuild may have written

@@ -161,6 +161,189 @@ just headless-tests && just headless-report
 `check-all`) и `scripts/helper-switch.sh` (`FLAKE_REF`). Для прямого
 вызова из shell — копируй URL из этих мест.
 
+### 6d. Управление субмодулями (SSH ↔ HTTPS)
+
+Субмодули используются по HTTPS по умолчанию для обеспечения работы всех пользователей,
+даже без SSH-ключей.
+
+#### Настройка субмодулей по умолчанию (HTTPS)
+
+Процесс создания новой среды:
+
+1. Инициализируйте субмодули (HTTPS по умолчанию):
+   ```bash
+   git submodule update --init --recursive
+   # или через just:
+   just switch
+   ```
+
+2. Для пользователей, у которых есть SSH-ключ для репозитория, можно локально
+   переопределить URL субмодуля на SSH для возможности пуша:
+   ```bash
+   git config submodule.submodules/agent-shell-hud.url git@github.com:11111000000/agent-shell-hud.git
+   git submodule sync
+   git submodule update --remote --merge
+   ```
+
+#### Смена всех субмодулей на SSH
+
+Скрипт `scripts/submodules-ssh.sh` преобразует все HTTPS-URL в SSH:
+
+```bash
+# Изменяет .gitmodules и обновляет субмодули до SSH
+cd pro-nix
+./scripts/submodules-ssh.sh
+```
+
+Результат:
+- Все HTTPS URLs в `.gitmodules` преобразуются в SSH
+- Субмодули обновляются с использованием SSH URLs
+- Пользователи с SSH-доступом могут теперь пушить изменения
+- Пользователи без SSH-доступа не могут клонировать (нужен SSH ключ)
+
+#### Разработка с HTTPS субмодулями (рекомендуется для большинства пользователей)
+
+```bash
+# Входящие ссылки в .gitmodules уже HTTPS
+# Для clone/pull работы без SSH-ключей:
+git submodule update --remote --merge
+# или
+just switch
+```
+
+#### Изменение субмодуля на SSH в развитии
+
+Если вам нужен SSH-доступ во время разработки (например, вы хотите отправить
+вклад):
+
+1. Измените URL субмодуля локально:
+   ```bash
+   git config submodule.submodules/<submodule-name>.url git@github.com:<user>/<repo>.git
+   git submodule sync
+   ```
+
+2. Перейдите в субмодуль и настройте remote:
+   ```bash
+   cd submodules/<submodule-name>
+   git remote set-url origin git@github.com:<user>/<repo>.git
+   ```
+
+3. Сделайте коммит в субмодуле, затем вернитесь в главный репозиторий:
+   ```bash
+   cd ..
+git add submodules/<submodule-name>
+git commit -m "<submodule>: switch to ssh remote"
+   ```
+
+#### Копирование субмодулей с SSH обратно в HTTPS
+
+Если вы перешли на SSH и хотите вернуться обратно к HTTPS (например, для
+основного ветка содержимого):
+
+```bash
+# Восстановите исходную .gitmodules
+cp .gitmodules.backup.<timestamp> .gitmodules
+
+# Обновите субмодули до HTTPS
+git submodule sync && git submodule update --remote --merge
+```
+
+## 8. Процесс развёртывания
+
+### Подготовка новой среды
+
+#### 1. Клонирование и инициализация
+
+```bash
+# Клонировать репозиторий
+git clone <repo-url> pro-nix
+cd pro-nix
+
+# Инициализировать все субмодули (HTTPS режим)
+git submodule update --init --recursive
+```
+
+#### 2. Базовые проверки
+
+```bash
+# Синтаксис конфигурации
+nix-instantiate --parse configuration.nix
+
+# Проверка флейка (с submoddes)
+nix flake check
+
+# Проверка целевых сборок (если нужно)
+nix eval .#nixosConfigurations.cf19.config.environment.systemPackages
+```
+
+#### 3. Режим разработки (HTTPS)
+
+```bash
+# Быстрое обновление Emacs после изменений в модулях
+sudo nixos-rebuild switch --flake "git+file://$(pwd)?submodules=1#<hostname>"
+# Мгновенный перезапуск Emacs
+C-x M-c   # в Emacs
+# или
+M-x pro/reload-config
+```
+
+#### 4. Производственное развёртывание (SSH для пуша)
+
+```bash
+# Сменить субмодули на SSH, если у вас есть права на пуш
+just submodules-ssh
+
+# Перезагрузить систему
+just switch <hostname>
+
+# Или вручную с sudo
+sudo nixos-rebuild switch --flake "git+file://$(pwd)?submodules=1#<hostname>"
+```
+
+### Управление после развёртывания
+
+#### Обновление субмодулей
+
+```bash
+# Обновить до удаленного main/master (HTTPS)
+git submodule update --remote --merge
+
+# Обновить конкретного субмодуля
+git submodule update --remote --merge submodules/agent-shell-hud
+```
+
+#### Решение конфликтов
+
+Если `just switch` вызывает конфликт (обычно в `local.nix`):
+
+```bash
+# Игнорировать разницу в local.nix (секреты)
+git rm local.nix
+# Продолжить rebase
+git rebase --continue
+```
+
+#### Hard reload Emacs
+
+```bash
+# Полная перезагрузка (если что-то сломалось)
+C-u M-x pro/reload-config
+
+# Изоляция от редактора в ExWM
+C-c C-c   # закрыть интернационализированный буфер
+```
+
+#### Резервное копирование перед мутацией
+
+```bash
+# Сохранить .gitmodules перед SSH переключением
+./scripts/submodules-ssh.sh
+
+# Восстановить HTTPS позже
+cp .gitmodules.backup.<timestamp> .gitmodules
+git submodule sync && git submodule update --remote --merge
+```
+
 ### 6b. Детекторы мёртвого кода
 
 Сигналы, по которым файл/модуль можно удалять (после ритуала ниже):

@@ -98,13 +98,11 @@ in
       # /etc/exports: rw,sync,no_subtree_check,sec=sys,fsid=0 (root export для NFSv4)
       # idmapd на клиенте маппит nobody/nogroup для чужих UID — поэтому
       # добавляем anonuid/anongid = 0 (root) и не делаем root_squash.
-      services.nfs.server.exports = [
-        {
-          path = cfg.server.exportPath;
-          host = cfg.server.allowedClients;
-          options = [ "rw" "sync" "no_subtree_check" "no_root_squash" "sec=sys" "fsid=0" "crossmnt" ];
-        }
-      ];
+      services.nfs.server.exports =
+        let
+          opts = "rw,sync,no_subtree_check,no_root_squash,sec=sys,fsid=0,crossmnt";
+          hostSpecs = map (host: "${host}(${opts})") cfg.server.allowedClients;
+        in "${cfg.server.exportPath} ${lib.concatStringsSep " " hostSpecs}";
 
       # Пакеты: nfs-utils уже подтянется через services.nfs.server, но
       # добавим явно в профиль для удобства диагностики.
