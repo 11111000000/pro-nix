@@ -76,3 +76,7 @@ submodules-ssh:
 
 emacs-verify:
 	./scripts/emacs-verify.sh both
+
+# Contract test for the network layer (pro-hosts, pro-network, pro-ssh-clients, headscale)
+network-contract:
+	./tests/contract/pro-network-01.sh

@@ -69,6 +69,11 @@
     enable = true;
     # LLMNR off — нам хватает mDNS (Avahi) для .local, LLMNR создаёт
     # конфликты с split-horizon DNS и не нужен в нашей сети.
+    # NB: NixOS-тип этой опции — `enum [ "true" "resolve" "false" ]`, то есть
+    # именно строка, несмотря на семантику bool. Мнемоника:
+    #   "true"   — LLMNR enabled and answers authoritatively;
+    #   "resolve" — LLMNR enabled, но systemd-resolved сам решает кому отвечать;
+    #   "false"  — LLMNR off.
     llmnr = "false";
     extraConfig = builtins.readFile ../../conf/resolved-extra.conf;
   };
@@ -79,4 +84,13 @@
   pro.nfs.server.enable = true;
   pro.nfs.server.exportPath = "/srv/nfs";
   pro.nfs.client.enable = true;
+
+  # Headscale control plane живёт на desktop (роль `headscale` в pro.hosts).
+  # NB: оператор должен подложить TLS-сертификат (или фронт-nginx) и
+  # настроить `derpUrls` через overlay, чтобы клиенты могли переключаться
+  # на собственный DERP-сервер.
+  headscale.enable = lib.mkForce true;
+  # LAN-gateway: разрешаем этому хосту роутить трафик tailnet-клиентов
+  # через основной uplink (use case: VMs/travel-ноутбуки без выхода в WAN).
+  pro.network.allowSubnetRouter = lib.mkForce true;
 }

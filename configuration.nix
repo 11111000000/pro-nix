@@ -64,6 +64,11 @@
     ./modules/searxng.nix
     ./modules/pro-nfs.nix
     ./modules/pro-spellcheck.nix
+    # Сетевая подсистема: общий каталог хостов (single source of truth),
+    # mDNS/NSS-интеграция и генерация ssh_config.d/pro.conf.
+    ./modules/pro-hosts.nix
+    ./modules/pro-network.nix
+    ./modules/pro-ssh-clients.nix
 
     # Локальные переопределения конкретного хоста остаются в файле local.nix.
   ] ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ];

@@ -121,4 +121,7 @@ in
 
   # NFS-клиент: монтируем desktop:/srv/nfs автоматически по обращению.
   pro.nfs.client.enable = true;
+
+  # headscale control plane не работает на ноутбуке.
+  headscale.enable = lib.mkForce false;
 }

@@ -29,4 +29,8 @@
 
   # NFS-клиент: монтируем desktop:/srv/nfs автоматически по обращение.
   pro.nfs.client.enable = true;
+
+  # VM собирается через `mkVmHost` в flake.nix, который НЕ импортирует
+  # общий `configuration.nix` (а значит и `headscale.nix`). Здесь нельзя
+  # ссылаться на `headscale.*` — опция не существует в этом evaluation.
 }

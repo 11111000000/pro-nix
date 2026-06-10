@@ -133,6 +133,9 @@ just headless-tests && just headless-report
 
 # Emacs: pending-биндинги
 # M-x pro-keys-report-pending
+
+# Сетевой стек (pro-hosts / pro-network / pro-ssh-clients / headscale)
+just network-contract
 ```
 
 ### 6a. Что `nix flake check` НЕ ловит
@@ -362,6 +365,77 @@ git submodule sync && git submodule update --remote --merge
 rg -l "<filename>"          # прямые импорты
 rg "<attributeName>"        # использования экспортов
 nix-instantiate --parse <каждый файл, который трогаем>
+```
+
+## 9. Сетевая модель (LAN + mesh + SSH-нейминг)
+
+Сеть в pro-nix строится из **трёх независимых слоёв**, каждый со своей
+ответственностью. Не смешивать в одном модуле.
+
+| Слой | Модуль | Что делает | Когда работает |
+|------|--------|------------|----------------|
+| LAN-обнаружение | `modules/pro-network.nix` (Avahi + nssmdns + resolved) | рекламирует SSH, резолвит `host.local` | только в одной L2-сети |
+| Mesh | `modules/headscale.nix` (control plane) + будущий `modules/pro-tailnet.nix` (клиенты) | стабильные IP/имена вне LAN, NAT-traversal | всегда, где есть интернет |
+| SSH-нейминг | `modules/pro-ssh-clients.nix` (генерирует `ssh_config.d/pro.conf`) | `ssh host` без DNS | всегда, если есть хоть один маршрут |
+
+### Single source of truth: `pro.hosts`
+
+`modules/pro-hosts.nix` объявляет **реестр** известных машин. Все остальные
+сетевые модули читают `config.pro.hosts.<name>`. Не дублируй `roles`,
+`sshUser` или `tailnet` в нескольких местах — это источник рассинхрона.
+
+```nix
+pro.hosts.desktop = {
+  sshUser = "az";
+  roles = [ "server" "headscale" "lan-gw" "nfs" "tor" ];
+  tailnet = "desktop";
+};
+```
+
+### Приоритеты подключения SSH
+
+Сгенерированный `ssh_config.d/pro.conf` перебирает кандидатов
+по порядку:
+
+1. `<tailnet>.<base_domain>` (например, `desktop.pro-nix.ts.net`) — основной
+2. `<tailnet>` (короткий, через MagicDNS) — fallback в tailnet
+3. `<name>.local` (mDNS) — fallback в LAN
+4. `addr` (статический IP, если задан) — последний шанс
+5. `<name>-onion` через torsocks — аварийный канал (если задан `onion`)
+
+Каждый Host-блок использует `ConnectTimeout`, поэтому отказ одного
+кандидата не блокирует остальные.
+
+### Где включать headscale
+
+**Только на одном хосте** с ролью `headscale` и `lan-gw` (по умолчанию —
+`desktop`). На всех остальных хостах `headscale.enable = lib.mkForce false`
+явно (см. `hosts/*/configuration.nix`). Забытое `headscale.enable = true`
+на ноутбуке — частая причина «случайного» control plane.
+
+### Антипаттерны
+
+- ❌ Хардкодить IP в ssh-конфиге. Доверься `pro.hosts` + tailnet-FQDN.
+- ❌ `services.resolved.llmnr = "false"` (строка). Должен быть **bool**.
+  NixOS-тип `enum` принимает только определённые значения; `false`
+  истинно нужно писать без кавычек.
+- ❌ Включать `services.tailscale.enable` глобально — требует auth-key,
+  ломает `nixos-rebuild` без секрета. Включай через `pro.tailnet.enable`
+  (после того, как модуль появится).
+
+### Быстрая проверка после правки
+
+```bash
+# Синтаксис и базовые атрибуты
+nix-instantiate --parse modules/pro-hosts.nix
+nix-instantiate --parse modules/pro-network.nix
+nix-instantiate --parse modules/pro-ssh-clients.nix
+nix eval --json .#nixosConfigurations.desktop.config.pro.hosts \
+  --apply builtins.attrNames
+# Должно вывести: [ "cf19" "desktop" "huawei" "vm" ]
+
+# Контракт
+just network-contract
 ```
 
 ## 7. Запреты (кратко)
