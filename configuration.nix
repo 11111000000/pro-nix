@@ -332,6 +332,11 @@
 
   xdg.portal = {
     enable = true;
+    # xdg-desktop-portal 1.17 requires either configPackages or config to be
+    # set, otherwise it warns and may not pick a portal backend. We declare
+    # the gtk implementation here; modules can still add to extraPortals
+    # additively for additional portal backends.
+    configPackages = lib.mkDefault [ pkgs.xdg-desktop-portal-gtk ];
     # Allow modules to contribute portals additively.
     extraPortals = lib.mkDefault [ pkgs.xdg-desktop-portal-gtk ];
   };
