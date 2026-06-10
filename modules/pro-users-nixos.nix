@@ -4,7 +4,7 @@
   home-manager.users = builtins.listToAttrs (map (name: {
     inherit name;
     value = {
-      imports = [ ../emacs/home-manager.nix ./opencode-tui.nix ] ++ lib.optionals (opencodeBwrapModule != null) [ opencodeBwrapModule ];
+      imports = [ ../emacs/home-manager.nix ./opencode-tui.nix ./pro-agent-configs.nix ] ++ lib.optionals (opencodeBwrapModule != null) [ opencodeBwrapModule ];
       home.username = name;
       home.homeDirectory = "/home/${name}";
       home.stateVersion = "23.11";
