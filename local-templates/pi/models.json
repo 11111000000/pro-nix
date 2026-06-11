@@ -1,5 +1,35 @@
 {
   "providers": {
+    "minimax": {
+      "baseUrl": "https://api.minimax.io/v1",
+      "api": "openai-completions",
+      "apiKey": "MINIMAX_API_KEY",
+      "authHeader": true,
+      "compat": {
+        "supportsDeveloperRole": true,
+        "supportsReasoningEffort": false,
+        "maxTokensField": "max_tokens"
+      },
+      "models": [
+        { "id": "MiniMax-M3",   "name": "MiniMax M3" },
+        { "id": "MiniMax-M2.7", "name": "MiniMax M2.7" }
+      ]
+    },
+    "deepseek": {
+      "baseUrl": "https://api.deepseek.com/v1",
+      "api": "openai-completions",
+      "apiKey": "DEEPSEEK_API_KEY",
+      "authHeader": true,
+      "compat": {
+        "supportsDeveloperRole": true,
+        "supportsReasoningEffort": true,
+        "maxTokensField": "max_tokens"
+      },
+      "models": [
+        { "id": "deepseek-v4-pro",   "name": "DeepSeek V4 Pro — флагман, 1M ctx" },
+        { "id": "deepseek-v4-flash", "name": "DeepSeek V4 Flash — быстрый, 1M ctx" }
+      ]
+    },
     "aitunnel": {
       "baseUrl": "https://api.aitunnel.ru/v1",
       "api": "openai-completions",
