@@ -32,7 +32,14 @@ in
   # tmpfiles create expected runtime directories. Keep avahi enabled for discovery.
   services.avahi.enable = lib.mkDefault true;
   services.avahi.publish.enable = lib.mkDefault true;
-  services.avahi.allowInterfaces = lib.mkDefault [ "eth*" "wlan*" "en*" "wlp*" ];
+  # allowInterfaces = null (default): avahi слушает все UP-интерфейсы, кроме
+  # loopback и point-to-point. Раньше задавали фильтр [ "eth*" "wlan*" "en*" "wlp*" ],
+  # но на cf19 (интерфейс wlp9s0) avahi-daemon 0.8 молча не присоединялся к
+  # mDNS-группе 224.0.0.251 при заданном allow-interfaces, и SMB-discovery
+  # не работал. Глобальное правило pro-nix: не задавать allowInterfaces.
+  # NB: включаются ВСЕ интерфейсы (в т.ч. wwan0, tailscale0, docker0), что
+  # для домашней LAN приемлемо. Если на каком-то хосте нужна фильтрация —
+  # задать опцию host-local c lib.mkForce.
   # Configure Samba to be reachable on the local network only and advertise via mDNS
   # Use the declarative settings sections: "global" + per-share sections
   # Gobal Samba parameters are security-sensitive. Prefer them to be applied
