@@ -8,8 +8,8 @@
 !
 ! Текущая палитра: чёрный фон + серый текст (#b0b0b0) + зелёный
 ! курсор.  Это совпадает с настройкой URxvt и применяется как fallback
-! для Emacs-фрейма до того, как `tao-yang' (светлая) тема переопределит
-! face'ы.  Если нужна тёмная Emacs-тема — см. docs/analyse/.
+! для Emacs-фрейма до того, как «tao-yang» (светлая) тема переопределит
+! «face»-ы.  Если нужна тёмная Emacs-тема — см. docs/analyse/.
 ! ══════════════════════════════════════════════════════════════════════
 
 ! ── Xft defaults (применяется ко всем Xft-приложениям) ───────────────
@@ -39,7 +39,7 @@ Emacs.background:        #000000
 Emacs.foreground:        #b0b0b0
 Emacs.cursorColor:       #88ff88
 Emacs.visualBell:        false
-! Disable Emacs' own XIM client so that EXWM (exwm-xim) can act as the
+! Disable Emacs own XIM client so that EXWM (exwm-xim) can act as the
 ! sole XIM server; otherwise the two negotiate recursively and may
 ! deadlock.  See exwm-xim.el::exwm-xim--deadlock-warning.
 Emacs.useXIM:            false
@@ -64,8 +64,8 @@ URxvt.saveLines:         2000
 URxvt.urgentOnBell:      true
 URxvt.visualBell:        false
 URxvt.termName:          rxvt-unicode-256color
-! Монохромная палитра с приглушёнными цветами: `ls --color', `git
-! status' и т.п. не «вырвиглазные», но цвета различимы.
+! Монохромная палитра с приглушёнными цветами: «ls --color», «git
+! status» и т.п. не «вырвиглазные», но цвета различимы.
 URxvt.color0:            #1c1c1c
 URxvt.color1:            #c25c5c
 URxvt.color2:            #5cc25c

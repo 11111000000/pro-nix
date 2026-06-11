@@ -9,6 +9,11 @@
     export EMACS_STARTUP_LOG_FILE="$EMACS_STARTUP_LOG_DIR/gdm-exwm.log"
     mkdir -p "$EMACS_STARTUP_LOG_DIR"
     printf '%s\n' "[sessionCommands $(date '+%F %T%z')] path=$PATH log_file=$EMACS_STARTUP_LOG_FILE"
+    # Merge Xresources from the system location first, then the user override
+    # if present.  The system file is deployed by configuration.nix via
+    # environment.etc."X11/Xresources", which is the only guaranteed location
+    # when home-manager is not active for this user.
+    [ -r /etc/X11/Xresources ] && xrdb -merge /etc/X11/Xresources || true
     [ -f "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources" || true
   '';
 

@@ -136,7 +136,11 @@ in
 
         # Merge Xresources early so Emacs/EXWM inherits fullscreen and font
         # settings to avoid visual flicker when the first frame appears.
-        xrdb -merge ~/.Xresources
+        # System path is the authoritative location (deployed by
+        # configuration.nix via environment.etc); ~/.Xresources is the
+        # optional home-manager override on top.
+        [ -r /etc/X11/Xresources ] && xrdb -merge /etc/X11/Xresources || true
+        [ -f "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources" || true
 
         # The xbindkeys rescue grab is launched from ~/.xprofile (lightdm
         # sources that BEFORE exec'ing us).  No need to re-launch here, but
