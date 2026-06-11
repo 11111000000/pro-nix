@@ -27,8 +27,9 @@
             "treemacs" "vertico" "vterm" "yasnippet" "embark-consult" "dash-docs" "consult-dash"
             "multi-vterm" "eshell-toggle" "acapella" "atlas" "shaoline" "tao-theme" "pro-tabs"
             "agent-shell" "agent-shell-hud" "acp" "emcp" "shell-maker"
-            "all-the-icons-dired" "all-the-icons-completion" "treemacs-icons-dired"
-            "golden-ratio"
+            "all-the-icons" "all-the-icons-dired" "all-the-icons-completion" "treemacs-icons-dired"
+            "async" "dash" "embark" "popon" "cond-let" "magit-section" "visual-fill-column"
+            "buffer-move" "golden-ratio"
           ];
 
           extraPackages = let
