@@ -10,7 +10,7 @@
 ;; гарантирует, что все помощники и адаптеры будут загружены при старте.
 (defvar pro-emacs-base-default-modules
     '(pro-core pro-ui pro-packages pro-package-bootstrap pro-project pro-git
-    pro-nix pro-js pro-ai pro-agent-shell pro-c pro-chat pro-telega pro-compat
+    pro-nix pro-js pro-ai pro-agent-shell pro-emcp pro-c pro-chat pro-telega pro-compat
     pro-completion pro-completion-keys pro-consult-helpers pro-dired
     pro-app-launcher pro-clipboard
     pro-emacs-check-fonts pro-exwm-sim pro-exwm pro-feeds pro-fix-corfu
