@@ -137,6 +137,7 @@ in
         device = "${cfg.client.server}.local:${cfg.client.remotePath}";
         fsType = "nfs";
         options = [
+          "noauto"
           "vers=4.2"
           "rsize=1048576"
           "wsize=1048576"
