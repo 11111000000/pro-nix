@@ -577,6 +577,11 @@ pro-history — part of pro-nix")))
   (setq recentf-exclude
         `(,pro-history-state-directory
           ,pro-history-cache-directory
+          ;; Network/automount mount points — `opendir' can hang for seconds
+          ;; on unavailable NFS/CIFS/sshfs; skip them in recentf-cleanup.
+          "/mnt/"
+          "/media/"
+          "/run/media/"
           "/\\.git/"
           "/\\.emacs\\.d/elpa/"
           "-autoloads\\.el\\'"

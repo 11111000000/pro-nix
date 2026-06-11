@@ -114,6 +114,13 @@ mode-line) avoid the projectile/file-truename chain on every invocation."
   ;; prefer projectile's completion helpers if available
   (when (fboundp 'projectile-mode)
     (projectile-mode 1))
+  ;; Skip automount / network mount points during project-root lookup:
+  ;; projectile walks parents from `default-directory' and stat()s each one,
+  ;; which hangs on unavailable NFS/CIFS/sshfs for seconds.
+  (setq projectile-globally-ignored-directories
+        (append projectile-globally-ignored-directories
+                '("/mnt" "/media" "/run/media" "/var/tmp" "/tmp")))
+  (setq projectile-ignored-project-feedback nil)
   ;; If consult-projectile is available, ensure it's loaded for better UX
   (when (pro--package-provided-p 'consult-projectile)
     (ignore (require 'consult-projectile nil t))))
