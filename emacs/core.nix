@@ -38,7 +38,7 @@ in
 
     providedPackages = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [ "magit" "consult" "vertico" "vertico-sort" "orderless" "marginalia" "gptel" "consult-dash" "dash-docs" "consult-eglot" "consult-yasnippet" "corfu" "cape" "kind-icon" "avy" "expand-region" "yasnippet" "projectile" "treemacs" "consult-projectile" "elfeed" "eglot" "rainbow-delimiters" "nix-mode" "markdown-mode" "mmm-mode" "org" "ob-mermaid" "vterm" "multi-vterm" "eshell-toggle" "ace-window" "undo-tree" "haskell-mode" "haskell-snippets" "which-key" "which-key-posframe" "eldoc-box" "keyfreq" "helpful" "popper" "buffer-expose" "buffer-move" "golden-ratio" "embark" "embark-consult" "exwm" "xelb" "agent-shell" "agent-shell-hud" "acp" "emcp" "telega" "transient" "visual-fill-column" "pro-tabs" "goto-chg" ];
+      default = [ "magit" "consult" "vertico" "vertico-sort" "orderless" "marginalia" "gptel" "consult-dash" "dash-docs" "consult-eglot" "consult-yasnippet" "corfu" "cape" "kind-icon" "avy" "expand-region" "yasnippet" "projectile" "treemacs" "consult-projectile" "elfeed" "eglot" "rainbow-delimiters" "nix-mode" "markdown-mode" "mmm-mode" "org" "ob-mermaid" "vterm" "multi-vterm" "eshell-toggle" "ace-window" "undo-tree" "haskell-mode" "haskell-snippets" "which-key" "which-key-posframe" "eldoc-box" "keyfreq" "helpful" "popper" "buffer-expose" "buffer-move" "golden-ratio" "embark" "embark-consult" "exwm" "xelb" "agent-shell" "agent-shell-hud" "acp" "emcp" "http-server" "telega" "transient" "visual-fill-column" "pro-tabs" "goto-chg" ];
     };
 
     defaultModules = lib.mkOption {

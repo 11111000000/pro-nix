@@ -342,12 +342,12 @@ all-the-icons — fallback, если nerd-icons недоступен. Семей
      (when (display-graphic-p)
        (let ((box `(:line-width ,pro-ui-cursor-readonly-line-width
                     :color ,pro-ui-cursor-readonly-color)))
-         ;; Полый прямоугольник: :background nil, и только рамка через
+         ;; Полый прямоугольник: :background 'unspecified, и только рамка через
          ;; :box. В read-only буфере Emacs использует лицо
          ;; `cursor-read-only', поэтому обновляем и его.
-         (set-face-attribute 'cursor nil :background nil :box box)
+         (set-face-attribute 'cursor nil :background 'unspecified :box box)
          (when (facep 'cursor-read-only)
-           (set-face-attribute 'cursor-read-only nil :background nil :box box)))))
+           (set-face-attribute 'cursor-read-only nil :background 'unspecified :box box)))))
     ('russian
      (setq cursor-type `(bar . ,pro-ui-cursor-bar-width))
      (when (display-graphic-p)

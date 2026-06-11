@@ -620,8 +620,11 @@ divided into `pro-buffer-banner-fade-steps' steps."
        (message "[pro-buffer-banner] show failed: %S" err)
        (pro-buffer-banner--destroy)))))
 
-(defun pro-buffer-banner--maybe-show ()
-  "Watcher invoked from `post-command-hook'. Show the banner on change."
+(defun pro-buffer-banner--maybe-show (&optional _frame)
+  "Watcher invoked from `post-command-hook' / `window-selection-change-functions'.
+Show the banner on buffer/window change.  _FRAME is ignored — it is passed by
+`window-selection-change-functions' but the function determines the target
+window dynamically via `selected-window'."
   (when (and pro-buffer-banner-enable
              (display-graphic-p)
              (not noninteractive))

@@ -27,6 +27,12 @@ stdenv.mkDerivation rec {
     mkdir -p $out/share/emacs/site-lisp
     cp *.el  $out/share/emacs/site-lisp/
     cp *.elc $out/share/emacs/site-lisp/ 2>/dev/null || true
+    # Install etc/ (langs, icons, etc.) alongside the .el files so that
+    # `telega-etc-file` can find them relative to `telega--lib-directory`.
+    # telega-i18n.el:80 reads `etc/langs/<lang>.plist` via `telega-etc-file`.
+    if [ -d etc ]; then
+      cp -r etc $out/share/emacs/site-lisp/
+    fi
     runHook postInstall
   '';
 

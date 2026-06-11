@@ -400,8 +400,13 @@ Race-condition защита: пока `exwm-manage-finish-hook' не присв�
 Tries several hooks to ensure EXWM starts before user-visible frames are
 displayed while still having required packages and display variables set.
 If the session isn't EXWM, this becomes a no-op.
+
+Guards against double init: the function is registered on three hooks
+(`early-window-setup-hook`, `window-setup-hook`, `emacs-startup-hook`)
+and the first one that fires starts EXWM; subsequent calls are no-ops.
 "
-  (when (pro-exwm--session-p)
+  (when (and (pro-exwm--session-p)
+             (not (and (boundp 'exwm-wm-mode) exwm-wm-mode)))
     (pro-exwm-start-session)))
 
 ;; Try early hooks in order: early-window-setup (if present), window-setup,

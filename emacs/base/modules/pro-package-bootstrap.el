@@ -6,13 +6,19 @@
   '(gptel agent-shell agent-shell-hud magit consult vertico orderless marginalia corfu which-key
     rainbow-delimiters embark embark-consult nerd-icons nerd-icons-completion
     nerd-icons-ibuffer all-the-icons all-the-icons-completion all-the-icons-dired
-    consult-projectile pro-fix-corfu http-server)
+    consult-projectile pro-fix-corfu)
   "Список пакетов, которые желательно установить в свежей конфигурации.
 
 Этот список служит ориентиром для быстрой установки базового набора
 функциональности. Он может быть расширен пользователем в локальном
 manifest'е или управляемой политике Nix. Здесь перечислены символы
-пакетов (символы Emacs Lisp), а не имена файлов." )
+пакетов (символы Emacs Lisp), а не имена файлов.
+
+`http-server' намеренно отсутствует: он поставляется через Nix-рецепт
+(`nix/emacs-recipes/http-server.nix') как propagatedInput для `emcp' и
+недоступен в MELPA/ELPA. Если Nix-пакет не подключён — agent-shell-hud
+и emcp будут ругаться на отсутствующий `http-server' feature; решение —
+добавить `http-server' в `pro.emacs.providedPackages'." )
 
  (defun pro-package-bootstrap-install-targets ()
   "Установить пакеты из `pro-package-bootstrap-targets', если их нет.

@@ -1,4 +1,4 @@
-{ stdenv, emacs, lib }:
+{ stdenv, emacs, lib, http-server }:
 
 stdenv.mkDerivation rec {
   pname = "emcp";
@@ -15,6 +15,10 @@ stdenv.mkDerivation rec {
     mkdir -p $out/share/emacs/site-lisp/${pname}
     cp ./*.el $out/share/emacs/site-lisp/${pname}/
   '';
+  # http-server.el is a hard runtime dep — emcp.el does
+  # `(require 'http-server)' at top level. Propagate so the user does
+  # not have to declare it in their profile.
+  propagatedInputs = [ http-server ];
   meta = with lib; {
     description = "EMCP — MCP server that lets an LLM agent talk to Emacs";
     homepage = "https://codeberg.org/martenlienen/emcp";
