@@ -6,7 +6,7 @@
   '(gptel agent-shell agent-shell-hud magit consult vertico orderless marginalia corfu which-key
     rainbow-delimiters embark embark-consult nerd-icons nerd-icons-completion
     nerd-icons-ibuffer all-the-icons all-the-icons-completion all-the-icons-dired
-    consult-projectile pro-fix-corfu)
+    consult-projectile pro-fix-corfu http-server)
   "Список пакетов, которые желательно установить в свежей конфигурации.
 
 Этот список служит ориентиром для быстрой установки базового набора
