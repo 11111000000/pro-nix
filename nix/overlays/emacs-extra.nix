@@ -37,13 +37,12 @@ let
   # Local recipes — always applied
   # Все sources идут из submodules/ — единый источник истины.
   # helper-switch.sh автоматически подтягивает свежий main/master перед сборкой.
+  #
+  # buffer-move: НЕ определяется здесь — `pkgs.emacsPackages.buffer-move` уже
+  # доступен в nixpkgs 25.11. Раньше мы переопределяли его через
+  # `emacsPackageFromRepository`, но в новых nixpkgs эта функция удалена,
+  # и весь `localRecipes` падал. Берём апстрим-версию напрямую.
   localRecipes = {
-    buffer-move = super.emacsPackages.emacsPackageFromRepository {
-      pname = "buffer-move";
-      repository = "lukhas/buffer-move";
-      revision = "master";
-      version = "0.6.2";
-    };
     pro-tabs = super.callPackage ../emacs-recipes/pro-tabs.nix {
       all-the-icons = super.emacsPackages.all-the-icons or null;
     };
