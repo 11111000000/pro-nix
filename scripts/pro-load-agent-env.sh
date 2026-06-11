@@ -5,6 +5,18 @@
 # the following variables when present, so opencode/pi/gptel can pick
 # them up via their env-var-aware config fields:
 #
+#   machine api.aitunnel.ru  login token ...     → AITUNNEL_KEY
+#                                                 + AITUNNEL_API_KEY
+#   machine openrouter.ai     login token ...     → OPENROUTER_KEY
+#                                                 + OPENROUTER_API_KEY
+#   machine api.openai.com    login openai ...    → OPENAI_API_KEY
+#   machine api.mistral.ai    login token ...     → MISTRAL_API_KEY
+#                                                 + MISTRAL_API_KEY
+#   machine api.minimax.io    login token ...     → MINIMAX_API_KEY
+#                                                 + MINIMAX_KEY
+#   machine api.deepseek.com  login token ...     → DEEPSEEK_API_KEY
+#                                                 + DEEPSEEK_KEY
+#
 #   machine api.aitunnel.ru login token ...     → AITUNNEL_KEY
 #                                                + AITUNNEL_API_KEY
 #   machine openrouter.ai    login token ...     → OPENROUTER_KEY
@@ -46,11 +58,13 @@ declare -A _pro_agent_targets=(
   ["openrouter.ai:token"]="OPENROUTER_KEY OPENROUTER_API_KEY"
   ["api.openai.com:openai"]="OPENAI_API_KEY"
   ["api.mistral.ai:token"]="MISTRAL_API_KEY MISTRAL_API_KEY"
+  ["api.minimax.io:token"]="MINIMAX_API_KEY MINIMAX_KEY"
+  ["api.deepseek.com:token"]="DEEPSEEK_API_KEY DEEPSEEK_KEY"
 )
 
 # Parse authinfo: each non-comment, non-blank line is a sequence of
 # key value pairs (machine HOST login USER password PASS ...).
-while IFS= read -r line; do
+while IFS= read -r line || [ -n "$line" ]; do
   case "$line" in
     \#* | '') continue ;;
   esac
