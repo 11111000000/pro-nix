@@ -6,9 +6,18 @@
 #
 # Цель:
 #   Включить /etc/avahi/services/ssh.service (уже делает pro-peer) +
-#   nss-mdns, чтобы `getent hosts desktop.local` отдавал LAN-IP. Дополнить
-#   systemd-resolved: MulticastDNS=yes, когда он используется.
+#   nss-mdns, чтобы `getent hosts desktop.local` отдавал LAN-IP.
 #   Это самый дешёвый способ обеспечить `ssh host.local` внутри одной сети.
+#
+#   ВАЖНО: на одном хосте должен быть только ОДИН mDNS-стек. Когда параллельно
+#   работают avahi-daemon и systemd-resolved с MulticastDNS=yes, RFC 6762 § 15
+#   описывает конфликт: avahi обнаруживает «another mDNS stack» (видно в journal
+#   предупреждение) и уходит в режим удержания — перестаёт публиковать DNS-SD
+#   записи (SMB, SSH, NFS), а resolved не умеет DNS-SD и отвечает только на
+#   простые .local A/AAAA. Симптом: ping host.local работает, а avahi-browse
+#   -rt _smb._tcp пусто, и SMB-discovery в файловом менеджере не находит шары.
+#   Поэтому resolved здесь оставляем с MulticastDNS=no (дефолт), а mDNS/DNS-SD
+#   целиком на avahi.
 #
 # Контракт:
 #   Опции:
@@ -16,7 +25,7 @@
 #     pro.network.allowSubnetRouter — bool (default false), включает IP
 #       forwarding и NAT, нужно для хостов с ролью `lan-gw`.
 #   Побочные эффекты: opens 5353/udp (если включён firewall), ставит пакет
-#     `nss-mdns` в профиль, дописывает MulticastDNS в resolved extra.
+#     `nss-mdns` в профиль, чтобы glibc NSS-плагин через avahi работал.
 #
 # Как проверить (Proof):
 #   `getent hosts desktop.local` — должен вернуть LAN-IP.
@@ -33,7 +42,7 @@ in
 
 {
   options.pro.network = {
-    useMdns = mkEnableOption "Enable Avahi mDNS + NSS + resolved MulticastDNS" // { default = true; };
+    useMdns = mkEnableOption "Enable Avahi mDNS + NSS (resolved оставляем с MulticastDNS=no)" // { default = true; };
     allowSubnetRouter = mkOption {
       type = types.bool;
       default = isLanGw;
@@ -66,20 +75,15 @@ in
       # рекламирует, но NSS не спрашивает.
       environment.systemPackages = with pkgs; [ nssmdns ];
 
-      # Резолв через systemd-resolved, когда он включён: добавляем
-      # MulticastDNS=yes в extraConfig. `services.resolved.extraConfig` — это
-      # `separatedString` (sep = "\n"), так что несколько присваиваний склеиваются
-      # через перевод строки. Используем lib.mkAfter, чтобы host-local override
-      # (например, conf/resolved-extra.conf на desktop) имел приоритет выше,
-      # а наши MulticastDNS-строки попадали в хвост — там, где их никто
-      # не переопределит.
+      # systemd-resolved НЕ включаем в mDNS — этим занимается avahi (см. шапку
+      # файла). Если хост всё-таки хочет resolved+MulticastDNS=yes (например,
+      # чтобы systemd-resolved был единственным mDNS-стеком и avahi выключен),
+      # пусть он задаёт services.resolved.extraConfig и services.avahi.enable
+      # локально. На уровне pro-nix — один стек, avahi.
+      #
       # NB: LLMNR здесь намеренно НЕ задаём — `services.resolved.llmnr`
       # управляет тем же ключом через отдельный enum-тип. Хосты, где
       # LLMNR должен быть выключен, переопределяют опцию напрямую.
-      services.resolved.extraConfig = lib.mkIf config.services.resolved.enable (lib.mkAfter ''
-        [Resolve]
-        MulticastDNS=yes
-      '');
 
       # Firewall: 5353/udp для mDNS. lib.mkDefault — хосты могут отключить
       # порт при отсутствии LAN-сети.
