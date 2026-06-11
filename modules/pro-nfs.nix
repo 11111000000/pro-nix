@@ -137,7 +137,7 @@ in
       # server is unavailable. This prevents activation scripts from failing
       # when they try to inspect/reload the unit during `switch`.
       systemd.mounts = lib.mkIf cfg.client.enable [ {
-        name = "mnt-desktop";
+        name = "mnt-desktop.mount";
         what = "${cfg.client.server}.local:${cfg.client.remotePath}";
         where = cfg.client.mountPoint;
         mountConfig = {
