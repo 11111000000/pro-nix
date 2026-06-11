@@ -133,11 +133,13 @@ in
       # declare it via `systemd.automounts."mnt-desktop"` in NixOS instead
       # of fstab, so the unit comes from a managed declaration rather
       # than the fstab generator.
-      fileSystems.${cfg.client.mountPoint} = {
-        device = "${cfg.client.server}.local:${cfg.client.remotePath}";
-        fsType = "nfs";
-        options = [
-          "noauto"
+      # Explicit systemd mount unit so the unit exists even if the remote
+      # server is unavailable. This prevents activation scripts from failing
+      # when they try to inspect/reload the unit during `switch`.
+      systemd.mounts."mnt-desktop" = {
+        what = "${cfg.client.server}.local:${cfg.client.remotePath}";
+        where = cfg.client.mountPoint;
+        options = lib.concatStringsSep ":" [
           "vers=4.2"
           "rsize=1048576"
           "wsize=1048576"
@@ -145,12 +147,11 @@ in
           "timeo=10"
           "retrans=1"
           "_netdev"
-          "x-systemd.requires=network-online.target"
-          "x-systemd.idle-timeout=60"
-          "x-systemd.mount-timeout=3"
           "nofail"
           "noatime"
         ];
+        # Do not enable an automount here; we keep manual mounting semantics.
+        wantedBy = [ "multi-user.target" ];
       };
 
       # nfs-utils для showmount, mountstats и т.п.
