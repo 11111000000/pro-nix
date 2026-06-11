@@ -252,6 +252,16 @@ GDM может добавлять префикс \='none+' к имени сес�
 (defvar pro-exwm-urxvt--id nil
   "X11 window id of the toggled urxvt sidebar, or nil if not running.")
 
+(defvar pro-exwm-urxvt--pid nil
+  "PID of the toggled urxvt sidebar process, or nil if not running.
+Хранится для надёжного закрытия: xdotool windowclose может быть
+перехвачен EXWM, а delete-process по известному PID — нет.")
+
+(defvar pro-exwm-urxvt--pending nil
+  "Non-nil если urxvt был заспавнен, но exwm-manage-finish-hook ещё не
+присвоил id. Защищает от race condition: повторный C-M-\` пока hook не
+сработал — noop, а не второй spawn.")
+
 (defvar pro-exwm-urxvt--program "urxvt"
   "Program used by `pro/exwm-urxvt-toggle' to spawn the urxvt sidebar.")
 
@@ -299,7 +309,8 @@ GDM может добавлять префикс \='none+' к имени сес�
   (when (and (boundp 'exwm-class-name) (string= exwm-class-name "URxvt")
              (boundp 'exwm-title) (string= exwm-title "pro-urxvt-sidebar")
              (boundp 'exwm-id) (integerp exwm-id))
-    (setq pro-exwm-urxvt--id exwm-id)
+    (setq pro-exwm-urxvt--id exwm-id
+          pro-exwm-urxvt--pending nil)
     ;; Defer the move/resize a tick: the window may not be mapped yet
     ;; when `exwm-manage-finish-hook' fires.
     (run-with-timer 0.05 nil
@@ -311,30 +322,70 @@ GDM может добавлять префикс \='none+' к имени сес�
              (not (memq #'pro-exwm-urxvt--on-manage exwm-manage-finish-hook)))
     (add-hook 'exwm-manage-finish-hook #'pro-exwm-urxvt--on-manage)))
 
+(defun pro-exwm-urxvt--pid-alive-p (pid)
+  "Non-nil если процесс с PID жив (signal 0 не вернул ESRCH)."
+  (and (integerp pid) (> pid 0)
+       (zerop (call-process "sh" nil nil nil "-c"
+                            (format "kill -0 %d 2>/dev/null" pid)))))
+
 (defun pro/exwm-urxvt-toggle ()
   "Toggle the urxvt bottom sidebar in EXWM.
 First call: spawns `urxvt' (`-name pro-urxvt-sidebar -title pro-urxvt-sidebar')
 and positions it as a 40% bottom sidebar.
 Second call: closes the running X client and clears state.
-No-op outside EXWM."
+No-op outside EXWM.
+
+Race-condition защита: пока `exwm-manage-finish-hook' не присвоил
+`pro-exwm-urxvt--id', повторный C-M-\` — noop (см. `pro-exwm-urxvt--pending').
+Закрытие: предпочитаем `delete-process' по известному PID
+(надёжнее xdotool windowclose для EXWM-управляемых окон)."
   (interactive)
   (unless (and (fboundp 'exwm-wm-mode) exwm-wm-mode)
     (user-error "pro/exwm-urxvt-toggle: EXWM is not running"))
   (let* ((id pro-exwm-urxvt--id)
-         (hex (and id (format "0x%x" id)))
-         (still-there (and hex
-                           (pro-exwm-urxvt--run-xdotool "getwindowname" hex))))
-    (if still-there
-        (progn
-          (pro-exwm-urxvt--run-xdotool "windowclose" hex)
-          (setq pro-exwm-urxvt--id nil)
-          (message "[pro-exwm] urxvt sidebar closed"))
-      (setq pro-exwm-urxvt--id nil)
-      (start-process-shell-command
-       "pro-urxvt-sidebar" nil
-       (concat pro-exwm-urxvt--program
-               " -name pro-urxvt-sidebar -title pro-urxvt-sidebar"))
-      (message "[pro-exwm] urxvt sidebar spawned"))))
+         (pid pro-exwm-urxvt--pid)
+         (pid-alive (pro-exwm-urxvt--pid-alive-p pid)))
+    (cond
+     ;; Процесс жив (и наш id/pid валидны) → закрыть
+     (pid-alive
+      (condition-case nil
+          (progn
+            (signal-process pid 'SIGTERM)
+            ;; SIGTERM может игнорироваться — fallback на SIGKILL через 0.2s
+            (run-with-timer 0.2 nil
+                            (lambda ()
+                              (when (pro-exwm-urxvt--pid-alive-p pid)
+                                (signal-process pid 'SIGKILL)))))
+        (error nil))
+      (setq pro-exwm-urxvt--id nil
+            pro-exwm-urxvt--pid nil
+            pro-exwm-urxvt--pending nil)
+      (message "[pro-exwm] urxvt sidebar closed (pid=%d)" pid))
+     ;; Недавно спавнили и ждём manage hook → noop
+     (pro-exwm-urxvt--pending
+      (message "[pro-exwm] urxvt sidebar pending (waiting for EXWM hook)"))
+     ;; Ничего нет → спавнить
+     (t
+      (setq pro-exwm-urxvt--id nil
+            pro-exwm-urxvt--pid nil
+            pro-exwm-urxvt--pending t)
+      (let ((proc (start-process
+                   "pro-urxvt-sidebar" nil
+                   pro-exwm-urxvt--program
+                   "-name" "pro-urxvt-sidebar"
+                   "-title" "pro-urxvt-sidebar")))
+        (when (processp proc)
+          (setq pro-exwm-urxvt--pid (process-id proc))
+          ;; Если процесс сам упал до manage hook — сбрасываем pending
+          (set-process-sentinel
+           proc
+           (lambda (_p _event)
+             (when (eq (process-status proc) 'exit)
+               (setq pro-exwm-urxvt--id nil
+                     pro-exwm-urxvt--pid nil
+                     pro-exwm-urxvt--pending nil)))))
+        (message "[pro-exwm] urxvt sidebar spawned (pid=%s)"
+                 (if (processp proc) (process-id proc) "?")))))))
 
 ;; ── Init hooks ───────────────────────────────────────────────────────────
 ;;
