@@ -76,14 +76,22 @@ in
       environment.systemPackages = with pkgs; [ nssmdns ];
 
       # systemd-resolved НЕ включаем в mDNS — этим занимается avahi (см. шапку
-      # файла). Если хост всё-таки хочет resolved+MulticastDNS=yes (например,
-      # чтобы systemd-resolved был единственным mDNS-стеком и avahi выключен),
-      # пусть он задаёт services.resolved.extraConfig и services.avahi.enable
-      # локально. На уровне pro-nix — один стек, avahi.
+      # файла). systemd-resolved по умолчанию включает MulticastDNS=yes (default
+      # в systemd), а не в conf-файле NixOS. Чтобы реально отключить, нужно
+      # явно прописать MulticastDNS=no в extraConfig (тогда conf-файл получит
+      # строку и перекроет default).
       #
-      # NB: LLMNR здесь намеренно НЕ задаём — `services.resolved.llmnr`
-      # управляет тем же ключом через отдельный enum-тип. Хосты, где
-      # LLMNR должен быть выключен, переопределяют опцию напрямую.
+      # nb: LLMNR — отдельный enum, им управляет `services.resolved.llmnr`;
+      # на хостах, где LLMNR выключен (например, desktop), этот extraConfig
+      # дополнительно подтверждает no. На тех, где LLMNR включён — extraConfig
+      # с LLMNR=no перекроет (lib.mkAfter в resolved.conf шаблоне ниже).
+      # Поэтому: MulticastDNS=no + LLMNR=no — глобальная политика pro-nix,
+      # хост может переопределить через services.resolved.extraConfig c
+      # lib.mkBefore, если ему нужен LLMNR.
+      services.resolved.extraConfig = lib.mkIf config.services.resolved.enable (lib.mkAfter ''
+        MulticastDNS=no
+        LLMNR=no
+      '');
 
       # Firewall: 5353/udp для mDNS. lib.mkDefault — хосты могут отключить
       # порт при отсутствии LAN-сети.
