@@ -51,10 +51,12 @@ let
     fi
   '') templateFiles;
 
-  # Source the loader from .bashrc so opencode/pi/gptel see AITUNNEL_KEY etc.
-  bashrcMarker = "# pro-nix: load AI provider keys from authinfo";
-  bashrcSnippet = ''
-    ${bashrcMarker}
+  # Source the loader from .profile so opencode/pi/gptel see AITUNNEL_KEY etc.
+  # In NixOS the relevant user-level RC file is ~/.profile (no ~/.bashrc by default),
+  # which is read by login shells and by graphical sessions sourcing it via PAM.
+  profileMarker = "# pro-nix: load AI provider keys from authinfo";
+  profileSnippet = ''
+    ${profileMarker}
     [ -f "$HOME/.local/share/pro-nix/load-agent-env.sh" ] && . "$HOME/.local/share/pro-nix/load-agent-env.sh"
   '';
 in
@@ -70,7 +72,7 @@ in
       type = lib.types.bool;
       default = true;
       description = ''
-        If true, ensure ~/.bashrc sources the authinfo→env loader script.
+        If true, ensure ~/.profile sources the authinfo→env loader script.
         Idempotent: existing marker comment is detected and skipped.
       '';
     };
@@ -90,14 +92,20 @@ in
       ${copyIfMissingLines}
     '';
 
-    # Activation: append a source line to ~/.bashrc (idempotent).
+    # Activation: append a source line to ~/.profile (idempotent).
     home.activation.pro-agent-configs-bashrc = lib.mkIf cfg.manageBashrc ''
       #!/bin/sh -e
-      bashrc="$HOME/.bashrc"
-      marker=${lib.escapeShellArg bashrcMarker}
-      if [ -f "$bashrc" ] && ! grep -qF "$marker" "$bashrc"; then
-        printf '\n%s\n' ${lib.escapeShellArg bashrcSnippet} >> "$bashrc"
-        echo "[pro-agent-configs] appended env-loader source line to $bashrc"
+      rcfile="$HOME/.profile"
+      marker=${lib.escapeShellArg profileMarker}
+      if [ -f "$rcfile" ] && ! grep -qF "$marker" "$rcfile"; then
+        printf '\n%s\n' ${lib.escapeShellArg profileSnippet} >> "$rcfile"
+        echo "[pro-agent-configs] appended env-loader source line to $rcfile"
+      elif [ ! -f "$rcfile" ]; then
+        # Create a minimal ~/.profile that sources the loader.
+        mkdir -p "$HOME"
+        printf '%s\n' ${lib.escapeShellArg profileSnippet} > "$rcfile"
+        chmod 0644 "$rcfile"
+        echo "[pro-agent-configs] created $rcfile with env-loader source line"
       fi
     '';
   };
