@@ -1,7 +1,7 @@
 ;;; pro-windows.el --- Window and buffer management helpers -*- lexical-binding: t; -*-
 ;; Lightweight, opt-in configuration for window management: winner-mode, windmove,
-;; buf-move, golden-ratio and ace-window integrations. Does NOT set global keybindings;
-;; recommended keys go to emacs-keys.org.
+;; buffer-move, golden-ratio and ace-window integrations. Does NOT set global
+;; keybindings; recommended keys go to emacs-keys.org.
 
 (defgroup pro-windows nil
   "Window and buffer management helpers for pro." :group 'pro)
@@ -20,47 +20,29 @@
     ;; do not call windmove-default-keybindings to avoid setting global keys; ensure functions exist
     (ignore (boundp 'windmove-left)))
 
-  ;; buf-move: built-in buffer-swap helpers on top of `windmove'.
-  ;; No external package: the four interactive commands are defined below.
-  ;; Key bindings (s-H/J/K/L in the EXWM input map) live in emacs-keys.org.
-  (defun pro-windows--buf-snapshot (window)
-    "Capture WINDOW's buffer-related state for later restoration."
-    (list (window-buffer window)
-          (window-start window)
-          (window-hscroll window)
-          (window-point window)))
-  (defun pro-windows--buf-restore (window snapshot)
-    "Restore WINDOW from a SNAPSHOT produced by `pro-windows--buf-snapshot'."
-    (set-window-buffer window (nth 0 snapshot))
-    (set-window-start   window (nth 1 snapshot))
-    (set-window-hscroll window (nth 2 snapshot))
-    (set-window-point   window (nth 3 snapshot)))
-  (defun pro-windows--buf-move-to (direction)
-    "Swap the current window's buffer with the neighbour window in DIRECTION.
-DIRECTION is one of `up', `down', `left', `right' (a `windmove' direction).
-Signal an error if no neighbour exists, or the target window is
-dedicated or is the minibuffer."
-    (let* ((this-window (selected-window))
-           (other-window (windmove-find-other-window direction))
-           (this-snapshot (pro-windows--buf-snapshot this-window)))
-      (cond
-       ((null other-window)                (user-error "No window %s of the current one" direction))
-       ((window-dedicated-p other-window) (user-error "Window %s of the current one is dedicated" direction))
-       ((window-minibuffer-p other-window)(user-error "Window %s of the current one is the minibuffer" direction)))
-      (pro-windows--buf-restore this-window  (pro-windows--buf-snapshot other-window))
-      (pro-windows--buf-restore other-window this-snapshot)
-      (select-window other-window)))
-  (defun pro-windows-buf-move-up    () (interactive) (pro-windows--buf-move-to 'up))
-  (defun pro-windows-buf-move-down  () (interactive) (pro-windows--buf-move-to 'down))
-  (defun pro-windows-buf-move-left  () (interactive) (pro-windows--buf-move-to 'left))
-  (defun pro-windows-buf-move-right () (interactive) (pro-windows--buf-move-to 'right))
+  ;; buffer-move: external package providing `buf-move-up/down/left/right' —
+  ;; swap (or move, when no neighbour) the current window's buffer with the
+  ;; neighbour in the given direction. Key bindings (s-h/j/k/l for focus,
+  ;; s-H/J/K/L for buffer-swap) live in emacs-keys.org.
+  (when (require 'buffer-move nil t)
+    ;; Stay in the original window after a swap so the next `buf-move-*'
+    ;; operates on the buffer we just moved, not the one we received.
+    (setq buffer-move-stay-after-swap t))
 
-  ;; Golden ratio: optional cosmetic window sizing
+  ;; Golden ratio: optional smart window sizing.
+  ;;
+  ;; `golden-ratio-mode' watches window/buffer changes and resizes the focused
+  ;; window toward φ ≈ 0.618 of the frame.  It composes naturally with
+  ;; manual `balance-windows' / per-window `golden-ratio' calls (those are
+  ;; idempotent — the next focus change re-applies the ratio).
   (when (require 'golden-ratio nil t)
-    ;; configure conservative defaults
+    ;; Conservative defaults: only resize on user actions, never pop up.
     (setq golden-ratio-adjust-factor 1.0)
     (setq golden-ratio-wide-adjust-factor 1.0)
-    (when (fboundp 'golden-ratio-mode) (golden-ratio-mode 1)))
+    (setq golden-ratio-auto-scale 0)
+    (setq golden-ratio-exclude-modes '(dired-mode magit-mode vterm-mode))
+    (when (fboundp 'golden-ratio-mode)
+      (golden-ratio-mode 1)))
 
   ;; ace-window: optional fast window selection (no keys set here)
   (when (require 'ace-window nil t)
@@ -114,15 +96,35 @@ dedicated or is the minibuffer."
   (setq multi-vterm-dedicated-window-height-percent 43))
 
 ;; --- Window resize (C-x + / C-x -) ---------------------------------------
+;;
+;; Three levels, with golden-ratio as the smart top tier:
+;;
+;;   C-x + (pro-windows-enlarge)   — подогнать текущее окно по золотому сечению
+;;                                  (если пакет `golden-ratio' доступен; иначе
+;;                                   fallback к `enlarge-window 4').
+;;   C-x - (pro-windows-shrink)    — выровнять все окна поровну
+;;                                  (`balance-windows'; иначе `shrink-window 4').
+;;   C-x = (pro-windows-balance)   — выровнять + применить golden-ratio.
+;;
+;; Bиндинги — в emacs-keys.org.
+
 (defun pro-windows-enlarge ()
-  "Увеличить текущее окно на 4 строки (вертикально)."
+  "Подогнать текущее окно по золотому сечению (golden-ratio).
+Fallback: enlarge-window 4, если пакет `golden-ratio' не загружен.
+Биндинг: C-x + (см. emacs-keys.org)."
   (interactive)
-  (enlarge-window 4))
+  (if (fboundp 'golden-ratio)
+      (golden-ratio)
+    (enlarge-window 4)))
 
 (defun pro-windows-shrink ()
-  "Уменьшить текущее окно на 4 строки (вертикально)."
+  "Выровнять все окна поровну (`balance-windows').
+Fallback: shrink-window 4, если golden-ratio-mode не активен.
+Биндинг: C-x - (см. emacs-keys.org)."
   (interactive)
-  (shrink-window 4))
+  (if (and (boundp 'golden-ratio-mode) golden-ratio-mode)
+      (balance-windows)
+    (shrink-window 4)))
 
 ;; --- Window balance (C-x =) ----------------------------------------------
 ;; Поведение в духе golden-ratio:

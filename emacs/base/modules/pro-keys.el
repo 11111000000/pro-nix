@@ -197,6 +197,7 @@
                 ((memq sym '(undo-tree-visualize)) (ignore-errors (require 'undo-tree nil t)))
                 ((memq sym '(cape-dict cape-line)) (ignore-errors (require 'cape nil t)))
                  ((memq sym '(exwm-reset exwm-workspace-switch)) (when (display-graphic-p) (ignore-errors (require 'exwm nil t))))
+                ((memq sym '(buf-move-up buf-move-down buf-move-left buf-move-right)) (ignore-errors (require 'buffer-move nil t)))
                   ((memq sym '(goto-last-change goto-last-change-reverse)) (ignore-errors (require 'goto-chg nil t)))
                  ((memq sym '(pro/chat-open pro/chat-close-idle-chats pro/chat-reload-emojis pro/chat-install)) (ignore-errors (require 'pro-chat nil t)))
                  ((memq sym '(pro/vterm-yank pro/vterm-interrupt pro/vterm-copy-mode)) (ignore-errors (require 'pro-terminals nil t)))
