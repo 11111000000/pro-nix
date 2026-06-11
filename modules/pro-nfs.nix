@@ -113,7 +113,7 @@ in
     (lib.mkIf cfg.client.enable {
 
       # Mount: NFSv4.2, soft (не зависаем при обрыве), _netdev (ждём сети),
-      # x-systemd.automount (монтируем по обращению), noatime (меньше IO).
+      # noatime (меньше IO).
       #
       # Таймауты — минимальные, чтобы `opendir(/mnt/desktop)` возвращал
       # ошибку через ~3 с, а не через 25+ с:
@@ -122,8 +122,17 @@ in
       #   x-systemd.mount-timeout=3 — жёсткий лимит systemd на mount-юнит
       #   nofail        — не блокировать загрузку, если шари нет
       #   nobootwait    — то же самое, при `bg`-режиме systemd-fstab-generator
-      # Note: do not set non-existent `services.nfs.client` option; only
-      # declare the filesystem mount which is a valid NixOS option.
+      #
+      # NB: we deliberately do NOT set `x-systemd.automount`. With that
+      # option, systemd-fstab-generator emits an *automount* unit (named
+      # `mnt-desktop.automount`) that systemd tries to `reload` on every
+      # `nixos-rebuild switch` whenever `/etc` changes. Automount units
+      # have `CanReload=no`, so the reload fails and the entire switch
+      # exits with code 4. A plain `mount` unit reloads fine. If we ever
+      # want on-demand mounting (lazy mount on first access), we should
+      # declare it via `systemd.automounts."mnt-desktop"` in NixOS instead
+      # of fstab, so the unit comes from a managed declaration rather
+      # than the fstab generator.
       fileSystems.${cfg.client.mountPoint} = {
         device = "${cfg.client.server}.local:${cfg.client.remotePath}";
         fsType = "nfs";
@@ -135,7 +144,6 @@ in
           "timeo=10"
           "retrans=1"
           "_netdev"
-          "x-systemd.automount"
           "x-systemd.requires=network-online.target"
           "x-systemd.idle-timeout=60"
           "x-systemd.mount-timeout=3"
