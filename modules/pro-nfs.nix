@@ -136,23 +136,27 @@ in
       # Explicit systemd mount unit so the unit exists even if the remote
       # server is unavailable. This prevents activation scripts from failing
       # when they try to inspect/reload the unit during `switch`.
-      systemd.mounts."mnt-desktop" = {
+      systemd.mounts = lib.mkIf cfg.client.enable [ {
+        name = "mnt-desktop";
         what = "${cfg.client.server}.local:${cfg.client.remotePath}";
         where = cfg.client.mountPoint;
-        options = lib.concatStringsSep ":" [
-          "vers=4.2"
-          "rsize=1048576"
-          "wsize=1048576"
-          "soft"
-          "timeo=10"
-          "retrans=1"
-          "_netdev"
-          "nofail"
-          "noatime"
-        ];
-        # Do not enable an automount here; we keep manual mounting semantics.
-        wantedBy = [ "multi-user.target" ];
-      };
+        mountConfig = {
+          Options = [
+            "vers=4.2"
+            "rsize=1048576"
+            "wsize=1048576"
+            "soft"
+            "timeo=10"
+            "retrans=1"
+            "_netdev"
+            "nofail"
+            "noatime"
+          ];
+        };
+        unitConfig = {
+          WantedBy = [ "multi-user.target" ];
+        };
+      } ];
 
       # nfs-utils для showmount, mountstats и т.п.
       environment.systemPackages = with pkgs; [ nfs-utils ];
