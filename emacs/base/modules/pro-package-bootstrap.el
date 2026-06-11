@@ -3,7 +3,7 @@
 
 (require 'package)
 (defconst pro-package-bootstrap-targets
-  '(gptel agent-shell magit consult vertico orderless marginalia corfu which-key
+  '(gptel agent-shell agent-shell-hud magit consult vertico orderless marginalia corfu which-key
     rainbow-delimiters embark embark-consult nerd-icons nerd-icons-completion
     nerd-icons-ibuffer all-the-icons all-the-icons-completion all-the-icons-dired
     consult-projectile pro-fix-corfu)
