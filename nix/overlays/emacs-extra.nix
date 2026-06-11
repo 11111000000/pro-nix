@@ -43,6 +43,20 @@ let
   # `emacsPackageFromRepository`, но в новых nixpkgs эта функция удалена,
   # и весь `localRecipes` падал. Берём апстрим-версию напрямую.
   localRecipes = {
+    # visual-fill-column: upstream-рецепт в nixpkgs запинен на
+    # codeberg.org/joostkremers/visual-fill-column@a38e3a28 — коммит
+    # больше недоступен (HTTP 404), Nix по кругу перебирает NIX_MIRRORS_*.
+    # Переопределяем source на GitHub-mirror (HEAD: 577fd2d, синхронизирован
+    # с codeberg). Остальные attrs (meta, propagatedInputs, recipe) берём
+    # из апстрима через overrideAttrs.
+    visual-fill-column = super.emacsPackages.visual-fill-column.overrideAttrs (_: {
+      src = super.fetchFromGitHub {
+        owner = "joostkremers";
+        repo = "visual-fill-column";
+        rev = "577fd2d285f4830fd85b17c2ded74a91dba9d522";
+        hash = "sha256-HG06pGehmxUDhDex639bG7rGkGrXCdNyzeWxPTbX9Nw=";
+      };
+    });
     pro-tabs = super.callPackage ../emacs-recipes/pro-tabs.nix {
       all-the-icons = super.emacsPackages.all-the-icons or null;
     };
