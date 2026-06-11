@@ -83,7 +83,11 @@
 # /srv/syncthing автоматически.
   pro.nfs.server.enable = true;
   pro.nfs.server.exportPath = "/srv/nfs";
-  pro.nfs.client.enable = true;
+  # NB: `pro.nfs.client.enable` намеренно НЕ включаем здесь — desktop
+  # сам себе NFS-сервер, и попытка монитровать `desktop.local:/srv/nfs`
+  # с localhost (адрес клиента = адрес сервера) заканчивается
+  # "No such file or directory" от mountd. NFS-клиент нужен только
+  # на ноутбуках/VM, которые подключаются к этому шаринг-хосту.
 
   # Headscale control plane живёт на desktop (роль `headscale` в pro.hosts).
   # NB: оператор должен подложить TLS-сертификат (или фронт-nginx) и
