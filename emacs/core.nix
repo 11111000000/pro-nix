@@ -38,7 +38,7 @@ in
 
     providedPackages = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [ "magit" "consult" "vertico" "vertico-sort" "orderless" "marginalia" "gptel" "consult-dash" "dash-docs" "consult-eglot" "consult-yasnippet" "corfu" "cape" "kind-icon" "avy" "expand-region" "yasnippet" "projectile" "treemacs" "consult-projectile" "elfeed" "eglot" "rainbow-delimiters" "nix-mode" "markdown-mode" "mmm-mode" "org" "ob-mermaid" "vterm" "multi-vterm" "eshell-toggle" "ace-window" "undo-tree" "haskell-mode" "haskell-snippets" "which-key" "which-key-posframe" "eldoc-box" "keyfreq" "helpful" "popper" "buffer-expose" "embark" "embark-consult" "exwm" "xelb" "agent-shell" "acp" "telega" "transient" "visual-fill-column" "pro-tabs" "goto-chg" ];
+      default = [ "magit" "consult" "vertico" "vertico-sort" "orderless" "marginalia" "gptel" "consult-dash" "dash-docs" "consult-eglot" "consult-yasnippet" "corfu" "cape" "kind-icon" "avy" "expand-region" "yasnippet" "projectile" "treemacs" "consult-projectile" "elfeed" "eglot" "rainbow-delimiters" "nix-mode" "markdown-mode" "mmm-mode" "org" "ob-mermaid" "vterm" "multi-vterm" "eshell-toggle" "ace-window" "undo-tree" "haskell-mode" "haskell-snippets" "which-key" "which-key-posframe" "eldoc-box" "keyfreq" "helpful" "popper" "buffer-expose" "embark" "embark-consult" "exwm" "xelb" "agent-shell" "agent-shell-hud" "acp" "emcp" "telega" "transient" "visual-fill-column" "pro-tabs" "goto-chg" ];
     };
 
     defaultModules = lib.mkOption {
@@ -58,11 +58,42 @@ in
 
     home.packages = hmPackages ++ cfg.extraPackages ++ availableProvidedNix;
 
-    home.sessionVariables = {
+    home.sessionVariables = let
+      # For each provided package, collect every directory under its
+      # share/emacs/site-lisp/ that contains .el files directly. Covers all
+      # three Emacs-package layouts we have in the repo without per-package
+      # special-casing:
+      #   1. flat         — site-lisp/agent-shell-hud.el
+      #   2. local subdir — site-lisp/atlas/atlas.el
+      #   3. nixpkgs elpa — site-lisp/elpa/gptel-20251007.257/gptel.el
+      # Recursion is bounded by directory nesting in the store path (≤ 3 in
+      # practice). readDir is wrapped in tryEval so a missing site-lisp/ in
+      # a derivation does not abort the eval.
+      collectElDirs = path:
+        let exists = (builtins.tryEval (builtins.pathExists path));
+        in if !(exists.success && exists.value) then [ ]
+           else
+             let contents = (builtins.tryEval (builtins.readDir path)); in
+             if !contents.success then [ ]
+             else
+               let
+                 d = contents.value;
+                 names = lib.attrNames d;
+                 hasEl = builtins.any (n: lib.hasSuffix ".el" n) names;
+                 subdirs = lib.filter
+                   (n: (d.${n} or null) == "directory")
+                   names;
+                 recursed = lib.concatMap
+                   (n: collectElDirs "${path}/${n}")
+                   subdirs;
+               in lib.optional hasEl path ++ recursed;
+      pkgLoadPaths = pkg: collectElDirs "${pkg}/share/emacs/site-lisp";
+      allLoadPaths = lib.concatMap pkgLoadPaths availableProvidedNix;
+    in {
       QUOTING_STYLE = "literal";
       LANG = "ru_RU.UTF-8";
       EMACSLOADPATH = lib.concatStringsSep ":" (lib.filter (s: s != "") ([
-        (lib.concatStringsSep ":" (map (pkg: "${pkg}/share/emacs/site-lisp") availableProvidedNix))
+        (lib.concatStringsSep ":" allLoadPaths)
         "${config.home.homeDirectory}/.config/emacs/modules"
       ]));
       PRO_PACKAGES_AUTO_INSTALL = "1";

@@ -14,8 +14,13 @@ stdenv.mkDerivation rec {
   # dontBuild = true.
   dontBuild = true;
   installPhase = ''
-    mkdir -p $out/share/emacs/site-lisp/${pname}
-    cp ./*.el $out/share/emacs/site-lisp/${pname}/
+    # Flat layout (site-lisp/, без поддиректории agent-shell-hud/): совпадает
+    # с тем, что emacs/core.nix кладёт в EMACSLOADPATH (только site-lisp/).
+    # Иначе (require 'agent-shell-hud) и его (require 'agent-shell-hud-i18n)
+    # внутри не находят файлы — Emacs ищет feature.el напрямую в load-path,
+    # а не в поддиректории с тем же именем.
+    mkdir -p $out/share/emacs/site-lisp
+    cp ./*.el $out/share/emacs/site-lisp/
   '';
   meta = with lib; {
     description = "HUD/UI extensions for agent-shell: live status, dashboard menu, i18n, side-window info";
