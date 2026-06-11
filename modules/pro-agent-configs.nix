@@ -17,6 +17,18 @@ let
       src = "local-templates/pi/models.json";
       dst = ".pi/agent/models.json";
     }
+    {
+      src = "local-templates/pi/mcp.json";
+      dst = ".pi/agent/mcp.json";
+    }
+    {
+      src = "local-templates/pi/skills/emacs-emcp/SKILL.md";
+      dst = ".pi/agent/skills/emacs-emcp/SKILL.md";
+    }
+    {
+      src = "local-templates/opencode/skills/emacs-emcp/SKILL.md";
+      dst = ".config/opencode/skills/emacs-emcp/SKILL.md";
+    }
   ];
 
   # Build a list of "if missing, copy" commands.

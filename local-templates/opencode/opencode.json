@@ -124,6 +124,12 @@
       "command": ["npx", "-y", "chrome-devtools-mcp@latest", "--browser-url=http://127.0.0.1:9222"],
       "enabled": true,
       "env": {}
+    },
+    "emcp": {
+      "_comment": "EMCP — MCP-сервер в Emacs. URL должен совпадать с emacs/base/modules/pro-emcp.el:pro-emcp-server-port (default 38913). Профиль `develop` (inspect + get/set-variable + screenshot). `eval` и `send-keys` НЕ включены.",
+      "type": "remote",
+      "url": "http://127.0.0.1:38913/mcp",
+      "enabled": true
     }
   }
 }
