@@ -49,6 +49,7 @@
     # Общие модули формируют общую политику и не зависят от пользовательских настроек.
     ./modules/pro-users.nix
     ./modules/pro-services.nix
+    ./modules/pro-docker.nix
     ./modules/pro-storage.nix
     ./modules/pro-privacy.nix
     ./modules/pro-dev.nix
@@ -69,6 +70,7 @@
     ./modules/pro-hosts.nix
     ./modules/pro-network.nix
     ./modules/pro-ssh-clients.nix
+    ./modules/pro-wifi-watchdog.nix
     # Страховка владения $HOME: чинит ownership dotdirs при активации
     # home-manager, чтобы несколько Unix-аккаунтов на одной машине
     # не ломали деплой шаблонов (см. /home/az/.pi EACCES).

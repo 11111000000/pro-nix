@@ -74,6 +74,10 @@
 | Проекты    | C-c C-p       | projectile-switch-project             | Сменить проект (alias)               |
 | Проекты    | C-c pa        | projectile-add-known-project          | Добавить проект                      |
 | Дерево     | s-d           | treemacs                              | Открыть дерево                       |
+| Docker     | C-c d c       | pro-docker-containers                 | Список контейнеров                   |
+| Docker     | C-c d i       | pro/docker-images                     | Список образов                       |
+| Docker     | C-c d v       | pro/docker-volumes                    | Список томов                         |
+| Docker     | C-c d n       | pro/docker-networks                   | Список сетей                         |
 | Окна       | C-x +         | pro-windows-enlarge                   | Увеличить окно (C-u N — шаг)         |
 | Окна       | C-x -         | pro-windows-shrink                    | Уменьшить окно (C-u N — шаг)         |
 | Окна       | C-x =         | pro-windows-balance                   | balance-windows + golden-ratio (разово) |

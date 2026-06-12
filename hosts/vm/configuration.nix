@@ -3,6 +3,7 @@
 {
   imports = [
     ../../modules/pro-users.nix
+    ../../modules/pro-docker.nix
     ../../modules/pro-nfs.nix
     ../../modules/pro-spellcheck.nix
   ];
