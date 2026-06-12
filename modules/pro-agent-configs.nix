@@ -22,6 +22,10 @@ let
       dst = ".pi/agent/mcp.json";
     }
     {
+      src = "local-templates/pi/settings.json";
+      dst = ".pi/agent/settings.json";
+    }
+    {
       src = "local-templates/pi/skills/emacs-emcp/SKILL.md";
       dst = ".pi/agent/skills/emacs-emcp/SKILL.md";
     }
