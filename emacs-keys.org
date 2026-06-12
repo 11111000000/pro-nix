@@ -74,9 +74,9 @@
 | Проекты    | C-c C-p       | projectile-switch-project             | Сменить проект (alias)               |
 | Проекты    | C-c pa        | projectile-add-known-project          | Добавить проект                      |
 | Дерево     | s-d           | treemacs                              | Открыть дерево                       |
-| Окна       | C-x +         | pro-windows-enlarge                   | Увеличить окно                       |
-| Окна       | C-x -         | pro-windows-shrink                    | Уменьшить окно                       |
-| Окна       | C-x =         | pro-windows-balance                   | Выровнять окна (balance + golden-ratio) |
+| Окна       | C-x +         | pro-windows-enlarge                   | Увеличить окно (C-u N — шаг)         |
+| Окна       | C-x -         | pro-windows-shrink                    | Уменьшить окно (C-u N — шаг)         |
+| Окна       | C-x =         | pro-windows-balance                   | balance-windows + golden-ratio (разово) |
 | Окна       | s-h           | windmove-left                         | Переместить фокус влево              |
 | Окна       | s-j           | windmove-down                         | Переместить фокус вниз               |
 | Окна       | s-k           | windmove-up                           | Переместить фокус вверх              |

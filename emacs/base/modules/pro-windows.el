@@ -29,20 +29,18 @@
     ;; operates on the buffer we just moved, not the one we received.
     (setq buffer-move-stay-after-swap t))
 
-  ;; Golden ratio: optional smart window sizing.
+  ;; Golden ratio: loaded as a library, NOT enabled globally.
   ;;
-  ;; `golden-ratio-mode' watches window/buffer changes and resizes the focused
-  ;; window toward φ ≈ 0.618 of the frame.  It composes naturally with
-  ;; manual `balance-windows' / per-window `golden-ratio' calls (those are
-  ;; idempotent — the next focus change re-applies the ratio).
+  ;; `golden-ratio-mode' watches window/buffer changes and auto-resizes the
+  ;; focused window toward φ ≈ 0.618 on every focus change — that is
+  ;; intrusive when you only want to resize on demand.  We keep the package
+  ;; available so `golden-ratio' (one-shot) and `golden-ratio-adjust' (manual
+  ;; tweak) can be called from explicit bindings below.
   (when (require 'golden-ratio nil t)
-    ;; Conservative defaults: only resize on user actions, never pop up.
     (setq golden-ratio-adjust-factor 1.0)
     (setq golden-ratio-wide-adjust-factor 1.0)
     (setq golden-ratio-auto-scale 0)
-    (setq golden-ratio-exclude-modes '(dired-mode magit-mode vterm-mode))
-    (when (fboundp 'golden-ratio-mode)
-      (golden-ratio-mode 1)))
+    (setq golden-ratio-exclude-modes '(dired-mode magit-mode vterm-mode)))
 
   ;; ace-window: optional fast window selection (no keys set here)
   (when (require 'ace-window nil t)
@@ -95,45 +93,45 @@
 (when (boundp 'multi-vterm-dedicated-window-height-percent)
   (setq multi-vterm-dedicated-window-height-percent 43))
 
-;; --- Window resize (C-x + / C-x -) ---------------------------------------
+;; --- Window resize (C-x + / C-x - / C-x =) -------------------------------
 ;;
-;; Three levels, with golden-ratio as the smart top tier:
+;; Per golden-ratio docs we do NOT enable `golden-ratio-mode' globally
+;; (it would auto-resize on every window/buffer change).  Instead we keep
+;; the package loaded and use its one-shot function `golden-ratio' from
+;; `C-x =' to fit the focused window to φ.  Manual grow/shrink stay on
+;; Emacs' built-in `enlarge-window' / `shrink-window' so users can pass
+;; a numeric prefix argument (e.g. `C-u 4 C-x +') to step by N lines.
 ;;
-;;   C-x + (pro-windows-enlarge)   — подогнать текущее окно по золотому сечению
-;;                                  (если пакет `golden-ratio' доступен; иначе
-;;                                   fallback к `enlarge-window 4').
-;;   C-x - (pro-windows-shrink)    — выровнять все окна поровну
-;;                                  (`balance-windows'; иначе `shrink-window 4').
-;;   C-x = (pro-windows-balance)   — выровнять + применить golden-ratio.
+;;   C-x + (pro-windows-enlarge)  — `enlarge-window' (default step = 1).
+;;   C-x - (pro-windows-shrink)   — `shrink-window'  (default step = 1).
+;;   C-x = (pro-windows-balance)  — `balance-windows' + one-shot
+;;                                  `golden-ratio' (if available).
 ;;
 ;; Bиндинги — в emacs-keys.org.
 
 (defun pro-windows-enlarge ()
-  "Подогнать текущее окно по золотому сечению (golden-ratio).
-Fallback: enlarge-window 4, если пакет `golden-ratio' не загружен.
-Биндинг: C-x + (см. emacs-keys.org)."
+  "Enlarge the current window.
+Биндинг: C-x + (см. emacs-keys.org).
+Prefix arg (e.g. `C-u 4') controls the step size — same as
+`enlarge-window'."
   (interactive)
-  (if (fboundp 'golden-ratio)
-      (golden-ratio)
-    (enlarge-window 4)))
+  (enlarge-window (prefix-numeric-value current-prefix-arg) 1))
 
 (defun pro-windows-shrink ()
-  "Выровнять все окна поровну (`balance-windows').
-Fallback: shrink-window 4, если golden-ratio-mode не активен.
-Биндинг: C-x - (см. emacs-keys.org)."
+  "Shrink the current window.
+Биндинг: C-x - (см. emacs-keys.org).
+Prefix arg (e.g. `C-u 4') controls the step size — same as
+`shrink-window'."
   (interactive)
-  (if (and (boundp 'golden-ratio-mode) golden-ratio-mode)
-      (balance-windows)
-    (shrink-window 4)))
+  (shrink-window (prefix-numeric-value current-prefix-arg) 1))
 
 ;; --- Window balance (C-x =) ----------------------------------------------
-;; Поведение в духе golden-ratio:
-;;   1) выровнять все окна одинаково (`balance-windows');
-;;   2) подогнать текущее окно под золотое сечение (`golden-ratio'),
-;;      если пакет `golden-ratio' загружен (см. `pro-windows-enable' выше).
-;; Fallback: если `golden-ratio' не загружен — только `balance-windows'.
+;; One-shot golden-ratio fit: balance the frame, then (if `golden-ratio'
+;; is loaded) resize the focused window toward φ.  This mirrors the
+;; behaviour of `golden-ratio-mode' but only when the user asks for it,
+;; not on every focus change.
 (defun pro-windows-balance ()
-  "Выровнять все окна, затем (если доступен) применить golden-ratio.
+  "Balance all windows, then (if available) apply one-shot `golden-ratio'.
 Биндинг: C-x = (см. emacs-keys.org)."
   (interactive)
   (balance-windows)
