@@ -1,4 +1,4 @@
-{ stdenv, emacs, lib, http-server }:
+{ stdenv, emacs, lib }:
 
 stdenv.mkDerivation rec {
   pname = "emcp";
@@ -18,7 +18,11 @@ stdenv.mkDerivation rec {
   # http-server.el is a hard runtime dep — emcp.el does
   # `(require 'http-server)' at top level. Propagate so the user does
   # not have to declare it in their profile.
-  propagatedInputs = [ http-server ];
+  # http-server is a runtime dependency of emcp (emcp.el does (require 'http-server)).
+  # We do not force-provide http-server here; the NixOS / user should include
+  # a suitable http-server package if they want EMCP to use the embedded HTTP
+  # transport. Historically http-server lived on Codeberg and required a
+  # separate recipe; to keep this flake clean we leave it optional.
   meta = with lib; {
     description = "EMCP — MCP server that lets an LLM agent talk to Emacs";
     homepage = "https://codeberg.org/martenlienen/emcp";
