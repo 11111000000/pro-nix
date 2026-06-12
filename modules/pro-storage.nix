@@ -180,6 +180,13 @@ in
 
   users.groups.pro.members = lib.mkDefault [ "az" "za" "la" "bo" ];
 
+  # Override systemd umask for the syncthing service: default 0022 makes new
+  # files land as 0644 (syncthing:pro) so group `pro` members get read-only.
+  # With 0002, files are 0664 and directories 0775 — paired with the setgid
+  # bit on /srv/syncthing/share (tmpfiles rule above), every pro member can
+  # read AND write, and new files inherit the `pro` group automatically.
+  systemd.services.syncthing.serviceConfig.UMask = "0002";
+
   # Контекст: конфигурация fail2ban зависит от путей логов и локальной политики.
   # Рекомендуется задавать правила и jails на уровне хоста для точной привязки к
   # локальным путям и особенностям логирования.
