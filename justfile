@@ -25,7 +25,19 @@ switch HOST='':
 
 # Deploy local agent configs (pi/opencode) if missing before switch
 switch-with-agents HOST='':
-	./scripts/deploy-agent-configs.sh && scripts/switch.sh "{{HOST}}"
+	./scripts/deploy-agent-configs.sh \
+	  && ./scripts/install-pi-packages.sh \
+	  && scripts/switch.sh "{{HOST}}"
+
+# Install npm-extension packages declared in local-templates/pi/settings.json.
+# Idempotent. Run after deploy-agent-configs.sh on a fresh machine.
+install-pi-packages:
+	./scripts/install-pi-packages.sh
+
+# Re-deploy agent configs (templates + npm packages) without re-running nixos-rebuild.
+# Useful when only the agent-config templates changed.
+deploy-agents:
+	./scripts/deploy-agent-configs.sh && ./scripts/install-pi-packages.sh
 
 test HOST:
 	sudo nixos-rebuild test --flake "git+file://$(pwd)?submodules=1#{{HOST}}"

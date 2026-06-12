@@ -1,0 +1,10 @@
+{
+  "_comment": "Шаблон settings.json для pi. Копируется в ~/.pi/agent/settings.json, только если его там ещё нет. `packages` — npm-пакеты pi-расширений; `defaultProvider`/`defaultModel` — модель по умолчанию. `compaction`, `theme`, `hideThinkingBlock` и прочие персональные настройки пользователь добавляет сам (шаблон их не задаёт, чтобы не перетирать индивидуальные предпочтения).",
+  "defaultProvider": "minimax",
+  "defaultModel": "MiniMax-M3",
+  "packages": [
+    "npm:pi-mcp-adapter",
+    "npm:@amartinr/pi-searxng",
+    "npm:pi-smart-fetch"
+  ]
+}
