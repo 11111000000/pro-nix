@@ -1,0 +1,59 @@
+# Минимальный шаблон docker-compose для локальной разработки микросервиса.
+#
+# Использование:
+#   1. Скопировать каталог: `cp -r templates/microservice ~/work/my-svc`
+#   2. cd ~/work/my-svc
+#   3. Подредактировать: имя сервиса, образ, порт, секреты
+#   4. just build && just up && just logs
+#
+# Конвенции:
+#   - Все сервисы подключаются к общей сети `pro-dev` (external: true),
+#     объявленной в modules/pro-docker.nix. Так соседние стеки могут
+#     резолвить этот контейнер по service-name: `my-svc:8000`.
+#   - Порт хоста — из dev-диапазона 3000/5000/5173/8000/8080/8443,
+#     открытого в firewall только на loopback/tailnet/docker-bridge
+#     (см. modules/pro-services.nix). Не открывайте 80/443 здесь.
+#   - Секреты — через sops/age (см. .env.sops.yaml.example). Никогда
+#     не коммитьте plaintext .env.
+#   - Healthcheck обязателен: позволяет Docker перезапускать контейнер
+#     при падении и даёт агенту быстрый способ проверить «жив ли» сервис.
+#   - restart: unless-stopped — Docker поднимет контейнер после ребута
+#     и при OOM-kill (autoheal не нужен).
+#
+# Документация: docs/microservices.md
+
+name: my-svc
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: my-svc:dev
+    container_name: my-svc
+    restart: unless-stopped
+    # Порт хоста берётся из .env.sops.yaml (SERVICE_PORT) или fallback 8000.
+    ports:
+      - "${SERVICE_PORT:-8000}:8000"
+    environment:
+      # Все секреты зашифрованы; расшифровываются в .env.sops.yaml
+      DATABASE_URL: ${DATABASE_URL}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    volumes:
+      # Локальный код в /app для быстрой итерации без пересборки образа.
+      # Удалите в проде, оставьте только в dev-override.
+      - ./src:/app/src:ro
+    networks:
+      - pro-dev
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8000/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+networks:
+  pro-dev:
+    # external: true → compose НЕ создаёт сеть, а подключается к уже
+    # существующей `pro-dev`, объявленной Nix'ом (modules/pro-docker.nix).
+    external: true

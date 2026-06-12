@@ -101,7 +101,23 @@
     enable = true;
     allowedTCPPorts = [ 22 80 443 ];
     allowedUDPPorts = [ 53 ];
-    trustedInterfaces = [ "docker0" ];
+    # Доверяем docker0 (default bridge) и docker-сети pro-dev, чтобы
+    # контейнеры могли ходить к systemd-сервисам на хосте без NAT.
+    # NB: docker присваивает bridge-интерфейсу сети `pro-dev` имя вида
+    # `br-<hash>` (не `br-pro-dev`). Чтобы не угадывать, разрешаем
+    # dev-порты через `trustedInterfaces` — он матчит все docker-мосты
+    # и любой br-*. tailscale0 — чтобы dev-сервисы были видны другим
+    # участникам tailnet.
+    trustedInterfaces = [ "docker0" "tailscale0" "br-+" ];
+    # Dev-порты: открыты ТОЛЬКО на loopback/tailnet/docker-bridges, не глобально.
+    # 3000 = create-react-app / next.js dev, 5000 = flask, 5173 = vite,
+    # 8000 = django / uvicorn, 8080 = common alt-http, 8443 = alt-https.
+    # 80/443/22 уже открыты глобально в allowedTCPPorts выше.
+    interfaces = {
+      lo.allowedTCPPorts = [ 3000 5000 5173 8000 8080 8443 ];
+      "tailscale0".allowedTCPPorts = [ 3000 5000 5173 8000 8080 8443 ];
+      "docker0".allowedTCPPorts = [ 3000 5000 5173 8000 8080 8443 ];
+    };
   };
 
   # Last reviewed update for documentation consistency.

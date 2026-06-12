@@ -78,6 +78,10 @@
 | Docker     | C-c d i       | pro/docker-images                     | Список образов                       |
 | Docker     | C-c d v       | pro/docker-volumes                    | Список томов                         |
 | Docker     | C-c d n       | pro/docker-networks                   | Список сетей                         |
+| Docker     | C-c d l       | pro/docker-logs                       | Логи контейнера (-f --tail 100)      |
+| Docker     | C-c d e       | pro/docker-shell                      | Shell в контейнере                   |
+| Docker     | C-c d r       | pro/docker-restart                    | Перезапустить контейнер              |
+| Docker     | C-c d p       | pro/docker-prune                      | docker system prune -f               |
 | Окна       | C-x +         | pro-windows-enlarge                   | Увеличить окно (C-u N — шаг)         |
 | Окна       | C-x -         | pro-windows-shrink                    | Уменьшить окно (C-u N — шаг)         |
 | Окна       | C-x =         | pro-windows-balance                   | balance-windows + golden-ratio (разово) |

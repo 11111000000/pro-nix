@@ -49,5 +49,17 @@
     nodePackages.mermaid-cli
     emacsPackages.eldev
     emacsPackages.cask
+    # Container-aware dev utilities (see modules/pro-docker.nix for context).
+    # Lazydocker = single TUI for ps/logs/exec/restart/prune; dive = image layer
+    # inspector; ctop = per-container resource meters; trivy = CVE scanner for
+    # both images and filesystems; hadolint = Dockerfile best-practices linter;
+    # sops + age = encrypted secrets in git (no plaintext .env).
+    lazydocker
+    dive
+    ctop
+    trivy
+    hadolint
+    sops
+    age
   ];
 }

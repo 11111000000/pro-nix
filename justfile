@@ -80,3 +80,61 @@ emacs-verify:
 # Contract test for the network layer (pro-hosts, pro-network, pro-ssh-clients, headscale)
 network-contract:
 	./tests/contract/pro-network-01.sh
+
+# ─── Docker / microservices dev helpers ────────────────────────────────────
+# Алиасы для lazydocker / docker CLI. Полезны агентам и человеку, чтобы
+# не печатать длинные команды. Все рецепты идемпотентны и не требуют sudo
+# (пользователь должен быть в группе `docker`, что делает pro-users.nix).
+
+# TUI: lazydocker — ps/logs/exec/restart/prune в одном интерфейсе
+d:
+	lazydocker
+
+# Хвост логов контейнера (использует `docker logs -f --tail 100`).
+# Использование: just dl <container>
+dl NAME:
+	docker logs -f --tail 100 {{NAME}}
+
+# Shell в контейнере. По умолчанию /bin/sh; передать другой через CMD.
+# Использование: just dsh <container> [cmd]
+dsh NAME CMD="sh":
+	docker exec -it {{NAME}} {{CMD}}
+
+# Перезапустить контейнер и показать первые 30 строк лога после рестарта.
+# Использование: just dr <container>
+dr NAME:
+	docker restart {{NAME}} && sleep 1 && docker logs --tail 30 {{NAME}}
+
+# Удалить остановленные контейнеры, висячие образы и неиспользуемые сети.
+# Без -f сначала спросит подтверждение; здесь -f для неинтерактивного CI/агента.
+dprune:
+	docker system prune -f
+	docker image prune -f
+	docker network prune -f
+
+# Сканировать образ на уязвимости через trivy. Только HIGH/CRITICAL по дефолту.
+# Использование: just dscan <image> [severity]
+dscan IMAGE SEVERITY="HIGH,CRITICAL":
+	trivy image --severity {{SEVERITY}} --no-progress {{IMAGE}}
+
+# Статический анализ Dockerfile через hadolint.
+# Использование: just dlint <path>
+dlint DOCKERFILE="Dockerfile":
+	hadolint {{DOCKERFILE}}
+
+# Запустить compose-стек в текущей директории (предполагается compose.yaml).
+# Сеть pro-dev подключается автоматически шаблоном templates/microservice/.
+dup:
+	docker compose up -d
+
+# Остановить compose-стек (контейнеры остаются, можно `docker compose start`).
+ddown:
+	docker compose down
+
+# Список сервисов текущего compose-проекта с их статусом.
+dps:
+	docker compose ps
+
+# Хвост логов compose-проекта (все сервисы сразу).
+dclogs:
+	docker compose logs -f --tail 50

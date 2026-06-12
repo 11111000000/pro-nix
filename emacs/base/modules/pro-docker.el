@@ -73,10 +73,86 @@
     (user-error "pro-docker: пакет `docker' не загружен (проверьте Nix-профиль)"))
   (docker-networks-list))
 
+;;;###autoload
+(defun pro/docker-logs (&optional name)
+  "Show logs of docker container NAME (default: prompt or selected in containers buffer)."
+  (interactive
+   (list (or (and (derived-mode-p 'docker-containers-mode)
+                  (tabulated-list-get-id))
+             (read-string "Container name: " nil nil ""))))
+  (unless (pro-docker--available-p)
+    (user-error "pro-docker: пакет `docker' не загружен"))
+  (if (fboundp 'docker-container-logs)
+      (docker-container-logs name)
+    (progn
+      (pop-to-buffer (get-buffer-create (format "*docker-logs-%s*" name)))
+      (let ((proc (apply #'start-process
+                         (format "docker-logs-%s" name)
+                         (current-buffer)
+                         "docker"
+                         (list "logs" "-f" "--tail" "100" name))))
+        (setq-local window-purpose 'docker-logs)
+        proc))))
+
+;;;###autoload
+(defun pro/docker-shell (&optional name)
+  "Open an interactive shell inside docker container NAME (default: prompt)."
+  (interactive
+   (list (or (and (derived-mode-p 'docker-containers-mode)
+                  (tabulated-list-get-id))
+             (read-string "Container name: " nil nil ""))))
+  (unless (pro-docker--available-p)
+    (user-error "pro-docker: пакет `docker' не загружен"))
+  (if (fboundp 'docker-container-shell)
+      (docker-container-shell name)
+    (progn
+      (let ((default-directory (format "/docker:%s:/" name)))
+        (call-interactively #'shell)))))
+
+;;;###autoload
+(defun pro/docker-restart (name)
+  "Restart docker container NAME."
+  (interactive
+   (list (or (and (derived-mode-p 'docker-containers-mode)
+                  (tabulated-list-get-id))
+             (read-string "Container name: " nil nil ""))))
+  (unless (pro-docker--available-p)
+    (user-error "pro-docker: пакет `docker' не загружен"))
+  (let ((buffer (current-buffer))
+        (proc (start-process "docker-restart" nil "docker" "restart" name)))
+    (set-process-sentinel
+     proc
+     (lambda (_ event)
+       (message "pro-docker: restart %s: %s" name (string-trim event))
+       (when (derived-mode-p 'docker-containers-mode)
+         (revert-buffer))))
+    proc))
+
+;;;###autoload
+(defun pro/docker-prune ()
+  "Run `docker system prune -f' to reclaim disk space (containers, networks, images)."
+  (interactive)
+  (unless (pro-docker--available-p)
+    (user-error "pro-docker: пакет `docker' не загружен"))
+  (let ((proc (start-process-shell-command
+               "docker-prune" (current-buffer)
+               "docker system prune -f")))
+    (set-process-sentinel
+     proc
+     (lambda (_ event)
+       (message "pro-docker: prune %s" (string-trim event))
+       (when (derived-mode-p 'docker-containers-mode)
+         (revert-buffer))))
+    proc))
+
 (define-key pro-docker-keymap (kbd "c") #'pro-docker-containers)
 (define-key pro-docker-keymap (kbd "i") #'pro/docker-images)
 (define-key pro-docker-keymap (kbd "v") #'pro/docker-volumes)
 (define-key pro-docker-keymap (kbd "n") #'pro/docker-networks)
+(define-key pro-docker-keymap (kbd "l") #'pro/docker-logs)
+(define-key pro-docker-keymap (kbd "e") #'pro/docker-shell)
+(define-key pro-docker-keymap (kbd "r") #'pro/docker-restart)
+(define-key pro-docker-keymap (kbd "p") #'pro/docker-prune)
 
 (when pro-docker-enable
   ;; Глобальный префикс `pro-docker-keymap-prefix' (по умолчанию C-c d)
