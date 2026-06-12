@@ -82,8 +82,6 @@ This flips `pro-dired-prefer-short' and updates `dired-listing-switches' for new
     (when (and (fboundp 'pro-ui--try-require)
                (pro-ui--try-require 'treemacs-icons-dired))
       (add-hook 'dired-mode-hook #'treemacs-icons-dired-enable-once))
-    (when (require 'all-the-icons-dired nil t)
-      (add-hook 'dired-mode-hook #'all-the-icons-dired-mode))
     ;; helper: reload elisp files in marked directory if pro-lisp helper present
     (defun pro/dired-reload-elisp-here ()
       "Reload all .el files in current dired directory if helper present."
