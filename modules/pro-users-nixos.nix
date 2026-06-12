@@ -60,7 +60,10 @@
             pkgs.emacsPackages.treemacs pkgs.emacsPackages.vertico pkgs.emacsPackages.vterm pkgs.emacsPackages.yasnippet
             pkgs.emacsPackages.treemacs pkgs.emacsPackages.vertico pkgs.emacsPackages.vterm pkgs.emacsPackages.yasnippet
             pkgs.emacsPackages.docker
-          ] ++ extraEmacs ++ spellPackages;
+            pkgs.emacsPackages.elisp-refs
+          ] ++ lib.optional (builtins.hasAttr "emacsPackages" pkgs && builtins.hasAttr "http-server" pkgs.emacsPackages)
+              pkgs.emacsPackages.http-server
+            ++ extraEmacs ++ spellPackages;
         };
 
         # OpenCode TUI config disabled: no plugins, no generated files.

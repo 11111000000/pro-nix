@@ -71,11 +71,9 @@ let
     # http-server.el lives on Codeberg (not MELPA/ELPA), so we provide it
     # via our own recipe. emcp declares `(require 'http-server)' and
     # propagates the dependency, so users get it transparently.
-    # http-server is intentionally not provided as a local recipe by default
-    # because its upstream revision is maintained independently. If you want to
-    # provide http-server via Nix, add a recipe at nix/emacs-recipes/http-server.nix
-    # and uncomment the line below.
-    # http-server = super.callPackage ../emacs-recipes/http-server.nix {};
+    http-server = super.callPackage ../emacs-recipes/http-server.nix {
+      trivialBuild = super.emacsPackages.trivialBuild;
+    };
     acapella = super.callPackage ../emacs-recipes/acapella.nix {};
     atlas = super.callPackage ../emacs-recipes/atlas.nix {};
     tao-theme = super.callPackage ../emacs-recipes/tao-theme.nix {};

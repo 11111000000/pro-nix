@@ -156,6 +156,9 @@
           pkgs.emacsPackages.expand-region pkgs.emacsPackages.yasnippet pkgs.emacsPackages.projectile
           pkgs.emacsPackages.treemacs pkgs.emacsPackages.vterm pkgs.emacsPackages.ace-window pkgs.emacsPackages.embark
           pkgs.emacsPackages.dash-docs pkgs.emacsPackages.embark-consult
+          pkgs.emacsPackages.elisp-refs
+          # http-server приходит из overlay (nix/overlays/emacs-extra.nix → localRecipes)
+          (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "http-server" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.http-server else null)
           # Try overlay-provided packages when available (agent-shell, acp, treemacs-icons-dired, eldoc-box)
           (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "agent-shell" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.agent-shell else null)
           (if (builtins.hasAttr "emacsPackages" pkgsOverlay && builtins.hasAttr "agent-shell-hud" pkgsOverlay.emacsPackages) then pkgsOverlay.emacsPackages.agent-shell-hud else null)
