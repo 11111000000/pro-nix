@@ -23,13 +23,29 @@
   networking.networkmanager.enable = true;
   networking.nameservers = [ "77.88.8.8" "77.88.8.1" "1.1.1.1" "8.8.8.8" ];
   networking.networkmanager.dns = "systemd-resolved";
+  # Глобальные дефолты WiFi-соединений: стабилизируют link, сокращают
+  # дропы и исключают MAC-ротацию (которая ломает контроль доступа
+  # и увеличивает время ассоциации после roam).
+  #
+  # wifi.powersave: 2 = disable (см. NMSettingWirelessPowersave: 0=DEFAULT,
+  #   1=IGNORE, 2=DISABLE, 3=ENABLE). Без этого чип периодически уходит
+  #   в firmware-sleep и теряет sync с AP.
+  # wifi.scan-rand-mac-address / wifi.cloned-mac-address: "no" = стабильный
+  #   MAC. NM по умолчанию рандомизирует MAC при скане (privacy) и при
+  #   подключении — на наших AP это лишний overhead и лишний повод для
+  #   deauth. Исключаем оба.
+  # ipv4/6.dhcp-timeout: жёсткие таймауты, чтобы при микро-разрыве NM не
+  #   висел в "connecting" бесконечно.
   networking.networkmanager.settings.connection = {
-    # 2 = disable (см. NMSettingWirelessPowersave: 0=DEFAULT,1=IGNORE,2=DISABLE,3=ENABLE)
     "wifi.powersave" = 2;
+    "wifi.scan-rand-mac-address" = "no";
+    "wifi.cloned-mac-address" = "no";
+    "ipv4.dhcp-timeout" = 30;
+    "ipv6.dhcp-timeout" = 30;
   };
-  # connection.gateway-ping-timeout и wifi.scan-rand-mac-address — НЕ валидные
-  # глобальные ключи в NM 1.54 (NM ругается в journal: "unknown key").
-  # Они задаются per-profile через `nmcli con mod` (см. docs/analyse/2026-06-02-network-drops-cf19.md).
+  # NB: connection.gateway-ping-timeout — не валидный глобальный ключ в
+  # NM 1.54 (NM ругается в journal: "unknown key"). Задаётся per-profile
+  # через `nmcli con mod` (см. docs/analyse/2026-06-02-network-drops-cf19.md).
 
   services.openssh = {
     enable = true;

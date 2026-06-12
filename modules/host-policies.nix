@@ -66,12 +66,27 @@ in
     (lib.mkIf isCf19 {
       pro-peer.allowTorHiddenService = true;
 
-      # iwlwifi на CF-19: явно отключить firmware power-save и поставить
-      # режим производительности, чтобы уменьшить link timed out при связи
-      # с Android-hotspot (см. docs/analyse/2026-06-02-network-drops-cf19.md).
-      boot.extraModprobeConfig = ''
+      # CF-19: жёсткая политика стабильности WiFi на iwlwifi/iwlmvm.
+      # Цель — не дать чипу «уснуть» и потерять BSS, особенно при
+      # подключении к Android-hotspot (см. docs/analyse/2026-06-02-network-drops-cf19.md).
+      #
+      # Каждая опция задокументирована: что делает и почему именно так.
+      # boot.extraModprobeConfig собирается через lib.mkAfter, чтобы не
+      # конфликтовать с другими модулями (например, btusb в desktop/...).
+      boot.extraModprobeConfig = lib.mkAfter ''
+        # iwlwifi: выключить firmware power-save. Без этого чип периодически
+        # засыпает между beacon'ами и теряет sync, особенно в режиме
+        # клиента точки доступа с плохим SNR.
         options iwlwifi power_save=0
+        # iwlmvm: режим производительности (1 = performance). Понижает
+        # задержку пробуждения радио и уменьшает вероятность roam-петли.
         options iwlmvm power_scheme=1
+        # 11n_disable=0 — оставить 802.11n включённым, но 11n_ht40=0
+        # запрещает 40-МГц каналы: на 2.4 ГГц они дают помехи и рост
+        # retry-rate в плотной застройке.
+        options cfg80211 ieee80211_default_rc_algo=minstrel_ht
+        options iwlwifi 11n_disable=8
+        options iwlmvm uapsd_disable=1
       '';
     })
   ];
