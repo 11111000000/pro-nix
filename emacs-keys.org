@@ -85,14 +85,14 @@
 | Окна       | C-x +         | pro-windows-enlarge                   | Увеличить окно (C-u N — шаг)         |
 | Окна       | C-x -         | pro-windows-shrink                    | Уменьшить окно (C-u N — шаг)         |
 | Окна       | C-x =         | pro-windows-balance                   | balance-windows + golden-ratio (разово) |
-| Окна       | s-h           | windmove-left                         | Переместить фокус влево              |
-| Окна       | s-j           | windmove-down                         | Переместить фокус вниз               |
-| Окна       | s-k           | windmove-up                           | Переместить фокус вверх              |
-| Окна       | s-l           | windmove-right                        | Переместить фокус вправо             |
-| Окна       | s-H           | buf-move-left                         | Переместить буфер влево              |
-| Окна       | s-J           | buf-move-down                         | Переместить буфер вниз               |
-| Окна       | s-K           | buf-move-up                           | Переместить буфер вверх              |
-| Окна       | s-L           | buf-move-right                        | Переместить буфер вправо             |
+| EXWM       | s-h           | windmove-left                         | Переместить фокус влево              |
+| EXWM       | s-j           | windmove-down                         | Переместить фокус вниз               |
+| EXWM       | s-k           | windmove-up                           | Переместить фокус вверх              |
+| EXWM       | s-l           | windmove-right                        | Переместить фокус вправо             |
+| EXWM       | s-H           | buf-move-left                         | Переместить буфер влево              |
+| EXWM       | s-J           | buf-move-down                         | Переместить буфер вниз               |
+| EXWM       | s-K           | buf-move-up                           | Переместить буфер вверх              |
+| EXWM       | s-L           | buf-move-right                        | Переместить буфер вправо             |
 | AI         | C-c a         | pro-ai-open-entry                     | Вход в AI                            |
 | AI         | C-c A         | pro-agent-open                        | agent-shell                          |
 | AI         | C-c a (hud)   | agent-shell-hud-menu                  | Пульт агента (в agent-shell-mode)    |
