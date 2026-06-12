@@ -38,4 +38,4 @@ else
   copy_if_missing "$TEMPLATES_DIR/opencode/opencode.json" "$PROJECT_PI_DIR/opencode.json"
 fi
 
-echo "[deploy] Done. If you changed auth storage, ensure AITUNNEL_KEY is set (or use ~/.authinfo and pro-ai.el)."
+echo "[deploy] Done. If you changed auth storage, ensure AITUNNEL_API_KEY is set (or use ~/.authinfo and pro-load-agent-env.sh)."

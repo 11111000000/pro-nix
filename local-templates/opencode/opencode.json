@@ -31,7 +31,7 @@
       "name": "AITUNNEL",
       "options": {
         "baseURL": "https://api.aitunnel.ru/v1",
-        "apiKey": "{env:AITUNNEL_KEY}"
+        "apiKey": "{env:AITUNNEL_API_KEY}"
       },
       "models": {
         "gpt-5.4-nano": { "name": "GPT-5.4 Nano" },
@@ -87,7 +87,7 @@
       "name": "OpenRouter",
       "options": {
         "baseURL": "https://openrouter.ai/api/v1",
-        "apiKey": "{env:OPENROUTER_KEY}"
+        "apiKey": "{env:OPENROUTER_API_KEY}"
       },
       "models": {
         "~openai/gpt-mini-latest": { "name": "GPT mini (latest)" },
