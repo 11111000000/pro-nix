@@ -18,6 +18,12 @@ hosts/<name>/
   composition.nix          # Слой пакетов: import ../../modules/system-package-sets-*.nix
 emacs/base/modules/        # Emacs Lisp модули (pro-*.el)
 emacs/base/site-init.el    # Загрузчик модулей Emacs
+local-templates/           # Шаблоны конфигов агентов (см. §10)
+  pi/{mcp,models,settings}.json
+  pi/skills/<name>/SKILL.md
+  opencode/opencode.json
+  opencode/skills/<name>/SKILL.md
+docs/agent-configs.md      # Подробная документация по pi/opencode (см. §10)
 ```
 
 ### 1a. Структура `modules/`
@@ -446,3 +452,25 @@ just network-contract
 | Глобальный zoom через `set-face-attribute` | Меняет шрифт во всех буферах |
 | `(define-key global-map …)` в модулях | Глобальные биндинги — только в `emacs-keys.org` |
 | `nixos-rebuild switch` в CI | Только eval/build, без применения |
+
+## 10. Agent configs (pi + opencode)
+
+**Краткая шпаргалка.** Полная версия — `docs/agent-configs.md`.
+
+| Что | Где | Как деплоится |
+|-----|-----|---------------|
+| Шаблоны конфигов (source of truth) | `local-templates/{pi,opencode}/` | коммитятся |
+| Активация на новой машине | `modules/pro-agent-configs.nix` (`home.activation.pro-agent-configs-deploy`) | `nixos-rebuild switch` |
+| Shell-аналог (для не-NixOS и быстрого форса) | `scripts/deploy-agent-configs.sh` | `just deploy-agents` |
+| npm-пакеты (pi-mcp-adapter и др.) | `local-templates/pi/settings.json` → `~/.pi/agent/settings.json` | `scripts/install-pi-packages.sh` |
+| Удобный entry-point | `just switch-with-agents HOST` | deploy + install + switch в одном рецепте |
+| Документация для модели по EMCP | `local-templates/*/skills/emacs-emcp/SKILL.md` | копируется как `skills/emacs-emcp/SKILL.md` |
+
+**Железные правила:**
+
+- `local-templates/` — единственный источник правды. **Правь шаблон, не деплой.**
+- `copy_if_missing` — никогда не перезаписывает существующий файл. Чтобы форсировать обновление — `rm` → `just deploy-agents`.
+- `pi install npm:…` — мерджит, не теряет существующие поля settings.json.
+- `pi-mcp-adapter` ставится **отдельно** через npm (не через Nix), потому что нет воспроизводимой сборки.
+- EMCP — это HTTP MCP-сервер на 127.0.0.1:38913. Стартует лениво из Emacs. Если `pi` показывает 0 тулов у `emcp` — `emacsclient -e '(pro-emcp-server-start)'`.
+- В `pi` MCP доступен через **прокси-тулзу** `mcp({tool:…, args:…})`. В `opencode` MCP-тулзы **прямые** (`emcp_apropos` и т.п.). Не путай.

@@ -86,6 +86,9 @@ git submodule sync && git submodule update --remote --merge
 | Команда | Что делает |
 |---------|--------------|
 | `just switch <HOST>` | NixOS-rebuild switch (обновляет субмодули автоматически) |
+| `just switch-with-agents <HOST>` | То же + деплой конфигов pi/opencode (шаблоны + npm-пакеты). **Рекомендуется для свежей машины** |
+| `just deploy-agents` | Только шаблоны + npm-пакеты (без `nixos-rebuild`). После правки `local-templates/` |
+| `just install-pi-packages` | Только npm-пакеты (читает `local-templates/pi/settings.json`) |
 | `just submodules-ssh` | Преобразовать все субмодули в SSH |
 | `just build <HOST>` | Nixos-rebuild build |
 | `just test <HOST>` | Nixos-rebuild test |
@@ -93,6 +96,10 @@ git submodule sync && git submodule update --remote --merge
 | `just headless-tests` | Запустить Emacs headless-тесты |
 | `just headless-report` | Отчёт по headless-тестам |
 | `just network-contract` | Проверить сетевой контракт (pro.hosts / ssh_config) |
+
+**Конфиги AI-агентов (pi / opencode / MCP / EMCP):** подробно в
+[`docs/agent-configs.md`](docs/agent-configs.md). Краткая шпаргалка — в
+`AGENTS.md` §10.
 
 ## Настройка после `just switch`
 
@@ -114,6 +121,14 @@ nix eval --json .#nixosConfigurations.$(hostname).config.environment.systemPacka
 C-x M-c            # в Emacs; то же что M-x pro/reload-config
 # или жёсткий reload, если что-то сломалось:
 C-u M-x pro/reload-config
+
+# 0.4 Конфиги pi / opencode: развернуть шаблоны + npm-пакеты
+#     (если ещё не сделано через `just switch-with-agents`)
+just deploy-agents
+
+# 0.5 Smoke-test MCP-моста между pi ↔ Emacs
+emacsclient -e '(pro-emcp-server-start)'     # поднять EMCP-сервер на 38913
+pi -p 'mcp({})'                                # → 2/2 серверов (emcp, chrome-devtools)
 ```
 
 ### 1. SSH-ключи (на каждом клиенте и сервере)
