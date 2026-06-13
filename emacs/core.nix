@@ -96,7 +96,12 @@ in
         (lib.concatStringsSep ":" allLoadPaths)
         "${config.home.homeDirectory}/.config/emacs/modules"
       ]));
-      PRO_PACKAGES_AUTO_INSTALL = "1";
+      # Автоустановка пакетов из MELPA по умолчанию выключена. Emacs стартует
+      # на основе Nix-профиля (см. EMACSLOADPATH выше). Если что-то отсутствует,
+      # пользователь запускает `M-x pro-package-bootstrap-install-targets' (C-c P a).
+      # Чтобы вернуть автоустановку, задайте в ~/.config/home-manager/home.nix:
+      #   home.sessionVariables.PRO_PACKAGES_AUTO_INSTALL = "1";
+      PRO_PACKAGES_AUTO_INSTALL = "0";
     };
 
     home.activation.pro-emacs-provided-packages-report = ''

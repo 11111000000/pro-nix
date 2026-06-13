@@ -6,7 +6,10 @@
 ;; Цель: минимально вмешиваться в ранний этап загрузки Emacs, чтобы обеспечить
 ;;  воспроизводимую загрузку модулей из репозитория и избежать записи в read-only init files.
 ;; Контракт: изменяет только Emacs ранние переменные (package-*, frame-*), добавляет pro modules в load-path.
-;; Побочные эффекты: включает автоустановку пакетов по умолчанию; обновление архивов выполняется только по необходимости на уровне package policy.
+;; Побочные эффекты: НЕ включает автоустановку пакетов по умолчанию. Старт Emacs
+;; использует только Nix-профиль и load-path. MELPA/ELPA читаются только по
+;; явному запросу (`M-x pro-package-bootstrap-install-targets', C-c P a).
+;; Обновление архивов выполняется только по необходимости на уровне package policy.
 ;; Proof: headless ERT и smoke checks: scripts/emacs-pro-wrapper.sh --batch -l scripts/emacs-e2e-assertions.el -l scripts/emacs-e2e-run-tests.el
 ;; Last reviewed: 2026-05-03
 
@@ -26,8 +29,10 @@
   (when (file-directory-p pro-modules-dir)
     (add-to-list 'load-path pro-modules-dir)))
 
-(unless (getenv "PRO_PACKAGES_AUTO_INSTALL")
-  (setenv "PRO_PACKAGES_AUTO_INSTALL" "1"))
+;; По умолчанию автоустановка выключена. Если пользователь явно запросил
+;; установку базовых пакетов командой `M-x pro-package-bootstrap-install-targets',
+;; переменная окружения может быть выставлена через Nix-конфиг или shell.
+;; Не подменяем её здесь — иначе Emacs будет лезть в MELPA при каждом старте.
 
 ;; Ensure package.el is allowed to upgrade built-in packages. Some built-in
 ;; packages (notably transient) are shipped with Emacs but need a newer
