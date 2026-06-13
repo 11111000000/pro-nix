@@ -1,52 +1,71 @@
 #!/usr/bin/env bash
-# torwrap - короткая утилита в PATH для запуска команды через Tor
-# поведение:
-#  - ищет доступный tor proxy (локальный или gateway) с помощью scripts/find_tor_proxy.sh
-#  - если найден SOCKS proxy: запускает приложение через torsocks если доступен, иначе использует 'proxychains4' если настроен
-#  - если найден HTTP proxy: запускает приложение с env http_proxy set для этой команды
-#  - если ничего не найдено — возвращает ошибку
+# torwrap — запуск команды через tor proxy.
+#
+# Использует `pro-tor detect` (после `just switch` доступен глобально) для
+# нахождения SOCKS5/HTTP прокси, затем:
+#   - если SOCKS и есть torsocks — exec torsocks "$@"
+#   - иначе если есть proxychains4 — exec proxychains4 "$@"
+#   - иначе: ALL_PROXY=socks5h://... exec "$@"
+#   - для HTTP-прокси: HTTP_PROXY=... exec "$@"
+#
+# Usage: torwrap <command> [args...]
+# Env:   PRO_TOR_NO_VERIFY=1   — пропустить verify в detect (быстрее)
 
 set -euo pipefail
-
-SELF=$(readlink -f "${BASH_SOURCE[0]}")
-SCRIPT_DIR=$(cd "$(dirname "$SELF")/.." && pwd)
-FINDER="$SCRIPT_DIR/scripts/find_tor_proxy.sh"
-if [ ! -x "$FINDER" ] && [ -x "$HOME/pro-nix/scripts/find_tor_proxy.sh" ]; then
-  FINDER="$HOME/pro-nix/scripts/find_tor_proxy.sh"
-fi
-if [ ! -x "$FINDER" ]; then
-  echo "Не найден $FINDER" >&2
-  exit 2
-fi
 
 if [ $# -lt 1 ]; then
   echo "Usage: torwrap <command> [args...]" >&2
   exit 2
 fi
 
-ORIGINAL_CMD=( "$@" )
+ORIG_CMD=("$@")
 
-proxy_line=$("$FINDER" 2>/dev/null || true)
-if [ -z "$proxy_line" ]; then
-  echo "Tor proxy не найден" >&2
+# Найти pro-tor: сначала в PATH, потом fallback
+PRO_TOR="$(command -v pro-tor || true)"
+if [ -z "$PRO_TOR" ]; then
+  for p in "$HOME/bin/pro-tor" "$HOME/.nix-profile/bin/pro-tor" "/etc/profiles/per-user/$USER/bin/pro-tor"; do
+    [ -x "$p" ] && PRO_TOR="$p" && break
+  done
+fi
+if [ -z "$PRO_TOR" ] || [ ! -x "$PRO_TOR" ]; then
+  echo "pro-tor не найден в PATH. Запустите: just switch" >&2
   exit 3
 fi
 
-set -- $proxy_line
-ptype=$1; phost=$2; pport=$3
-set -- "${ORIGINAL_CMD[@]}"
-
-# prefer torsocks for socks
-if [ "$ptype" = "socks" ]; then
-  if command -v torsocks >/dev/null 2>&1; then
-    exec torsocks "$@"
-  elif command -v proxychains4 >/dev/null 2>&1; then
-    exec proxychains4 "$@"
-  else
-    # fallback: set ALL_PROXY env for the executed command
-    ALL_PROXY="socks5h://$phost:$pport" exec "$@"
+# Сначала пробуем local (быстро), если не вышло — remote
+# `--no-verify` — fast path, детект по TCP. Проверка через check.torproject.org
+# внутри tor-сети моргает, для разового запуска команды это лишний риск.
+proxy_line=""
+for mode in local remote; do
+  if proxy_line=$("$PRO_TOR" detect --no-verify --mode "$mode" 2>/dev/null); then
+    [ -n "$proxy_line" ] && break
   fi
+done
+
+# Fallback без --mode (использует дефолт remote)
+if [ -z "$proxy_line" ]; then
+  proxy_line=$("$PRO_TOR" detect --no-verify 2>/dev/null || true)
+fi
+
+if [ -z "$proxy_line" ]; then
+  echo "Tor proxy не найден (ни local, ни remote)" >&2
+  exit 4
+fi
+
+# формат вывода pro-tor detect: "host:port" (одна строка, socks5h)
+# или "type host port" — зависит от версии. Парсим гибко.
+phost="${proxy_line%%:*}"
+pport="${proxy_line##*:}"
+[ "$phost" = "$proxy_line" ] && {
+  # нет ':' — не наш формат
+  echo "unexpected proxy_line format: $proxy_line" >&2
+  exit 5
+}
+
+if command -v torsocks >/dev/null 2>&1; then
+  exec torsocks "${ORIG_CMD[@]}"
+elif command -v proxychains4 >/dev/null 2>&1; then
+  exec proxychains4 "${ORIG_CMD[@]}"
 else
-  # http proxy
-  HTTP_PROXY="http://$phost:$pport" HTTPS_PROXY="http://$phost:$pport" exec "$@"
+  ALL_PROXY="socks5h://$phost:$pport" exec "${ORIG_CMD[@]}"
 fi

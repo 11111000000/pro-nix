@@ -11,6 +11,7 @@ let
   runtime = import ../../modules/system-package-sets-runtime.nix { inherit pkgs; };
   dev = import ../../modules/system-package-sets-dev.nix { inherit pkgs; };
   exwm = import ../../modules/system-package-sets-exwm.nix { inherit pkgs; };
+  tor = import ../../modules/system-package-sets-tor.nix { inherit pkgs; };
 in
 {
   environment.systemPackages = with pkgs;
@@ -20,6 +21,7 @@ in
     ++ lsp.lspPackages
     ++ privacy.privacyPackages
     ++ media.mediaPackages
+    ++ tor.torControlPackages
     ++ (import ../../modules/system-package-sets-desktop-heavy.nix { inherit pkgs; }).desktopHeavyPackages
     ++ [ tor-browser ];
 }

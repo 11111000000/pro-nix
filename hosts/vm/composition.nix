@@ -5,6 +5,7 @@ let
   dev = import ../../modules/system-package-sets-dev.nix { inherit pkgs; };
   exwm = import ../../modules/system-package-sets-exwm.nix { inherit pkgs; };
   privacy = import ../../modules/system-package-sets-privacy.nix { inherit pkgs; };
+  tor = import ../../modules/system-package-sets-tor.nix { inherit pkgs; };
 in
 {
   environment.systemPackages = with pkgs;
@@ -12,5 +13,6 @@ in
     ++ dev.devPackages
     ++ exwm.exwmPackages
     ++ privacy.privacyPackages
+    ++ tor.torControlPackages
     ++ [ gh tor-browser ];
 }

@@ -1,0 +1,394 @@
+#!/usr/bin/env bash
+# pro-tor — toggle tor-proxy для текущей пользовательской сессии.
+#
+# Два режима работы:
+#   local   — локальный tor.service на 127.0.0.1:9050 (быстро, без сети)
+#   remote  — Orbot на Android AP / любой удалённый SOCKS5 (сканирует сеть)
+#
+# Действие: пишет/удаляет переменные proxy в ~/.config/pro-tor/env (sourced
+# вручную: `source <(pro-tor env)` или `eval "$(pro-tor env)"`).
+#
+# Subcommands:
+#   pro-tor local on|off|status          — режим локального tor.service
+#   pro-tor remote on|off|status [--scan-subnet]
+#                                           — режим Orbot на AP
+#   pro-tor detect [--mode local|remote]  — найти прокси (без включения)
+#   pro-tor verify [HOST[:PORT]]         — проверить, что это Tor
+#   pro-tor env                          — напечатать export-строки (для eval)
+#
+# Опции:
+#   --no-verify    — пропустить curl-проверку (быстрее, но ложные срабатывания)
+#   --scan-subnet  — сканировать всю /24 (только remote, медленно)
+#   --timeout N    — TCP-таймаут (default 1)
+#   --port P       — конкретный порт (default 9050)
+#   --host H       — конкретный хост (минует detect)
+
+set -euo pipefail
+IFS=$'\n\t'
+
+ENV_DIR="$HOME/.config/pro-tor"
+ENV_FILE="$ENV_DIR/env"
+TOR_PORTS_DEFAULT=(9050 9150)
+
+PROBE_TIMEOUT=1
+DO_VERIFY=1
+DO_SCAN_SUBNET=0
+OVERRIDE_PORT=""
+OVERRIDE_HOST=""
+MODE=""  # local|remote — set by subcommand
+
+err()  { printf "[ERR] %s\n" "$*" >&2; }
+warn() { printf "[WARN] %s\n" "$*" >&2; }
+info() { printf "[..] %s\n" "$*" >&2; }
+ok()   { printf "[OK] %s\n" "$*"; }
+
+usage() {
+  cat >&2 <<EOF
+pro-tor — toggle tor-proxy для текущей сессии.
+
+Subcommands:
+  pro-tor local   on|off|status             локальный tor.service (127.0.0.1:9050)
+  pro-tor remote  on|off|status [opts]      Orbot на AP / удалённый SOCKS5
+  pro-tor detect  [--mode local|remote]     найти прокси (без включения)
+  pro-tor verify  [HOST[:PORT]]            проверить, что прокси — Tor
+  pro-tor env                               напечатать export-строки для eval
+
+Опции:
+  --no-verify                                пропустить curl-проверку
+  --scan-subnet                              сканировать /24 (только remote)
+  --timeout N                                TCP-таймаут (default 1)
+  --port P                                   конкретный порт (default 9050)
+  --host H                                   конкретный хост
+EOF
+  exit 1
+}
+
+# ---- парсинг ----
+# Поддерживаем оба стиля:
+#   pro-tor local on           (явный режим)
+#   pro-tor remote on
+#   pro-tor detect             (по умолчанию remote)
+#   pro-tor detect --mode local
+#   pro-tor verify [HOST:PORT]
+#   pro-tor env
+SUBCMD="${1:-}"
+[ $# -gt 0 ] && shift
+
+if [ -z "$SUBCMD" ] || [ "$SUBCMD" = "-h" ] || [ "$SUBCMD" = "--help" ]; then
+  usage
+fi
+
+ACTION=""
+case "$SUBCMD" in
+  local|remote)
+    MODE="$SUBCMD"
+    ACTION="${1:-}"
+    [ $# -gt 0 ] && shift
+    case "$ACTION" in
+      on|off|status|detect) ;;
+      "") err "missing action for '$MODE': on|off|status|detect"; usage ;;
+      *) err "unknown action for '$MODE': $ACTION"; usage ;;
+    esac
+    # detect под режимом = разовая команда, выходим в конце
+    [ "$ACTION" = "detect" ] && SUBCMD="detect"
+    ;;
+  detect)
+    # detect без явного режима = remote (типичный случай: Orbot)
+    [ -z "$MODE" ] && MODE=remote
+    ;;
+  verify|env) ;;
+  *) err "unknown subcommand: $SUBCMD"; usage ;;
+esac
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --no-verify) DO_VERIFY=0 ;;
+    --scan-subnet) DO_SCAN_SUBNET=1 ;;
+    --timeout) PROBE_TIMEOUT="$2"; shift ;;
+    --port) OVERRIDE_PORT="$2"; shift ;;
+    --host) OVERRIDE_HOST="$2"; shift ;;
+    --mode) MODE="$2"; shift ;;
+    -*) err "unknown option: $1"; usage ;;
+    *)  # позиционный HOST[:PORT] (для detect/verify/on)
+        if [ -z "$OVERRIDE_HOST" ]; then
+          if [[ "$1" == *:* ]]; then
+            OVERRIDE_HOST="${1%:*}"
+            OVERRIDE_PORT="${1##*:}"
+          else
+            OVERRIDE_HOST="$1"
+          fi
+        else
+          err "unexpected positional: $1"; usage
+        fi
+        ;;
+  esac
+  shift
+done
+
+# ---- утилиты ----
+has_cmd() { command -v "$1" >/dev/null 2>&1; }
+
+tcp_open() {
+  local host=$1 port=$2
+  if has_cmd nc; then
+    nc -z -w "$PROBE_TIMEOUT" "$host" "$port" >/dev/null 2>&1
+  else
+    timeout "$PROBE_TIMEOUT" bash -c "(</dev/tcp/$host/$port)" >/dev/null 2>&1
+  fi
+}
+
+verify_tor_socks() {
+  local host=$1 port=$2
+  if [ "$DO_VERIFY" -eq 0 ]; then return 0; fi
+  has_cmd curl || { warn "curl not found — skipping verify"; return 0; }
+  local out attempt
+  for attempt in 1 2; do
+    out=$(curl --socks5-hostname "$host:$port" -s --max-time 8 https://check.torproject.org/ 2>/dev/null || true)
+    if printf '%s' "$out" | grep -qi "Congratulations"; then return 0; fi
+    [ "$attempt" -eq 1 ] && sleep 1
+  done
+  return 1
+}
+
+default_gw() { ip -4 route show default 2>/dev/null | awk '/default/ {print $3; exit}'; }
+default_gw_iface() { ip -4 route show default 2>/dev/null | awk '/default/ {print $5; exit}'; }
+current_subnet_base() {
+  local iface sub
+  iface=$(default_gw_iface)
+  sub=$(ip -4 -o addr show scope global 2>/dev/null \
+        | awk -v i="$iface" '$0 ~ (" " i " ") {print $4; exit}')
+  [ -n "$sub" ] && printf '%s' "${sub%.*}"
+}
+
+# ---- кандидаты по режимам ----
+candidates_local() {
+  # local — только loopback
+  printf '127.0.0.1\n'
+}
+
+candidates_remote() {
+  local -a out=()
+  local gw
+  gw=$(default_gw)
+  [ -n "$gw" ] && out+=("$gw")
+  if [ -n "$gw" ] && [[ "$gw" == *.1.* ]]; then
+    out+=("${gw%.*.*}.1.1")
+  elif [ -n "$gw" ]; then
+    out+=("${gw%.*}.1")
+  fi
+  out+=("192.168.43.1")  # стандартный Android AP
+  out+=("192.168.49.1")  # USB-tethering default
+  if [ "$DO_SCAN_SUBNET" -eq 1 ]; then
+    local base
+    base=$(current_subnet_base)
+    if [ -n "$base" ]; then
+      info "scanning /24 subnet $base.0/24 ..."
+      local i
+      for i in $(seq 1 254); do
+        out+=("$base.$i")
+      done
+    fi
+  fi
+  printf '%s\n' "${out[@]}" | awk '!seen[$0]++'
+}
+
+probe_host() {
+  local host=$1 port=$2
+  if tcp_open "$host" "$port"; then
+    if verify_tor_socks "$host" "$port"; then
+      printf '%s:%s\n' "$host" "$port"
+      return 0
+    fi
+  fi
+  return 1
+}
+
+# ---- detect ----
+do_detect() {
+  local -a ports
+  if [ -n "$OVERRIDE_PORT" ]; then
+    ports=("$OVERRIDE_PORT")
+  else
+    ports=("${TOR_PORTS_DEFAULT[@]}")
+  fi
+
+  if [ -n "$OVERRIDE_HOST" ]; then
+    info "probing user-supplied $OVERRIDE_HOST on port(s) ${ports[*]}" >&2
+    local p
+    for p in "${ports[@]}"; do
+      if probe_host "$OVERRIDE_HOST" "$p"; then return 0; fi
+    done
+    err "no Tor proxy at $OVERRIDE_HOST on ports ${ports[*]}"
+    return 1
+  fi
+
+  local -a hosts
+  local mode=${MODE:-remote}
+  if [ "$mode" = "local" ]; then
+    mapfile -t hosts < <(candidates_local)
+  else
+    mapfile -t hosts < <(candidates_remote)
+  fi
+
+  local h p
+  for h in "${hosts[@]}"; do
+    for p in "${ports[@]}"; do
+      if probe_host "$h" "$p"; then return 0; fi
+    done
+  done
+
+  err "no Tor proxy found (mode=$mode, ${#hosts[@]} candidates, ports ${ports[*]})"
+  if [ "$mode" = "remote" ]; then
+    cat >&2 <<EOF
+
+Возможные причины:
+  - Orbot на телефоне остановлен или слушает только 127.0.0.1:9050
+    (в Orbot: Settings → "Allow other apps to use Orbot" ВКЛ)
+  - Телефон = клиент Wi-Fi (не точка доступа); Orbot недоступен напрямую.
+  - Сканирование /24 выключено. Повтори: pro-tor remote detect --scan-subnet
+EOF
+  fi
+  return 1
+}
+
+# ---- env file ----
+write_env_file() {
+  local hostport=$1 mode=$2
+  mkdir -p "$ENV_DIR"
+  chmod 700 "$ENV_DIR"
+  cat > "$ENV_FILE" <<EOF
+# Generated by pro-tor on $(date -Iseconds)
+# Mode: $mode
+# Target: $hostport
+# Activate: eval "\$(pro-tor env)"
+#         или: source $ENV_FILE
+export ALL_PROXY="socks5h://$hostport"
+export all_proxy="socks5h://$hostport"
+export HTTP_PROXY="http://$hostport"
+export http_proxy="http://$hostport"
+export HTTPS_PROXY="http://$hostport"
+export https_proxy="http://$hostport"
+# Не проксировать локальные адреса
+export NO_PROXY="127.0.0.1,localhost,*.local,.local,::1"
+export no_proxy="127.0.0.1,localhost,*.local,.local,::1"
+export PRO_TOR_MODE="$mode"
+export PRO_TOR_TARGET="$hostport"
+export PRO_TOR_ENABLED=1
+EOF
+  chmod 600 "$ENV_FILE"
+}
+
+clear_env_file() {
+  rm -f "$ENV_FILE"
+}
+
+print_env_lines() {
+  if [ ! -f "$ENV_FILE" ]; then
+    err "proxy is not enabled (no $ENV_FILE); run: pro-tor local|remote on"
+    return 1
+  fi
+  cat "$ENV_FILE"
+}
+
+# ---- on / off ----
+do_on() {
+  local hit
+  if hit=$(do_detect 2>/dev/null); then
+    : # найдено и подтверждено verify
+  else
+    warn "verify failed; retrying without curl check (прокси, который отвечает TCP но блокирует check.torproject.org, будет принят)"
+    local saved=$DO_VERIFY
+    DO_VERIFY=0
+    if ! hit=$(do_detect 2>/dev/null); then
+      DO_VERIFY=$saved
+      err "no Tor proxy found in mode=$MODE"
+      return 1
+    fi
+    DO_VERIFY=$saved
+    warn "proxy $hit accepted WITHOUT verify; запустите 'pro-tor verify $hit' для проверки"
+  fi
+  local host="${hit%:*}" port="${hit##*:}"
+  write_env_file "$hit" "$MODE"
+  ok "tor proxy enabled ($MODE): $hit"
+  info "apply: source $ENV_FILE"
+  info "или одной командой: eval \"\$(pro-tor env)\""
+  info "turn off: pro-tor $MODE off"
+}
+
+do_off() {
+  if [ -f "$ENV_FILE" ]; then
+    rm -f "$ENV_FILE"
+    ok "tor proxy disabled (removed $ENV_FILE)"
+  else
+    ok "tor proxy already off (no $ENV_FILE)"
+  fi
+  info "clear vars in current shell: unset ALL_PROXY all_proxy HTTP_PROXY http_proxy HTTPS_PROXY https_proxy NO_PROXY no_proxy PRO_TOR_*"
+}
+
+# ---- status ----
+do_status() {
+  printf "== pro-tor status (mode=%s) ==\n" "${MODE:-any}"
+  if [ -f "$ENV_FILE" ]; then
+    local target mode
+    target=$(grep -E '^export PRO_TOR_TARGET=' "$ENV_FILE" | head -1 | sed -E 's/.*="(.*)"/\1/')
+    mode=$(grep -E '^export PRO_TOR_MODE=' "$ENV_FILE" | head -1 | sed -E 's/.*="(.*)"/\1/')
+    [ -n "$target" ] && printf "[OK] enabled: mode=%s target=%s\n" "$mode" "$target"
+    if [ -n "$target" ] && tcp_open "${target%:*}" "${target##*:}"; then
+      ok "$target reachable"
+    else
+      warn "$target NOT reachable — IP устарел. Run: pro-tor $mode on"
+    fi
+  else
+    printf "[..] %s not present — proxy OFF\n" "$ENV_FILE"
+  fi
+  if [ "$(systemctl is-active tor.service 2>/dev/null || echo unknown)" = "active" ]; then
+    info "local tor.service is active (127.0.0.1:9050)"
+  else
+    info "local tor.service is NOT active"
+  fi
+}
+
+# ---- verify ----
+do_verify() {
+  local hp="${OVERRIDE_HOST:-}"
+  local port="${OVERRIDE_PORT:-9050}"
+  if [ -z "$hp" ]; then
+    if [ -f "$ENV_FILE" ]; then
+      hp=$(grep -E '^export PRO_TOR_TARGET=' "$ENV_FILE" | head -1 | sed -E 's/.*="(.*)"/\1/')
+      port="${hp##*:}"
+      hp="${hp%:*}"
+    fi
+  fi
+  if [ -z "$hp" ]; then
+    err "no proxy configured; run: pro-tor local|remote on"
+    return 1
+  fi
+  info "verifying $hp:$port ..."
+  has_cmd curl || { err "curl not found"; return 1; }
+  if curl --socks5-hostname "$hp:$port" -s --max-time 10 https://check.torproject.org/ \
+     | grep -qi "Congratulations"; then
+    ok "$hp:$port IS a real Tor exit"
+    return 0
+  else
+    err "$hp:$port responded, but check.torproject.org did NOT confirm Tor"
+    warn "возможно SOCKS5-сервер, который не Tor, или check.torproject.org недоступен"
+    return 1
+  fi
+}
+
+# ---- entrypoint ----
+case "$SUBCMD" in
+  local|remote)
+    case "$ACTION" in
+      on)     do_on ;;
+      off)    do_off ;;
+      status) do_status ;;
+    esac
+    ;;
+  detect)
+    [ -z "$MODE" ] && MODE=remote
+    do_detect
+    ;;
+  verify)  do_verify ;;
+  env)     print_env_lines ;;
+esac
