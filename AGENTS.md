@@ -175,6 +175,31 @@ just network-contract
 Субмодули используются по HTTPS по умолчанию для обеспечения работы всех пользователей,
 даже без SSH-ключей.
 
+#### Политика `just switch` по субмодулям
+
+`just switch` (и `scripts/helper-switch.sh` под ним) **по умолчанию не обновляет**
+субмодули с remote. Решение принимается в три фазы:
+
+| Состояние | Действие |
+|-----------|----------|
+| передан флаг `update-submodules` / `sync` (через `just switch <host> update-submodules`) | `git submodule update --remote --merge` для каждого submodule (sequential, 20s fetch + 10s merge timeout; при сбое WARNING, идём дальше) |
+| `PRO_NIX_NO_SUBMODULE_UPDATE=1` (escape hatch) | ничего не делаем |
+| submodules не инициализированы (`git submodule status` показывает `-`) | `git submodule update --init --recursive` — первичная загрузка |
+| submodules уже инициализированы | **ничего не делаем**, используем то, что лежит в `submodules/` |
+
+Мотивация: `just switch` запускается часто (после каждой правки в `.nix`/`.el`).
+Дёргать `git submodule update --remote` на каждый switch — лишний сетевой round-trip
+и потенциальные конфликты с локальными правками в submodule (dirty check
+заставлял switch падать). Теперь `just switch` — дешёвая операция, а
+явное обновление делается только когда нужно.
+
+Ручное обновление (без switch):
+```bash
+just sync-submodules
+# или напрямую:
+./scripts/sync-submodules.sh
+```
+
 #### Настройка субмодулей по умолчанию (HTTPS)
 
 Процесс создания новой среды:
@@ -182,8 +207,8 @@ just network-contract
 1. Инициализируйте субмодули (HTTPS по умолчанию):
    ```bash
    git submodule update --init --recursive
-   # или через just:
-   just switch
+   # или просто запустите `just switch` — он сам сделает --init --recursive,
+   # если submodules не инициализированы.
    ```
 
 2. Для пользователей, у которых есть SSH-ключ для репозитория, можно локально
@@ -191,7 +216,8 @@ just network-contract
    ```bash
    git config submodule.submodules/agent-shell-hud.url git@github.com:11111000000/agent-shell-hud.git
    git submodule sync
-   git submodule update --remote --merge
+   # Если нужен свежий код сразу:
+   just sync-submodules
    ```
 
 #### Смена всех субмодулей на SSH
@@ -213,11 +239,14 @@ cd pro-nix
 #### Разработка с HTTPS субмодулями (рекомендуется для большинства пользователей)
 
 ```bash
-# Входящие ссылки в .gitmodules уже HTTPS
-# Для clone/pull работы без SSH-ключей:
-git submodule update --remote --merge
+# Входящие ссылки в .gitmodules уже HTTPS.
+# Обновить submodules до свежих main/master:
+just sync-submodules
 # или
-just switch
+git submodule update --remote --merge
+# `just switch` (без флагов) НЕ обновляет submodules — только собирает Nix.
+# Если нужно обновить перед сборкой:
+just switch <host> update-submodules
 ```
 
 #### Изменение субмодуля на SSH в развитии

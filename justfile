@@ -20,8 +20,20 @@ build HOST:
 	# (см. flake-check ниже). `path:` и `.` НЕ включают submodules в captured source.
 	sudo nixos-rebuild build --flake "git+file://$(pwd)?submodules=1#{{HOST}}"
 
-switch HOST='':
-	scripts/switch.sh "{{HOST}}"
+switch HOST='' FLAGS='':
+	# `FLAGS` пробрасывается в scripts/helper-switch.sh вторым аргументом.
+	# Поддерживаемые значения: `update-submodules`, `sync` (включают
+	# обновление submodules с remote перед switch). По умолчанию —
+	# submodules инициализируются (`git submodule update --init --recursive`)
+	# только если их нет; если уже есть — используются как есть. Полная
+	# политика — AGENTS.md §6d и scripts/helper-switch.sh.
+	scripts/switch.sh "{{HOST}}" "{{FLAGS}}"
+
+# Вручную синхронизировать все submodules с их remote main/master.
+# Не запускает switch. Использовать, когда хочется подтянуть свежие
+# emacs-recipes/pro-tabs/telega/... без полной пересборки Nix.
+sync-submodules:
+	scripts/sync-submodules.sh
 
 # Deploy local agent configs (pi/opencode) if missing before switch
 switch-with-agents HOST='':
