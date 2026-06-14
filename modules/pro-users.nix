@@ -88,5 +88,18 @@
     useUserPackages = true;
   };
 
+  # Привязка профиля окружения (NixOS-eval) к HM-опции pro.emacs.gui.enable.
+  # Это единственное место, где NixOS-опция (pro.profiles.exwmMinimal.enable)
+  # превращается в HM-опцию (home-manager.users.<name>.pro.emacs.gui.enable):
+  # прямое присваивание в HM-eval невозможно — `pro.profiles` не определена
+  # в home-manager, и `osConfig` в release-25.11 не пробрасывается через
+  # extraSpecialArgs автоматически. Установка здесь означает, что
+  # ~/.config/pro/exwm-session (генерируется emacs/exwm.nix, гейт cfg.gui.enable)
+  # появляется только на хостах с exwmMinimal-профилем.
+  home-manager.users = builtins.listToAttrs (map (name: {
+    inherit name;
+    value = { pro.emacs.gui.enable = config.pro.profiles.exwmMinimal.enable or false; };
+  }) [ "az" "za" "la" "bo" ]);
+
   imports = [ ./pro-users-nixos.nix ];
 }

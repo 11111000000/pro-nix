@@ -16,7 +16,11 @@
         ++ lib.optional (builtins.hasAttr "telega-server" pkgs) pkgs.telega-server);
         pro.emacs = {
           enable = true;
-          gui.enable = false;
+          # GUI-слой Emacs-профиля (X-сессия, gtk/qt-конфиги,
+          # ~/.config/pro/exwm-session) включается через pro-users.nix
+          # в NixOS-eval, чтобы прочитать config.pro.profiles.exwmMinimal.enable
+          # (NixOS-опция недоступна в HM-eval). На TUI-only хостах /
+          # Termux остаётся default (false).
           providedPackages = [
             "ace-window" "avy" "cape" "consult" "consult-dash" "consult-eglot" "consult-projectile" "consult-yasnippet"
             "corfu" "corfu-posframe" "corfu-terminal" "dash-docs" "docker" "eglot" "elfeed" "expand-region" "gptel"

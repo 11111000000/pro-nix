@@ -20,7 +20,6 @@
 {
   imports = [
     ./session-base.nix
-    ./session-exwm.nix
     ./session-fonts.nix
     ./session-audio.nix
     ./session-cinnamon.nix

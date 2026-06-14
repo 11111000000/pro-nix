@@ -59,7 +59,6 @@
     ./modules/pro-desktop.nix
     ./modules/pro-exwm-desktop.nix
     ./modules/pro-profiles.nix
-    ./modules/session-exwm.nix
     ./modules/pro-emacs-rescue.nix
     ./modules/nix-cuda-compat.nix
     ./modules/zram-slice.nix
