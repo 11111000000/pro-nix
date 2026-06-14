@@ -71,9 +71,7 @@ let
     # http-server.el lives on Codeberg (not MELPA/ELPA), so we provide it
     # via our own recipe. emcp declares `(require 'http-server)' and
     # propagates the dependency, so users get it transparently.
-    http-server = super.callPackage ../emacs-recipes/http-server.nix {
-      trivialBuild = super.emacsPackages.trivialBuild;
-    };
+    http-server = super.callPackage ../emacs-recipes/http-server.nix {};
     acapella = super.callPackage ../emacs-recipes/acapella.nix {};
     atlas = super.callPackage ../emacs-recipes/atlas.nix {};
     tao-theme = super.callPackage ../emacs-recipes/tao-theme.nix {};
