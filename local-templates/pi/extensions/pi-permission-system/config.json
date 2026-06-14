@@ -1,0 +1,82 @@
+{
+  "$schema": "https://raw.githubusercontent.com/gotgenes/pi-permission-system/main/schemas/permissions.schema.json",
+
+  "debugLog": false,
+  "permissionReviewLog": true,
+  "yoloMode": false,
+
+  "piInfrastructureReadPaths": [],
+
+  "permission": {
+    "*": "allow",
+
+    "path": {
+      "*": "allow",
+      "**/.env": "deny",
+      "**/.env.*": "deny",
+      "**/.env.example": "allow",
+      "**/secrets.*": "deny",
+      "**/*.pem": "deny",
+      "**/*.key": "deny",
+      "**/id_rsa*": "deny",
+      "**/id_ed25519*": "deny",
+      "~/.ssh/**": "deny",
+      "~/.aws/**": "deny",
+      "~/.gnupg/**": "deny",
+      "~/.pi/agent/auth.json": "deny",
+      "~/.pi/agent/models.json": "ask"
+    },
+
+    "read": "allow",
+    "write": "allow",
+    "edit": "allow",
+
+    "bash": {
+      "*": "allow",
+
+      "rm -rf *": "deny",
+      "rm -rf /*": "deny",
+      "rm -fr *": "deny",
+      "find * -delete": "deny",
+      "find * -exec rm *": "deny",
+      "dd *": "deny",
+      "mkfs*": "deny",
+      ":(){:|:&};:": "deny",
+
+      "sudo *": "ask",
+      "su - *": "ask",
+      "chmod 777 *": "deny",
+      "chmod -R 777 *": "deny",
+      "chown *": "ask",
+
+      "curl * | sh": "deny",
+      "curl * | bash": "deny",
+      "wget * | sh": "deny",
+      "wget * | bash": "deny",
+
+      "git push *": "ask",
+      "git push --force *": "deny",
+      "git push -f *": "deny",
+      "git reset --hard *": "ask",
+      "git clean -fd *": "ask",
+
+      "npm publish *": "deny",
+      "pnpm publish *": "deny",
+      "yarn publish *": "deny",
+
+      "nix-env *": "ask",
+      "nix-collect-garbage -d *": "deny",
+
+      "systemctl *": "ask",
+      "kill -9 1": "deny",
+      "reboot": "deny",
+      "shutdown *": "deny"
+    },
+
+    "mcp": { "*": "allow" },
+
+    "skill": { "*": "ask" },
+
+    "external_directory": "ask"
+  }
+}
