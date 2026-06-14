@@ -39,12 +39,45 @@ EMACSLOADPATH, который Nix выставляет автоматическ�
   :type '(choice (const minimal) (const shaoline) (const doom))
   :group 'pro-ui-modeline)
 
+(defcustom pro-ui-shaoline-strategy 'auto-timer
+  "Стратегия shaoline-mode по умолчанию.
+- 'auto-timer — кастомная стратегия: 1 Гц таймер обновляет time/battery,
+  но post-command-hook/reassert/advice отключены → нет мигания
+  на каждое нажатие клавиши. Это компромисс между 'yin (замороженные
+  сегменты) и 'adaptive/'yang (мигание echo-area при любом (message ...)).
+- 'yin — обновления только по явному вызову `shaoline-update`.
+- 'adaptive — поведение shaoline по умолчанию (может мигать)."
+  :type '(choice (const auto-timer) (const yin) (const adaptive) (const yang))
+  :group 'pro-ui-modeline)
+
+(defun pro-ui--install-shaoline-strategy ()
+  "Регистрирует кастомную стратегию 'auto-timer' и применяет её.
+Делает shaoline молчаливым: только таймер 1 Гц, без post-command-hook
+и без echo-area-reassert, который конкурирует с (message ...) от других
+команд. Снимает симптом мигания modeline на каждое нажатие клавиши."
+  (when (boundp 'shaoline--strategies)
+    ;; Стратегия 'auto-timer' = yin по хукам/advice/reassert, но с
+    ;; таймером 1 Гц для time/battery. hide-modelines оставлен
+    ;; пользовательской настройке `shaoline-hide-modeline'.
+    (unless (assq 'auto-timer shaoline--strategies)
+      (setq shaoline--strategies
+            (cons '(auto-timer
+                    . ((update-method  . automatic)
+                       (use-hooks      . nil)
+                       (use-advice     . nil)
+                       (use-timers     . t)
+                       (always-visible . nil)
+                       (hide-modelines . nil)))
+                  shaoline--strategies))))
+  (setq shaoline-mode-strategy 'auto-timer))
+
 (defun pro-ui--enable-shaoline-if-available ()
   "Включает shaoline, если выбран стиль 'shaoline' и пакет доступен.
 Функция безопасна к вызову в ранней инициализации — использует require с
 nil t и with-eval-after-load для отложенной настройки." 
   (when (and (eq pro-ui-modeline-style 'shaoline) (require 'shaoline nil t))
     (with-eval-after-load 'shaoline
+      (pro-ui--install-shaoline-strategy)
       (when (fboundp 'shaoline-mode) (shaoline-mode 1)))))
 
 (defun pro-ui--enable-doom-if-available ()
