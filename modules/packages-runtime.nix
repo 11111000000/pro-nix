@@ -62,6 +62,7 @@
     tree
     htop
     lsof
+    file
     ncdu
     time
 
