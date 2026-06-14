@@ -60,11 +60,15 @@ frame's font — enough to clear the mode-line or first line of text."
   "Show VCS branch (magit or vc) in the banner."
   :type 'boolean :group 'pro-buffer-banner)
 
-(defcustom pro-buffer-banner-debounce 0
+(defcustom pro-buffer-banner-debounce 1.6
   "Minimum seconds between successive banners. 0 means no debounce —
 the banner re-shows on every buffer/window switch so the visible time
 stays constant regardless of how fast you switch. Set to a positive
-value to throttle re-shows (e.g. 0.05) if you see flicker."
+value to throttle re-shows (e.g. 0.05) if you see flicker.
+Default is 1.6 (matches `pro-buffer-banner-duration') so the banner
+shows once per typing/window-burst and then fades smoothly without
+restarting on every minibuffer open/close. Set to 0 only if you want
+the old per-event flicker behaviour back."
   :type 'number :group 'pro-buffer-banner)
 
 (defcustom pro-buffer-banner-initial-alpha 95
