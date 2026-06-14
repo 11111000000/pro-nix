@@ -8,14 +8,42 @@
 ;;  4. Buffer naming — exwm-update-title-hook → «TITLE — CLASS»
 ;;  5. Input methods — настраивает default-input-method для Emacs-IM
 ;;     (toggle по C-\) и пробрасывает XKB-layout в X-клиенты через
-;;     exwm-xim. Эти два слоя НЕ пересекаются:
+;;     exwm-x (бывший exwm-xim). Эти два слоя НЕ пересекаются:
 ;;     - Emacs-IM (russian-computer) работает в Emacs-окнах, переключается
 ;;       по C-\ (toggle-input-method; см. emacs-keys.org).
 ;;     - XKB-раскладка (us,ru с grp:toggle из session-base.nix — Right Alt)
-;;       работает в X-приложениях через exwm-xim.
+;;       работает в X-приложениях через exwm-x.
 ;;
-;; EXWM is provided via Nix (emacsPackages.exwm + emacsPackages.exwm-xim)
-;; so require succeeds immediately — no MELPA fallback needed.
+;; EXWM and its required packages (xelb, exwm-x for IME) are listed in
+;; modules/pro-users-nixos.nix:providedPackages. They land on
+;; EMACSLOADPATH via emacs/core.nix:allLoadPaths and into
+;; home.packages via availableProvidedNix. If you see a log entry
+;; "EXWM NOT FOUND ON LOAD-PATH" in ~/.cache/emacs-startup/exwm.log,
+;; the package is missing from providedPackages — re-run
+;; `just switch` and verify the Nix profile.
+
+(defvar pro-exwm--log-file
+  (expand-file-name "exwm.log"
+                    (or (getenv "EMACS_STARTUP_LOG_DIR")
+                        (expand-file-name ".cache/emacs-startup" (getenv "HOME"))))
+  "Where pro-exwm.el writes diagnostic messages.
+Mirrors EMACS_STARTUP_LOG_DIR from emacs/exwm.nix so a missing EXWM
+package is logged even when exwm-session-start has already taken
+over the exwm-session log file.")
+
+(defun pro-exwm--log (fmt &rest args)
+  "Append a line to `pro-exwm--log-file'. Creates parent dir if needed.
+FORMAT and ARGS are forwarded to `format'."
+  (condition-case _err
+      (let ((dir (file-name-directory pro-exwm--log-file)))
+        (unless (file-directory-p dir)
+          (make-directory dir t))
+        (with-temp-buffer
+          (insert (format-time-string "[%F %T%z] "))
+          (insert (apply #'format fmt args))
+          (insert "\n")
+          (append-to-file (point-min) (point-max) pro-exwm--log-file)))
+    (error nil)))
 
 ;; ── Buffer naming ────────────────────────────────────────────────────────
 
@@ -133,11 +161,14 @@ GDM может добавлять префикс \='none+' к имени сес�
   (interactive)
   (when (pro-exwm--session-p)
     ;; EXWM is provided by Nix — require should succeed immediately.
-    (condition-case err
-        (require 'exwm)
-      (error
-       (message "[pro-exwm] failed to load EXWM: %s" err)
-       (cl-return-from pro-exwm-start-session)))
+    ;; If it doesn't, the `pro.emacs.providedPackages` list in
+    ;; modules/pro-users-nixos.nix is missing "exwm" / "xelb".
+    ;; Log to disk so a stuck session can be diagnosed after the fact.
+    (unless (require 'exwm nil t)
+      (let ((err "exwm feature not provided on load-path"))
+        (message "[pro-exwm] %s" err)
+        (pro-exwm--log "EXWM NOT FOUND ON LOAD-PATH: %s" err)
+        (cl-return-from pro-exwm-start-session)))
 
     ;; Configure EXWM before activating the minor mode.
     ;; exwm-wm-mode reads these variables during init.
@@ -162,7 +193,9 @@ GDM может добавлять префикс \='none+' к имени сес�
     (pro-exwm-install-title-rename-hook)
 
     ;; Enable system tray BEFORE exwm-wm-mode so tray starts with the WM.
-    ;; exwm-systemtray-mode is autoloaded from the exwm package.
+    ;; exwm-systemtray was split off the main exwm package in nixpkgs
+    ;; 21.11 and removed in nixpkgs 25.x (folded back into exwm core).
+    ;; The fboundp check below handles both old and new worlds.
     (condition-case nil
         (require 'exwm-systemtray)
       (error nil))
@@ -171,14 +204,18 @@ GDM может добавлять префикс \='none+' к имени сес�
 
     ;; Enable X Input Method (IME) for multi-language text input in X apps.
     ;; This is what makes layout switching work in Firefox, terminals, etc.
-    ;; Note: exwm-xim bridges the *system XKB layout* into X clients — it does
-    ;; NOT expose Emacs' own `input-method' (russian-computer etc.) to X apps.
-    ;; For Emacs-internal text input, set `default-input-method' below.
-    (condition-case nil
-        (require 'exwm-xim)
-      (error nil))
-    (when (fboundp 'exwm-xim-mode)
-      (exwm-xim-mode 1))
+    ;; Note: exwm-x (formerly exwm-xim) bridges the *system XKB layout*
+    ;; into X clients — it does NOT expose Emacs' own `input-method'
+    ;; (russian-computer etc.) to X apps.  For Emacs-internal text
+    ;; input, set `default-input-method' below.
+    ;; In nixpkgs 25.11 the package was renamed: exwm-xim → exwm-x.
+    ;; Try the new name first, then the legacy one; ignore if absent.
+    (unless (require 'exwm-x nil t)
+      (condition-case nil (require 'exwm-xim) (error nil)))
+    (let ((xim-fn (or (and (fboundp 'exwm-x-mode) 'exwm-x-mode)
+                      (and (fboundp 'exwm-xim-mode) 'exwm-xim-mode))))
+      (when xim-fn
+        (funcall xim-fn 1)))
 
     ;; Pick an Emacs-side input method so that `C-\' (toggle-input-method)
     ;; has something to toggle inside Emacs buffers.  We default to
@@ -232,7 +269,15 @@ GDM может добавлять префикс \='none+' к имени сес�
     (message "[pro-exwm] session started (workspaces: %d, systemtray: %s, xim: %s)"
              exwm-workspace-number
              (if (and (boundp 'exwm-systemtray-mode) exwm-systemtray-mode) "on" "off")
-             (if (and (boundp 'exwm-xim-mode) exwm-xim-mode) "on" "off"))))
+             (let ((mode (or (and (boundp 'exwm-x-mode) 'exwm-x-mode)
+                             (and (boundp 'exwm-xim-mode) 'exwm-xim-mode))))
+               (if (and mode (symbol-value mode)) "on" "off")))
+    (pro-exwm--log "session started: workspaces=%d systemtray=%s xim=%s"
+                   exwm-workspace-number
+                   (if (and (boundp 'exwm-systemtray-mode) exwm-systemtray-mode) "on" "off")
+                   (let ((mode (or (and (boundp 'exwm-x-mode) 'exwm-x-mode)
+                                   (and (boundp 'exwm-xim-mode) 'exwm-xim-mode))))
+                     (if (and mode (symbol-value mode)) "on" "off")))))
 
 ;; ── Urxvt bottom-sidebar toggle ────────────────────────────────────────────
 ;;
