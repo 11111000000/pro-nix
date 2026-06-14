@@ -1,0 +1,110 @@
+# i3 config — pro-nix default (modules/session-i3.nix → conf/i3-config.in).
+# Single source of truth: читается NixOS-модулем (system-wide /etc/i3/config)
+# и home-manager-модулем (per-user ~/.config/i3/config).
+#
+# Mod4 = Super (Win) — не конфликтует с EXWM global keys (s-... в emacs-keys.org).
+# Биндинги в стиле EXWM/Sway (h/j/k/l focus/move — как в EXWM s-h/j/k/l).
+# Polybar config (status bar) — отдельный файл через environment.etc в
+# session-i3.nix (только системный уровень, без per-user override).
+
+set $mod Mod4
+set $alt Mod1
+set $terminal xterm
+set $menu dmenu_run
+set $browser firefox
+
+# Font.
+font pango:monospace 9
+
+# Floating modifier.
+floating_modifier $mod
+
+# === Keybindings (EXWM/Sway-стиль) ===
+bindsym $mod+Return exec $terminal
+bindsym $mod+Space exec $menu
+bindsym $mod+q kill
+bindsym $mod+Shift+q kill
+bindsym $mod+Shift+e exec i3-nagbar -t warning -m 'Logout?' -B 'Yes' 'i3-msg exit'
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+r restart
+
+# Focus / Move (как EXWM s-h/j/k/l windmove, s-H/J/K/L buf-move).
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+bindsym $mod+Shift+h move left
+bindsym $mod+Shift+j move down
+bindsym $mod+Shift+k move up
+bindsym $mod+Shift+l move right
+# Дублирующие биндинги стрелками.
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+# Workspaces (1..9).
+bindsym $mod+1 workspace number 1
+bindsym $mod+2 workspace number 2
+bindsym $mod+3 workspace number 3
+bindsym $mod+4 workspace number 4
+bindsym $mod+5 workspace number 5
+bindsym $mod+6 workspace number 6
+bindsym $mod+7 workspace number 7
+bindsym $mod+8 workspace number 8
+bindsym $mod+9 workspace number 9
+bindsym $mod+Shift+1 move container to workspace number 1
+bindsym $mod+Shift+2 move container to workspace number 2
+bindsym $mod+Shift+3 move container to workspace number 3
+bindsym $mod+Shift+4 move container to workspace number 4
+bindsym $mod+Shift+5 move container to workspace number 5
+bindsym $mod+Shift+6 move container to workspace number 6
+bindsym $mod+Shift+7 move container to workspace number 7
+bindsym $mod+Shift+8 move container to workspace number 8
+bindsym $mod+Shift+9 move container to workspace number 9
+
+# Layout (как в EXWM: b=split-h, v=split-v, s=stacking, w=tabbed, e=toggle-split).
+default_orientation vertical
+bindsym $mod+b splith
+bindsym $mod+v splitv
+bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
+
+# Floating / fullscreen.
+bindsym $mod+Shift+space floating toggle
+bindsym $mod+space focus mode_toggle
+bindsym $mod+f fullscreen
+
+# Resize (mode).
+mode "resize" {
+  bindsym Left resize shrink width 20px or 20ppt
+  bindsym Down resize grow height 20px or 20ppt
+  bindsym Up resize shrink height 20px or 20ppt
+  bindsym Right resize grow width 20px or 20ppt
+  bindsym Escape mode "default"
+}
+bindsym $mod+r mode "resize"
+
+# Status bar: polybar (конфиг в /etc/polybar/config.ini, развёрнут через
+# environment.etc в session-i3.nix).
+bar {
+  status_command polybar --reload example
+  position top
+  height 24
+}
+
+# Title bar: убираем.
+for_window [class=".*"] title_format ""
+
+# Gaps: визуально отделяем окна (как в Sway-конфиге).
+gaps inner 4
+gaps outer 4
+
+# Autostart.
+exec --no-startup-id dex --autostart --environment i3
+exec --no-startup-id dunst

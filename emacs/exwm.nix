@@ -174,6 +174,18 @@ in
       '';
       executable = true;
     };
+
+    # Per-user копии системных /etc/{sway,i3}/config (один файл читается
+    # и в NixOS-модуле, и здесь, через conf/*-config.in). Sway/i3 ищут
+    # сначала ~/.config/<wm>/config — per-user override выигрывает над
+    # /etc/<wm>/config. Без home-manager-управляемого файла пользователь
+    # видит пустой ~/.config/sway/ (системный fallback в /etc/sway/config
+    # работает, но ls показывает только symlink → /etc/static/sway/config).
+    # С этим блоком конфиг лежит "в своей директории" и редактируется
+    # стандартным способом (без nixos-rebuild, но с предупреждением что
+    # изменения перезапишутся при следующем switch).
+    home.file.".config/sway/config".text = builtins.readFile ../conf/sway-config.in;
+    home.file.".config/i3/config".text = builtins.readFile ../conf/i3-config.in;
     })
   ];
 }

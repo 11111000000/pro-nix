@@ -1,0 +1,139 @@
+# Sway config — pro-nix default (modules/session-sway.nix → conf/sway-config.in).
+# Single source of truth: читается NixOS-модулем (system-wide /etc/sway/config)
+# и home-manager-модулем (per-user ~/.config/sway/config).
+#
+# Mod4 = Super (Win) — не конфликтует с EXWM global keys (s-... в emacs-keys.org)
+# и не используется в Emacs.
+#
+# Биндинги в стиле EXWM, где применимо (h/j/k/l как Vim/EXWM):
+#   Mod4+h/j/k/l        — focus left/down/up/right (как EXWM s-h/j/k/l windmove)
+#   Mod4+Shift+h/j/k/l  — move window (как EXWM s-H/J/K/L buf-move)
+#   Mod4+Return         — terminal (foot)
+#   Mod4+Space          — app launcher (wofi). НЕ Mod4+d, чтобы не конфликтовать
+#                          с EXWM s-d = treemacs.
+#   Mod4+q              — close window
+#   Mod4+1..9           — workspace 1..9
+#   Mod4+Shift+1..9     — move window to workspace
+#   Mod4+b/v            — split horizontal/vertical
+#   Mod4+s/w/e          — layout stacking/tabbed/toggle-split
+#   Mod4+r              — resize mode
+#   Mod4+f              — fullscreen
+#   Mod4+Shift+c/r      — reload/restart
+#   Mod4+Escape         — lock (swaylock)
+
+set $mod Mod4
+set $alt Mod1
+set $terminal foot
+set $menu wofi --show drun --insensitive --prompt "search "
+set $browser firefox
+
+# Output: пусть Sway сам выберет режим через wlr-randr.
+output * adaptive_sync on
+
+# Input: базовые настройки, без переназначения Caps (это делает
+# XKB из session-base.nix одинаково для EXWM/i3/Sway).
+input type:keyboard {
+  xkb_layout "us,ru"
+  xkb_options "ctrl:nocaps,grp:toggle,grp_led:caps"
+}
+input type:touchpad {
+  tap enabled
+  natural_scroll enabled
+}
+
+# Автозапуск: status bar + notifications + XDG env для X11-приложений.
+exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway XDG_SESSION_DESKTOP=sway
+exec waybar
+exec mako
+
+# === Keybindings (EXWM-стиль) ===
+floating_modifier $mod normal
+bindsym $mod+Return exec $terminal
+bindsym $mod+Space exec $menu
+bindsym $mod+q kill
+bindsym $mod+Shift+q kill
+bindsym $mod+Shift+e exec swaynag \
+  -t warning \
+  -m 'What do you want to do?' \
+  -B 'Logout' 'swaymsg exit' \
+  -B 'Reboot' 'systemctl reboot' \
+  -B 'Shutdown' 'systemctl poweroff'
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+r restart
+
+# Focus / Move (как EXWM s-h/j/k/l windmove, s-H/J/K/L buf-move).
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+bindsym $mod+Shift+h move left
+bindsym $mod+Shift+j move down
+bindsym $mod+Shift+k move up
+bindsym $mod+Shift+l move right
+# Дублирующие биндинги стрелками (для ноутбуков/раскладок без h/j/k/l).
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+# Workspaces (стандартно 1..9).
+bindsym $mod+1 workspace number 1
+bindsym $mod+2 workspace number 2
+bindsym $mod+3 workspace number 3
+bindsym $mod+4 workspace number 4
+bindsym $mod+5 workspace number 5
+bindsym $mod+6 workspace number 6
+bindsym $mod+7 workspace number 7
+bindsym $mod+8 workspace number 8
+bindsym $mod+9 workspace number 9
+bindsym $mod+Shift+1 move container to workspace number 1
+bindsym $mod+Shift+2 move container to workspace number 2
+bindsym $mod+Shift+3 move container to workspace number 3
+bindsym $mod+Shift+4 move container to workspace number 4
+bindsym $mod+Shift+5 move container to workspace number 5
+bindsym $mod+Shift+6 move container to workspace number 6
+bindsym $mod+Shift+7 move container to workspace number 7
+bindsym $mod+Shift+8 move container to workspace number 8
+bindsym $mod+Shift+9 move container to workspace number 9
+
+# Layout (те же клавиши, что в EXWM: b=split-h, v=split-v, s=stacking,
+# w=tabbed, e=toggle-split).
+bindsym $mod+b splith
+bindsym $mod+v splitv
+bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
+default_orientation vertical
+
+# Floating / fullscreen / lock.
+bindsym $mod+Shift+space floating toggle
+bindsym $mod+space focus mode_toggle
+bindsym $mod+f fullscreen
+bindsym $mod+Escape exec swaylock -f -c 000000
+
+# Resize (mode).
+mode "resize" {
+  bindsym Left resize shrink width 20px
+  bindsym Down resize grow height 20px
+  bindsym Up resize shrink height 20px
+  bindsym Right resize grow height 20px
+  bindsym Escape mode "default"
+}
+bindsym $mod+r mode "resize"
+
+# Screenshot.
+bindsym Print exec grim ~/Pictures/screenshot-$$(date +%Y%m%d-%H%M%S).png
+bindsym $mod+Print exec grim -g "$$(slurp)" ~/Pictures/screenshot-$$(date +%Y%m%d-%H%M%S).png
+
+# Hide cursor.
+seat seat0 cursor hide_when_typing enabled
+
+# Title bar: убираем (waybar показывает всё что нужно).
+for_window [class=".*"] title_format ""
+default_border pixel 2
+gaps inner 4
+gaps outer 4
