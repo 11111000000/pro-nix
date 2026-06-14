@@ -18,6 +18,30 @@
          (expand-file-name "submodules/emcp" repo-root)))
   "Путь к EMCP submodule. Вычисляется относительно расположения этого файла в репозитории.")
 
+(defvar pro-agent-shell--core-path
+  (let* ((this-file (or load-file-name
+                        (and (boundp 'byte-compile-current-file) byte-compile-current-file)
+                        buffer-file-name))
+         (module-dir (and this-file (file-name-directory this-file)))
+         (repo-root (and module-dir
+                         (locate-dominating-file module-dir ".git"))))
+    (and repo-root
+         (expand-file-name "submodules/agent-shell" repo-root)))
+  "Путь к agent-shell submodule. Вычисляется относительно расположения этого файла в репозитории.
+
+Используется в самом конце этого модуля (см. блок
+\"Submodule override\") для `load-file' submodule-версии
+`agent-shell-ui.el'.  Это rebinds `agent-shell-ui-*' defuns (включая
+`agent-shell-ui--append-body', который держит фикс дублирования
+thinking-чанков) поверх MELPA-версии, не трогая load-path и не
+ломая `require' паттерны других модулей.
+
+На горячем reload (`M-x pro/reload-config') top-level код модуля
+выполняется заново, и `load-file' внизу перебиндит функции из
+submodule-версии — даже если feature `agent-shell' уже загружен из
+MELPA.  Это нужно, чтобы локальные правки в submodule
+(например, `agent-shell-ui.el') подхватывались без `kill-emacs'.")
+
 (defvar-local pro-agent-shell--project-name-cache nil
   "Cached enriched project name: (CACHE-KEY . VALUE).
 CACHE-KEY is (DIR . HEAD-MTIME); refreshed only when HEAD changes.")
@@ -375,6 +399,33 @@ CPU and GC pressure while keeping the header fresh enough to be useful."
 ;; keyed on (DIR . HEAD-MTIME); if a user edits the project's
 ;; `pro-agent-shell--project-name' logic, the next call will compute
 ;; fresh against the new code and the new key.
+
+;; ---------------------------------------------------------------------------
+;; Submodule override: load the agent-shell submodule's `agent-shell-ui.el'
+;; last, after all top-level `require' calls above have run.  The submodule
+;; path is NOT pushed onto `load-path' here — only the explicit file is
+;; loaded.  This rebinds `agent-shell-ui-*' defuns (notably
+;; `agent-shell-ui--append-body' and friends) to the submodule's version
+;; even when the `agent-shell' feature was loaded from a different
+;; directory (MELPA, Nix site-lisp) earlier in startup.  Effect: local
+;; edits in `submodules/agent-shell/agent-shell-ui.el' take effect on
+;; `M-x pro/reload-config' without restarting Emacs.
+;;
+;; Position matters: this block runs AFTER the top-level
+;; `(when (require 'agent-shell nil t) ...)' calls above (lines ~109 and
+;; ~118).  Emacs has a quirk where the first failed `(require FEATURE
+;; nil t)' returns nil silently, but subsequent calls re-raise the cached
+;; file-error.  If we pushed the submodule to `load-path' earlier, those
+;; later `require' calls would re-signal the `acp' load error (the
+;; submodule's `agent-shell.el' requires `acp').  By running this block
+;; at the very end, we don't perturb the existing `require' behaviour.
+(when (and pro-agent-shell--core-path
+           (file-directory-p pro-agent-shell--core-path)
+           (file-readable-p (expand-file-name "agent-shell-ui.el"
+                                              pro-agent-shell--core-path)))
+  (condition-case _err
+      (load-file (expand-file-name "agent-shell-ui.el" pro-agent-shell--core-path))
+    (error nil)))
 
 (provide 'pro-agent-shell)
 
