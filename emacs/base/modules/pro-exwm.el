@@ -282,8 +282,27 @@ GDM может добавлять префикс \='none+' к имени сес�
 ;; ── Urxvt bottom-sidebar toggle ────────────────────────────────────────────
 ;;
 ;; Spawns `urxvt' as a child X window and, after EXWM manages it, uses
-;; `xdotool' to position it as a sidebar at the bottom of the screen.  A
-;; second invocation closes the X client and clears the state.
+;; `xdotool' to position it as a sidebar at the bottom of the screen.
+;;
+;; Toggle states (driven by `pro-exwm-urxvt--hidden' + pid-alive check):
+;;
+;;   nil  ─press→  spawn + show  (новое окно, `default-directory')
+;;   shown  ─press→  hide  (`windowunmap', процесс жив)
+;;   hidden ─press→  show  (`windowmap' + re-position + activate)
+;;
+;; Процесс сохраняется между hide→show — scrollback и shell-state
+;; переживают цикл.  Когда процесс реально умирает (sentinel на
+;; `exit', kill извне), следующий press спавнит новый.
+;;
+;; Working directory: на первом spawn'е передаём `-cd <default-directory>'
+;; текущего Emacs-буфера (dired → директория буфера, file-buffer →
+;; директория файла).  TRAMP-пути (`/ssh:host:/...') urxvt не поймёт —
+;; fallback на $HOME через `pro-exwm-urxvt--initial-directory'.
+;;
+;; Focus: `xdotool windowactivate' встроен в `pro-exwm-urxvt--position',
+;; поэтому urxvt получает X-server focus сразу после позиционирования.
+;; Это убирает симптом «read-only» — после toggle'а ввод идёт в urxvt,
+;; а не остаётся в Emacs-буфере.
 ;;
 ;; Why xdotool:  EXWM manages X windows itself and does not expose a
 ;; built-in "set position/size" function for non-floating windows.  A
@@ -299,13 +318,19 @@ GDM может добавлять префикс \='none+' к имени сес�
 
 (defvar pro-exwm-urxvt--pid nil
   "PID of the toggled urxvt sidebar process, or nil if not running.
-Хранится для надёжного закрытия: xdotool windowclose может быть
-перехвачен EXWM, а delete-process по известному PID — нет.")
+Хранится для надёжного отслеживания: `pid-alive-p' — единственный
+надёжный признак, что процесс ещё крутится (X-окно мог убить сам
+пользователь или оно упало).")
 
 (defvar pro-exwm-urxvt--pending nil
   "Non-nil если urxvt был заспавнен, но exwm-manage-finish-hook ещё не
 присвоил id. Защищает от race condition: повторный C-M-\` пока hook не
 сработал — noop, а не второй spawn.")
+
+(defvar pro-exwm-urxvt--hidden nil
+  "Non-nil если urxvt-окно было спрятано (`windowunmap'), но процесс жив.
+Toggle hide→show: `windowmap' + re-position.  Hide→close идёт через
+SIGTERM и сбрасывает флаг.")
 
 (defvar pro-exwm-urxvt--program "urxvt"
   "Program used by `pro/exwm-urxvt-toggle' to spawn the urxvt sidebar.")
@@ -336,8 +361,20 @@ GDM может добавлять префикс \='none+' к имени сес�
         (when (looking-at "[0-9a-fA-F]+")
           (string-to-number (match-string 0) 16))))))
 
+(defun pro-exwm-urxvt--initial-directory ()
+  "Return a local filesystem directory to pass to urxvt's `-cd' flag.
+Берём `default-directory' текущего буфера; для remote/TRAMP путей
+и любых «мусорных» значений — fallback на $HOME."
+  (let ((dir (and (stringp default-directory) default-directory)))
+    (if (and dir (not (file-remote-p dir))
+             (file-directory-p dir))
+        (file-name-as-directory dir)
+      (file-name-as-directory (or (getenv "HOME") "~")))))
+
 (defun pro-exwm-urxvt--position (id)
-  "Move/resize the X window ID to occupy the bottom sidebar slot."
+  "Move/resize/raise/activate the X window ID to the bottom sidebar slot.
+`windowactivate' отдаёт X-server focus в urxvt — иначе после toggle'а
+фокус остаётся в Emacs и ввод «не идёт» (симптом read-only)."
   (when (and id (integerp id))
     (let* ((geom (pro-exwm-urxvt--read-display))
            (w (car geom))
@@ -347,17 +384,21 @@ GDM может добавлять префикс \='none+' к имени сес�
            (hex (format "0x%x" id)))
       (pro-exwm-urxvt--run-xdotool "windowmove" hex "0" (number-to-string sidebar-y))
       (pro-exwm-urxvt--run-xdotool "windowsize" hex (number-to-string w) (number-to-string sidebar-h))
-      (pro-exwm-urxvt--run-xdotool "windowraise" hex))))
+      (pro-exwm-urxvt--run-xdotool "windowraise" hex)
+      (pro-exwm-urxvt--run-xdotool "windowactivate" hex))))
 
 (defun pro-exwm-urxvt--on-manage ()
-  "Hook: reposition the urxvt sidebar after EXWM has finished managing it."
+  "Hook: configure the urxvt sidebar after EXWM has finished managing it.
+Ставит `pro-exwm-urxvt--id' и сбрасывает `pro-exwm-urxvt--hidden'
+(свеже-замапленное окно не может быть скрытым).  Позиционирование
+отложено на +50ms — X-окно может быть не полностью mapped в момент
+fire'а хука."
   (when (and (boundp 'exwm-class-name) (string= exwm-class-name "URxvt")
              (boundp 'exwm-title) (string= exwm-title "pro-urxvt-sidebar")
              (boundp 'exwm-id) (integerp exwm-id))
     (setq pro-exwm-urxvt--id exwm-id
-          pro-exwm-urxvt--pending nil)
-    ;; Defer the move/resize a tick: the window may not be mapped yet
-    ;; when `exwm-manage-finish-hook' fires.
+          pro-exwm-urxvt--pending nil
+          pro-exwm-urxvt--hidden nil)
     (run-with-timer 0.05 nil
                     (lambda () (pro-exwm-urxvt--position pro-exwm-urxvt--id)))))
 
@@ -373,64 +414,100 @@ GDM может добавлять префикс \='none+' к имени сес�
        (zerop (call-process "sh" nil nil nil "-c"
                             (format "kill -0 %d 2>/dev/null" pid)))))
 
+(defun pro-exwm-urxvt--show (id)
+  "Show a previously hidden urxvt sidebar.
+`windowmap' возвращает unmap'нутое окно на экран; position+activate
+применяется с 50ms задержкой (EXWM может пересчитать фрейм).  Noop
+для невалидного ID."
+  (when (and id (integerp id))
+    (pro-exwm-urxvt--run-xdotool "windowmap" (format "0x%x" id))
+    (run-with-timer 0.05 nil
+                    (lambda () (pro-exwm-urxvt--position id))))
+  (setq pro-exwm-urxvt--hidden nil)
+  (message "[pro-exwm] urxvt sidebar shown (pid=%d)" pro-exwm-urxvt--pid))
+
+(defun pro-exwm-urxvt--hide (id)
+  "Hide the urxvt sidebar without killing the process.
+Используется для toggle hide→show без потери scrollback и shell state.
+Следующий C-M-\` поднимет окно обратно через `pro-exwm-urxvt--show'."
+  (when (and id (integerp id))
+    (pro-exwm-urxvt--run-xdotool "windowunmap" (format "0x%x" id)))
+  (setq pro-exwm-urxvt--hidden t)
+  (message "[pro-exwm] urxvt sidebar hidden (pid=%d)" pro-exwm-urxvt--pid))
+
 (defun pro/exwm-urxvt-toggle ()
   "Toggle the urxvt bottom sidebar in EXWM.
-First call: spawns `urxvt' (`-name pro-urxvt-sidebar -title pro-urxvt-sidebar')
-and positions it as a 40% bottom sidebar.
-Second call: closes the running X client and clears state.
-No-op outside EXWM.
+
+Цикл: spawn → hide → show → hide → …
+
+First call:  спавнит `urxvt' (`-name pro-urxvt-sidebar -title
+pro-urxvt-sidebar -cd <default-directory>') и позиционирует как
+40% нижний sidebar.  Рабочая директория — `default-directory'
+текущего буфера (или $HOME для TRAMP-путей).
+
+Second call:  прячет X-окно (`windowunmap'); процесс продолжает
+жить, scrollback и shell-state сохраняются.
+
+Third call:  поднимает то же самое окно (`windowmap' + re-position
++ activate).
+
+Pid-alive — single source of truth.  Если urxvt умер (пользователь
+сделал `exit' внутри, или X-окно убили извне), следующий C-M-\`
+заспавнит новый.
 
 Race-condition защита: пока `exwm-manage-finish-hook' не присвоил
-`pro-exwm-urxvt--id', повторный C-M-\` — noop (см. `pro-exwm-urxvt--pending').
-Закрытие: предпочитаем `delete-process' по известному PID
-(надёжнее xdotool windowclose для EXWM-управляемых окон)."
+`pro-exwm-urxvt--id', повторный C-M-\` — noop.
+
+No-op outside EXWM."
   (interactive)
   (unless (and (fboundp 'exwm-wm-mode) exwm-wm-mode)
     (user-error "pro/exwm-urxvt-toggle: EXWM is not running"))
   (let* ((id pro-exwm-urxvt--id)
          (pid pro-exwm-urxvt--pid)
-         (pid-alive (pro-exwm-urxvt--pid-alive-p pid)))
+         (pid-alive (pro-exwm-urxvt--pid-alive-p pid))
+         (hidden pro-exwm-urxvt--hidden))
     (cond
-     ;; Процесс жив (и наш id/pid валидны) → закрыть
-     (pid-alive
-      (condition-case nil
-          (progn
-            (signal-process pid 'SIGTERM)
-            ;; SIGTERM может игнорироваться — fallback на SIGKILL через 0.2s
-            (run-with-timer 0.2 nil
-                            (lambda ()
-                              (when (pro-exwm-urxvt--pid-alive-p pid)
-                                (signal-process pid 'SIGKILL)))))
-        (error nil))
-      (setq pro-exwm-urxvt--id nil
-            pro-exwm-urxvt--pid nil
-            pro-exwm-urxvt--pending nil)
-      (message "[pro-exwm] urxvt sidebar closed (pid=%d)" pid))
      ;; Недавно спавнили и ждём manage hook → noop
      (pro-exwm-urxvt--pending
       (message "[pro-exwm] urxvt sidebar pending (waiting for EXWM hook)"))
-     ;; Ничего нет → спавнить
+     ;; Процесс жив, окно скрыто → показать
+     ((and pid-alive hidden)
+      (pro-exwm-urxvt--show id))
+     ;; Процесс жив, окно видно → скрыть
+     (pid-alive
+      (pro-exwm-urxvt--hide id))
+     ;; Процесс мёртв (или не было) → спавнить
      (t
       (setq pro-exwm-urxvt--id nil
             pro-exwm-urxvt--pid nil
-            pro-exwm-urxvt--pending t)
-      (let ((proc (start-process
-                   "pro-urxvt-sidebar" nil
-                   pro-exwm-urxvt--program
-                   "-name" "pro-urxvt-sidebar"
-                   "-title" "pro-urxvt-sidebar")))
-        (when (processp proc)
-          (setq pro-exwm-urxvt--pid (process-id proc))
-          ;; Если процесс сам упал до manage hook — сбрасываем pending
-          (set-process-sentinel
-           proc
-           (lambda (_p _event)
-             (when (eq (process-status proc) 'exit)
-               (setq pro-exwm-urxvt--id nil
-                     pro-exwm-urxvt--pid nil
-                     pro-exwm-urxvt--pending nil)))))
-        (message "[pro-exwm] urxvt sidebar spawned (pid=%s)"
-                 (if (processp proc) (process-id proc) "?")))))))
+            pro-exwm-urxvt--pending t
+            pro-exwm-urxvt--hidden nil)
+      (let* ((dir (pro-exwm-urxvt--initial-directory))
+             (proc (start-process
+                    "pro-urxvt-sidebar" nil
+                    pro-exwm-urxvt--program
+                    "-name" "pro-urxvt-sidebar"
+                    "-title" "pro-urxvt-sidebar"
+                    "-cd" dir)))
+        (if (processp proc)
+            (progn
+              (setq pro-exwm-urxvt--pid (process-id proc))
+              ;; Если процесс сам упал до manage hook или между hide/show
+              ;; (sentinel получит exit в обоих случаях) — сбрасываем
+              ;; state, чтобы следующий press спавнил новый.
+              (set-process-sentinel
+               proc
+               (lambda (_p _event)
+                 (when (eq (process-status proc) 'exit)
+                   (setq pro-exwm-urxvt--id nil
+                         pro-exwm-urxvt--pid nil
+                         pro-exwm-urxvt--pending nil
+                         pro-exwm-urxvt--hidden nil))))
+              (message "[pro-exwm] urxvt sidebar spawned in %s (pid=%d)"
+                       dir (process-id proc)))
+          (setq pro-exwm-urxvt--pending nil
+                pro-exwm-urxvt--hidden nil)
+          (message "[pro-exwm] urxvt sidebar spawn FAILED (cd=%s)" dir)))))))
 
 ;; ── Init hooks ───────────────────────────────────────────────────────────
 ;;
