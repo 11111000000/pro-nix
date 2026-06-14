@@ -33,7 +33,12 @@
 
   services.displayManager.sessionPackages = [
     (pkgs.runCommand "pro-exwm-xsession" { passthru.providedSessions = [ "exwm" ]; } ''
-      mkdir -p $out/share/xsessions $out/share/wayland-sessions
+      mkdir -p $out/share/xsessions
+      # EXWM — X11-only compositor. Симлинк в wayland-sessions убираем,
+      # чтобы Sway/SDDM не предлагали "EXWM" в Wayland-меню (при выборе
+      # X11-сессии из Wayland-greeter EXWM стартует в xwayland и падает
+      # в самом неожиданном месте — пользователь видит третью запись,
+      # которая не работает).
       cat > $out/share/xsessions/exwm.desktop <<'EOF'
 [Desktop Entry]
 Name=EXWM
@@ -46,7 +51,6 @@ X-GNOME-Bugzilla-Bugzilla=Emacs
 X-GNOME-Bugzilla-Product=Emacs
 X-GNOME-Bugzilla-Component=window-manager
 EOF
-      ln -s ../xsessions/exwm.desktop $out/share/wayland-sessions/exwm.desktop
       chmod -R a+rX $out
     '')
   ];

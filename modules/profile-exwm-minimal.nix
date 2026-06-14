@@ -27,6 +27,20 @@ in {
     services.xserver = {
       enable = mkDefault true;
       windowManager.exwm.enable = mkDefault true;
+      # nixpkgs модуль (nixos/modules/services/x11/window-managers/exwm.nix)
+      # при `windowManager.exwm.enable = true` добавляет свою запись в
+      # `windowManager.session` с name = "exwm" и Exec вида
+      # `${emacs}/bin/emacs -l ${loadScript}` (без ~/.xprofile, без
+      # systemd-run, без ssh-agent). Эта запись попадает в /etc/X11/sessions/
+      # и LightDM/Sway показывает её в меню рядом с нашей
+      # `pro-exwm-xsession`. В NixOS 25.11 опции `useDefaultSessionFile` нет
+      # — вычищаем её через `mkForce` (на хостах pro-nix EXWM — единственный
+      # включённый windowManager.*, см. grep, так что `[]` означает "убрать
+      # nixpkgs-сессию, оставить только pro-exwm-xsession из sessionPackages").
+      # Канонический launcher живёт в modules/session-exwm.nix:
+      # ~/.config/pro/exwm-session (ssh-agent + xbindkeys rescue +
+      # systemd-run + XDG_CURRENT_DESKTOP).
+      windowManager.session = lib.mkForce [];
       desktopManager.cinnamon.enable = mkDefault false;
     };
 
