@@ -33,15 +33,6 @@
   ;; possible during startup when we explicitly request them below.
   (setq package-install-upgrade-built-in t)
 
-  ;; Ensure `transient' is available/upgraded so Magit does not complain.
-  ;; Use pro-packages helper which refreshes archives when necessary.
-  (when (and (require 'pro-packages nil t) (fboundp 'pro-packages--do-install))
-    (ignore-errors
-      (pro-packages--do-install 'transient)
-      ;; Reload the feature if an upgraded version was installed.
-      (when (featurep 'transient)
-        (unload-feature 'transient t)
-        (require 'transient))))
   ;; Обязательно добавляем каталог модулей в `load-path' — это делает
   ;; локальные вспомогательные пакеты (pro-*) доступными для `require' и
   ;; `locate-library' в ранней стадии загрузки.
@@ -49,14 +40,13 @@
     (add-to-list 'load-path pro-emacs-base-system-modules-dir))
   ;; Now load site-init which will load configured modules
   (load (expand-file-name "site-init.el" base-dir) nil t)
-  ;; Ensure a set of required packages are available before modules perform
-  ;; package-driven installs. This helps avoid race conditions where package
-  ;; installation/compilation of one package (eg. nix-mode) requires another
-  ;; package (eg. mmm-mode) to be present during compilation. Install the
-  ;; defaults noninteractively when possible.
-(when (require 'pro-packages nil t)
-    (ignore-errors (when (fboundp 'pro-packages-ensure-required)
-                     (pro-packages-ensure-required))))
+  ;; First-start bootstrap: один раз (marker-based) устанавливает transient
+  ;; и declared-пакеты через MELPA. На обычных запусках marker существует,
+  ;; и функция no-op'ит — никаких сетевых запросов к MELPA.
+  ;; Заменил прежний безусловный `pro-packages--do-install 'transient' (он
+  ;; опрашивал MELPA на каждом старте).
+  (when (fboundp 'pro-emacs-maybe-bootstrap-on-first-start)
+    (pro-emacs-maybe-bootstrap-on-first-start))
   (pro-emacs-base-start))
 
 (provide 'pro-init)

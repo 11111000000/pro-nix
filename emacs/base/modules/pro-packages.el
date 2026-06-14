@@ -38,6 +38,27 @@
   (expand-file-name "package-archives.refresh" (expand-file-name "pro-emacs" (or (getenv "XDG_CACHE_HOME") (expand-file-name ".cache" (getenv "HOME")))))
   "Файл метки времени последнего успешного refresh архивов.")
 
+;; Marker-файл для first-start bootstrap. Создаётся после первой успешной
+;; попытки установить базовые пакеты (transient для Magit и т.п.). После
+;; этого pro-emacs-maybe-bootstrap-on-first-start становится no-op'ом и
+;; НЕ выполняет никаких сетевых запросов на каждом старте Emacs.
+;; Размещение: $XDG_CACHE_HOME/pro-emacs/.bootstrap-done (или
+;; ~/.cache/pro-emacs/.bootstrap-done, если XDG_CACHE_HOME не задан).
+(defvar pro-emacs-bootstrap-marker
+  (expand-file-name ".bootstrap-done" (expand-file-name "pro-emacs" (or (getenv "XDG_CACHE_HOME") (expand-file-name ".cache" (getenv "HOME")))))
+  "Marker-файл успешного first-start bootstrap. Существование файла
+означает, что pro-emacs-maybe-bootstrap-on-first-start уже отработал.")
+
+(defun pro-emacs-bootstrap-completed-p ()
+  "Вернуть non-nil, если bootstrap-marker существует."
+  (file-exists-p pro-emacs-bootstrap-marker))
+
+(defun pro-emacs-mark-bootstrap-done ()
+  "Создать marker-файл после успешного bootstrap. Идемпотентно."
+  (make-directory (file-name-directory pro-emacs-bootstrap-marker) t)
+  (with-temp-file pro-emacs-bootstrap-marker
+    (insert (format "Bootstrapped at %s" (format-time-string "%FT%T%z")))))
+
 (defun pro-packages-configure-archives ()
   "Подключить архивы пакетов без сетевого обмена."
   (setq package-archives pro-packages-archives))
@@ -94,6 +115,34 @@ FORCE принудительно запускает refresh."
   (condition-case _err
       (rename-file (concat pro-packages-decisions-file ".tmp") pro-packages-decisions-file t)
     (error (message "[pro-packages] failed to save decisions"))))
+
+(defun pro-emacs-maybe-bootstrap-on-first-start ()
+  "Выполнить bootstrap только на первом запуске Emacs (one-shot, marker-based).
+
+Если marker `pro-emacs-bootstrap-marker' НЕ существует:
+  1) подключает архивы пакетов (без сети);
+  2) инициализирует package.el (без сети);
+  3) пытается установить `transient' (для Magit) и declared-пакеты;
+  4) создаёт marker-файл.
+
+На всех последующих запусках marker существует, функция — no-op:
+НИКАКИХ сетевых запросов к MELPA не происходит. Это и есть требуемое
+поведение: опрашивать MELPA только при первом запуске, а в обычном
+режиме — никаких запросов при старте Emacs.
+
+Failures (нет сети, ошибки package.el) логируются через message и
+НЕ блокируют старт Emacs. Marker не создаётся в случае ошибки, так что
+следующий запуск попробует снова — но это разовая ситуация (один раз
+после клонирования), а не постоянный overhead."
+  (unless (pro-emacs-bootstrap-completed-p)
+    (condition-case err
+        (progn
+          (pro-packages-configure-archives)
+          (pro-packages-initialize)
+          (when (fboundp 'pro-packages--do-install)
+            (pro-packages--do-install 'transient))
+          (pro-emacs-mark-bootstrap-done))
+      (error (message "[pro-emacs] bootstrap failed: %S" err)))))
 
 (defun pro--package-provided-p (pkg)
   "Return non-nil if PKG is available in this Emacs session.

@@ -122,6 +122,48 @@
             (should (memq 'pro-package-bootstrap features))
             (should (memq 'pro-package-bootstrap features-before))))))))
 
+(ert-deftest pro-emacs-bootstrap/no-refresh-when-marker-exists ()
+  "При существующем marker-файле bootstrap-must-be no-op: никаких
+сетевых вызовов package-install или refresh. Это и есть требуемое
+поведение: MELPA опрашивается ТОЛЬКО при первом запуске."
+  (when (fboundp 'pro-emacs-maybe-bootstrap-on-first-start)
+    (let ((refresh-called nil)
+          (install-called nil)
+          (marker-existed nil))
+      (cl-letf (((symbol-function 'pro-emacs-bootstrap-completed-p)
+                 (lambda () (setq marker-existed t) t))
+                ((symbol-function 'pro-emacs-mark-bootstrap-done)
+                 (lambda () (ert-fail "mark-bootstrap-done must not run when marker exists")))
+                ((symbol-function 'pro-packages-configure-archives)
+                 (lambda () nil))
+                ((symbol-function 'pro-packages-initialize)
+                 (lambda () nil))
+                ((symbol-function 'pro-packages--do-install)
+                 (lambda (_pkg) (setq install-called t) (ert-fail "do-install must not run when marker exists"))))
+        (pro-emacs-maybe-bootstrap-on-first-start)
+        (should marker-existed)
+        (should-not install-called)))))
+
+(ert-deftest pro-emacs-bootstrap/runs-install-once-when-marker-missing ()
+  "При отсутствии marker-файла bootstrap должен один раз попытаться
+установить `transient' (для Magit) и пометить себя выполненным."
+  (when (fboundp 'pro-emacs-maybe-bootstrap-on-first-start)
+    (let ((install-called nil)
+          (marker-created nil))
+      (cl-letf (((symbol-function 'pro-emacs-bootstrap-completed-p)
+                 (lambda () nil))
+                ((symbol-function 'pro-emacs-mark-bootstrap-done)
+                 (lambda () (setq marker-created t)))
+                ((symbol-function 'pro-packages-configure-archives)
+                 (lambda () nil))
+                ((symbol-function 'pro-packages-initialize)
+                 (lambda () nil))
+                ((symbol-function 'pro-packages--do-install)
+                 (lambda (_pkg) (setq install-called t) t)))
+        (pro-emacs-maybe-bootstrap-on-first-start)
+        (should install-called)
+        (should marker-created)))))
+
 (provide 'test-package-policy)
 
 ;;; test-package-policy.el ends here
