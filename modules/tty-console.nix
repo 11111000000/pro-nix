@@ -8,8 +8,10 @@
 # Pressure: Debt
 # Surface impact: NixOS Base Configuration — поведение TTY для раскладок
 #                совпадает с X11/XKB: layout = "us,ru", options = "grp:toggle".
-# Proof: systemd-vconsole-setup стартует без ошибок; на виртуальной консоли
-#        Right Alt переключает группу, кириллица отображается.
+# Proof: systemd-vconsole-setup стартует с success и применяет шрифт на ВСЕХ
+#        VC (включая tty с активным getty). Кириллица видна без ручного
+#        `setfont`. Проверка: `journalctl -u systemd-vconsole-setup` не должен
+#        содержать "All allocated virtual consoles are busy".
 # Migration: none.
 
 let
@@ -23,12 +25,21 @@ in
 {
   console = {
     # Используем XKB-конфигурацию, чтобы консольная раскладка совпадала с X11.
-    useXkbConfig = lib.mkDefault true;
-    earlySetup = lib.mkDefault true;
-    font = lib.mkDefault ttyFont;
+    useXkbConfig = true;
+    earlySetup = true;
+    font = ttyFont;
     # Не генерируем кастомные loadkeys-таблицы — XKB обработает группу
     # раскладок и переключение по Right Alt согласно services.xserver.xkb.
   };
+
+  # systemd-vconsole-setup по умолчанию молча отказывается ставить шрифт и
+  # keymap, если ВСЕ VC заняты (типичный случай: getty@tty1..ttyN уже
+  # стартовали к моменту сервиса при splash-бутe). Это эвристика
+  # «не мешать активному вводу», но в нашем сценарии — после `nixos-rebuild
+  # switch` мы хотим гарантированно применить политику шрифта на всех VC.
+  # SYSTEMD_VCONSOLE_FORCE=1 обходит эту проверку: см. systemd-vconsole-setup(8)
+  # и src/shared/vconsole-util.c (vc_list_get_busy → force override).
+  systemd.services.systemd-vconsole-setup.environment.SYSTEMD_VCONSOLE_FORCE = "1";
 
   services.gpm = {
     enable = lib.mkDefault true;
