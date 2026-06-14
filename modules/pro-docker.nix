@@ -38,13 +38,32 @@
   virtualisation.docker.enable = true;
 
   # Идемпотентное создание bridge-сети `pro-dev` при каждом старте
-  # dockerd. `docker network create` возвращает non-zero, если сеть
-  # уже есть — это OK, нас интересует только «сеть существует после
-  # запуска юнита». Используем `|| true` для идемпотентности.
+  # dockerd. Используем wrapper-скрипт, а не shell-redirect-фоллбэк
+  # (`2>/dev/null || true`) внутри ExecStart: в systemd < 258 есть баг
+  # парсинга `2>/dev/null` рядом с `||` в ExecStart — редирект
+  # интерпретируется как часть argv и обрезает позиционные аргументы
+  # у бинаря, который идёт перед редиректом (docker-cli видит
+  # `requires 1 argument` вместо имени сети). Wrapper-скрипт делает
+  # `docker network inspect` (проверка существования) и при отсутствии —
+  # `docker network create`. Без shell-метасимволов в ExecStart.
   #
   # Зависимость `After=docker.service` + `Requires=docker.service`
   # гарантирует, что сеть создаётся ПОСЛЕ старта демона.
-  systemd.services.docker-network-pro-dev = {
+  systemd.services.docker-network-pro-dev = let
+    script = pkgs.writeShellScriptBin "pro-docker-network-create" ''
+      set -eu
+      if ${pkgs.docker}/bin/docker network inspect pro-dev >/dev/null 2>&1; then
+        echo "[pro-docker-network] network pro-dev already exists"
+        exit 0
+      fi
+      echo "[pro-docker-network] creating pro-dev (172.20.0.0/16)..."
+      exec ${pkgs.docker}/bin/docker network create \
+        --driver=bridge \
+        --subnet=172.20.0.0/16 \
+        --gateway=172.20.0.1 \
+        pro-dev
+    '';
+  in {
     description = "Create pro-dev bridge network for microservices";
     after = [ "docker.service" "docker.socket" ];
     requires = [ "docker.service" ];
@@ -52,10 +71,10 @@
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${pkgs.docker}/bin/docker network create --driver=bridge --subnet=172.20.0.0/16 --gateway=172.20.0.1 pro-dev 2>/dev/null || true";
-      # Проверяем реальное наличие сети после `create || true` —
-      # если ExecStart завершился с ошибкой (например, нет демона),
-      # сообщаем, но не валим загрузку.
+      ExecStart = "${script}/bin/pro-docker-network-create";
+      # Проверяем реальное наличие сети после create. Если ExecStart
+      # завершился с ошибкой (например, нет демона), сообщаем, но
+      # не валим загрузку.
       ExecStartPost = "${pkgs.docker}/bin/docker network inspect pro-dev";
     };
   };
