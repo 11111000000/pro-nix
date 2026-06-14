@@ -26,8 +26,13 @@
   "Non-nil to enable the transient buffer banner."
   :type 'boolean :group 'pro-buffer-banner)
 
-(defcustom pro-buffer-banner-duration 1.6
-  "Total seconds the banner stays visible (including fade-out)."
+(defcustom pro-buffer-banner-duration 3.0
+  "Total seconds the banner stays visible (including fade-out).
+
+Banner appears after a buffer/window switch, then stays fully visible
+for ~80% of this duration, with a short fade-out at the end. Three
+seconds is a comfortable read window for buffer name + project +
+branch without becoming intrusive."
   :type 'number :group 'pro-buffer-banner)
 
 (defcustom pro-buffer-banner-fade-steps 10
@@ -60,15 +65,18 @@ frame's font — enough to clear the mode-line or first line of text."
   "Show VCS branch (magit or vc) in the banner."
   :type 'boolean :group 'pro-buffer-banner)
 
-(defcustom pro-buffer-banner-debounce 1.6
-  "Minimum seconds between successive banners. 0 means no debounce —
-the banner re-shows on every buffer/window switch so the visible time
-stays constant regardless of how fast you switch. Set to a positive
-value to throttle re-shows (e.g. 0.05) if you see flicker.
-Default is 1.6 (matches `pro-buffer-banner-duration') so the banner
-shows once per typing/window-burst and then fades smoothly without
-restarting on every minibuffer open/close. Set to 0 only if you want
-the old per-event flicker behaviour back."
+(defcustom pro-buffer-banner-debounce 0.2
+  "Minimum seconds between successive *display* calls. This is a pure
+display-side throttle, NOT a fade-restart trigger: even if a new
+display is allowed by the debounce, the running fade is NOT restarted
+(see `pro-buffer-banner--show' for details). The visible time is
+therefore always `pro-buffer-banner-duration' from the first display
+in a burst, regardless of how many switches happen in between.
+
+Set to 0 to disable the throttle (the banner will re-display on every
+post-command / window-selection change). 200ms is enough to suppress
+the spammy minibuffer-open/close and rapid C-x b b b switching, while
+still letting single switches through immediately."
   :type 'number :group 'pro-buffer-banner)
 
 (defcustom pro-buffer-banner-initial-alpha 95
@@ -463,12 +471,24 @@ WIDTH-CHARS wide and 1 char tall — passing (width . N) (height . 1) to
        nil))))
 
 (defun pro-buffer-banner--hide ()
-  "Hide the banner frame (without deleting it) and cancel any fade."
+  "Hide the banner frame (without deleting it) and cancel any fade.
+
+Returns focus to the parent frame first — `override-redirect' child
+frames are *not* managed by the WM, but some WMs (Xfwm, awesome, i3)
+still pass focus to them on unmap. `redirect-frame-focus' + `x-focus-frame'
+make the focus move deterministic regardless of WM behaviour."
   (when (and pro-buffer-banner--timer (timerp pro-buffer-banner--timer))
     (cancel-timer pro-buffer-banner--timer))
   (setq pro-buffer-banner--timer nil)
   (when (frame-live-p pro-buffer-banner--frame)
-    (set-frame-parameter pro-buffer-banner--frame 'visibility nil)))
+    (set-frame-parameter pro-buffer-banner--frame 'visibility nil)
+    ;; Return focus to the parent frame so the banner never *holds* it
+    ;; after fade-out. `redirect-frame-focus' is the canonical way
+    ;; (X11/Emacs 28+); `x-focus-frame' is a belt-and-suspenders fallback
+    ;; for WMs that ignore redirect.
+    (ignore-errors (redirect-frame-focus pro-buffer-banner--frame
+                                         (selected-frame)))
+    (ignore-errors (x-focus-frame (selected-frame)))))
 
 (defun pro-buffer-banner--destroy ()
   "Permanently delete the banner frame. Idempotent."
@@ -510,21 +530,11 @@ WIDTH-CHARS wide and 1 char tall — passing (width . N) (height . 1) to
 (defun pro-buffer-banner--restart-fade ()
   "Cancel any in-flight fade, reset alpha to full, and start a fresh fade.
 
-Entry point called by every `pro-buffer-banner--show' invocation.
-Guarantees that:
-
-  • the existing fade timer (if any) is cancelled;
-  • the banner's alpha is reset to `pro-buffer-banner-initial-alpha';
-  • a new fade begins from the first step.
-
-The combined effect is that every (re-)show — in particular, every
-window change detected by `pro-buffer-banner--maybe-show' — gives
-the banner its full `pro-buffer-banner-duration' from the latest
-activity, so the visible time is never `eaten' by a half-finished
-fade from a previous show.  This is what fixes the
-\"disappears-too-fast-on-window-switch\" symptom: previously the
-timer could be deep into a fade when a new show arrived, and the
-banner could appear visibly half-faded before re-brightening."
+NOTE: kept for compatibility but **no longer called by `--show'** —
+re-starting the fade on every display caused the banner to never
+hide on rapid buffer switching (each new show cancelled the running
+timer and started over). See `pro-buffer-banner--show' for the new
+\"start only if no fade is running\" logic."
   (when (and pro-buffer-banner--timer (timerp pro-buffer-banner--timer))
     (cancel-timer pro-buffer-banner--timer))
   (setq pro-buffer-banner--timer nil)
@@ -611,14 +621,30 @@ divided into `pro-buffer-banner-fade-steps' steps."
             ;; this here keeps the banner a pure text label even after
             ;; repeated buffer switches.
             (pro-buffer-banner--strip-decoration frame)
-            ;; 5. Show, then restart the fade.  `pro-buffer-banner--restart-fade'
-            ;;    is the single entry point that resets alpha + cancels the
-            ;;    old timer + starts a fresh fade, so every (re-)show
-            ;;    (including every window change) gives the banner its
-            ;;    full `pro-buffer-banner-duration' from the latest
-            ;;    activity.  See the docstring of that function.
+            ;; 5. Show. We do NOT restart the fade on every show —
+            ;; that would cause the banner to *never* hide on rapid
+            ;; buffer switching (each new show cancelled the running
+            ;; timer and started over). Instead, start a fresh fade
+            ;; only if no fade is currently running. Result: the
+            ;; visible time is always `pro-buffer-banner-duration'
+            ;; from the *first* display in a burst, then the banner
+            ;; auto-hides regardless of how many more switches happen.
             (set-frame-parameter frame 'visibility t)
-            (pro-buffer-banner--restart-fade)
+            ;; Keep focus on the parent frame. `no-focus-on-map' in
+            ;; `pro-buffer-banner--frame-params' is not enough on every
+            ;; WM; explicitly redirect focus back to the selected
+            ;; frame after the map. (X11/Emacs 28+ for redirect-frame-focus.)
+            (ignore-errors (redirect-frame-focus frame (selected-frame)))
+            (ignore-errors (x-focus-frame (selected-frame)))
+            (unless (and pro-buffer-banner--timer
+                         (timerp pro-buffer-banner--timer)
+                         (timer-pending-p pro-buffer-banner--timer))
+              ;; No running fade: start one. Reset alpha to full so a
+              ;; mid-fade re-display doesn't show a half-transparent
+              ;; banner.
+              (set-frame-parameter frame 'alpha
+                                   pro-buffer-banner-initial-alpha)
+              (pro-buffer-banner--start-fade))
             (setq pro-buffer-banner--last-shown-at (float-time))))
       (error
        (message "[pro-buffer-banner] show failed: %S" err)
