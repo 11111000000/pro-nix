@@ -21,6 +21,20 @@
           # в NixOS-eval, чтобы прочитать config.pro.profiles.exwmMinimal.enable
           # (NixOS-опция недоступна в HM-eval). На TUI-only хостах /
           # Termux остаётся default (false).
+          #
+          # providedPackages здесь — **plain assignment**, полностью
+          # перезаписывает default в emacs/core.nix. Если что-то нужно
+          # добавить — добавляйте сюда, иначе core.nix default
+          # игнорируется. Особо критично:
+          #   - exwm + xelb — без них pro-exwm-start-session падает на
+          #     `(require 'exwm)`, EXWM как WM не активируется,
+          #     пользователь видит обычный Emacs. Раньше exwm/xelb были
+          #     доступны через `~/.config/emacs/elpa/exwm-*/` после ручной
+          #     установки; это хрупко и было потеряно при чистке elpa/.
+          #   - exwm-x — переименованный exwm-xim (nixpkgs ≥ 23.x);
+          #     нужен для IME в X-приложениях (Firefox и пр.).
+          #   - exwm-systemtray и exwm-xim — старые имена, в nixpkgs 25.11
+          #     их нет; pro-exwm.el корректно игнорирует через condition-case.
           providedPackages = [
             "ace-window" "avy" "cape" "consult" "consult-dash" "consult-eglot" "consult-projectile" "consult-yasnippet"
             "corfu" "corfu-posframe" "corfu-terminal" "dash-docs" "docker" "eglot" "elfeed" "expand-region" "gptel"
@@ -34,6 +48,11 @@
             "treemacs-icons-dired"
             "async" "dash" "embark" "popon" "cond-let" "magit-section" "visual-fill-column"
             "buffer-move" "golden-ratio"
+            # EXWM stack (nixpkgs 25.11). Эти пакеты попадают в
+            # EMACSLOADPATH через emacs/core.nix:allLoadPaths, и в
+            # home.packages через availableProvidedNix. Без них
+            # (require 'exwm) падает в pro-exwm-start-session.
+            "exwm" "xelb" "exwm-x"
           ];
 
           extraPackages = let
