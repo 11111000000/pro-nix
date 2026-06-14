@@ -1,13 +1,13 @@
 ---
 name: emacs-emcp
-description: Доступ к запущенному Emacs через EMCP (MCP-сервер). Использовать, когда задача требует взаимодействия с текущей Emacs-сессией: посмотреть определение функции/переменной в Emacs, прочитать буфер, сделать скриншот фрейма, выполнить elisp-выражение. Содержит инструкции по проверке работоспособности сервера, инструментам develop-профиля (по умолчанию) и порядку эскалации до full-control (eval/send-keys).
+description: Доступ к запущенному Emacs через EMCP (MCP-сервер). Использовать, когда задача требует взаимодействия с текущей Emacs-сессией: посмотреть определение функции/переменной в Emacs, прочитать буфер, сделать скриншот фрейма, выполнить elisp-выражение, отправить клавиши в Emacs. Профиль по умолчанию `full-control` (eval/send-keys включены, но гейтнуты политикой 'ask' — каждый вызов подтверждается в `*EMCP confirm*`).
 ---
 
 # Emacs EMCP — подключение к живой Emacs-сессии
 
 EMCP поднимает внутри Emacs HTTP MCP-сервер на `127.0.0.1:38913/mcp`.
-Профиль по умолчанию — `develop`: `inspect` + `get-variable` + `set-variable` + `screenshot`.
-`eval` и `send-keys` **не** включены — для них нужен явный переход на `full-control`.
+Профиль по умолчанию — `full-control`: `inspect` + `get-variable` + `set-variable` + `screenshot` + `eval` + `send-keys`.
+`eval` и `send-keys` гейтнуты политикой `'ask'` — каждый вызов требует подтверждения в буфере `*EMCP confirm*` (`y` / `n` / `a` — always accept / `r` — always reject для сессии).
 
 ## 1. Проверить, что сервер жив
 
@@ -29,7 +29,7 @@ M-x pro-emcp-server-start
 
 URL появится в `*Messages*` и попадёт в kill-ring.
 
-## 2. Что есть в develop-профиле
+## 2. Что есть в full-control (дефолт)
 
 | Тип | Имя | Что делает |
 |-----|-----|------------|
@@ -41,10 +41,10 @@ URL появится в `*Messages*` и попадёт в kill-ring.
 | tool | `get-variable` | Глобальное значение переменной (`name`) |
 | tool | `set-variable` | Установить глобальное значение (`name`, `value` как Lisp literal) |
 | tool | `screenshot` | PNG всех видимых фреймов |
+| tool | `eval` | Выполнить произвольный elisp (`code`). Гейтнут политикой `emcp-tools-eval-default-policy` (по умолчанию `ask`). |
+| tool | `send-keys` | Отправить клавиатурную последовательность (`keys` в `kbd`-нотации). Гейтнут политикой `emcp-tools-send-keys-default-policy` (по умолчанию `ask`). |
 | resource | `info://{manual}/{node}` | Прочитать Info-ноду |
 | prompt | `/screenshot` | Запросить у пользователя скриншот (он сам решает, делиться ли) |
-
-**Нет**: `eval`, `send-keys`. Они доступны только в `full-control` (см. §5).
 
 ## 3. Типичные сценарии
 
@@ -72,39 +72,37 @@ URL появится в `*Messages*` и попадёт в kill-ring.
 
 ## 4. Безопасность
 
+- `eval` и `send-keys` гейтнуты политикой `ask` по умолчанию: каждый вызов
+  открывает `*EMCP confirm*` буфер, где пользователь жмёт `y` (принять) /
+  `n` (отклонить) / `a` (принять для всей сессии) / `r` (отклонить для всей
+  сессии) / `q` (отменить). Политику можно отключить в Emacs:
+  ```elisp
+  ;; в ~/.config/emacs/modules/<user>.el
+  (setq emcp-tools-eval-default-policy t            ; 't' — accept, nil — reject, 'ask' — спрашивать
+        emcp-tools-send-keys-default-policy t)
+  ```
+  Не делайте так, пока не доверяете MCP-клиенту полностью.
 - `set-variable` меняет **глобальный** default, не buffer-local значение. Это
-  влияет на все буферы. Для buffer-local сначала прочитайте `get-variable`,
-  затем меняйте `default-value` явно через `eval` (если профиль расширен).
+  влияет на все буферы. Для buffer-local используйте `eval`:
+  ```
+  eval: "(set (make-local-variable 'some-var) 42)"
+  ```
 - Никогда не вызывайте `set-variable` для `emcp-http-port` или
   `emcp-default-profile` — это приведёт к разрыву соединения.
-- Если вы не уверены в значении `value` — не пишите `eval` руками: используйте
-  `set-variable` со строкой-Lisp-литералом, EMCP парсит его сам.
+- Если вы не уверены в значении `value` для `set-variable` — используйте
+  `eval`: `(setq some-var 42)` или подобное.
 
-## 5. Эскалация: full-control (eval, send-keys)
+## 5. Откат к develop-профилю (только inspect/develop/screenshot)
 
-`eval` и `send-keys` **НЕ** доступны по умолчанию — это политика безопасности
-EMCP: каждое выполнение идёт через буфер подтверждения `*EMCP confirm*`.
-Пользователь должен явно согласиться (`y` / `n`) или установить session-wide
-accept/reject через `M-x emcp-session-manager`.
-
-Чтобы поднять full-control:
-1. Попросите пользователя запустить в Emacs:
-   ```
-   M-x emcp-start RET full-control RET
-   ```
-2. Сервер стартует на **другом** порту (для каждого профиля свой сервер).
-   URL будет показан в `*Messages*`.
-3. Попросите пользователя зарегистрировать новый URL (например, через
-   `claude mcp add ...` или `opencode mcp add`) — и **предупредите**, что
-   эта сессия может выполнять произвольный elisp.
-
-Альтернативно: пользователь может глобально переключить default-профиль в
-`~/.config/emacs/modules/<user-module>.el`:
+Если нужен профиль без eval/send-keys (например, чтобы исключить
+возможность произвольного elisp в недоверенной сессии), запустите в Emacs:
 ```elisp
-(setq pro-emcp-server-profile 'full-control)
+;; в ~/.config/emacs/modules/<user>.el
+(setq pro-emcp-server-profile 'develop)
 ```
-и перезагрузить конфиг (`M-x pro/reload-config` или `C-x M-c`). Это
-**меняет** поведение для всех будущих сессий — используйте только в dev.
+Затем `M-x pro/reload-config` (`C-x M-c`). Сервер пересоздастся с
+профилем `develop` (без eval/send-keys), тот же URL `127.0.0.1:38913/mcp`
+останется в `mcp.json`.
 
 ## 6. Troubleshooting
 
@@ -129,11 +127,11 @@ accept/reject через `M-x emcp-session-manager`.
 
 ## 8. Чего НЕ делать
 
-- Не вызывать `eval` через `set-variable` — EMCP не запускает код через
-  `set-variable`, это просто присваивание. Для произвольного кода нужен
-  `full-control`-профиль и явное согласие пользователя.
 - Не менять `emcp-http-port` через MCP — потеряете соединение.
 - Не запускать `emcp-stop` агентом — это разрывает сессию **всех**
   MCP-клиентов сразу.
+- Не вызывать `send-keys` с произвольными последовательностями, не подумав
+  о текущем буфере/режиме/минibuffer-стейте — эффект может быть любым.
+  Политика `'ask'` это гейтит, но всё равно читайте что отправляете.
 - Не предполагать, что `find_definition` сработает для символа, который не
   `require`'нут в текущей Emacs-сессии. Сначала `apropos` с широкой регуляркой.

@@ -4,10 +4,12 @@
 
 Доступ к запущенному Emacs через EMCP (MCP-сервер) на `http://127.0.0.1:38913/mcp`.
 Позволяет: искать символы, читать help, находить определения и ссылки,
-читать буферы, делать скриншоты фреймов, читать/писать переменные.
+читать буферы, делать скриншоты фреймов, читать/писать переменные,
+выполнять произвольный elisp, отправлять клавиатурные последовательности.
 
-Профиль по умолчанию — `develop`: `inspect` + `get-variable` + `set-variable` + `screenshot`.
-`eval` и `send-keys` НЕ включены.
+Профиль по умолчанию — `full-control`: `inspect` + `get-variable` + `set-variable` + `screenshot` + `eval` + `send-keys`.
+`eval` и `send-keys` гейтнуты политикой `'ask'` — каждый вызов требует
+подтверждения в буфере `*EMCP confirm*` (`y` / `n` / `a` — always accept / `r` — always reject).
 
 ## 1. Проверить, что сервер жив
 
@@ -24,7 +26,7 @@ curl -fsS http://127.0.0.1:38913/mcp -X POST \
 - запустить Emacs,
 - или внутри Emacs: `M-x pro-emcp-server-start` (URL появится в `*Messages*`).
 
-## 2. Инструменты develop-профиля
+## 2. Инструменты full-control (дефолт)
 
 | Тип | Имя | Что делает |
 |-----|-----|------------|
@@ -36,10 +38,10 @@ curl -fsS http://127.0.0.1:38913/mcp -X POST \
 | tool | `get-variable` | Глобальное значение переменной (`name`) |
 | tool | `set-variable` | Установить глобальное значение (`name`, `value` как Lisp literal) |
 | tool | `screenshot` | PNG всех видимых фреймов |
+| tool | `eval` | Выполнить произвольный elisp (`code`). Гейтнут политикой `emcp-tools-eval-default-policy` (по умолчанию `ask`). |
+| tool | `send-keys` | Отправить клавиатурную последовательность (`keys` в `kbd`-нотации). Гейтнут политикой `emcp-tools-send-keys-default-policy` (по умолчанию `ask`). |
 | resource | `info://{manual}/{node}` | Прочитать Info-ноду |
 | prompt | `/screenshot` | Запросить у пользователя скриншот (он сам решает, делиться ли) |
-
-**Нет**: `eval`, `send-keys`. Доступны только в `full-control` (см. §5).
 
 ## 3. Типичные сценарии
 
@@ -66,36 +68,32 @@ curl -fsS http://127.0.0.1:38913/mcp -X POST \
 
 ## 4. Безопасность
 
+- `eval` и `send-keys` гейтнуты политикой `ask` по умолчанию: каждый вызов
+  открывает `*EMCP confirm*` буфер, где пользователь жмёт `y` (принять) /
+  `n` (отклонить) / `a` (принять для всей сессии) / `r` (отклонить для всей
+  сессии) / `q` (отменить). Политику можно отключить в Emacs:
+  ```elisp
+  ;; в ~/.config/emacs/modules/<user>.el
+  (setq emcp-tools-eval-default-policy t            ; 't' — accept, nil — reject, 'ask' — спрашивать
+        emcp-tools-send-keys-default-policy t)
+  ```
+  Не делайте так, пока не доверяете MCP-клиенту полностью.
 - `set-variable` меняет **глобальный** default, не buffer-local. Влияет на все буферы.
 - Никогда не меняйте `emcp-http-port` или `emcp-default-profile` через MCP —
   разорвёте соединение.
 - `value` для `set-variable` — **строка с Lisp-литералом**, EMCP парсит сам.
   Примеры: `"42"`, `"\"hi\""`, `"(1 2 3)"`, `"t"`, `"nil"`.
 
-## 5. Эскалация: full-control (eval, send-keys)
+## 5. Откат к develop-профилю
 
-`eval` и `send-keys` **НЕ** доступны по умолчанию. Каждый вызов идёт через
-буфер подтверждения `*EMCP confirm*` — пользователь явно жмёт `y` / `n`.
-
-Поднять full-control:
-1. Попросите пользователя в Emacs:
-   ```
-   M-x emcp-start RET full-control RET
-   ```
-2. Сервер стартует на **другом** порту (у каждого профиля свой сервер).
-   URL покажется в `*Messages*`.
-3. Попросите пользователя зарегистрировать новый URL через
-   `opencode mcp add --transport http emcp-full <url>` (или
-   отредактировать `opencode.json`) и **предупредите**, что эта сессия
-   может выполнять произвольный elisp.
-
-Альтернативно — пользователь может глобально переключить default:
+Если нужен профиль без eval/send-keys (например, чтобы исключить
+произвольный elisp в недоверенной сессии):
 ```elisp
 ;; в ~/.config/emacs/modules/<user>.el
-(setq pro-emcp-server-profile 'full-control)
+(setq pro-emcp-server-profile 'develop)
 ```
-После `M-x pro/reload-config` (`C-x M-c`) — все будущие emcp-сессии стартуют
-на full-control. **Только для dev-окружений**, не для production.
+Затем `M-x pro/reload-config` (`C-x M-c`). Сервер пересоздастся на том
+же URL `127.0.0.1:38913/mcp`, но профиль будет `develop` (без eval/send-keys).
 
 ## 6. Troubleshooting
 
@@ -116,9 +114,10 @@ curl -fsS http://127.0.0.1:38913/mcp -X POST \
 
 ## 8. Чего НЕ делать
 
-- Не вызывать `eval` через `set-variable` — это не код, а присваивание.
-  Для произвольного кода нужен `full-control` + явное согласие пользователя.
 - Не менять `emcp-http-port` через MCP — потеряете соединение.
 - Не запускать `emcp-stop` агентом — это разрывает сессию **всех** MCP-клиентов.
+- Не вызывать `send-keys` с произвольными последовательностями, не подумав
+  о текущем буфере/режиме/минibuffer-стейте — эффект может быть любым.
+  Политика `'ask'` это гейтит, но всё равно читайте что отправляете.
 - Не предполагать, что `find_definition` сработает для символа, который не
   `require`'нут. Сначала `apropos` с широкой регуляркой.

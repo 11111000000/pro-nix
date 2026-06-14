@@ -16,7 +16,7 @@
 ;; Публичная поверхность:
 ;;  - pro-emcp-server-port        ; integer, default 38913
 ;;  - pro-emcp-server-host        ; string,  default "127.0.0.1"
-;;  - pro-emcp-server-profile     ; symbol, default 'develop
+;;  - pro-emcp-server-profile     ; symbol, default 'full-control
 ;;  - pro-emcp-server-auto-start  ; boolean, default t
 ;;  - M-x pro-emcp-server-start   ; запустить сервер
 ;;  - M-x pro-emcp-server-stop    ; остановить сервер
@@ -28,8 +28,13 @@
 ;;  - inspect       ; apropos, describe, find-definition, find-references,
 ;;                  ; info-search, info:// resource, /screenshot prompt
 ;;  - develop       ; + get-variable, set-variable, screenshot
-;;                  ; (этот профиль стартуем по умолчанию — без eval/send-keys)
-;;  - full-control  ; + eval (gated), send-keys (gated) — включать явно
+;;  - full-control  ; + eval (gated), send-keys (gated)
+;;                  ; Дефолт: нужен eval/send-keys "из коробки" для pi/opencode.
+;;                  ; Каждый вызов eval/send-keys всё равно проходит через
+;;                  ; `*EMCP confirm*' с дефолтной политикой 'ask' — отключить
+;;                  ; гейт можно только явно (см. `emcp-tools-eval-default-policy'
+;;                  ; / `emcp-tools-send-keys-default-policy', или session-mode
+;;                  ; `a' в буфере подтверждения).
 
 ;; ---------------------------------------------------------------------------
 ;; Декларации для byte-compiler
@@ -71,13 +76,19 @@ MCP-клиенты (pi, opencode) настроены на `http://127.0.0.1:<por
   :type 'string
   :group 'pro-emcp)
 
-(defcustom pro-emcp-server-profile 'develop
+(defcustom pro-emcp-server-profile 'full-control
   "Профиль EMCP, который стартует автоматически.
 
-`develop' включает inspect + get/set-variable + screenshot, но НЕ eval
-или send-keys — это безопасный дефолт. Для `full-control' запустите
-`emcp-start' интерактивно с `C-u' (выбор профиля) или `M-x emcp-start RET
-full-control'."
+`full-control' = inspect + develop + eval + send-keys. `eval' и
+`send-keys' гейтнуты политикой `emcp-tools-eval-default-policy' /
+`emcp-tools-send-keys-default-policy' (по умолчанию `ask' — каждый
+вызов требует подтверждения в буфере `*EMCP confirm*').
+
+Чтобы вернуться к `develop' (только inspect/get-variable/set-variable/
+screenshot) — `M-x customize-variable RET pro-emcp-server-profile RET'
+или в `~/.config/emacs/modules/<user>.el':
+  (setq pro-emcp-server-profile 'develop)
+и затем `M-x pro/reload-config'."
   :type '(choice (const inspect) (const develop) (const full-control))
   :group 'pro-emcp)
 
