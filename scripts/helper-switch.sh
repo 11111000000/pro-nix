@@ -52,11 +52,53 @@ if [ -z "${PRO_NIX_NO_SUBMODULE_UPDATE:-}" ]; then
     exit 1
   fi
 
-  if ! git submodule update --init --remote --merge 2>&1 | sed 's/^/[simple-helper] submod: /'; then
-    echo "[simple-helper] ERROR: git submodule update --remote --merge failed" >&2
-    exit 1
+  # GIT_TERMINAL_PROMPT=0 — не висеть на запросе credentials для HTTPS-сабмодулей,
+  # у которых нет credential helper.
+  #
+  # Главное правило: ЛЮБАЯ проблема с submodule update НЕ ВАЛИТ switch.
+  # Nix-рецепты читают локальный submodules/<name> (см. nix/emacs-recipes/*.nix),
+  # а не remote — поэтому можно собирать на старом HEAD.
+  #
+  # Почему именно последовательно + per-job timeout:
+  #   - `git submodule update` по умолчанию гоняет 8 параллельных воркеров,
+  #     что на github/codeberg упирается в rate-limit и доходит до 60+ секунд
+  #     на merge-фазе (диагностика 2026-06-13: timeout 60 = exit, ровно 60с висит).
+  #   - один сабмодуль fetch укладывается в 4–22с; merge в локальный HEAD <2с.
+  #   - 11 submodules × ~15с = ~165с в худшем случае, приемлемо.
+  #
+  # Если fetch/merge упал — пишем WARNING и идём дальше. Локальный HEAD
+  # используется как fallback (он уже на свежем состоянии после предыдущего
+  # успешного update, либо на initial commit — в обоих случаях валиден для сборки).
+  export GIT_TERMINAL_PROMPT=0
+  echo "[simple-helper] Updating submodules (sequential, 20s fetch + 10s merge each)..."
+  failed_subs=()
+  updated_count=0
+  for sub in $(git submodule foreach -q 'echo $sm_path'); do
+    name=$(basename "$sub")
+    # 1) fetch с timeout (подавляем вывод fetch — он шумный, логируем только статус)
+    if ! timeout 20 git -C "$sub" fetch origin >/dev/null 2>&1; then
+      echo "[simple-helper] WARNING: $name fetch failed/timeout — using local HEAD" >&2
+      failed_subs+=("$name")
+      continue
+    fi
+    # 2) merge в локальный HEAD с timeout.
+    # `git submodule update --remote <path>` мержит remote-tracking branch
+    # в локальный HEAD. Если merge не нужен (уже на свежем коммите) — exit 0 за <1с.
+    if ! timeout 10 git submodule update --remote "$sub" 2>&1 \
+         | sed "s/^/[simple-helper] submod[$name]: /"; then
+      echo "[simple-helper] WARNING: $name merge failed/timeout — using local HEAD" >&2
+      failed_subs+=("$name")
+      continue
+    fi
+    updated_count=$((updated_count + 1))
+  done
+  if [ "${#failed_subs[@]}" -gt 0 ]; then
+    echo "[simple-helper] These submodules were NOT updated (kept local HEAD):" >&2
+    printf '  - %s\n' "${failed_subs[@]}" >&2
+    echo "[simple-helper] Common causes: codeberg/github rate-limit, network timeout." >&2
+    echo "[simple-helper] Continuing switch — Nix recipes will use whatever is in submodules/." >&2
   fi
-  echo "[simple-helper] Submodules are on fresh main/master."
+  echo "[simple-helper] Submodules step finished: $updated_count updated, ${#failed_subs[@]} skipped."
 fi
 
 # Запуск switch с сохранением логов.
