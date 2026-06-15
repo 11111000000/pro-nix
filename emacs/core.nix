@@ -147,38 +147,32 @@ EOF
 
     home.activation.pro-emacs-install-treesitter = ''
       #!/bin/sh -e
+      # Install every tree-sitter grammar shipped in the precompiled bundle into
+      # $HOME/.config/emacs/tree-sitter/ (Emacs 29+ default `treesit-library-path').
+      # The bundle stores files as `<lang>.so`; Emacs looks for
+      # `libtree-sitter-<lang>.so`, so we add the prefix on copy. Existing
+      # files are preserved so the user can pin a specific grammar locally
+      # (delete it to pick up a fresh copy on next `nixos-rebuild switch').
       TS_DIR="$HOME/.config/emacs/tree-sitter"
-      required_libs="libtree-sitter-typescript.so libtree-sitter-tsx.so"
 
       mkdir -p "$TS_DIR"
 
-      for f in $required_libs; do
-        if [ -f "$TS_DIR/$f" ]; then
-          continue
-        fi
-
-        if [ -f "${treeSitterBundle}/$f" ]; then
-          cp -f "${treeSitterBundle}/$f" "$TS_DIR/$f"
-          continue
-        fi
-
-        found=$(find "${treeSitterBundle}" -type f -name "$f" -print -quit)
-        if [ -n "$found" ]; then
-          cp -f "$found" "$TS_DIR/$f"
-          continue
-        fi
-
-        echo "pro-emacs: missing required tree-sitter grammar: $f" >&2
-      done
-
-      for f in $required_libs; do
-        if [ ! -f "$TS_DIR/$f" ]; then
-          echo "pro-emacs: tree-sitter bootstrap finished without $f; Emacs may keep using fallback parsing" >&2
-          exit 0
+      copied=0
+      skipped=0
+      # Bundle .so file names contain no whitespace, so a newline-delimited
+      # pipeline is safe and avoids Nix parser choking on process substitution.
+      find "${treeSitterBundle}" -type f -name '*.so' | while IFS= read -r f; do
+        name=$(basename "$f" .so)
+        target="$TS_DIR/libtree-sitter-$name.so"
+        if [ -e "$target" ]; then
+          skipped=$((skipped + 1))
+        else
+          cp -f "$f" "$target"
+          copied=$((copied + 1))
         fi
       done
 
-      echo "pro-emacs: installed tree-sitter grammars to $TS_DIR"
+      echo "pro-emacs: tree-sitter grammars: $copied copied, $skipped already present in $TS_DIR"
     '';
 
     home.file.".config/emacs/early-init.el".source = ../emacs/base/early-init.el;
