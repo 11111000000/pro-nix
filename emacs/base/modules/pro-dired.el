@@ -67,7 +67,14 @@ This flips `pro-dired-prefer-short' and updates `dired-listing-switches' for new
     (setq insert-directory-program "ls")
     (setq dired-use-ls-dired t)
     (setq dired-auto-revert-buffer t)
-    (setq global-auto-revert-non-file-buffers t)
+    ;; Disabled for I/O: pro-dired previously enabled global revert for
+    ;; non-file buffers (magit-status, help, *Messages*, *Compile*, ...).
+    ;; With eglot + magit + projectile + treemacs running, this made Emacs
+    ;; re-read all such buffers periodically and accounted for a large share
+    ;; of background disk I/O. File buffers still auto-revert by default;
+    ;; only the non-file variant is disabled. Flip back to `t' if you want
+    ;; live-updating *Help* / *Messages* / etc.
+    (setq global-auto-revert-non-file-buffers nil)
     (setq dired-hide-details-hide-symlink-targets nil)
     ;; wdired: enable quick editing
     (when (require 'wdired nil t)

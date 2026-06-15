@@ -60,6 +60,15 @@ to use a project-pinned binary (e.g. via `direnv' or `nix develop')."
   :type '(repeat string)
   :group 'pro-haskell)
 
+(defcustom pro-haskell-enable-eglot t
+  "If non-nil, automatically start HLS via eglot in Haskell buffers.
+HLS is heavy (it eagerly type-checks the whole package, often 1-2 GiB RSS
+and noticeable background I/O). Set to nil to fall back to plain haskell-mode
++ haskell-indentation (no LSP) — much lighter, but no jump-to-def /
+hover / flycheck-style diagnostics."
+  :type 'boolean
+  :group 'pro-haskell)
+
 (defun pro-haskell--register-eglot-server ()
   "Tell eglot to use `pro-haskell-lsp-server-program' for haskell buffers."
   (when (fboundp 'eglot-server-programs)
@@ -80,7 +89,9 @@ to use a project-pinned binary (e.g. via `direnv' or `nix develop')."
 запуститься автоматически."
   (setq-local indent-tabs-mode nil)
   (setq-local tab-width 2)
-  (when (and (fboundp 'eglot-ensure) (executable-find "haskell-language-server-wrapper"))
+  (when (and pro-haskell-enable-eglot
+             (fboundp 'eglot-ensure)
+             (executable-find "haskell-language-server-wrapper"))
     (eglot-ensure)))
 
 ;;; Helpers (interactive commands)

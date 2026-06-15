@@ -252,9 +252,13 @@ idempotent across `pro/reload-config' reloads (lambdas would accumulate)."
       (when undo-tree-mode
         (when buffer-file-name
           (ignore-errors (undo-tree-load-history)))
-        (add-hook 'after-save-hook
-                  #'pro-history--undo-tree-save-after-save
-                  nil t)))
+        ;; 2026-06: per-save undo-tree save removed to cut disk activity.
+        ;; Undo history is still persisted at kill-emacs via
+        ;; `pro-history--save-all-undo-on-exit' (defined below).
+        ;; Trade-off: a crash between saves loses undo history; an
+        ;; orderly exit preserves it. Was the source of a write per save
+        ;; in projects with many buffers (Haskell, Nix, JS, ...).
+        ))
     (defun pro-history--undo-tree-save-after-save ()
       "Buffer-local `after-save-hook' that saves undo history silently."
       (ignore-errors (undo-tree-save-history nil t)))
@@ -545,8 +549,14 @@ pro-history — part of pro-nix")))
 (defun pro-history-configure-auto-save ()
   "Apply auto-save policy: send auto-saves to cache directory."
   (setq auto-save-default t)
-  (setq auto-save-timeout 20)
-  (setq auto-save-interval 200)
+  ;; Auto-save was 20s / 200 keystrokes — too aggressive once many buffers
+  ;; are open. Raised to 60s / 800 keystrokes after the 2026-06 I/O
+  ;; profiling: the old values produced one write per ~15s on average
+  ;; across all open buffers, and emacs was the second-largest disk
+  ;; consumer during `nix flake check` runs. 60s is still fast enough to
+  ;; recover from crashes but roughly halves auto-save disk activity.
+  (setq auto-save-timeout 60)
+  (setq auto-save-interval 800)
   (setq auto-save-file-name-transforms
         `((".*" ,(expand-file-name "\\1" (file-name-as-directory pro-history-auto-save-directory)) t)))
   (setq auto-save-list-file-prefix

@@ -22,10 +22,13 @@
 ;; `Automatic GC' under interactive agent-shell / flyspell load (profile
 ;; 2026-06 showed ~32%). Raise the threshold so collection runs less often
 ;; and amortizes better. pro-ui-tty.el may further override for TTY frames.
-(defcustom pro-core-gc-cons-threshold (* 64 1024 1024)
+(defcustom pro-core-gc-cons-threshold (* 128 1024 1024)
   "Steady-state value for `gc-cons-threshold' installed by pro-core.
-64 MiB keeps GC pauses rare without making them painfully long; tune
-downward on memory-constrained hosts (Raspberry Pi, etc.)."
+128 MiB keeps GC pauses rare without making them painfully long; tune
+downward on memory-constrained hosts (Raspberry Pi, etc.).
+Raised from 64 MiB after the 2026-06 I/O profiling showed GC was
+still firing often enough to be visible in `Automatic GC' profile
+columns during long opencode / nix flake check sessions."
   :type 'integer
   :group 'pro)
 
