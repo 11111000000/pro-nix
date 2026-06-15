@@ -13,7 +13,7 @@
 # Контракт:
 #   Опции:
 #     pro.sshClient.enable — bool, по умолчанию true;
-#     pro.sshClient.identityFile — путь к ключу (по умолчанию ed25519);
+#     pro.sshClient.identityFile — путь к ключу (по умолчанию 11111000000_at_email_dot_com, общий с github.com/gitverse.ru);
 #     pro.sshClient.connectTimeout — seconds for each candidate HostName.
 #   Побочные эффекты: пишет /etc/ssh/ssh_config.d/pro.conf (text).
 #
@@ -109,7 +109,12 @@ in
     enable = lib.mkEnableOption "Generate /etc/ssh/ssh_config.d/pro.conf from pro.hosts" // { default = true; };
     identityFile = lib.mkOption {
       type = lib.types.str;
-      default = "~/.ssh/id_ed25519";
+      # 11111000000_at_email_dot_com — общий SSH-ключ пользователя
+      # (тот же, что уже закреплён за github.com и gitverse.ru в
+      # ~/.ssh/config). Держим единый ключ для кластера, чтобы избежать
+      # рассинхрона: раньше default был id_ed25519, но authorized_keys на
+      # desktop был пустой для него, и `ssh desktop.local` падал.
+      default = "~/.ssh/11111000000_at_email_dot_com";
       description = "Default identity file used in generated Host blocks.";
     };
     connectTimeout = lib.mkOption {
