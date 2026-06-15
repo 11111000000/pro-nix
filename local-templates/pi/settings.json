@@ -1,7 +1,40 @@
 {
-  "_comment": "Шаблон settings.json для pi. Копируется в ~/.pi/agent/settings.json, только если его там ещё нет. `packages` — npm-пакеты pi-расширений; `defaultProvider`/`defaultModel` — модель по умолчанию. `compaction`, `theme`, `hideThinkingBlock` и прочие персональные настройки пользователь добавляет сам (шаблон их не задаёт, чтобы не перетирать индивидуальные предпочтения). Субагентные пакеты (`pi-subagents`, `pi-crew`, `pi-simplify`, `pi-code-review` и т.п.) намеренно не включены.",
   "defaultProvider": "minimax",
   "defaultModel": "MiniMax-M3",
+
+  "defaultThinkingLevel": "medium",
+  "thinkingBudgets": {
+    "minimal": 1024,
+    "low": 4096,
+    "medium": 10240,
+    "high": 32768
+  },
+
+  "compaction": {
+    "enabled": true,
+    "reserveTokens": 16384,
+    "keepRecentTokens": 20000
+  },
+
+  "retry": {
+    "enabled": true,
+    "maxRetries": 3,
+    "baseDelayMs": 2000,
+    "provider": {
+      "timeoutMs": 3600000,
+      "maxRetries": 0,
+      "maxRetryDelayMs": 60000
+    }
+  },
+
+  "enableSkillCommands": true,
+  "doubleEscapeAction": "tree",
+
+  "shellCommandPrefix": "[ -f ~/.local/share/pro-nix/load-agent-env.sh ] && . ~/.local/share/pro-nix/load-agent-env.sh >/dev/null 2>&1\nshopt -s expand_aliases 2>/dev/null\n[ -f ~/.bashrc ] && eval \"$(grep -E '^alias ' ~/.bashrc 2>/dev/null)\"",
+
+  "quietStartup": false,
+
+  "_comment_packages": "Установка: запусти `pi install` для каждого пакета после rebuild home-manager. Список — то что реально нужно, без мусора.",
   "packages": [
     "npm:pi-mcp-adapter",
     "npm:pi-smart-fetch",
@@ -9,7 +42,9 @@
     "npm:@spences10/pi-redact",
     "npm:@spences10/pi-recall",
     "npm:@gotgenes/pi-permission-system",
+    "npm:pi-simplify",
     "npm:pi-compass",
-    "npm:pi-blueprint"
+    "npm:pi-blueprint",
+    "npm:pi-code-review"
   ]
 }
