@@ -158,6 +158,17 @@
   pro-peer.enable = true;
   pro-peer.enableKeySync = true;
 
+  # SSH-ключи для az/za/la/bo. Кладём сюда (а не в `local.nix`), потому
+  # что public key по дизайну публичный и может коммититься в репо.
+  # Плюс: `git+file://$(pwd)?submodules=1` (использует `just switch`)
+  # захватывает только git-tracked файлы — untracked `local.nix` в
+  # captured source не попадает, `pathExists` в sandbox возвращает false,
+  # `local.nix` не импортируется. Опция `pro.ssh.authorizedKeys` остаётся
+  # переиспользуемой: per-host override — в `hosts/<host>/configuration.nix`.
+  pro.ssh.authorizedKeys = [
+    "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC3/bT0dabwHdGv1RpEktGrlLlYsyMpbwx+sKmsmFsWb059yBC45K5DphzCyLbk7si+cC86YKffj1rxkcJVP3BN0F33b1lYBKyr99dtFki4DCTeqcO4yUZAcPNG3lU5kpcWQ7St8Dqit1819vc5nLiYq+2NjE2gSnwU3MGN/wYBhiDsWU7V4IeGqM04cgsJ1KolvpjAuDLkCIsZCF2V8e9q88zSKSwBvqE6RhwcdkN8wY3D4e31rOVkZqH0F1X8KAr2Tmpzqx/oRqZfcEmw583+SOyAExtnH1zaRiXOV8g6utL5mTv8oyockRP9tXCF6I/e63Oean/Dx2gIH9xLHVdRvOYCr8ph6nKryLmdu8wcaWPsX/TE5W0J+XoI4x6uwL7+Lqfy+LSuNBTog/MXkJNFEjGR4PYBRqd+GCbB0Rv2+2y8x+Ordb7mt8rLyyhI0fR8vg/R6LQk11kDeTisBQf4PUGk5XitcCkR5iqeSBnNEynYmTaJhEWLO7WmoyLFsoxoB7wIQmPzd2mOe1Vdc3IZOiiHAvf3ib5Dc2aDD3MCCLRQkNKQ/UqjYNUAGcIwEKJwgLIbsaaBykCTxpw6Av/oKejENtX3kTFdgdmL0k1VONKpZnKChGOXzfCqlB7kdc7BtOSFYESi+14CKCxCJIyuqCuM11YBw7bFipcNNNOYnw== 11111000000@email.com"
+  ];
+
   # Глобальная VM-тюнинг политика (swappiness=10, dirty ratios, vfs_cache_pressure).
   # Хост может отключить через `pro.vmTuning.enable = lib.mkForce false;`.
   pro.vmTuning.enable = true;

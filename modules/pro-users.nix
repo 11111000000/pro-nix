@@ -17,6 +17,32 @@
 { config, pkgs, lib, emacsPkg ? pkgs.emacs, opencodeBwrapModule ? null, ... }:
 
 {
+  # Почему вынесено в опцию: SSH-ключ — персональный; хардкодить его в
+  # `modules/` = коммитить публичный ключ в общий репо. Опция позволяет
+  # прописать ключ в `local.nix` (в .gitignore, machine-local) или в
+  # `hosts/<host>/configuration.nix` (если разные ключи на разных хостах).
+  # Default: пустой список — без ключей `az`/`za`/`la`/`bo` не смогут
+  # зайти по SSH, остаётся только путь GPG pro-peer-sync-keys
+  # (см. modules/pro-peer.nix).
+  options.pro.ssh.authorizedKeys = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = [ ];
+    example = [ "ssh-rsa AAAAB3NzaC1yc2E...== user@host" ];
+    description = ''
+      SSH public keys authorized for az/za/la/bo. Один и тот же набор
+      добавляется в `~/.ssh/authorized_keys` каждого из четырёх
+      аккаунтов. Per-user override (например, az — admin, la — readonly)
+      — через host-level `users.users.<name>.openssh.authorizedKeys.keys`.
+
+      Как прописать:
+        - local.nix (предпочтительно, ключ не попадает в публичный репо):
+            pro.ssh.authorizedKeys = [ "ssh-rsa AAAAB3... user@host" ];
+        - hosts/<host>/configuration.nix (если ключ machine-specific).
+    '';
+  };
+
+  config = {
+
   # Создаём стандартные пользовательские учётные записи для этого коллектива.
   # Формируем список через listToAttrs для компактности конфигурации.
   users.users = builtins.listToAttrs (map (name: {
@@ -28,7 +54,9 @@
       extraGroups = [ "networkmanager" "wheel" "bluetooth" "docker" "input" "uinput" "pro" "pro-agent" ];
       # Минимальный набор программ в пользовательском профиле.
       packages = with pkgs; [ git ];
-      openssh.authorizedKeys.keys = [ ];
+      # Ключи читаются из `pro.ssh.authorizedKeys` (см. опцию выше);
+      # default — пустой массив, заполняется через `local.nix`.
+      openssh.authorizedKeys.keys = config.pro.ssh.authorizedKeys;
     };
   }) [ "az" "za" "la" "bo" ]);
 
@@ -101,5 +129,9 @@
     value = { pro.emacs.gui.enable = config.pro.profiles.exwmMinimal.enable or false; };
   }) [ "az" "za" "la" "bo" ]);
 
+  };  # config =
+
+  # `imports` — top-level опция, нельзя класть внутрь `config = { ... }`.
+  # Подключает HM-профили, pro-agent-configs и т.п. для всех пользователей.
   imports = [ ./pro-users-nixos.nix ];
 }

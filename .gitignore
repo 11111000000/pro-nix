@@ -40,9 +40,11 @@ docs
 system-packages.nix.bak
 system-packages.nix.tmp
 
-# Local overrides, secrets, and build artifacts
+# Local overrides, secrets, and build artifacts.
+# NB: `local.nix.example` is INTENTIONALLY NOT ignored — it's the
+# documented template for `local.nix` and gets committed. Only the
+# real `local.nix` (which may contain secrets) is ignored.
 local.nix
-local.nix.example
 .env
 .env.local
 *.env
