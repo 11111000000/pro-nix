@@ -116,7 +116,15 @@
       nixosConfigurations = hosts;
 
       checks.${system} = (
-        { default = hosts.huawei.config.system.build.toplevel; }
+        # `default = nixosConfigurations.huawei.config.system.build.toplevel`
+        # был очень тяжёлым: заставлял `nix flake check` eval всю NixOS
+        # конфигурацию huawei целиком. По AGENTS.md §6a flake check всё равно
+        # не ловит многие классы ошибок (lazy derivation build, etc.), и
+        # автор рекомендует точечный `nix eval` конкретных атрибутов для
+        # быстрой валидации. Поэтому `default` убран — `nix flake check`
+        # теперь проверяет только типы/наличие атрибутов flake, что и
+        # делает за секунды. Тяжёлые VM-тесты остаются под `runSlow`.
+        { }
         // (if runSlow then {
           # NixOS VM tests for activation verification — expensive, enable via
           # PRO_NIX_RUN_SLOW_CHECKS=1 in your environment when you want them.

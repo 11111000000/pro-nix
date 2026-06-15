@@ -102,8 +102,10 @@ environment.systemPackages = with pkgs; [ pavucontrol playerctl ];
 ### Перед пушем
 
 ```bash
-nix flake check
 git status && git diff
+# Полная проверка: только по явному запросу пользователя — `just flake-check`
+# (долго, eval всей huawei-конфигурации). Для быстрой валидации используй
+# `nix eval .#nixosConfigurations --apply builtins.attrNames` (мгновенно).
 ```
 
 ### Cleanup-коммиты (при удалении мёртвого кода)

@@ -66,7 +66,7 @@ EMACSLOADPATH, который Nix выставляет автоматическ�
                        (use-hooks      . nil)
                        (use-advice     . nil)
                        (use-timers     . t)
-                       (always-visible . nil)
+                       (always-visible . t)
                        (hide-modelines . nil)))
                   shaoline--strategies))))
   (setq shaoline-mode-strategy 'auto-timer))
