@@ -71,6 +71,7 @@
     ./modules/pro-network.nix
     ./modules/pro-ssh-clients.nix
     ./modules/pro-wifi-watchdog.nix
+    ./modules/pro-vm-tuning.nix
     # Страховка владения $HOME: чинит ownership dotdirs при активации
     # home-manager, чтобы несколько Unix-аккаунтов на одной машине
     # не ломали деплой шаблонов (см. /home/az/.pi EACCES).
@@ -156,6 +157,10 @@
   # LAN advertise via mDNS and can receive centrally-managed authorized_keys.
   pro-peer.enable = true;
   pro-peer.enableKeySync = true;
+
+  # Глобальная VM-тюнинг политика (swappiness=10, dirty ratios, vfs_cache_pressure).
+  # Хост может отключить через `pro.vmTuning.enable = lib.mkForce false;`.
+  pro.vmTuning.enable = true;
 
   # hermes removed
 
