@@ -140,22 +140,21 @@ in
         name = "mnt-desktop.mount";
         what = "${cfg.client.server}.local:${cfg.client.remotePath}";
         where = cfg.client.mountPoint;
+        # Почему wantedBy top-level, а не unitConfig.WantedBy:
+        #   в NixOS `unitConfig` маппится в секцию [Unit], где `WantedBy`
+        #   неизвестен — systemd его игнорирует с warning
+        #   "Unknown key 'WantedBy' in section [Unit], ignoring."
+        #   и mount не стартует после загрузки. Top-level `wantedBy` →
+        #   [Install] (правильная секция).
+        # Почему Options — одна строка, а не список:
+        #   systemd `[Mount].Options=` — единственное поле, не повторяется;
+        #   список из 9 элементов NixOS рендерит как 9 отдельных `Options=`,
+        #   и каждое следующее перезаписывает предыдущее (остаётся только
+        #   `noatime`). Comma-separated строка — канонический формат.
         mountConfig = {
-          Options = [
-            "vers=4.2"
-            "rsize=1048576"
-            "wsize=1048576"
-            "soft"
-            "timeo=10"
-            "retrans=1"
-            "_netdev"
-            "nofail"
-            "noatime"
-          ];
+          Options = "vers=4.2,rsize=1048576,wsize=1048576,soft,timeo=10,retrans=1,_netdev,nofail,noatime";
         };
-        unitConfig = {
-          WantedBy = [ "multi-user.target" ];
-        };
+        wantedBy = [ "multi-user.target" ];
       } ];
 
       # nfs-utils для showmount, mountstats и т.п.
