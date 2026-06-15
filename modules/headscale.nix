@@ -58,12 +58,30 @@ in
     };
     derpUrls = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [];
+      # NB: дефолт ссылается на публичную Tailscale-карту — это снимает
+      # ошибку "initial DERPMap is empty" в случае, если встроенный DERP
+      # отключён (см. ниже). Если встроенный сервер включён, headscale
+      # предпочитает локальный DERP; публичный используется как fallback.
+      default = [ "https://controlplane.tailscale.com/derpmap/default" ];
       example = [ "https://control.pro-nix.lan/derp" ];
       description = ''
-        Optional DERP map URLs. When set, clients prefer the embedded DERP
-        server (run separately) before falling back to the public Tailscale
-        DERP map.
+        DERP map URLs. Empty means "use only the embedded DERP server"
+        (requires `derpServer = true`). When set, clients use these
+        URLs in addition to (or instead of) the embedded server.
+      '';
+    };
+    derpServer = lib.mkOption {
+      type = lib.types.bool;
+      # Default: ON. Без DERP headscale 0.27+ стартует с FTL "initial
+      # DERPMap is empty, Headscale requires at least one entry".
+      # Встроенный DERP-сервер поднимается на 0.0.0.0:80 (TCP) +
+      # 0.0.0.0:3478 (STUN/UDP). Для продакшна с собственным FQDN
+      # ставьте `derpServer = false` и `derpUrls = [ "https://..." ]`.
+      default = true;
+      description = ''
+        Run the embedded DERP relay server on this host. Required unless
+        `derpUrls` points at an externally-hosted DERP map. DERP serves
+        WireGuard relay traffic when direct P2P fails (NAT, firewalls).
       '';
     };
   };
@@ -83,6 +101,13 @@ in
       };
     };
 
+    # Firewall: открыть STUN (3478/udp) и DERP-HTTP (80/tcp) при
+    # встроенном DERP-сервере. 80/tcp — это тот же порт, что в `derp.server.urls`
+    # по умолчанию. Если меняете на 443 (за reverse-proxy) — обновите
+    # allowedTCPPorts и stun_listen_addr соответственно.
+    networking.firewall.allowedTCPPorts = lib.mkIf cfg.derpServer [ 80 ];
+    networking.firewall.allowedUDPPorts = lib.mkIf cfg.derpServer [ 3478 ];
+
     # Generate config via `pkgs.formats.yaml` so list/boolean values are
     # rendered correctly. Hand-rolled `lib.concatStringsSep "," (map ...
     # "\"${s}\"")` produced `"1.1.1.1","8.8.8.8"` — a single string, not
@@ -90,12 +115,23 @@ in
     environment.etc."headscale/config.yaml".source =
       let
         yamlFormat = pkgs.formats.yaml {};
-        # DERP block: only present if there is at least one custom DERP URL.
-        # When derpUrls is empty, omit the whole `derp` key so headscale
-        # falls back to the public Tailscale DERP map.
-        derpBlock = if cfg.derpUrls == [] then {} else {
+        # DERP-блок рендерим ВСЕГДА (с urls и/или server.enabled). В headscale
+        # 0.27+ пустой `derp:` без urls и с выключенным server приводит к
+        # FTL "initial DERPMap is empty". Если оба источника выключены —
+        # это явная ошибка конфигурации, сервер всё равно упадёт, что и
+        # хочется (loud failure лучше тихого).
+        derpBlock = {
           derp = {
             urls = cfg.derpUrls;
+            server = {
+              enabled = cfg.derpServer;
+              region_id = 999;
+              stun_listen_addr = "0.0.0.0:3478";
+              # В headscale 0.27+ DERP-server требует свой private key.
+              # Без явного пути headscale стартует с пустым путём и падает:
+              # "failed to read or create DERP server private key: open : no such file".
+              private_key_path = "/var/lib/headscale/derp_server_private.key";
+            };
           };
         };
       in yamlFormat.generate "headscale-config.yaml" ({
@@ -126,14 +162,6 @@ in
           nameservers.global = cfg.nameservers;
           extra_records_path = "/var/lib/headscale/extra-records.json";
           magic_dns = true;
-        };
-        # Embedded DERP server is opt-in: not started by this module. Hosts
-        # that need to terminate DERP for the cluster should run it
-        # separately (or override this attribute set).
-        derp.server = {
-          enabled = false;
-          region_id = 999;
-          stun_listen_addr = "0.0.0.0:3478";
         };
       } // derpBlock);
 
