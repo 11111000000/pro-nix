@@ -160,9 +160,19 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # Render the file. Putting it in /etc/ssh/ssh_config.d/ means it will
-    # be picked up by openssh automatically (ssh_config.d is included by
-    # default since OpenSSH 7.3 and NixOS enables it).
+    # Render the file. We put it in /etc/ssh/ssh_config.d/pro.conf and
+    # then explicitly include it from the system ssh_config (see below) —
+    # NixOS's default ssh_config does NOT auto-include ssh_config.d, so
+    # writing the file alone leaves it dead.
     environment.etc."ssh/ssh_config.d/pro.conf".text = body;
+
+    # Add an Include directive for the pro.conf to the system ssh_config.
+    # `programs.ssh.extraConfig` is prepended to the generated file, and
+    # `lib.mkBefore` puts our line above any user-supplied extraConfig so
+    # cluster defaults take precedence over per-machine overrides.
+    programs.ssh.extraConfig = lib.mkBefore ''
+      # pro-nix managed ssh client config (modules/pro-ssh-clients.nix)
+      Include /etc/ssh/ssh_config.d/pro.conf
+    '';
   };
 }
