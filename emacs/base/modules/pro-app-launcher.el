@@ -115,6 +115,11 @@
                      pro-app-launcher-directories)
             nil)
            ((and (require 'consult nil t) (fboundp 'consult--read))
+            ;; `consult--read' (как и `completing-read' для alist) возвращает
+            ;; уже ЗНАЧЕНИЕ (cdr ячейки (name . file)), то есть строку-путь.
+            ;; Раньше мы пытались сделать (cdr choice), что для строки
+            ;; вызывало "Wrong type argument: listp" и "apply: Command
+            ;; attempted to use minibuffer while in minibuffer".
             (consult--read candidates
                            :prompt "App: "
                            :require-match t
@@ -126,7 +131,7 @@
                                            'pro-app-launcher-history)
                           candidates)))))))
     (when choice
-      (pro-app-launcher--launch (cdr choice))
+      (pro-app-launcher--launch choice)
       ;; Возвращаем фокус X-фрейму через 150 мс — этого хватает, чтобы
       ;; WM поднял новое окно над Emacs.
       (when (fboundp 'x-focus-frame)
