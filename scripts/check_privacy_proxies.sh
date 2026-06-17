@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Отчётный скрипт: проверяет доступные способы подключения к приватным каналам
-# (Tor, I2P, Yggdrasil и прочие) и печатает красивый отчёт на русском.
+# (Tor, I2P и прочие) и печатает красивый отчёт на русском.
 # Запускайте: bash scripts/check_privacy_proxies.sh
 
 set -euo pipefail
@@ -36,7 +36,7 @@ cat <<EOF
 Хост: $HOSTNAME
 Время: $DATE
 Скрипт проверяет:
- - локальные демоны/байнари: tor, i2pd/i2p, yggdrasil, tailscale, zerotier, openvpn, wireguard
+ - локальные демоны/байнари: tor, i2pd/i2p, tailscale, zerotier, openvpn, wireguard
  - прослушивающие прокси-порты (SOCKS/HTTP): 9050/9150/8118 (Tor), 4444/4447/7657 (I2P) и т.п.
  - доступность прокси на шлюзе (полезно при использовании Android/Orbot как хотспота)
  - установленные инструменты: torsocks, proxychains, redsocks
@@ -45,7 +45,7 @@ cat <<EOF
 EOF
 
 print_h "1) Наличие ключевых утилит"
-TOOLS=(tor torsocks proxychains proxychains4 i2pd i2p yggdrasil tailscale zerotier-one wg wg-quick openvpn socat redsocks)
+TOOLS=(tor torsocks proxychains proxychains4 i2pd i2p tailscale zerotier-one wg wg-quick openvpn socat redsocks)
 for t in "${TOOLS[@]}"; do
   if has_cmd "$t"; then
     ok "$t — найден ($(command -v $t))"
@@ -56,7 +56,7 @@ done
 
 print_h "2) Системные службы (systemd)"
 if has_cmd systemctl; then
-  for svc in tor tor@default i2pd yggdrasil tailscaled zerotier-one openvpn@client; do
+  for svc in tor tor@default i2pd tailscaled zerotier-one openvpn@client; do
     if systemctl list-units --type=service --all | rg -i "^${svc}" >/dev/null 2>&1; then
       state=$(systemctl is-active "$svc" 2>/dev/null || echo inactive)
       ok "$svc — сервис есть, состояние: $state"
@@ -69,7 +69,7 @@ else
 fi
 
 print_h "3) Локальные прослушивающие SOCKS/HTTP порты (локальная машина)"
-# common ports to check: tor: 9050,9150 socks; 8118 http; i2p: 4444 http, 4447 socks, 7657 console; yggdrasil: none specific; wireguard: tun interface
+# common ports to check: tor: 9050,9150 socks; 8118 http; i2p: 4444 http, 4447 socks, 7657 console; wireguard: tun interface
 PORTS=("127.0.0.1:9050" "127.0.0.1:9150" "127.0.0.1:8118" "127.0.0.1:4444" "127.0.0.1:4447" "127.0.0.1:7657")
 if has_cmd ss; then
   ss -ltnp | sed -n '1,200p'
@@ -109,14 +109,6 @@ fi
 
 print_h "5) Интерфейсы и VPN/TUN"
 ip -brief addr || true
-# check for ygg interfaces
-ygg_if=$(ip link show | rg -i "ygg|yggdrasil" -n || true)
-if [ -n "$ygg_if" ]; then
-  ok "Найдены интерфейсы Yggdrasil:"
-  echo "$ygg_if"
-else
-  warn "Интерфейсы Yggdrasil не найдены"
-fi
 
 if ip link show tun0 >/dev/null 2>&1; then ok "tun0 — есть (возможно VPN)"; else warn "tun0 — нет"; fi
 if ip link show wg0 >/dev/null 2>&1; then ok "wg0 — есть (WireGuard)"; else warn "wg0 — нет"; fi
@@ -132,21 +124,20 @@ done
 
 print_h "8) Рекомендации (диалектический анализ и варианты)"
 cat <<'ANALYSIS'
-Цель: "Все запросы из компьютера идут через Tor (или I2P/Yggdrasil/прочие)".
+Цель: "Все запросы из компьютера идут через Tor (или I2P/прочие)".
 
 1) Возможности и ограничения:
  - Tor (SOCKS) транслирует TCP (HTTP/HTTPS) трафик, но не все приложения автоматически используют SOCKS.
  - DNS-запросы по умолчанию могут идти в обход — нужно использовать 'socks5h' или forcе проксирование DNS.
  - UDP (VoIP, DNS over UDP, некоторые игры) не поддерживается Tor.
- - I2P предоставляет HTTP/SOCKS прокси для доступа к eepsites и сервисам внутри I2P; не заменяет весь Интернет.
- - Yggdrasil — это mesh-сеть уровня IP; маршрутизируется как обычный ip-интерфейс (если есть, многие приложения автоматически идут через неё).
+- I2P предоставляет HTTP/SOCKS прокси для доступа к eepsites и сервисам внутри I2P; не заменяет весь Интернет.
 
 2) Варианты реализации "всё через прокси":
  A) Перезапуск приложений через torsocks/proxychains (простой, per-app).
  B) Установка переменных окружения (http_proxy, all_proxy) — работает лишь для программ, читающих их.
  C) Transparent proxy: использовать iptables/nftables + redsocks/socat чтобы принудительно перенаправлять весь TCP на SOCKS — более сложный, требует root.
  D) Использовать полноценный VPN: если Orbot на Android поддерживает VPN-over-Tor, или поднять VPN-сервер поверх Tor (нетривиально).
- E) Для Yggdrasil — включённый интерфейс делает трафик маршрутизируемым на уровне IP, поэтому можно манипулировать маршрутами.
+ E) Для VPN-интерфейсов (tun/wg) — маршрутизация на уровне IP позволяет прозрачно пропускать трафик через них.
 
 3) Практические рекомендации:
  - Для простой работы: используйте torsocks/proxychains для тех приложений, которые вы хотите защитить.

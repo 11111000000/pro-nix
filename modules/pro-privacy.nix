@@ -111,7 +111,6 @@ in {
     proxychains
     mullvad-vpn
     wireguard-tools
-    yggdrasil
   ];
 
   networking.firewall = {

@@ -17,7 +17,6 @@ with pkgs;
     onionshare
     dnscrypt-proxy
     wireguard-tools
-    yggdrasil
     i2p
     proxychains
     mullvad-vpn
