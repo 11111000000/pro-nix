@@ -42,33 +42,48 @@ EMACSLOADPATH, который Nix выставляет автоматическ�
 (defcustom pro-ui-shaoline-strategy 'auto-timer
   "Стратегия shaoline-mode по умолчанию.
 - 'auto-timer — кастомная стратегия: 1 Гц таймер обновляет time/battery,
-  но post-command-hook/reassert/advice отключены → нет мигания
-  на каждое нажатие клавиши. Это компромисс между 'yin (замороженные
-  сегменты) и 'adaptive/'yang (мигание echo-area при любом (message ...)).
-- 'yin — обновления только по явному вызову `shaoline-update`.
+  но post-command-hook/reassert/advice/always-visible отключены →
+  нет мигания на каждое нажатие клавиши, нет конкуренции за echo-area
+  с (message ...). Это компромисс между 'yin (замороженные сегменты)
+  и 'adaptive/'yang (мигание echo-area при любом (message ...)).
+- 'yin — обновления только по явному вызову `shaoline-update'.
 - 'adaptive — поведение shaoline по умолчанию (может мигать)."
   :type '(choice (const auto-timer) (const yin) (const adaptive) (const yang))
   :group 'pro-ui-modeline)
 
 (defun pro-ui--install-shaoline-strategy ()
   "Регистрирует кастомную стратегию 'auto-timer' и применяет её.
-Делает shaoline молчаливым: только таймер 1 Гц, без post-command-hook
-и без echo-area-reassert, который конкурирует с (message ...) от других
-команд. Снимает симптом мигания modeline на каждое нажатие клавиши."
-  (when (boundp 'shaoline--strategies)
-    ;; Стратегия 'auto-timer' = yin по хукам/advice/reassert, но с
-    ;; таймером 1 Гц для time/battery. hide-modelines оставлен
-    ;; пользовательской настройке `shaoline-hide-modeline'.
-    (unless (assq 'auto-timer shaoline--strategies)
-      (setq shaoline--strategies
-            (cons '(auto-timer
-                    . ((update-method  . automatic)
-                       (use-hooks      . nil)
-                       (use-advice     . nil)
-                       (use-timers     . t)
-                       (always-visible . t)
-                       (hide-modelines . nil)))
-                  shaoline--strategies))))
+Делает shaoline полностью молчаливым: только таймер 1 Гц для
+time/battery, без post-command-hook, без advice и без echo-area-reassert.
+`always-visible = nil' (а не `t', как в более ранней версии) — это
+важно: с always-visible=t shaoline каждый раз восстанавливает своё
+сообщение в echo-area при первой возможности, что выглядит как
+«мигание» при наборе текста (любой чужой (message ...) сразу же
+затирается shaoline'ом). С always-visible=nil shaoline пишет в
+echo-area только когда контент реально изменился.
+
+Регистрация через публичный API `shaoline-define-strategy'
+(вместо прямого cons-а в `shaoline--strategies') — это
+устраняет три класса багов:
+  * cons поверх лениво-инициализированного alist-а
+    (`shaoline--ensure-core-vars') молча перезаписывался;
+  * cons в голову менял порядок стратегий, из-за чего
+    `shaoline-toggle-strategy' пропускал новую стратегию;
+  * опечатка в ключе (`:always-vicible' вместо `:always-visible')
+    тихо давала дефолтное значение.
+
+Идемпотентно: `shaoline-define-strategy' сам заменяет существующую
+запись, так что повторный вызов после `pro/reload-config' корректно
+обновляет конфигурацию (а не пропускает её через `unless assq')."
+  (when (fboundp 'shaoline-define-strategy)
+    (shaoline-define-strategy
+     'auto-timer
+     :update-method  'automatic
+     :use-hooks      nil
+     :use-advice     nil
+     :use-timers     t
+     :always-visible nil
+     :hide-modelines nil))
   (setq shaoline-mode-strategy 'auto-timer))
 
 (defun pro-ui--enable-shaoline-if-available ()

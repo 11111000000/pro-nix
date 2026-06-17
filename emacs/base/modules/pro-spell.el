@@ -39,7 +39,14 @@
   "Бинарь spell-checker, передаваемый в `ispell-program-name'.
 По умолчанию `pro-hunspell' — обёртка, поставляемая модулем
 modules/pro-spellcheck.nix, которая проксирует DICPATH на ru_RU
-и дополнительные словари."
+и дополнительные словари.
+
+NB: если `pro-hunspell' не найден в PATH (модуль pro-spellcheck.nix
+не включён на этом хосте), `pro-spell-configure-ispell' пытается
+найти fallback: сначала `hunspell', затем `aspell'. Если ни один
+недоступен, `pro-spell-auto-enable' принудительно ставится в nil,
+чтобы flyspell не падал с \"Searching for program\" при каждом
+открытии text/prog буфера."
   :type 'string
   :group 'pro-spell)
 
@@ -73,13 +80,43 @@ flyspell вручную через M-x flyspell-mode."
   (let ((val (or (getenv "PRO_SPELL_DISABLE") "")))
     (member val '("1" "yes" "true" "on"))))
 
+(defun pro-spell--resolve-program ()
+  "Вернуть путь к spell-checker бинарю с fallback'ом.
+Приоритет:
+  1. `pro-spell-program-name' (по умолчанию `pro-hunspell'),
+  2. `hunspell' (стандартный upstream из nixpkgs),
+  3. `aspell' (legacy),
+  4. nil — ни один не найден.
+Возвращает строку-путь или nil. Не меняет `ispell-program-name'."
+  (or (executable-find pro-spell-program-name)
+      (executable-find "hunspell")
+      (executable-find "aspell")))
+
 (defun pro-spell-configure-ispell ()
   "Настроить ispell для работы с pro-hunspell + ru_RU.
 Регистрирует ru_RU в `ispell-local-dictionary-alist', чтобы
 ispell-flyspell-verdict корректно классифицировал кириллические
-слова. Вызывается при загрузке модуля и при pro/reload-config."
-  (setq ispell-program-name pro-spell-program-name)
-  (setq ispell-dictionary (pro-spell--default-dictionary))
+слова. Вызывается при загрузке модуля и при pro/reload-config.
+
+Graceful fallback: если `pro-hunspell' недоступен (модуль
+pro-spellcheck.nix не включён на этом хосте), пробуем upstream
+`hunspell', затем `aspell'. Если ни один не найден, выводим
+предупреждение один раз и принудительно выключаем
+`pro-spell-auto-enable', чтобы flyspell не падал на каждом буфере."
+  (let ((resolved (pro-spell--resolve-program)))
+    (cond
+     ((null resolved)
+      (unless (get 'pro-spell--resolve-program :warned)
+        (put 'pro-spell--resolve-program :warned t)
+        (display-warning 'pro-spell
+                         (format "spell-checker не найден (искали: %s, hunspell, aspell); flyspell отключён"
+                                 pro-spell-program-name)
+                         :warning))
+      (setq pro-spell-auto-enable nil)
+      (setq ispell-program-name nil))
+     (t
+      (setq ispell-program-name resolved)
+      (setq ispell-dictionary (pro-spell--default-dictionary)))))
   ;; Регистрация ru_RU. Формат записи для hunspell:
   ;;   (NAME CASE-RELEVANT REGEXP NOT-CASE-RELEVANT-CHARS IGNORE-CHARS
   ;;         MULTI-LINE-P EXTRA-ARGS AFF-FILE DIC-FILE CODING)
@@ -115,14 +152,19 @@ ispell-flyspell-verdict корректно классифицировал кир
   (when (and (derived-mode-p 'text-mode)
              ;; Не включаем flyspell в minibuffer и read-only буферах.
              (not (minibufferp))
-             (not buffer-read-only))
+             (not buffer-read-only)
+             ;; Если spell-checker так и не нашёлся, не пытаемся
+             ;; включать flyspell (иначе ispell падает на каждом буфере
+             ;; с \"Searching for program\").
+             (executable-find ispell-program-name))
     (flyspell-mode 1)))
 
 (defun pro-spell--enable-prog ()
-  "Включить flyspell-prog-mode для prog-буферов (комментарии/строки)."
-  (when (derived-mode-p 'prog-mode)
-    ;; flyspell-prog-mode — обычный `defun` без аргументов, поэтому
-    ;; вызываем без `1` (это `define-minor-mode` для flyspell-mode,
+  "Включить flyspell-prog-mode для prog-режимов (комментарии/строки)."
+  (when (and (derived-mode-p 'prog-mode)
+             (executable-find ispell-program-name))
+    ;; flyspell-prog-mode — обычный `defun' без аргументов, поэтому
+    ;; вызываем без `1` (это `define-minor-mode' для flyspell-mode,
     ;; а prog-вариант включает `flyspell-mode' внутри).
     (flyspell-prog-mode)))
 
