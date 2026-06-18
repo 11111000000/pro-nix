@@ -150,6 +150,185 @@ MODULE — символ или строка. Возвращает t при ус�
           (setq fail (1+ fail))))
       (message "pro/reload-all-modules: %d ok, %d failed" ok fail))))
 
+(defvar pro--package-features nil
+  "Список features, загруженных из /run/current-system/sw/share/emacs/site-lisp/elpa/
+или из Nix-store elpa. Используется в `pro/reload-config' для force-reload после `just switch'.
+Заполняется лениво при первом вызове; обновляется при каждом reload.")
+
+(defun pro--package-feature-p (file)
+  "Non-nil если FILE — путь к пакету (не к встроенному Emacs .elc).
+
+Пакеты в NixOS-конфиге pro-nix поставляются либо через
+emacs-with-packages (лежат в /run/current-system/sw/share/emacs/site-lisp/
+или /nix/store/.../share/emacs/site-lisp/ и подкаталогах вроде /elpa/),
+либо через home-manager-профиль.
+
+Встроенные Emacs-файлы лежат в /nix/store/...-emacs-<ver>/share/emacs/<ver>/lisp/
+(например 30.2/lisp/backquote.elc). Они НЕ являются пакетами и должны
+оставаться загруженными.
+
+Эвристика: пакет, если путь содержит '/site-lisp/' ИЛИ '/elpa/' под
+share/emacs/, или идёт из home-manager elpa-каталога."
+  (and (stringp file)
+       (cond
+        ;; Nix-store elpa: /nix/store/.../share/emacs/.../<pkg>-<ver>/...
+        ;; Отличаем от /nix/store/...-emacs-30.2/share/emacs/30.2/lisp/...
+        ;; по наличию /elpa/ или /site-lisp/ в пути.
+        ((string-prefix-p "/nix/store/" file)
+         (or (string-match-p "/share/emacs/[^/]+/elpa/" file)
+             (string-match-p "/share/emacs/[^/]+/site-lisp/" file)
+             (string-match-p "/share/emacs/site-lisp/" file)))
+        ;; System-wide: /run/current-system/sw/share/emacs/site-lisp/...
+        ((string-prefix-p "/run/current-system/sw/share/emacs/" file)
+         (or (string-match-p "/site-lisp/" file)
+             (string-match-p "/elpa/" file)))
+        ;; Home-manager Emacs elpa: ~/.local/state/.../share/emacs/...
+        ((string-match-p "/share/emacs/[^/]+/elpa/" file) t)
+        (t nil))))
+
+(defun pro--collect-package-features ()
+  "Собрать список features, загруженных из Nix-/EMACS-provided site-lisp.
+Это функции вроде `magit', `consult', `telega' — те, что поставляет
+`emacs-with-packages' (Nix). Возвращает свежий список символов.
+
+Алгоритм: обходим `load-history', для каждой записи смотрим FILE;
+если путь удовлетворяет `pro--package-feature-p', собираем все
+`provide' из этой записи."
+  (let (result)
+    (dolist (entry load-history result)
+      (when (and (consp entry) (stringp (car entry)))
+        (let ((file (car entry)))
+          (when (pro--package-feature-p file)
+            (dolist (form (cdr entry))
+              (when (and (consp form) (eq (car form) 'provide)
+                         (symbolp (cdr form))
+                         ;; Наши pro-* модули — отдельно через pro/reload-module.
+                         (not (string-prefix-p "pro-" (symbol-name (cdr form)))))
+                (push (cdr form) result)))))))))
+
+(defvar pro--built-in-features
+  '(emacs cl-lib subr-x advice help-mode help-fns help-macro help elt seq
+          eieio backtrace find-func pp comint ring format-spec shortdoc
+          cl-macs cl-generic cl-extra pcase rx theraamc
+          ;; Фундаментальные subr-фичи, появляются в load-history раньше всего
+          backquote hashtable-print-readable keymap widget custom
+          ;; Внутренние, на которых держится Emacs
+          files-x cus-edit cus-start cus-load wid-edit)
+  "Базовые фичи Emacs и subr, которые НЕЛЬЗЯ выгружать.
+Часть встроенного Emacs, `unload-feature' на них сделает Emacs
+неработоспособным. Эти фичи появляются в load-history как provided
+из `/nix/store/...-emacs-30.2/share/emacs/30.2/lisp/*.elc', но наш
+фильтр `pro--package-feature-p' их пропускает (нет `/elpa/' или
+`/site-lisp/' в пути). На случай если путь нестандартный — оставляем
+явный denylist.")
+
+(defun pro/reload-packages ()
+  "Force-reload всех Nix-/Emacs-provided пакетов (magit, consult, telega, …).
+
+Алгоритм:
+  1. Собрать features, загруженные из /run/current-system/sw/.../share/emacs/
+     или из /nix/store/.../share/emacs/.
+  2. Для каждого выполнить `unload-feature' с FORCE=t. Это выгружает
+     функции и сбрасывает feature, чтобы `require' смог перечитать файл.
+  3. Очистить `load-path' от старых путей этих packages и добавить
+     заново /run/current-system/sw/share/emacs/site-lisp/elpa и
+     вложенные site-lisp от найденных derivation.
+  4. `require' каждый feature обратно — Emacs загрузит .elc/.el из
+     нового /nix/store-пути (если `just switch' положил туда новую
+     derivation).
+
+ВАЖНО: между шагами 2 и 4 Emacs НЕ будет иметь доступа к функциям
+этих пакетов. Не вызывайте их в этот промежуток (например, в
+`pro--before-reload-hook' / `pro--after-reload-hook').
+
+Возвращает plist (:unloaded N :loaded M :failed F).
+
+Не выгружает:
+  - встроенные Emacs-фичи (emacs, cl-lib, subr-x, …)
+  - наши собственные pro-* модули (их reload — через pro/reload-module)
+  - features, чьи файлы сейчас не существуют (защита от race condition)"
+  (interactive)
+  (let* ((targets (pro--collect-package-features))
+         (unloaded 0)
+         (loaded 0)
+         (failed 0)
+         (failed-names '()))
+    ;; 1. СНАЧАЛА выгружаем все target features (ДО чистки load-path —
+    ;; иначе Emacs не сможет найти loadhist.el, требуемый
+    ;; unload-feature, и выдаст file-missing).
+    (dolist (feat targets)
+      (condition-case err
+          (progn
+            (unload-feature feat 'force)
+            (setq unloaded (1+ unloaded)))
+        (error
+         (setq failed (1+ failed))
+         (push feat failed-names)
+         (message "pro/reload-packages: unload %s failed: %S" feat err))))
+    ;; 2. Теперь чистим load-path от старых путей и добавляем заново
+    ;; текущие site-lisp/elpa пути — чтобы require ниже перечитал из
+    ;; нового /nix/store.
+    ;;
+    ;; ВАЖНО: сохраняем путь /etc/profiles/per-user/<user>/share/emacs/...
+    ;; (home-manager профиль). Без него require magit/consult не найдёт
+    ;; свои .elc — функция `pro--package-feature-p' его считает пакетом,
+    ;; и cl-remove-if выше мог бы его удалить.
+    (setq load-path
+          (cl-remove-if (lambda (p)
+                          (and (stringp p)
+                               (pro--package-feature-p p)
+                               ;; Не трогаем home-manager профиль — он
+                               ;; стабильный путь в /etc/profiles/per-user.
+                               (not (string-prefix-p "/etc/profiles/per-user/" p))))
+                        load-path))
+    ;; Добавляем обратно стандартные site-lisp пути:
+    ;;   - /run/current-system/sw/share/emacs/site-lisp/ + подкаталоги
+    ;;   - /etc/profiles/per-user/<user>/share/emacs/site-lisp/ + подкаталоги
+    ;;   - любые /nix/store/.../share/emacs/site-lisp/ из текущего PATH
+    (let ((roots '("/run/current-system/sw/share/emacs/site-lisp")))
+      (let ((user-elpa-dir
+             (expand-file-name
+              "share/emacs/site-lisp"
+              (file-name-directory
+               (file-name-directory
+                (file-name-directory user-emacs-directory))))))
+        ;; user-emacs-directory = ~/.config/emacs, ищем user profile в /etc/profiles
+        ;; (простой способ — найти первый путь, который уже был в load-path)
+        (setq roots
+              (append roots
+                      (cl-remove-if-not
+                       (lambda (p)
+                         (and (stringp p)
+                              (string-prefix-p "/etc/profiles/per-user/" p)
+                              (file-directory-p p)
+                              (string-match-p "/share/emacs/[^/]+/site-lisp" p)))
+                       load-path)))
+        (dolist (root roots)
+          (when (and (stringp root) (file-directory-p root))
+            (add-to-list 'load-path root)
+            (dolist (sub (directory-files root t "^[a-z0-9]" t))
+              (when (file-directory-p sub)
+                (add-to-list 'load-path sub)))))))
+    ;; 3. Require обратно.
+    (dolist (feat targets)
+      (condition-case err
+          (progn
+            (require feat nil 'noerror)
+            (if (featurep feat)
+                (setq loaded (1+ loaded))
+              (setq failed (1+ failed))
+              (push feat failed-names)
+              (message "pro/reload-packages: require %s failed (noerror returned nil)" feat)))
+        (error
+         (setq failed (1+ failed))
+         (push feat failed-names)
+         (message "pro/reload-packages: require %s error: %S" feat err))))
+    (message "pro/reload-packages: unloaded=%d loaded=%d failed=%d (%s)"
+             unloaded loaded failed
+             (mapconcat #'symbol-name (reverse failed-names) ", "))
+    (list :unloaded unloaded :loaded loaded :failed failed
+          :failed-names (reverse failed-names))))
+
 (defun pro/update-melpa-in-background ()
   "Запустить фоновый процесс для обновления MELPA/ELPA.
 Запускает отдельный Emacs --batch, который выполняет скрипт
@@ -213,10 +392,19 @@ without aborting the calling command."
 (defun pro/reload-config (&optional full)
   "Reload the whole pro Emacs configuration to apply changes without restarting.
 
-If FULL is non-nil (or called with a prefix argument), re-eval
-`site-init.el' from disk (which re-runs provided-packages loading
-and the top-level init) AND re-load every module. The non-full path
-re-evaluates each module's .el file in place.
+Prefix arg controls the depth:
+  no prefix   — soft reload наших pro-* модулей (default). Быстро,
+                безопасно, не трогает Nix-пакеты.
+  C-u         — full reload: перечитывает site-init.el и весь манифест.
+                Тоже безопасно. Похоже на рестарт Emacs с восстановлением
+                буферов, но без потери frame-состояния X11.
+  C-u C-u     — packages reload: ВЫГРУЖАЕТ с FORCE все Nix-/EMACS-provided
+                пакеты (magit, consult, telega, …) и require'ит их
+                обратно из /nix/store. Это даёт реальное обновление
+                пакетов после `just switch' без рестарта Emacs.
+                Между unload и require функции пакетов недоступны;
+                pre-/after-reload hooks могут сломаться — это намеренно.
+                В EXWM безопасно: X-клиенты не падают, WM-моргает.
 
 Both paths run `pro--before-reload-hook' (modules can tear down child
 frames / bg processes / cached state) and `pro--after-reload-hook'
@@ -226,12 +414,14 @@ This function is defensive and uses `ignore-errors' / `condition-case' to avoid
 breaking the running session when a single module fails to reload.
 
 Usage:
-  M-x pro/reload-config      ;; quick reload (modules in-place)
-  C-u M-x pro/reload-config  ;; full reload (re-eval site-init.el + modules)
+  M-x pro/reload-config       ;; quick reload (modules in-place)
+  C-u M-x pro/reload-config   ;; full reload (re-eval site-init.el + modules)
+  C-u C-u M-x pro/reload-config ;; packages reload (force-unload + require Nix pkgs)
 "
   (interactive "P")
-  (let ((start (float-time)))
-    (message "pro: starting config reload (full=%s)" full)
+  (let ((start (float-time))
+        (packages-p (= (prefix-numeric-value full) 16)))
+    (message "pro: starting config reload (full=%s packages=%s)" full packages-p)
     ;; 1. Refresh nix-generated paths if available
     (ignore-errors (when (fboundp 'pro/nix-generate-and-refresh-paths)
                      (pro/nix-generate-and-refresh-paths)))
@@ -240,22 +430,30 @@ Usage:
     (run-hooks 'pro--before-reload-hook)
     ;; 3. Re-evaluate module code.
     (condition-case err
-        (if full
-            (let ((site-init (and (boundp 'pro-emacs-base-system-modules-dir)
-                                  (locate-library "pro-site-init"))))
-              ;; Re-eval site-init.el from disk so provided-packages,
-              ;; manifest resolution, and pro-emacs-base-start all run
-              ;; again. `load-file' here is what makes a `full' reload
-              ;; actually re-run the top-level side effects.
-              (if (and site-init (file-readable-p site-init))
-                  (progn
-                    (pro--forget-file-in-load-history site-init)
-                    (load-file site-init)
-                    (when (fboundp 'pro-emacs-base-start)
-                      (pro-emacs-base-start)))
-                (pro-emacs-base-start))
-              (pro/reload-all-modules))
+        (cond
+         (packages-p
+          ;; Packages reload: force-unload всех Nix-предоставленных пакетов,
+          ;; потом require заново. После этого наши pro-* модули могут
+          ;; ссылаться на новые определения magit/consult/telega/etc.
+          (pro/reload-packages)
           (pro/reload-all-modules))
+         (full
+          (let ((site-init (and (boundp 'pro-emacs-base-system-modules-dir)
+                                (locate-library "pro-site-init"))))
+            ;; Re-eval site-init.el from disk so provided-packages,
+            ;; manifest resolution, and pro-emacs-base-start all run
+            ;; again. `load-file' here is what makes a `full' reload
+            ;; actually re-run the top-level side effects.
+            (if (and site-init (file-readable-p site-init))
+                (progn
+                  (pro--forget-file-in-load-history site-init)
+                  (load-file site-init)
+                  (when (fboundp 'pro-emacs-base-start)
+                    (pro-emacs-base-start)))
+              (pro-emacs-base-start))
+            (pro/reload-all-modules)))
+         (t
+          (pro/reload-all-modules)))
       (error (message "pro/reload-config: module reload failed: %S" err)))
     ;; 4. Re-apply keybindings and pending pro-keys entries
     (ignore-errors (when (fboundp 'pro-keys-reload) (pro-keys-reload)))
