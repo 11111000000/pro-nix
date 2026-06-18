@@ -57,6 +57,7 @@
     ./modules/host-policies.nix
     ./modules/headscale.nix
     ./modules/pro-desktop.nix
+    ./modules/pro-heavy-desktop.nix
     ./modules/pro-exwm-desktop.nix
     ./modules/pro-profiles.nix
     ./modules/pro-emacs-rescue.nix

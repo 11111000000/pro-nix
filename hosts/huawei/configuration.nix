@@ -3,9 +3,7 @@
 {
   # Import modules for this host
   imports = [
-    ../../modules/pro-users.nix
     ../../modules/pro-haskell.nix
-    ../../modules/pro-heavy-desktop.nix
   ];
 
   networking.hostName = "huawei";
