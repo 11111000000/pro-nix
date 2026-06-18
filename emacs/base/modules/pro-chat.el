@@ -62,20 +62,27 @@
        (memq 'telega pro-packages-provided-by-nix)))
 
 (defun pro/chat--apply-base-config ()
-  "Применить базовые кастомайз-переменные telega. Идемпотентно."
-  (when (fboundp 'setq)
-    (setq telega-use-docker pro/chat-use-docker
-          telega-chat-list-default-filter "Unread"
-          telega-use-images t
-          telega-emoji-use-images nil
-          telega-chat-show-avatars nil
-          telega-chat-show-photos nil
-          telega-root-auto-fill-mode nil
-          telega-chat-auto-fill-mode nil
-          telega-webpage-preview-mode nil
-          telega-chat-fill-column pro/chat-fill-column
-          telega-chat-history-limit pro/chat-history-limit
-          telega-emoji-font-family pro/chat-emoji-font-family)))
+  "Применить базовые кастомайз-переменные telega. Идемпотентно.
+
+Используем `customize-set-variable' вместо `setq' потому что
+`telega-use-docker' и другие — это defcustom-переменные telega.el.
+При повторном `require' telega фреймворк customize восстанавливает
+дефолт (`nil' для use-docker), затирая обычный setq. customize-set
+записывает значение как user-saved, и оно переживает reload.
+"
+  (when (fboundp 'customize-set-variable)
+    (customize-set-variable 'telega-use-docker pro/chat-use-docker)
+    (customize-set-variable 'telega-chat-list-default-filter "Unread")
+    (customize-set-variable 'telega-use-images t)
+    (customize-set-variable 'telega-emoji-use-images nil)
+    (customize-set-variable 'telega-chat-show-avatars nil)
+    (customize-set-variable 'telega-chat-show-photos nil)
+    (customize-set-variable 'telega-root-auto-fill-mode nil)
+    (customize-set-variable 'telega-chat-auto-fill-mode nil)
+    (customize-set-variable 'telega-webpage-preview-mode nil)
+    (customize-set-variable 'telega-chat-fill-column pro/chat-fill-column)
+    (customize-set-variable 'telega-chat-history-limit pro/chat-history-limit)
+    (customize-set-variable 'telega-emoji-font-family pro/chat-emoji-font-family)))
 
 (defun pro/chat--install-hooks ()
   "Подключить локальные хуки telega. Вызывать после (require 'telega).
