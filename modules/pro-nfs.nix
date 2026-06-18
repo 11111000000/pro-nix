@@ -117,11 +117,13 @@ in
       #
       # Таймауты — минимальные, чтобы `opendir(/mnt/desktop)` возвращал
       # ошибку через ~3 с, а не через 25+ с:
-      #   timeo=10      — 1 секунда (десятые доли) на одну попытку NFS
-      #   retrans=1     — одна попытка; с `soft` сразу EIO после таймаута
-      #   x-systemd.mount-timeout=3 — жёсткий лимит systemd на mount-юнит
-      #   nofail        — не блокировать загрузку, если шари нет
-      #   nobootwait    — то же самое, при `bg`-режиме systemd-fstab-generator
+      #   timeo=10              — 1 секунда (десятые доли) на одну попытку NFS
+      #   retrans=1             — одна попытка; с `soft` сразу EIO после таймаута
+      #   x-systemd.mount-timeout=3s — жёсткий лимит systemd на mount-юнит
+      #                            (без него systemd ретраит холодный старт
+      #                            долго и boot ощутимо висит, пока ARP сходится)
+      #   nofail                — не блокировать загрузку, если шари нет
+      #   nobootwait            — то же самое, при `bg`-режиме systemd-fstab-generator
       #
       # NB: we deliberately do NOT set `x-systemd.automount`. With that
       # option, systemd-fstab-generator emits an *automount* unit (named
@@ -152,7 +154,7 @@ in
         #   и каждое следующее перезаписывает предыдущее (остаётся только
         #   `noatime`). Comma-separated строка — канонический формат.
         mountConfig = {
-          Options = "vers=4.2,rsize=1048576,wsize=1048576,soft,timeo=10,retrans=1,_netdev,nofail,noatime";
+          Options = "vers=4.2,rsize=1048576,wsize=1048576,soft,timeo=10,retrans=1,_netdev,nofail,noatime,x-systemd.mount-timeout=3s";
         };
         wantedBy = [ "multi-user.target" ];
       } ];

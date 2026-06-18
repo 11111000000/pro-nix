@@ -56,6 +56,9 @@
   # forces an exception. Tor Browser lives in the shared package composition.
 
   # NFS-клиент: монтируем desktop:/srv/nfs автоматически по обращению.
+  # При недоступном сервере (другая подсеть, нет mDNS/headscale) — mount
+  # уходит в failed через ~3 с (nofail,soft,timeo=10,retrans=1), ничего
+  # не блокирует. Диагностика: `journalctl -u mnt-desktop.mount`.
   pro.nfs.client.enable = true;
 
   # headscale control plane — на desktop; на ноутбуке выключаем явно.
