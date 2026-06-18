@@ -23,20 +23,20 @@ jobs:
 
       - name: Make script executable
         run: |
-          chmod +x ./scripts/emacs-headless-test.sh
+          chmod +x ./scripts/test-emacs-headless.sh
 
       - name: Run headless tests (auto install)
         env:
           PRO_PACKAGES_AUTO_INSTALL: '1'
           EMACS_BIN: emacs
         run: |
-          ./scripts/emacs-headless-test.sh tty
+          ./scripts/test-emacs-headless.sh tty
 
       - name: Summarize headless logs
         run: |
           LOGDIR=$(ls -td logs/emacs-headless/* | head -n1)
           echo "Checking logs in $LOGDIR"
-          ./scripts/parse-emacs-logs.sh "$LOGDIR" | tee run-summary.txt
+          ./scripts/helper-parse-emacs-logs.sh "$LOGDIR" | tee run-summary.txt
           # Fail build if critical warnings are present
           if rg "command .* not found for key" "$LOGDIR"; then
             echo "Found key binding warnings" >&2
