@@ -101,4 +101,10 @@
   # LAN-gateway: разрешаем этому хосту роутить трафик tailnet-клиентов
   # через основной uplink (use case: VMs/travel-ноутбуки без выхода в WAN).
   pro.network.allowSubnetRouter = lib.mkForce true;
+
+  # Русская проверка орфографии (flyspell + ru_RU). Доставляет `pro-hunspell`
+  # в PATH, после чего pro-spell.el подхватывает его и включает flyspell
+  # для text/prog режимов. Модуль pro-spellcheck.nix вендорит ru_RU
+  # в dictionaries/hunspell/ — без зависимости от hunspellDicts в nixpkgs.
+  pro.spellcheck.enable = true;
 }
