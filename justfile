@@ -72,25 +72,25 @@ check-all:
 	nix run .#check-all
 
 headless-tty:
-	./scripts/emacs-verify.sh tty
+	./scripts/test-emacs-headless.sh tty
 
 headless-xorg:
-	./scripts/emacs-verify.sh xorg
+	./scripts/test-emacs-headless.sh xorg
 
 headless:
-	./scripts/emacs-verify.sh both
+	./scripts/test-emacs-headless.sh both
 
 headless-tests:
 	./scripts/test-emacs-headless.sh both
 
 headless-parse:
-	./scripts/parse-emacs-logs.sh
+	./scripts/helper-parse-emacs-logs.sh
 
 headless-report:
-	./scripts/emacs-headless-report.sh
+	./scripts/test-emacs-headless-report.sh
 
 logs-latest:
-	./scripts/emacs-headless-report.sh
+	./scripts/test-emacs-headless-report.sh
 
 emacs-sync:
 	./scripts/dev-emacs-sync.sh
@@ -99,7 +99,7 @@ submodules-ssh:
 	scripts/submodules-ssh.sh
 
 emacs-verify:
-	./scripts/emacs-verify.sh both
+	./scripts/test-emacs-headless.sh both
 
 # Contract test for the network layer (pro-hosts, pro-network, pro-ssh-clients, headscale)
 network-contract:
