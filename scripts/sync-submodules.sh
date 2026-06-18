@@ -9,9 +9,9 @@
 #      если передан флаг (см. там же case update).
 #
 # Поведение:
-#   - sequential fetch (timeout 20s) + merge (timeout 10s) на каждый submodule.
+#   - sequential fetch (timeout 60s) + merge (timeout 30s) на каждый submodule.
 #   - 8 параллельных воркеров по умолчанию упираются в github/codeberg rate-limit
-#     и висят 60+ секунд; 1×submodule × ~15s = ~165s worst case, приемлемо.
+#     и висят 60+ секунд; 1×submodule × ~90s = ~990s worst case, приемлемо.
 #   - Параллельный fetch не используется, чтобы не нарываться на лимиты.
 #   - При сбое fetch/merge — WARNING, submodule остаётся на локальном HEAD.
 #     Nix-рецепты читают ЛОКАЛЬНЫЙ submodules/<name>, а не remote, поэтому
@@ -38,13 +38,13 @@ fi
 # у которых нет credential helper.
 export GIT_TERMINAL_PROMPT=0
 
-echo "[sync-submodules] Updating submodules (sequential, 20s fetch + 10s merge each)..."
+echo "[sync-submodules] Updating submodules (sequential, 60s fetch + 30s merge each)..."
 failed_subs=()
 updated_count=0
 for sub in $(git submodule foreach -q 'echo $sm_path'); do
   name=$(basename "$sub")
   # 1) fetch с timeout (подавляем вывод fetch — он шумный, логируем только статус)
-  if ! timeout 20 git -C "$sub" fetch origin >/dev/null 2>&1; then
+  if ! timeout 60 git -C "$sub" fetch origin >/dev/null 2>&1; then
     echo "[sync-submodules] WARNING: $name fetch failed/timeout — using local HEAD" >&2
     failed_subs+=("$name")
     continue
@@ -52,7 +52,7 @@ for sub in $(git submodule foreach -q 'echo $sm_path'); do
   # 2) merge в локальный HEAD с timeout.
   # `git submodule update --remote <path>` мержит remote-tracking branch
   # в локальный HEAD. Если merge не нужен (уже на свежем коммите) — exit 0 за <1с.
-  if ! timeout 10 git submodule update --remote "$sub" 2>&1 \
+  if ! timeout 30 git submodule update --remote "$sub" 2>&1 \
        | sed "s/^/[sync-submodules] submod[$name]: /"; then
     echo "[sync-submodules] WARNING: $name merge failed/timeout — using local HEAD" >&2
     failed_subs+=("$name")
