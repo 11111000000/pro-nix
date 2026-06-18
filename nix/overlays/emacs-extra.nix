@@ -77,6 +77,7 @@ let
     tao-theme = super.callPackage ../emacs-recipes/tao-theme.nix {};
     shaoline = super.callPackage ../emacs-recipes/shaoline.nix {};
     shaoline-package = super.emacsPackages.shaoline;
+    shell-maker = super.callPackage ../emacs-recipes/shell-maker.nix {};
   };
 in {
   emacsPackages = super.emacsPackages // repoExtras // localRecipes;
