@@ -95,17 +95,19 @@
 | EXWM       | s-L           | buf-move-right                        | Переместить буфер вправо             |
 | AI         | C-c a         | pro-ai-open-entry                     | Вход в AI                            |
 | AI         | C-c A         | pro-agent-open                        | agent-shell                          |
-| AI         | C-c a (hud)   | agent-shell-hud-menu                  | Пульт агента (в agent-shell-mode)    |
-| AI         | C-c i (hud)   | agent-shell-hud-info                  | HUD-инфо (в agent-shell-mode)        |
-| AI         | C-c r (hud)   | agent-shell-hud-refresh               | Обновить HUD (в agent-shell-mode)    |
+| AI         | C-c a         | agent-shell-hud-menu                  | Пульт агента (в agent-shell-mode)    |
+| AI         | C-c i         | agent-shell-hud-info                  | HUD-инфо (в agent-shell-mode)        |
+| AI         | C-c r         | agent-shell-hud-refresh               | Обновить HUD (в agent-shell-mode)    |
 | Чат        | C-c T         | pro/chat-open                         | Telegram                             |
 | Чат        | C-c t o       | pro/chat-open                         | Open Telegram (telega)               |
 | Чат        | C-c t k       | pro/chat-close-idle-chats             | Close idle telega chat buffers       |
-| Чат        | C-c t e       | pro/chat-reload-emojis                | Reload telega emoji tables           |
+| Чат        | C-c t E       | pro/chat-reload-emojis                | Reload telega emoji tables           |
 | Чат        | C-c t i       | pro/chat-install                      | Install telega from MELPA (fallback) |
 | Чат        | C-c t s       | pro/telega-select-chat-or-contact     | Select telega chat/contact (consult) |
 | Чат        | C-c t c       | pro/telega-select-chat-or-contact     | Select telega chat/contact (alias)   |
 | Чат        | C-c t u       | pro/telega-select-chat-or-contact     | Select telega contact (C-u)          |
+| Terminal   | C-c t v       | multi-vterm-project                   | Открыть vterm по проекту             |
+| Terminal   | C-c t e       | eshell-toggle                         | Toggle eshell                        |
 | Tabs       | C-c t n       | pro-tabs-open-new-tab                 | Открыть новую вкладку                |
 | Tabs       | C-c t k       | pro-tabs-close-tab-and-buffer         | Закрыть вкладку и буфер              |
 | Tabs       | C-c t s       | tab-bar-switch-to-tab                 | Переключиться на вкладку             |
