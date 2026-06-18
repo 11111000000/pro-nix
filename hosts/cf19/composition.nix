@@ -1,6 +1,7 @@
 { lib, pkgs, ... }:
 
 let
+  runtime = import ../../modules/system-package-sets-runtime.nix { inherit pkgs; };
   tor = import ../../modules/system-package-sets-tor.nix { inherit pkgs; };
 in
 {
@@ -8,8 +9,9 @@ in
   # получает компактный прикладной desktop-слой без тяжёлого desktop branch.
   pro.profiles.exwmMinimal.enable = lib.mkDefault true;
 
-  # Глобальные tor-утилиты (pro-tor CLI, torwrap). Доступны через PATH
-  # после just switch — нужны на каждом хосте, включая EXWM-лэптоп с
-  # Android-AP (см. README.md и docs/analyse/...).
-  environment.systemPackages = tor.torControlPackages;
+  # Базовый runtime + tor-утилиты. runtimePackages — единый «доступно всем»
+  # набор (bash, openssh, emacs, obsidian, ...). tor-утилиты нужны на
+  # каждом хосте, включая EXWM-лэптоп с Android-AP (см. README.md и
+  # docs/analyse/...).
+  environment.systemPackages = runtime.runtimePackages ++ tor.torControlPackages;
 }

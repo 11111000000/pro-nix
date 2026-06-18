@@ -41,6 +41,7 @@ with pkgs;
     atop
     cifs-utils
     avahi
+    obsidian  # Markdown knowledge base; available on every host via PATH
     nodePackages.mermaid-cli
     # opencode removed from the runtime set: it is delivered via the
     # Home Manager wrapper path, not system runtime.
