@@ -70,5 +70,10 @@
     # наличие amixer/alsamixer/speaker-test/aplay и утилиты beep на всех хостах.
     alsa-utils
     beep
+
+    # xdpyinfo — диагностика X-сервера (display info, extensions, visuals).
+    # Нужна на всех хостах с X11 для удалённой диагностики display-конфигурации
+    # (например, при отладке EXWM/headless-сессий через xvfb-run).
+    xorg.xdpyinfo
   ];
 }
