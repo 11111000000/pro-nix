@@ -1,7 +1,10 @@
-;; ERT tests for keys parsing and pending/apply logic
-;; Run in headless test environment
+;;; test-keys.el --- ERT tests for pro-keys parser and pending bindings -*- lexical-binding: t; -*-
+
+;; ERT tests for keys parsing and pending/apply logic.
+;; Runs in headless test environment (scripts/test-emacs-headless.sh).
 
 (require 'ert)
+
 (add-to-list 'load-path (expand-file-name "emacs/base/modules" (getenv "PWD")))
 
 ;; The repository modules are prefixed with `pro-`; tests should require
@@ -24,4 +27,4 @@
     ;; message is fboundp, so pending should be cleared and binding applied
     (should (equal pro-keys-pending-bindings nil))))
 
-(provide 'pro-tests-keys)
+(provide 'test-keys)

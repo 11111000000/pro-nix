@@ -16,7 +16,7 @@
     pro-emacs-check-fonts pro-exwm-sim pro-exwm pro-feeds pro-fix-corfu
     pro-haskell pro-java pro-key-utils pro-keys pro-lisp pro-markdown pro-nix-refresh
     pro-org pro-python pro-reload pro-session pro-history pro-spell pro-startup-metrics pro-profiler pro-tabs
-    pro-terminals pro-test-helpers pro-tests pro-tests-keys pro-text
+    pro-terminals pro-test-helpers pro-tests pro-text
     pro-ui-completion pro-ui-fonts pro-ui-fringes pro-ui-icons
     pro-ui-improvements pro-buffer-banner pro-ui-modeline pro-ui-theme pro-ui-tty
     pro-dashboard pro-help pro-windows-popups
