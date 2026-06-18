@@ -20,8 +20,10 @@ jobs:
           # Use the same NixOS channel as declared in flake.nix
           nix_path: nixpkgs=channel:nixos-25.11
       - name: Run nix flake check
-        # path:. чтобы Nix читал исходники напрямую с диска, иначе
-        # git+file:// по умолчанию исключает submodules из flake source.
-        run: nix --extra-experimental-features 'nix-command flakes' flake check path:. --show-trace
+        # git+file://...?submodules=1 чтобы Nix захватил submodules в captured
+        # source. `path:.` тоже работает, когда `actions/checkout` уже положил
+        # submodules на диск (`submodules: recursive` выше), но `git+file://`
+        # ближе к тому, что делает `just switch` локально. AGENTS.md §6c.
+        run: nix --extra-experimental-features 'nix-command flakes' flake check "git+file://$PWD?submodules=1" --show-trace
       - name: Run holo-verify
         run: ./tools/holo-verify.sh
