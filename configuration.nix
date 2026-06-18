@@ -368,23 +368,17 @@
     noto-fonts
     noto-fonts-cjk-sans
     noto-fonts-color-emoji
-    (stdenv.mkDerivation rec {
-      name = "aporetic-fonts";
-      src = ./fonts;
-      installPhase = ''
-        mkdir -p $out/share/fonts/truetype
-        cp $src/*.ttf $out/share/fonts/truetype/
-      '';
-    })
     liberation_ttf
     dejavu_fonts
     cantarell-fonts
   ];
 
-  # Prefer Aporetic Sans as the system sans font and Aporetic Sans Mono for monospace.
+  # Use DejaVu Sans / DejaVu Sans Mono as system defaults. Previously Aporetic
+  # Sans was first choice, but the source lived in ./fonts/ (97 MB) and was
+  # superseded by DejaVu when Aporetic was removed.
   fonts.fontconfig.defaultFonts = {
-    sansSerif = [ "Aporetic Sans" "DejaVu Sans" ];
-    monospace = [ "Aporetic Sans Mono" "Terminus" ];
+    sansSerif = [ "DejaVu Sans" ];
+    monospace = [ "DejaVu Sans Mono" "Terminus" ];
   };
 
   # Optional guidance: hosts that need to force VT native resolution can add

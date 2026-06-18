@@ -15,17 +15,15 @@
     nerd-fonts.fira-code
     nerd-fonts.hack
     nerd-fonts.dejavu-sans-mono
-    # aporetic-fonts removed to avoid impure local path during eval
-    # If needed, package fonts via a derivation in the flake inputs or use --impure eval
     liberation_ttf
     dejavu_fonts
     cantarell-fonts
   ];
 
   fonts.fontconfig.defaultFonts = {
-    sansSerif = [ "Aporetic Sans" "DejaVu Sans" ];
-    serif = [ "Aporetic Sans Serif" ];
-    monospace = [ "Aporetic Sans Mono" "Terminus" ];
+    sansSerif = [ "DejaVu Sans" ];
+    serif = [ "DejaVu Serif" ];
+    monospace = [ "DejaVu Sans Mono" "Terminus" ];
   };
 
   environment.etc."fonts.conf".source = ../conf/fonts.conf;
