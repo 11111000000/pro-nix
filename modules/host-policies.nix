@@ -7,18 +7,9 @@ in
 {
   config = lib.mkMerge [
     {
-      services.tor = lib.mkDefault {
-        enable = true;
-        client.enable = true;
-        torsocks.enable = true;
-        settings = {
-          ControlPort = [ 9051 ];
-          CookieAuthentication = true;
-          DNSPort = [ 9053 ];
-          AutomapHostsOnResolve = true;
-          AutomapHostsSuffixes = [ ".onion" ".exit" ];
-        };
-      };
+      # NB: services.tor базовая конфигурация живёт в modules/pro-privacy.nix
+      # (там же ClientTransportPlugin для obfs4/meek/snowflake). Здесь только
+      # huawei-специфичные obfs4 bridges и cf19-специфичные политики.
 
       networking.firewall.allowedTCPPorts = lib.mkDefault [ 9050 9051 9053 22 ];
       networking.firewall.allowedUDPPorts = lib.mkDefault [ 9564 ];

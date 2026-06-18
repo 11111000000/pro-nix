@@ -131,21 +131,14 @@
 
   networking.hostName = lib.mkDefault hostName;  # Базовое имя машины (может быть переопределено локально).
 
-  # Global Tor defaults for all hosts: enable the client+torsocks. Bridge
-  # management is delegated to modules/pro-privacy.nix which renders Bridge
-  # lines (avoiding the `Include` directive that some tor builds reject
-  # during `--verify-config`). Use lib.mkDefault so host-specific configs
-  # can override these values if a host needs different behavior.
-  services.tor = lib.mkDefault {
-    enable = true;
-    client.enable = true;
-    torsocks.enable = true;
-    settings = {
-      # Do not emit `Include /etc/tor/bridges.conf` globally here — the
-      # pro-privacy module handles bridges declaratively to avoid
-      # verify-config incompatibilities.
-    };
-  };
+  # Global Tor defaults: enabled in modules/pro-privacy.nix (single source
+  # of truth for client + torsocks + obfs4/meek/snowflake transports).
+  # Per-host bridges — modules/host-policies.nix (huawei: obfs4).
+  # pro-peer.nix добавляет HiddenServiceDir при allowTorHiddenService=true.
+  # Этот блок намеренно пуст — исторически тут стоял `lib.mkDefault`
+  # для `services.tor.{enable,client.enable,torsocks.enable}`, но он
+  # конфликтовал с теми же опциями в pro-privacy.nix через `lib.mkForce`/
+  # plain assignment. Удалено как часть audit-2026-06-18 P2-1.
 
   # ADB нужен как системный инструмент на всех хостах этого профиля.
   programs.adb.enable = true;
