@@ -288,7 +288,8 @@ in
     allowedUDPPorts = [
       21027       # Syncthing discovery
       137 138     # NetBIOS name/datagram service
-      5353        # mDNS (Avahi) — без этого хосты не находят друг друга по hostname.local
+      # NB: 5353/udp (mDNS) is owned by modules/pro-network.nix — Avahi
+      # owner. Do not duplicate here. See audit-2026-06-18 P2-11.
     ];
   };
 

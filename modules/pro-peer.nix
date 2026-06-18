@@ -154,27 +154,10 @@ in
         "d /run/avahi-daemon 0755 avahi avahi -"
       ];
 
-      # Разрешаем mDNS (UDP/5353) в брандмауэре, чтобы хосты могли находить друг
-      # друга в LAN через Avahi. Список портов объединяется с существующим,
-      # чтобы не перезаписывать настройки других модулей.
-      networking.firewall = lib.mkIf true {
-        # Почему lib.mkDefault: позволяет хостам переопределять порты без насильственного
-        # перезаписывания; lib.mkForce бы сломал переопределения в других модулях.
-        # Как проверить: добавить в хост `networking.firewall.allowedUDPPorts = []` — порт исчезнет.
-        # Почему lib.concatLists:合并ваем с已有的, не теряя порты из других модулей.
-        allowedUDPPorts = lib.mkDefault (lib.concatLists [ (config.networking.firewall.allowedUDPPorts or []) [ 5353 ] ]);
-        # Дополнительно добавляем idempotent правила через extraCommands, чтобы
-        # разрешить IPv4 и IPv6 multicast (224.0.0.251 и ff02::fb), используемые
-        # Avahi для обнаружения в сети.
-        # Add idempotent iptables rules as a default; allow hosts to override
-        # by using lib.mkDefault instead of lib.mkForce.
-        extraCommands = lib.mkDefault ''
-          # Allow IPv4 mDNS UDP port 5353 (multicast 224.0.0.251)
-          iptables -C INPUT -p udp --dport 5353 -d 224.0.0.251 -j ACCEPT 2>/dev/null || iptables -I INPUT -p udp --dport 5353 -d 224.0.0.251 -j ACCEPT || true
-          # Allow IPv6 mDNS (multicast ff02::fb)
-          ip6tables -C INPUT -p udp --dport 5353 -d ff02::fb -j ACCEPT 2>/dev/null || ip6tables -I INPUT -p udp --dport 5353 -d ff02::fb -j ACCEPT || true
-        '';
-      };
+      # NB: mDNS firewall rules (UDP/5353, multicast 224.0.0.251, ff02::fb)
+      # are owned by modules/pro-network.nix — it is the single source of
+      # truth for Avahi-related firewall. Previously duplicated in pro-peer
+      # and pro-storage; see audit-2026-06-18 P2-11.
 
       environment.etc."pro-peer/authorized_keys".text = "# Managed at runtime by pro-peer-sync-keys\n";
 
