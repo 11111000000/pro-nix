@@ -11,7 +11,7 @@
     ./composition.nix
   ];
 
-  networking.hostName = "desktop";
+  networking.hostName = "station";
 
   # Аппаратная поддержка
   hardware.cpu.intel.updateMicrocode = true;
@@ -54,7 +54,7 @@
 
   swapDevices = [ ];
 
-  # audit не работает на desktop — /etc/passwd, /etc/shadow, /etc/group
+  # audit не работает на station — /etc/passwd, /etc/shadow, /etc/group
   # ведут symlink-ами в /.host-etc/ через границу монтирования, и auditctl
   # не может наложить watch-правила. Отключаем audit для этого хоста.
   security.audit.enable = false;
@@ -77,23 +77,23 @@
     extraConfig = builtins.readFile ../../conf/resolved-extra.conf;
   };
 
-# Desktop — fileserver для LAN. NFS-export /srv/nfs (члены pro группы
+# Station — fileserver для LAN. NFS-export /srv/nfs (члены pro группы
 # могут писать, setgid). Syncthing в pro-storage.nix уже шарит
 # /srv/syncthing автоматически.
   pro.nfs.server.enable = true;
   pro.nfs.server.exportPath = "/srv/nfs";
   # SMB-зеркало /srv/nfs для клиентов без NFS (Android, Windows).
   # `pro.samba.enable = true` — явный override; авто-определение по роли
-  # `nfs` в pro.hosts.desktop уже включило бы его, но явная строка
+  # `nfs` в pro.hosts.station уже включило бы его, но явная строка
   # гарантирует поведение, даже если кто-то изменит реестр ролей.
   pro.samba.enable = true;
-  # NB: `pro.nfs.client.enable` намеренно НЕ включаем здесь — desktop
-  # сам себе NFS-сервер, и попытка монитровать `desktop.local:/srv/nfs`
+  # NB: `pro.nfs.client.enable` намеренно НЕ включаем здесь — station
+  # сам себе NFS-сервер, и попытка монитровать `station.local:/srv/nfs`
   # с localhost (адрес клиента = адрес сервера) заканчивается
   # "No such file or directory" от mountd. NFS-клиент нужен только
   # на ноутбуках/VM, которые подключаются к этому шаринг-хосту.
 
-  # Headscale control plane живёт на desktop (роль `headscale` в pro.hosts).
+  # Headscale control plane живёт на station (роль `headscale` в pro.hosts).
   # NB: оператор должен подложить TLS-сертификат (или фронт-nginx) и
   # настроить `derpUrls` через overlay, чтобы клиенты могли переключаться
   # на собственный DERP-сервер.

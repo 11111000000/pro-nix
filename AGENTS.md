@@ -422,10 +422,10 @@ nix-instantiate --parse <каждый файл, который трогаем>
 `sshUser` или `tailnet` в нескольких местах — это источник рассинхрона.
 
 ```nix
-pro.hosts.desktop = {
+pro.hosts.station = {
   sshUser = "az";
   roles = [ "server" "headscale" "lan-gw" "nfs" "tor" ];
-  tailnet = "desktop";
+  tailnet = "station";
 };
 ```
 
@@ -462,7 +462,7 @@ pro.hosts.desktop = {
 ### Где включать headscale
 
 **Только на одном хосте** с ролью `headscale` и `lan-gw` (по умолчанию —
-`desktop`). На всех остальных хостах `headscale.enable = lib.mkForce false`
+`station`). На всех остальных хостах `headscale.enable = lib.mkForce false`
 явно (см. `hosts/*/configuration.nix`). Забытое `headscale.enable = true`
 на ноутбуке — частая причина «случайного» control plane.
 
@@ -483,9 +483,9 @@ pro.hosts.desktop = {
 nix-instantiate --parse modules/pro-hosts.nix
 nix-instantiate --parse modules/pro-network.nix
 nix-instantiate --parse modules/pro-ssh-clients.nix
-nix eval --json .#nixosConfigurations.desktop.config.pro.hosts \
+nix eval --json .#nixosConfigurations.station.config.pro.hosts \
   --apply builtins.attrNames
-# Должно вывести: [ "cf19" "desktop" "huawei" "vm" ]
+# Должно вывести: [ "cf19" "station" "huawei" "vm" ]
 
 # Контракт
 just network-contract

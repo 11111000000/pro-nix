@@ -132,7 +132,7 @@ in
   # fbterm отключён: он занимает tty2 и может конфликтовать с запуском display manager.
   systemd.services."fbterm-tty2".enable = lib.mkForce false;
 
-  # NFS-клиент: монтируем desktop:/srv/nfs автоматически по обращению.
+  # NFS-клиент: монтируем station:/srv/nfs автоматически по обращению.
   pro.nfs.client.enable = true;
 
   # headscale control plane не работает на ноутбуке.

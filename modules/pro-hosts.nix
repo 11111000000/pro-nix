@@ -78,10 +78,10 @@ let
   # the registry stable so the rest of the cluster can keep referencing
   # them by name even when the host is temporarily down.
   defaultHosts = {
-    desktop = {
+    station = {
       sshUser = "az";
       roles = [ "server" "headscale" "lan-gw" "nfs" "tor" ];
-      tailnet = "desktop";
+      tailnet = "station";
     };
     cf19 = {
       sshUser = "az";

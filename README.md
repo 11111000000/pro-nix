@@ -151,7 +151,7 @@ ssh-keygen -t ed25519 -C "az@$(hostname)" -f ~/.ssh/id_ed25519
 ```bash
 # Быстрый путь: после первого switch, если avahi уже работает,
 # scp сможет зайти по <host>.local (см. раздел «mDNS»).
-ssh-copy-id -i ~/.ssh/id_ed25519.pub az@desktop.local
+ssh-copy-id -i ~/.ssh/id_ed25519.pub az@station.local
 ssh-copy-id -i ~/.ssh/id_ed25519.pub az@cf19.local
 ssh-copy-id -i ~/.ssh/id_ed25519.pub az@huawei.local
 ssh-copy-id -i ~/.ssh/id_ed25519.pub az@vm.local
@@ -187,8 +187,8 @@ pro.sshClient.identityFile = "/home/az/.ssh/id_work";
 **Проверить, что всё работает:**
 ```bash
 # с любой машины в LAN:
-ssh -G desktop | grep -E 'identityfile|hostname'   # что генерируется
-ssh -v desktop 'echo ok' 2>&1 | grep -E 'Authentication|publickey'
+ssh -G station | grep -E 'identityfile|hostname'   # что генерируется
+ssh -v station 'echo ok' 2>&1 | grep -E 'Authentication|publickey'
 ```
 
 ### 2. mDNS / Avahi (`.local` имена)
@@ -197,17 +197,17 @@ ssh -v desktop 'echo ok' 2>&1 | grep -E 'Authentication|publickey'
 резолвился в LAN. На каждом клиенте нужно **убедиться**, что работает:
 
 ```bash
-# На desktop (сервере):
+# На station (сервере):
 systemctl status avahi-daemon
 avahi-browse -rt _ssh._tcp | grep -i ssh   # должен увидеть соседей
 
 # На клиенте:
-getent hosts desktop.local   # должен вернуть LAN-IP
-ssh desktop.local 'echo ok'  # должно подключиться
+getent hosts station.local   # должен вернуть LAN-IP
+ssh station.local 'echo ok'  # должно подключиться
 avahi-browse -rt _ssh._tcp
 ```
 
-Если `getent hosts desktop.local` возвращает пусто — nss-mdns не подхвачен.
+Если `getent hosts station.local` возвращает пусто — nss-mdns не подхвачен.
 Чинится:
 ```bash
 sudo nixos-rebuild switch   # пересобрать с nss-mdns в profile
@@ -217,30 +217,30 @@ grep mdns /etc/nsswitch.conf  # должно быть `hosts: ... mdns4_minimal 
 
 **Anti-паттерн**: включать MulticastDNS=yes в `services.resolved`
 параллельно с Avahi — даёт конфликт по RFC 6762 § 15 (avahi видит
-"another mDNS stack" и уходит в holding mode). Поэтому `desktop` оставляет
-`resolved.llmnr = "false"` (см. `hosts/desktop/configuration.nix`).
+"another mDNS stack" и уходит в holding mode). Поэтому `station` оставляет
+`resolved.llmnr = "false"` (см. `hosts/station/configuration.nix`).
 
-### 3. NFS-шара `/mnt/desktop`
+### 3. NFS-шара `/mnt/station`
 
 После `just switch` с `pro.nfs.client.enable = true` (по умолчанию на всех
-клиентах) **autofs-unit `mnt-desktop.automount` стартует автоматически**.
-При первом обращении к `/mnt/desktop` autofs поднимет NFS-mount.
+клиентах) **autofs-unit `mnt-station.automount` стартует автоматически**.
+При первом обращении к `/mnt/station` autofs поднимет NFS-mount.
 
 ```bash
 # Проверить, что unit жив:
-systemctl status mnt-desktop.automount
-systemctl status mnt-desktop.mount   # появится после первого ls
+systemctl status mnt-station.automount
+systemctl status mnt-station.mount   # появится после первого ls
 
 # Проверить таймауты (cf19/huawei/vm):
 grep -E "timeo|retrans|mount-timeout" /etc/fstab
 #   timeo=10,retrans=1,x-systemd.mount-timeout=3,nofail  ← эти значения
 ```
 
-**Когда шара недоступна** (desktop выключен, LAN без связи):
+**Когда шара недоступна** (station выключен, LAN без связи):
 
 ```bash
-ls /mnt/desktop
-# ls: cannot open directory '/mnt/desktop': No such device   # не ошибка autofs
+ls /mnt/station
+# ls: cannot open directory '/mnt/station': No such device   # не ошибка autofs
 #                                                  ↑ 3 секунды
 # Раньше было ~25 секунд (старые таймауты). Сейчас — 3 с, см. modules/pro-nfs.nix.
 ```
@@ -250,14 +250,14 @@ ls /mnt/desktop
 
 ```nix
 # hosts/cf19/configuration.nix (или local.nix override):
-fileSystems."/mnt/desktop".options = lib.mkForce [ "noauto" ];
+fileSystems."/mnt/station".options = lib.mkForce [ "noauto" ];
 # или совсем убрать точку монтирования.
 ```
 
-### 4. Headscale (только `desktop`)
+### 4. Headscale (только `station`)
 
-`desktop` — единственный хост с `headscale.enable = true` (см.
-`hosts/desktop/configuration.nix`). По умолчанию слушает `0.0.0.0:8080` с
+`station` — единственный хост с `headscale.enable = true` (см.
+`hosts/station/configuration.nix`). По умолчанию слушает `0.0.0.0:8080` с
 baseDomain `pro-nix.ts.net`.
 
 **Что нужно сделать руками:**
@@ -273,7 +273,7 @@ baseDomain `pro-nix.ts.net`.
    ```
 
 2. **DERP-сервер** (опционально, но без него клиенты ходят через публичный
-   DERP, что медленно). `local.nix` на desktop:
+   DERP, что медленно). `local.nix` на station:
    ```nix
    headscale.derpUrls = [
      "https://controlplane.tailscale.com/derpmap/default"
@@ -291,13 +291,13 @@ baseDomain `pro-nix.ts.net`.
 
 4. **Регистрация клиента**:
    ```bash
-   # на desktop:
+   # на station:
    sudo headscale users create az
    sudo headscale preauthkeys create --user az --reusable --expiration 24h
    # ↑ preauthkey
 
    # на клиенте (cf19 / huawei / vm):
-   sudo tailscale up --login-server http://desktop.local:8080 --authkey=<KEY>
+   sudo tailscale up --login-server http://station.local:8080 --authkey=<KEY>
    ```
 
 ### 5. Пользовательские пароли
@@ -335,11 +335,11 @@ security.sudo.wheelNeedsPassword = lib.mkForce true;
 
 ### 7. Per-host чек-листы
 
-#### 7.1. `desktop` (server / NFS-server / headscale / lan-gw)
+#### 7.1. `station` (server / NFS-server / headscale / lan-gw)
 
 - [ ] SSH-ключи залиты (см. §1).
-- [ ] Avahi публикует SSH: `avahi-browse -rt _ssh._tcp | grep desktop`.
-- [ ] NFS-export создан: `exportfs -v | grep /srv/nfs` (только desktop).
+- [ ] Avahi публикует SSH: `avahi-browse -rt _ssh._tcp | grep station`.
+- [ ] NFS-export создан: `exportfs -v | grep /srv/nfs` (только station).
 - [ ] `/srv/nfs` существует и writable для группы `pro`:
   ```bash
   sudo install -d -m 2775 -o root -g pro /srv/nfs
@@ -353,7 +353,7 @@ security.sudo.wheelNeedsPassword = lib.mkForce true;
   ```
 - [ ] zram активен: `systemctl status zram.slice`.
 - [ ] LAN-gw (если это ваш uplink): `pro.network.allowSubnetRouter = true`
-  уже выставлен в `hosts/desktop/configuration.nix`. Проверьте
+  уже выставлен в `hosts/station/configuration.nix`. Проверьте
   `sysctl net.ipv4.ip_forward` → `1`.
 
 #### 7.2. `cf19` (Panasonic Let's Note CF-MX, ноутбук)
@@ -369,8 +369,8 @@ security.sudo.wheelNeedsPassword = lib.mkForce true;
   ```bash
   cat /proc/cmdline | tr ' ' '\n' | rg i8042
   ```
-- [ ] Avahi: `getent hosts desktop.local` возвращает IP.
-- [ ] NFS-mount `/mnt/desktop` доступен (или корректно отказывает за 3 с).
+- [ ] Avahi: `getent hosts station.local` возвращает IP.
+- [ ] NFS-mount `/mnt/station` доступен (или корректно отказывает за 3 с).
 - [ ] EXWM сессия: `ls /run/systemd/system/display-manager.service` →
   GDM. Логин → EXWM. Если чёрный экран — `Ctrl+Alt+F2`, логин в tty,
   `~/.local/share/xorg/Xorg.0.log` для диагностики.
@@ -398,20 +398,20 @@ security.sudo.wheelNeedsPassword = lib.mkForce true;
 - [ ] Sudo без пароля для az (потому что `security.sudo.wheelNeedsPassword = lib.mkForce false;`).
 - [ ] root-пароль пуст (`users.users.root.password = "";`) — годится
   **только** для изолированной VM. В проде замените.
-- [ ] `pro.nfs.client.enable = true` — автоподключение `/mnt/desktop`.
+- [ ] `pro.nfs.client.enable = true` — автоподключение `/mnt/station`.
 - [ ] Нет Xorg / display manager: `systemctl status gdm` → `inactive`.
 
 ### 8. Smoke-tests после первой настройки
 
 ```bash
 # 8.1 Сеть
-ssh -G desktop | head                        # что генерирует ssh_config
-ssh -o ConnectTimeout=3 desktop 'uname -a'    # подключение через mDNS
-getent hosts desktop.local                   # mDNS-резолв
-mount | rg '/mnt/desktop'                    # autofs-точка
+ssh -G station | head                        # что генерирует ssh_config
+ssh -o ConnectTimeout=3 station 'uname -a'    # подключение через mDNS
+getent hosts station.local                   # mDNS-резолв
+mount | rg '/mnt/station'                    # autofs-точка
 
 # 8.2 NFS
-time ls /mnt/desktop                         # ≤ 3 с, даже если desktop выключен
+time ls /mnt/station                         # ≤ 3 с, даже если station выключен
 
 # 8.3 Emacs
 emacsclient -e '(emacs-version)'             # Emacs работает
@@ -428,9 +428,9 @@ nix flake check                              # общая проверка
 
 | Симптом | Где смотреть |
 |---------|---------------|
-| `Permission denied (publickey)` на `ssh desktop` | §1 — ключи не залиты. Проверить `~/.ssh/authorized_keys` на сервере и `~/.ssh/id_ed25519` на клиенте. |
-| `getent hosts desktop.local` пусто | Avahi не подхвачен. `sudo systemctl restart avahi-daemon`. Если не помогло — проверить `nsswitch.conf`. |
-| `ls /mnt/desktop` висит > 3 с | `grep /mnt/desktop /etc/fstab` → должны быть `timeo=10,retrans=1,x-systemd.mount-timeout=3`. Если нет — `just switch` не подхватил `modules/pro-nfs.nix`. |
+| `Permission denied (publickey)` на `ssh station` | §1 — ключи не залиты. Проверить `~/.ssh/authorized_keys` на сервере и `~/.ssh/id_ed25519` на клиенте. |
+| `getent hosts station.local` пусто | Avahi не подхвачен. `sudo systemctl restart avahi-daemon`. Если не помогло — проверить `nsswitch.conf`. |
+| `ls /mnt/station` висит > 3 с | `grep /mnt/station /etc/fstab` → должны быть `timeo=10,retrans=1,x-systemd.mount-timeout=3`. Если нет — `just switch` не подхватил `modules/pro-nfs.nix`. |
 | Emacs жалуется на `Cannot open load file "some-pkg"` | `git submodule update --init --recursive` — рецепт не нашёл исходник submodule. |
 | `headscale: noise key regenerated, all sessions lost` | §4.1 — скопировать ключи из `/var/lib/headscale/` в `local.nix`. |
 | `nixos-rebuild switch` падает на `mount` шаге | Загрузка ждёт NFS. `nofail` уже в опциях (`modules/pro-nfs.nix`). Если не помогло — добавить `x-systemd.mount-timeout=1`. |

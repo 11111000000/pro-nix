@@ -104,7 +104,7 @@
       hosts = {
         cf19 = mkHost [ ./hosts/cf19/configuration.nix ./hosts/cf19/composition.nix ];
         huawei = mkHost [ ./hosts/huawei/configuration.nix ./hosts/huawei/composition.nix ];
-        desktop = mkHost [ ./hosts/desktop/configuration.nix ./hosts/desktop/composition.nix ];
+        station = mkHost [ ./hosts/station/configuration.nix ./hosts/station/composition.nix ];
         vm = mkVmHost [ ./hosts/vm/configuration.nix ./hosts/vm/composition.nix ];
       };
 

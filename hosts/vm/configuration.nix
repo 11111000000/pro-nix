@@ -28,7 +28,7 @@
 
   # VM follows the same shared package policy, including Tor Browser.
 
-  # NFS-клиент: монтируем desktop:/srv/nfs автоматически по обращение.
+  # NFS-клиент: монтируем station:/srv/nfs автоматически по обращение.
   pro.nfs.client.enable = true;
 
   # VM собирается через `mkVmHost` в flake.nix, который НЕ импортирует
