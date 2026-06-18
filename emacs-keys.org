@@ -67,10 +67,10 @@
 | Completion | C-c o l       | cape-line                             | Строка из буфера                     |
 | Snippet    | C-c y y       | consult-yasnippet                     | Выбор сниппета                       |
 | LSP        | C-c C-.       | consult-eglot-symbols                 | Поиск символов LSP                   |
-| Навигация  | M-g g         | avy-goto-char                         | Прыжок к символу                     |
+| Навигация  | M-g M-g       | avy-goto-char                         | Прыжок к символу                     |
 | Выделение  | M-SPC         | er/expand-region                      | Расширение выделения                 |
 | Проекты    | C-c p p       | projectile-switch-project             | Сменить проект                       |
-| Проекты    | C-c p f       | projectile-find-file                  | Файл в проекте                       |
+| Проекты    | C-c p P       | projectile-find-file                  | Файл в проекте (projectile)          |
 | Проекты    | C-c C-p       | projectile-switch-project             | Сменить проект (alias)               |
 | Проекты    | C-c pa        | projectile-add-known-project          | Добавить проект                      |
 | Дерево     | s-d           | treemacs                              | Открыть дерево                       |
@@ -95,12 +95,12 @@
 | EXWM       | s-L           | buf-move-right                        | Переместить буфер вправо             |
 | AI         | C-c a         | pro-ai-open-entry                     | Вход в AI                            |
 | AI         | C-c A         | pro-agent-open                        | agent-shell                          |
-| AI         | C-c a         | agent-shell-hud-menu                  | Пульт агента (в agent-shell-mode)    |
+| AI         | C-c C-h       | agent-shell-hud-menu                  | Пульт агента (в agent-shell-mode)    |
 | AI         | C-c i         | agent-shell-hud-info                  | HUD-инфо (в agent-shell-mode)        |
 | AI         | C-c r         | agent-shell-hud-refresh               | Обновить HUD (в agent-shell-mode)    |
 | Чат        | C-c T         | pro/chat-open                         | Telegram                             |
 | Чат        | C-c t o       | pro/chat-open                         | Open Telegram (telega)               |
-| Чат        | C-c t k       | pro/chat-close-idle-chats             | Close idle telega chat buffers       |
+| Чат        | C-c t K       | pro/chat-close-idle-chats             | Close idle telega chat buffers       |
 | Чат        | C-c t E       | pro/chat-reload-emojis                | Reload telega emoji tables           |
 | Чат        | C-c t i       | pro/chat-install                      | Install telega from MELPA (fallback) |
 | Чат        | C-c t s       | pro/telega-select-chat-or-contact     | Select telega chat/contact (consult) |
@@ -110,7 +110,7 @@
 | Terminal   | C-c t e       | eshell-toggle                         | Toggle eshell                        |
 | Tabs       | C-c t n       | pro-tabs-open-new-tab                 | Открыть новую вкладку                |
 | Tabs       | C-c t k       | pro-tabs-close-tab-and-buffer         | Закрыть вкладку и буфер              |
-| Tabs       | C-c t s       | tab-bar-switch-to-tab                 | Переключиться на вкладку             |
+| Tabs       | C-c t S       | tab-bar-switch-to-tab                 | Переключиться на вкладку             |
 | Tabs       | <C-tab>       | pro-tabs-line-next                    | Следующая tab-line вкладка (в окне)  |
 | Tabs       | <C-S-tab>     | pro-tabs-line-prev                    | Предыдущая tab-line вкладка (в окне) |
 | Package    | C-c P p       | pro-packages-menu                     | Список пакетов                       |
@@ -131,7 +131,6 @@
 | Suggested  | C-c v y       | pro/vterm-yank                        | suggested from terminals             |
 | Suggested  | C-c v i       | pro/vterm-interrupt                   | suggested from terminals             |
 | Suggested  | C-c v c       | vterm-copy-mode                       | suggested from terminals             |
-| Suggested  | C-x y         | pro/clipboard-yank-pop                | suggested from clipboard             |
 | Haskell    | C-c h l       | pro-haskell-load-buffer               | Загрузить буфер в REPL (cabal/ghci)  |
 | Haskell    | C-c h r       | pro-haskell-switch-to-repl            | Переключиться на REPL                |
 | Haskell    | C-c h f       | pro-haskell-format-buffer             | Форматировать (fourmolu)             |
