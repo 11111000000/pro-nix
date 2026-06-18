@@ -39,60 +39,42 @@ EMACSLOADPATH, который Nix выставляет автоматическ�
   :type '(choice (const minimal) (const shaoline) (const doom))
   :group 'pro-ui-modeline)
 
-(defcustom pro-ui-shaoline-strategy 'auto-timer
-  "Стратегия shaoline-mode по умолчанию.
-- 'auto-timer — кастомная стратегия: 1 Гц таймер обновляет time/battery,
-  но post-command-hook/reassert/advice/always-visible отключены →
-  нет мигания на каждое нажатие клавиши, нет конкуренции за echo-area
-  с (message ...). Это компромисс между 'yin (замороженные сегменты)
-  и 'adaptive/'yang (мигание echo-area при любом (message ...)).
-- 'yin — обновления только по явному вызову `shaoline-update'.
-- 'adaptive — поведение shaoline по умолчанию (может мигать)."
-  :type '(choice (const auto-timer) (const yin) (const adaptive) (const yang))
+(defcustom pro-ui-shaoline-strategy 'adaptive
+  "Стратегия shaoline-mode.
+- 'yin — обновления только по явному вызову `shaoline-update'. Минимум
+  активности, mode-line статичен между ручными апдейтами.
+- 'yang — полная активность: post-command-hook, advice, таймеры,
+  echo-area-reassert. Максимально отзывчиво, но склонно «мигать»
+  echo-area при любом (message ...).
+- 'adaptive — компромисс: debounce + rate-limit + context-monitoring
+  внутри shaoline (см. shaoline-strategy.el). Без внешних таймеров."
+  :type '(choice (const yin) (const adaptive) (const yang))
   :group 'pro-ui-modeline)
 
-(defun pro-ui--install-shaoline-strategy ()
-  "Регистрирует кастомную стратегию 'auto-timer' и применяет её.
-Делает shaoline полностью молчаливым: только таймер 1 Гц для
-time/battery, без post-command-hook, без advice и без echo-area-reassert.
-`always-visible = nil' (а не `t', как в более ранней версии) — это
-важно: с always-visible=t shaoline каждый раз восстанавливает своё
-сообщение в echo-area при первой возможности, что выглядит как
-«мигание» при наборе текста (любой чужой (message ...) сразу же
-затирается shaoline'ом). С always-visible=nil shaoline пишет в
-echo-area только когда контент реально изменился.
+(defun pro-ui--apply-shaoline-strategy ()
+  "Применяет стратегию из `pro-ui-shaoline-strategy' перед активацией mode.
+Ставит `shaoline-mode-strategy' ДО `(shaoline-mode 1)' — shaoline-mode.el
+читает эту переменную при активации (shaoline-mode.el:143–148) и сразу
+зовёт `shaoline--apply-strategy'. Если значение не зарегистрировано в
+`shaoline--strategies' (shaoline.el:863 — там только yin/yang/adaptive),
+все настройки будут nil → mode включится, но ни один триггер обновления
+не сработает, и mode-line зависнет на первом кадре.
 
-Регистрация через публичный API `shaoline-define-strategy'
-(вместо прямого cons-а в `shaoline--strategies') — это
-устраняет три класса багов:
-  * cons поверх лениво-инициализированного alist-а
-    (`shaoline--ensure-core-vars') молча перезаписывался;
-  * cons в голову менял порядок стратегий, из-за чего
-    `shaoline-toggle-strategy' пропускал новую стратегию;
-  * опечатка в ключе (`:always-vicible' вместо `:always-visible')
-    тихо давала дефолтное значение.
-
-Идемпотентно: `shaoline-define-strategy' сам заменяет существующую
-запись, так что повторный вызов после `pro/reload-config' корректно
-обновляет конфигурацию (а не пропускает её через `unless assq')."
-  (when (fboundp 'shaoline-define-strategy)
-    (shaoline-define-strategy
-     'auto-timer
-     :update-method  'automatic
-     :use-hooks      nil
-     :use-advice     nil
-     :use-timers     t
-     :always-visible nil
-     :hide-modelines nil))
-  (setq shaoline-mode-strategy 'auto-timer))
+Ранние версии пытались регистрировать кастомную стратегию через
+`shaoline-define-strategy' — такой функции в shaoline 3.3.4 нет
+(см. submodules/shaoline/lisp/shaoline-strategy.el). Стратегия
+'auto-timer' молча проваливалась через `fboundp', а затем `setq'
+ставил неизвестное имя в `shaoline-mode-strategy' — это и есть
+симптом «запускается но не показывается»."
+  (setq shaoline-mode-strategy pro-ui-shaoline-strategy))
 
 (defun pro-ui--enable-shaoline-if-available ()
   "Включает shaoline, если выбран стиль 'shaoline' и пакет доступен.
 Функция безопасна к вызову в ранней инициализации — использует require с
-nil t и with-eval-after-load для отложенной настройки." 
+nil t и with-eval-after-load для отложенной настройки."
   (when (and (eq pro-ui-modeline-style 'shaoline) (require 'shaoline nil t))
     (with-eval-after-load 'shaoline
-      (pro-ui--install-shaoline-strategy)
+      (pro-ui--apply-shaoline-strategy)
       (when (fboundp 'shaoline-mode) (shaoline-mode 1)))))
 
 (defun pro-ui--enable-doom-if-available ()
