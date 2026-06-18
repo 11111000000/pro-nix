@@ -1,10 +1,17 @@
-{ config, lib, pkgs, opencodeBwrapModule ? null, ... }:
+{ config, lib, pkgs, opencodeBwrapModule ? null, piPkg, ... }:
 
 {
+  # Forward piPkg from NixOS specialArgs into home-manager module scope.
+  # pro-agent-configs.nix uses it to symlink the built-in subagent extension
+  # from pi-coding-agent's nix store path. Set in BOTH the NixOS scope and
+  # each home-manager user scope to handle the two evaluation contexts.
+  _module.args.piPkg = piPkg;
+
   home-manager.users = builtins.listToAttrs (map (name: {
     inherit name;
     value = {
       imports = [ ../emacs/home-manager.nix ./opencode-tui.nix ./pro-agent-configs.nix ] ++ lib.optionals (opencodeBwrapModule != null) [ opencodeBwrapModule ];
+      _module.args.piPkg = piPkg;
       home.username = name;
       home.homeDirectory = "/home/${name}";
       home.stateVersion = "23.11";

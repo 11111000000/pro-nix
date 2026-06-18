@@ -112,6 +112,20 @@ in
     { device = "/dev/disk/by-uuid/68ade83c-1e5b-4f37-a13f-2c386be87be6"; }
   ];
 
+  # zram: сжатый swap в RAM, приоритет выше дискового (5 vs -2).
+  # На 16 GB RAM: auto → 8 GB zram ≈ 16-24 GB эффективного свопа.
+  # Существенно снижает нагрузку на SSD (см. AGENTS.md, предыдущие замеры:
+  # 338 GB swpout за 19 часов при disk-only swap).
+  services.zramSlice = {
+    enable = true;
+    size = "auto";
+  };
+
+  # Ограничиваем параллелизм nix-eval/cores: 4-CPU ноутбуку оставляем
+  # 2 ядра на UI при flake-eval/build. Глобальный max-jobs = 2 уже задан
+  # в configuration.nix, тут — ширина одного derivation.
+  nix.settings.cores = 2;
+
   # Cinnamon не нужен на cf19: оставляем GDM + EXWM, но убираем тяжёлый
   # desktop branch. TTY-login сохраняется через tty1/tty2/tty3 и getty.
   services.xserver.desktopManager.cinnamon.enable = lib.mkForce false;

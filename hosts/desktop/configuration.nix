@@ -82,6 +82,11 @@
 # /srv/syncthing автоматически.
   pro.nfs.server.enable = true;
   pro.nfs.server.exportPath = "/srv/nfs";
+  # SMB-зеркало /srv/nfs для клиентов без NFS (Android, Windows).
+  # `pro.samba.enable = true` — явный override; авто-определение по роли
+  # `nfs` в pro.hosts.desktop уже включило бы его, но явная строка
+  # гарантирует поведение, даже если кто-то изменит реестр ролей.
+  pro.samba.enable = true;
   # NB: `pro.nfs.client.enable` намеренно НЕ включаем здесь — desktop
   # сам себе NFS-сервер, и попытка монитровать `desktop.local:/srv/nfs`
   # с localhost (адрес клиента = адрес сервера) заканчивается
@@ -96,4 +101,10 @@
   # LAN-gateway: разрешаем этому хосту роутить трафик tailnet-клиентов
   # через основной uplink (use case: VMs/travel-ноутбуки без выхода в WAN).
   pro.network.allowSubnetRouter = lib.mkForce true;
+
+  # Русская проверка орфографии (flyspell + ru_RU). Доставляет `pro-hunspell`
+  # в PATH, после чего pro-spell.el подхватывает его и включает flyspell
+  # для text/prog режимов. Модуль pro-spellcheck.nix вендорит ru_RU
+  # в dictionaries/hunspell/ — без зависимости от hunspellDicts в nixpkgs.
+  pro.spellcheck.enable = true;
 }

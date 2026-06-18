@@ -216,6 +216,14 @@ No-op when `pro-buffer-banner-theme-aware' is nil."
 ;; Internal state
 ;; ---------------------------------------------------------------------------
 
+(defun pro-buffer-banner--timer-pending-p (timer)
+  "Return non-nil if TIMER is currently scheduled (pending).
+Portable replacement for the removed `timer-pending-p' (gone in Emacs 30).
+A timer is pending iff it is a `timerp' object AND is present in
+`timer-list' (the global list of scheduled timers). A timer that has
+already fired, was cancelled, or is otherwise inactive is not pending."
+  (and (timerp timer) (memq timer timer-list)))
+
 (defvar pro-buffer-banner--frame nil
   "The single persistent banner child frame, or nil when not yet created.")
 
@@ -638,7 +646,8 @@ divided into `pro-buffer-banner-fade-steps' steps."
             (ignore-errors (x-focus-frame (selected-frame)))
             (unless (and pro-buffer-banner--timer
                          (timerp pro-buffer-banner--timer)
-                         (timer-pending-p pro-buffer-banner--timer))
+                         (pro-buffer-banner--timer-pending-p
+                          pro-buffer-banner--timer))
               ;; No running fade: start one. Reset alpha to full so a
               ;; mid-fade re-display doesn't show a half-transparent
               ;; banner.

@@ -164,6 +164,19 @@
 ;; Defer consult-specific integration until consult is actually loaded.
 ;; ВАЖНО: Глобальные клавиши не назначаем здесь — они живут в emacs-keys.org
 ;; и применяются модулем keys.el. Здесь только настройки поведения/интеграции.
+
+;; Vertico: показать список кандидатов сразу при открытии минибуфера.
+;; Без этого vertico показывает только prompt до первого нажатия —
+;; локальный post-command-hook, который дёргает `vertico--exhibit',
+;; не вызывается до первой команды в минибуфере. Для EXWM/коротких
+;; prompt'ов это выглядит как «список дополнений спрятан». Дёргаем
+;; exhibit сразу после setup, чтобы первая отрисовка случилась
+;; синхронно.
+(with-eval-after-load 'vertico
+  (when (and (fboundp 'vertico--setup) (fboundp 'vertico--exhibit))
+    (unless (advice-member-p #'vertico--exhibit #'vertico--setup)
+      (advice-add 'vertico--setup :after #'vertico--exhibit))))
+
 (with-eval-after-load 'consult
   ;; M-x history-based sorting is the default `vertico-sort-function'
   ;; (`vertico-sort-history-length-alpha'), driven by

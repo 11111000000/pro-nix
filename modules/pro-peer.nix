@@ -80,12 +80,6 @@ in
         description = "GPG recipient to encrypt HiddenService backup to (optional).";
         default = null;
       };
-      enableYggdrasil = lib.mkEnableOption "Enable Yggdrasil mesh daemon (optional)";
-      yggdrasilConfigPath = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
-        description = "Path to yggdrasil config file (optional). If null a default will be used in /etc/yggdrasil.conf";
-        default = null;
-      };
       enableWireguardHelper = lib.mkEnableOption "Enable simple WireGuard helper (wg-quick) (optional)";
       wireguardConfigPath = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
@@ -98,7 +92,7 @@ in
   # Собираем условные фрагменты конфигурации и объединяем их в единый атрибут `config`.
   # Раздел описывает механизмы обнаружения в локальной сети (mDNS/Avahi),
   # управление ключами SSH и интеграцию с альтернативными сетевыми слоями
-  # (Tor, Yggdrasil, WireGuard). Комментарии показывают архитектуру взаимодействия
+  # (Tor, WireGuard). Комментарии показывают архитектуру взаимодействия
   # модулей и почему используется tmpfiles/systemd для создания runtime-путей.
   #
   # Rationale (литературный блок):
@@ -240,27 +234,6 @@ in
           CPUQuota = "30%";
         };
       };
-    })
-
-    (lib.mkIf config.pro-peer.enableYggdrasil {
-      environment.systemPackages = with pkgs; [ yggdrasil ];
-      environment.etc."pro-peer-yggdrasil-wrapper.sh".source = ./scripts/pro-peer-yggdrasil-wrapper.sh;
-      environment.etc."pro-peer-yggdrasil-wrapper.sh".mode = "0755";
-
-      systemd.services.yggdrasil = {
-        description = "Yggdrasil mesh daemon (pro-peer)";
-        wantedBy = [ "multi-user.target" ];
-        # Run via wrapper to avoid complex quoting in ExecStart and ensure
-        # the service points at a concrete path that `systemd-analyze verify`
-        # can resolve.
-        serviceConfig = {
-          ExecStart = "${helpers.proPeerWgQuick}/bin/pro-peer-wg-quick-wrapper";
-          Restart = "on-failure";
-          CPUQuota = "40%";
-          CPUWeight = "150";
-        };
-      };
-      environment.etc."yggdrasil.conf".text = if config.pro-peer.yggdrasilConfigPath == null then ''{ Peers: [] }'' else null;
     })
 
     (lib.mkIf config.pro-peer.enableWireguardHelper {

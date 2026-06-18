@@ -1,5 +1,36 @@
 { ... }:
 
+# Шаблон локального конфига машины. Копируй в `local.nix` (без .example)
+# и заполни. `local.nix` в .gitignore — секреты не утекают.
+#
+# Конвенция: всё, что касается конкретной машины (hostname, SSH-ключи,
+# Wi-Fi-пароли, override'ы для конкретного железа) — сюда. Всё, что
+# shared между всеми хостами — в `modules/` или `configuration.nix`.
+
 {
+  # ─── Обязательное ────────────────────────────────────────────────────────
+  # Имя хоста; читается в `configuration.nix` через `local.hostName`.
   hostName = "my-host";
+
+  # ─── SSH-ключи для az/za/la/bo ──────────────────────────────────────────
+  # По умолчанию `pro.ssh.authorizedKeys = []` — без ключей не войдёшь
+  # по SSH (password auth выключен в `pro-peer.nix`). Пропиши свой
+  # публичный ключ, иначе после `nixos-rebuild switch` ты потеряешь
+  # доступ к хосту по SSH.
+  #
+  # Как получить свой публичный ключ:
+  #   cat ~/.ssh/id_ed25519.pub
+  #   # или
+  #   cat ~/.ssh/11111000000_at_email_dot_com.pub
+  #
+  # Формат: "<type> <base64-key> [comment]"
+  pro.ssh.authorizedKeys = [
+    # "ssh-rsa AAAAB3NzaC1yc2E...== 11111000000@email.com"
+    # "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5... user@host"
+  ];
+
+  # ─── Прочее (примеры, не обязательно) ────────────────────────────────────
+  # pro.smb.mountOnBoot = true;          # монтировать SMB-шары при загрузке
+  # pro.tailscale.authKeyFile = "/var/lib/tailscale/authkey";
+  # environment.etc."example".text = "...";
 }

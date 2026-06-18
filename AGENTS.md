@@ -102,8 +102,10 @@ environment.systemPackages = with pkgs; [ pavucontrol playerctl ];
 ### Перед пушем
 
 ```bash
-nix flake check
 git status && git diff
+# Полная проверка: только по явному запросу пользователя — `just flake-check`
+# (долго, eval всей huawei-конфигурации). Для быстрой валидации используй
+# `nix eval .#nixosConfigurations --apply builtins.attrNames` (мгновенно).
 ```
 
 ### Cleanup-коммиты (при удалении мёртвого кода)
@@ -411,7 +413,7 @@ nix-instantiate --parse <каждый файл, который трогаем>
 |------|--------|------------|----------------|
 | LAN-обнаружение | `modules/pro-network.nix` (Avahi + nssmdns + resolved) | рекламирует SSH, резолвит `host.local` | только в одной L2-сети |
 | Mesh | `modules/headscale.nix` (control plane) + будущий `modules/pro-tailnet.nix` (клиенты) | стабильные IP/имена вне LAN, NAT-traversal | всегда, где есть интернет |
-| SSH-нейминг | `modules/pro-ssh-clients.nix` (генерирует `ssh_config.d/pro.conf`) | `ssh host` без DNS | всегда, если есть хоть один маршрут |
+| SSH-нейминг | `modules/pro-ssh-clients.nix` (генерирует `ssh_config.d/pro.conf`) | `ssh host` без DNS | для каждой сети свой алиас (см. ниже) |
 
 ### Single source of truth: `pro.hosts`
 
@@ -427,19 +429,35 @@ pro.hosts.desktop = {
 };
 ```
 
-### Приоритеты подключения SSH
+### Алиасы SSH: один блок на кандидат
 
-Сгенерированный `ssh_config.d/pro.conf` перебирает кандидатов
-по порядку:
+Сгенерированный `ssh_config.d/pro.conf` для каждого хоста из `pro.hosts`
+выпускает **один `Host` блок на кандидат** (а не один блок с
+автоматическим failover'ом — OpenSSH так не умеет). Пользователь
+сам выбирает алиас под текущую сеть.
 
-1. `<tailnet>.<base_domain>` (например, `desktop.pro-nix.ts.net`) — основной
-2. `<tailnet>` (короткий, через MagicDNS) — fallback в tailnet
-3. `<name>.local` (mDNS) — fallback в LAN
-4. `addr` (статический IP, если задан) — последний шанс
-5. `<name>-onion` через torsocks — аварийный канал (если задан `onion`)
+| Алиас | HostName | Маршрут |
+|-------|----------|---------|
+| `<name>` | `<name>.<base_domain>` (headscale FQDN) | tailnet — primary, требует `headscale` + MagicDNS |
+| `<name>.local` | `<name>.local` | mDNS / LAN — работает только в одной L2-сети |
+| `<name>.<base_domain>` | `<name>.<base_domain>` | tailnet FQDN (тот же, что и primary, явный алиас) |
+| `<addr>` (если задан в `pro.hosts`) | `<addr>` | статический IP / публичный DNS |
+| `<name>-onion` (если задан `onion`) | v3 hidden service | tor — torsocks ProxyCommand |
 
-Каждый Host-блок использует `ConnectTimeout`, поэтому отказ одного
-кандидата не блокирует остальные.
+`Host <name>` (без суффикса) — primary: `HostName` указывает на самый
+приоритетный кандидат (обычно tailnet FQDN), и `ssh <name>` идёт
+напрямую туда. Bare shortname `<name>` в DNS/mDNS не резолвится —
+это by design, иначе пришлось бы синхронизировать `/etc/hosts` со
+всеми машинами кластера.
+
+Каждый `Host` блок несёт свой `ConnectTimeout` (опция
+`pro.sshClient.connectTimeout`, default 5s), `IdentityFile` и
+`IdentitiesOnly yes` — то есть набирать `ssh -i ...` руками
+не нужно, ключ подставляется автоматически.
+
+**Не дублируй** эти блоки в `~/.ssh/config`. Override имеет смысл
+только для специфичных overrides (отдельный пользователь, нестандартный
+порт, jump-host) — для базового подключения модуль уже всё настроил.
 
 ### Где включать headscale
 
