@@ -7,7 +7,12 @@
 #   локальной сети, оставляя оператору решение об активации и острой политике доступа.
 #
 # Контракт:
-#   Опции: services.samba.enable, services.syncthing.enable, services.samba.openFirewall
+#   Опции:
+#     pro.samba.enable              — bool (default: авто-on для хостов с ролью `nfs`,
+#                                    иначе false). Включает services.samba + smbpasswd.
+#     pro.samba.shareNfsPath        — bool (default true). Публиковать /srv/nfs
+#                                    через Samba как гостевую RW-шару с force group=pro.
+#     services.syncthing.enable     — по-прежнему lib.mkDefault true.
 #   Побочные эффекты: при включении открываются SMB/Sync порты и создаются каталоги /srv/samba/*.
 #
 # Предпосылки:
@@ -16,18 +21,56 @@
 # Как проверить (Proof):
 #   `ss -tlnp | grep -E '445|8384'` или `systemctl status nmbd smbd`.
 #
-# Last reviewed: 2026-05-03
+# Last reviewed: 2026-06-18
 { config, lib, pkgs, ... }:
 
 let
   hostName = config.networking.hostName;
+  cfg = config.pro.samba;
+  # Авто-on для хостов с ролью `nfs` (по аналогии с pro.network.allowSubnetRouter для lan-gw).
+  # В pro.hosts.<name>.roles роль `nfs` означает: "этот хост экспортирует NFS-шару".
+  # Логично, что тот же хост публикует её и через SMB — для клиентов, у которых
+  # нет NFS (Android, Windows). Сам хост (desktop) может включить явно через
+  # `pro.samba.enable = true` для override.
+  isNfsHost = builtins.elem "nfs" (config.pro.hosts.${hostName}.roles or [ ]);
+  cfgEnable = cfg.enable or (isNfsHost);
 in
 {
-  # Samba useful in LAN, but nmbd can hang on startup if there's no ready
-  # non-loopback IPv4 interface. So common module just describes
-  # configuration, host enables service explicitly in host/local config.
-  services.samba.enable = lib.mkDefault true;
-  services.samba.openFirewall = lib.mkDefault true;
+  # Опции модуля — отдельным блоком. NixOS требует, чтобы все config-атрибуты
+  # (services, systemd, users, environment, networking) шли ВНУТРИ одного
+  # атрибутного литерала, а не на верхнем уровне рядом с options.
+  options.pro.samba = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = isNfsHost;
+      defaultText = lib.literalExpression "true for hosts with role \"nfs\" in pro.hosts, else false";
+      description = ''
+        Run Samba (smbd/nmbd) on this host. Defaults to true for hosts whose
+        pro.hosts.<name>.roles contains "nfs" (i.e. desktop) — those hosts
+        export /srv/nfs via NFS and also publish it as a guest SMB share.
+        Set explicitly to true on a non-nfs host or false on desktop if you
+        want to opt out.
+      '';
+    };
+    shareNfsPath = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Publish /srv/nfs (the NFS export) as the `nfs` Samba share with
+        guest RW, force user=az, force group=pro, create mask=0664,
+        directory mask=2775. Combined with the setgid bit on /srv/nfs,
+        every LAN client writes as az:pro and the group is preserved on
+        new files. Disable if you want Samba shares independent from NFS.
+      '';
+    };
+  };
+
+  config = {
+    # Samba: opt-in. nmbd can hang on startup if there's no ready non-loopback
+  # IPv4 interface, so we don't auto-enable globally — host with role `nfs`
+  # (or explicit pro.samba.enable) decides.
+  services.samba.enable = lib.mkIf cfgEnable true;
+  services.samba.openFirewall = lib.mkIf cfgEnable true;
   # Avahi can fail early during boot if /run/avahi-daemon is missing; ensure
   # tmpfiles create expected runtime directories. Keep avahi enabled for discovery.
   services.avahi.enable = lib.mkDefault true;
@@ -46,7 +89,7 @@ in
   # deterministically, but keep them additive at the module level to allow
   # host-specific overrides. Use lib.mkDefault here and let a top-level
   # composition decide whether to force global security settings.
-  services.samba.settings."global" = lib.mkDefault {
+  services.samba.settings."global" = lib.mkIf cfgEnable (lib.mkDefault {
     workgroup = "WORKGROUP";
     "server string" = "NixOS Samba Server";
     # Почему "Bad User": анонимный гость маппится на реального пользователя,
@@ -81,9 +124,9 @@ in
     # independent from firewall backend.
     "hosts allow" = "127.0.0.1 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16";
     "hosts deny" = "0.0.0.0/0";
-  };
+  });
   # Define Samba shares as sections under services.samba.settings
-  services.samba.settings."${hostName}" = {
+  services.samba.settings."${hostName}" = lib.mkIf cfgEnable {
       path = "/srv/samba/${hostName}";
       browseable = "yes";
       # Rationale: share defaults intentionally permissive for discovery; hosts may tighten ACLs.
@@ -96,7 +139,7 @@ in
       "valid users" = "az za la bo";
   };
 
-  services.samba.settings.public = {
+  services.samba.settings.public = lib.mkIf cfgEnable {
       path = "/srv/samba/public";
       browseable = "yes";
       "read only" = "no";
@@ -107,15 +150,60 @@ in
       "directory mask" = "2775";
   };
 
+  # ── nfs-share: Samba-зеркало NFS-шары /srv/nfs для клиентов без NFS ──
+  # Это та же директория, что экспортируется pro-nfs.nix через NFSv4. Любой
+  # LAN-клиент (Android, Windows, Linux без nfs-utils) может зайти гостем
+  # и писать; `force user = az` + `force group = pro` гарантируют, что
+  # файлы приходят как az:pro и совместимы с правами NFS-клиентов.
+  #
+  # Почему `guest ok = yes` + `map to guest = Bad User` (см. global выше):
+  # Android-галереи и Windows-проводник логинятся анонимно; "Bad User"
+  # маппит unknown-user на guest-аккаунт, дальше `guest only = yes` принуждает
+  # исполнять все операции под `force user`. Без guest-only любой
+  # невалидный Unix-юзер (например, nobody) мог бы попытаться писать
+  # под своим UID — мы этого не хотим.
+  #
+  # NB: `shareNfsPath = false` отключает только ЭТУ шару; Samba-сервер
+  # остаётся работать (нужен для `public` и `${hostName}`). Чтобы
+  # выключить Samba целиком — `pro.samba.enable = false`.
+  # Двойное условие (cfgEnable && cfg.shareNfsPath) — без Samba-сервера
+  # шарить /srv/nfs через SMB бессмысленно.
+  services.samba.settings.nfs = lib.mkIf (cfgEnable && cfg.shareNfsPath) {
+    path = "/srv/nfs";
+    browseable = "yes";
+    "read only" = "no";
+    "guest ok" = "yes";
+    "guest only" = "yes";
+    "force user" = "az";
+    "force group" = "pro";
+    "create mask" = "0664";
+    "directory mask" = "2775";
+    # Скрываем share от browse-list на чужих vlan'ах (на практике
+    # hosts allow/deny в global уже фильтрует, но явное ограничение
+    # защищает от случайного export'а через VPN/Tailscale в чужой LAN).
+    "hosts allow" = "127.0.0.1 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16";
+    "hosts deny" = "0.0.0.0/0";
+  };
+
   systemd.tmpfiles.rules = [
-    "d /srv/samba/${hostName} 2775 root pro - -"
-    "d /srv/samba/public 2775 az pro - -"
+    # Samba-каталоги создаём только на хостах, где Samba реально работает;
+    # на остальных tmpfiles-правило не нужно и может сбить с толку (каталог
+    # создаётся и пустует).
+    (lib.mkIf cfgEnable "d /srv/samba/${hostName} 2775 root pro - -")
+    (lib.mkIf cfgEnable "d /srv/samba/public 2775 az pro - -")
+    (lib.mkIf cfgEnable ''
+      # /var/lib/pro-samba holds the one-time-setup marker so we never
+      # re-prompt for Samba passwords on subsequent switches.
+      d /var/lib/pro-samba 0755 root root - -
+    '')
     "d /srv/syncthing 2775 root pro - -"
     "d /srv/syncthing/share 2775 root pro - -"
-    # /var/lib/pro-samba holds the one-time-setup marker so we never
-    # re-prompt for Samba passwords on subsequent switches.
-    "d /var/lib/pro-samba 0755 root root - -"
-    # NFS runtime paths (opt-in NFS server creates /srv/nfs)
+    # NFS runtime paths (opt-in NFS server creates /srv/nfs). Создаём
+    # ВСЕГДА — даже на хостах без Samba/NFS-сервера, потому что /srv/nfs
+    # используется ещё и как SMB-share на desktop'е (через services.samba).
+    # На клиентах каталог создаётся, но Samba/NFS не стартуют — это просто
+    # страховка, что на desktop'е после `just switch` он точно существует
+    # с правильными правами.
     "d /srv/nfs 2775 root pro - -"
   ];
 
@@ -131,9 +219,11 @@ in
   # If none of the above work, that user is reported in the unit's stdout
   # and the service exits 0 anyway — the operator must run
   # `ops-pro-samba-setup-users` manually later.
-  environment.etc."pro/ops-pro-samba-setup-users.sh".source = ../scripts/ops-pro-samba-setup-users.sh;
-  environment.etc."pro/ops-pro-samba-setup-users.sh".mode = "0755";
-  systemd.services."pro-samba-setup-users" = {
+  environment.etc."pro/ops-pro-samba-setup-users.sh" = lib.mkIf cfgEnable {
+    source = ../scripts/ops-pro-samba-setup-users.sh;
+    mode = "0755";
+  };
+  systemd.services."pro-samba-setup-users" = lib.mkIf cfgEnable {
     description = "Populate Samba passdb with pro-nix Unix users (one-shot)";
     wantedBy = [ "multi-user.target" ];
     after = [ "systemd-tmpfiles-setup.service" ];
@@ -249,4 +339,5 @@ in
   # and will be discoverable on the local Wi‑Fi network. If additional mDNS
   # publication is needed, we can add service definition files under
   # /etc/avahi/services/ via NixOS `environment.etc`.
+  };
 }

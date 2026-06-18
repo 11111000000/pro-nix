@@ -82,6 +82,11 @@
 # /srv/syncthing автоматически.
   pro.nfs.server.enable = true;
   pro.nfs.server.exportPath = "/srv/nfs";
+  # SMB-зеркало /srv/nfs для клиентов без NFS (Android, Windows).
+  # `pro.samba.enable = true` — явный override; авто-определение по роли
+  # `nfs` в pro.hosts.desktop уже включило бы его, но явная строка
+  # гарантирует поведение, даже если кто-то изменит реестр ролей.
+  pro.samba.enable = true;
   # NB: `pro.nfs.client.enable` намеренно НЕ включаем здесь — desktop
   # сам себе NFS-сервер, и попытка монитровать `desktop.local:/srv/nfs`
   # с localhost (адрес клиента = адрес сервера) заканчивается
