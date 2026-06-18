@@ -62,7 +62,7 @@ run_tty() {
   # Do not explicitly load test files here: init.el / site-init are responsible
   # for loading modules and test helpers once. Explicitly loading tests from the
   # harness caused duplicate ERT definitions when site-init also loaded them.
-  cmd="HOME=\"$RUN_HOME\" $EMACS_BIN --batch --quick \
+  cmd="HOME=\"$RUN_HOME\" PRO_EMACS_TEST_MODE=1 $EMACS_BIN --batch --quick \
     --eval \"(setq pro-test-repo-root \\\"$REPO_DIR\\\")\" \
     --eval \"(setq user-emacs-directory \\\"$run_home_esc/.config/emacs/\\\" pro-emacs-base-system-modules-dir nil pro-emacs-base-user-modules-dir \\\"$run_home_esc/.config/emacs/modules\\\" pro-emacs-base-user-manifest \\\"$run_home_esc/.config/emacs/modules.el\\\")\" \
     --load \"$base_dir_esc/init.el\" \
@@ -92,7 +92,7 @@ run_xorg() {
   base_dir_esc="$(escape_path "$BASE_DIR")"
   modules_dir_esc="$(escape_path "$MODULES_DIR")"
 
-  DISPLAY="$display" HOME="$RUN_HOME" "$EMACS_BIN" --batch --quick \
+  DISPLAY="$display" HOME="$RUN_HOME" PRO_EMACS_TEST_MODE=1 "$EMACS_BIN" --batch --quick \
     --eval "(setq pro-test-repo-root \"$REPO_DIR\")" \
     --eval "(setq user-emacs-directory \"$run_home_esc/.config/emacs/\" pro-emacs-base-system-modules-dir nil pro-emacs-base-user-modules-dir \"$run_home_esc/.config/emacs/modules\" pro-emacs-base-user-manifest \"$run_home_esc/.config/emacs/modules.el\")" \
     --load "$base_dir_esc/init.el" \

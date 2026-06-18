@@ -47,7 +47,23 @@
   ;; опрашивал MELPA на каждом старте).
   (when (fboundp 'pro-emacs-maybe-bootstrap-on-first-start)
     (pro-emacs-maybe-bootstrap-on-first-start))
-  (pro-emacs-base-start))
+  (pro-emacs-base-start)
+
+  ;; Test loader: only in headless/CI runs. We use env var instead of a
+  ;; test-mode feature so production Emacs does not even read tests/.
+  ;; scripts/test-emacs-headless.sh sets PRO_EMACS_TEST_MODE=1; nothing
+  ;; else should. This unblocks the 16 test-*.el files that had no
+  ;; loader (audit-2026-06-18 P1-8).
+  (when (getenv "PRO_EMACS_TEST_MODE")
+    (let* ((tests-dir (expand-file-name "tests" base-dir))
+           (loaded (make-hash-table :test 'equal)))
+      (when (file-directory-p tests-dir)
+        (dolist (f (sort (directory-files tests-dir t "\\.el$") #'string<))
+          ;; Skip test-loader self-reference (no test-loader.el yet) and
+          ;; any file that fails to load — surface the error.
+          (unless (gethash f loaded)
+            (puthash f t loaded)
+            (load f nil t)))))))
 
 (provide 'pro-init)
 
