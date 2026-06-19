@@ -292,29 +292,32 @@
     # Limit parallel builds to a conservative number to avoid saturating CPU.
     # Set to 2 for interactive responsiveness on typical desktop machines.
     settings.max-jobs = 2;
-    # Сначала используем публичный кэш и его Fastly-зеркало, чтобы сборка быстрее уходила в готовые бинарники.
-    # pi-crew cache switch branch: pi-crew/cache-switch-20260520152216
-    # Временно предпочитаем fastly mirror; cache.nixos.org остаётся запасным.
+# Substituters — порядок важен: Nix опрашивает все substituters параллельно
+    # (binary cache race), но доверяет подписанным binaries только если
+    # substituter есть в trusted-substituters И его ключ — в
+    # trusted-public-keys. cache.nixos.org-1 — единственный ключ, который
+    # мы доверяем; все зеркала ниже отдают binaries, подписанные тем же
+    # ключом (mirror.nju.edu.cn подписан cache.nixos.org-1, см.
+    # /5pn1p0p3a6yy5l2fbwrpyzhba92gi0fb.narinfo).
+    #
+    # Cache.nixos.org — primary (~270 КБ/с на этой ноде, Range поддерживается).
+    # mirror.nju.edu.cn — fallback (медленнее, ~180 КБ/с, но иногда выигрывает
+    # race когда cache.nixos.org тормозит).
+    #
+    # nix-mirror.freetls.fastly.net удалён: не подписан известным ключом
+    # (без ключа Nix не доверяет signed binaries → fetcher всегда fallback'ит
+    # на cache.nixos.org, но сам fact опроса fastly тормозит build).
     settings.substituters = lib.mkForce [
-      "https://nix-mirror.freetls.fastly.net"
       "https://cache.nixos.org"
+      "https://mirror.nju.edu.cn/nix-channels/store"
     ];
 
-    # Prefer the Fastly mirror as primary substituter and make cache.nixos.org
-    # a fallback by ordering. Also set trusted-substituters so Nix will prefer
-    # verified substitutes from the mirror. The public key for the mirror is
-    # unknown in this environment; the mirror advertises that it serves
-    # pre-signed cache.nixos.org binaries, so no extra key is strictly
-    # necessary. If you have a mirror public key, add it to
-    # settings.trusted-public-keys.
     settings.trusted-substituters = lib.mkForce [
-      "https://nix-mirror.freetls.fastly.net"
       "https://cache.nixos.org"
+      "https://mirror.nju.edu.cn/nix-channels/store"
     ];
 
     settings.trusted-public-keys = lib.mkForce [
-      # If you have the mirror's public key, place it here (format: name:key)
-      # Example placeholder removed for safety; leaving only cache.nixos.org key.
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     ];
     gc = {
