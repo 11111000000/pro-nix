@@ -9,6 +9,10 @@
     noto-fonts-cjk-sans
     noto-fonts-color-emoji
     emacs-all-the-icons-fonts
+    # Aporetic (nixpkgs `aporetic`): основной шрифт pro-nix, см.
+    # configuration.nix. nix-closure гарантирует, что пакет доступен
+    # во всех хостах; дублирующее включение здесь идемпотентно.
+    aporetic
     # Nerd Fonts: required by `nerd-icons` (consult/ibuffer/dired/completion).
     # FiraCode — primary; Hack и DejaVuSansMono — резерв на случай смены code-font
     # (кандидаты в pro-ui-fonts.el ищутся именно в этом порядке).
@@ -20,10 +24,11 @@
     cantarell-fonts
   ];
 
+  # defaultFonts уже заданы в configuration.nix (Aporetic Sans/Mono first,
+  # DejaVu fallback). Здесь только добавляем serif, которого нет в базовом
+  # слое — для pro-* UI, который использует variable-pitch с засечками.
   fonts.fontconfig.defaultFonts = {
-    sansSerif = [ "DejaVu Sans" ];
-    serif = [ "DejaVu Serif" ];
-    monospace = [ "DejaVu Sans Mono" "Terminus" ];
+    serif = [ "Aporetic Serif" "DejaVu Serif" ];
   };
 
   environment.etc."fonts.conf".source = ../conf/fonts.conf;

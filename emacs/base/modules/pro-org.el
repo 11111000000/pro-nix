@@ -117,6 +117,5 @@
 ;; packages (consult/embark etc.) that `require` 'org' still work when the
 ;; repository's local org module is loaded during tests or containerized runs.
 (provide 'pro-org)
-(provide 'pro-org)
 
 ;;; pro-org.el ends here

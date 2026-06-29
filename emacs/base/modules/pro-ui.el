@@ -56,13 +56,6 @@
   :type 'boolean
   :group 'pro-ui)
 
-(defcustom pro-ui-modeline-style 'shaoline
-  "Modeline style: 'minimal, 'shaoline or 'doom. Defaults to 'shaoline.
-Modeline packages are only enabled if available and if this value
-is set accordingly."
-  :type '(choice (const minimal) (const shaoline) (const doom))
-  :group 'pro-ui)
-
 (defun pro-ui--font-available-p (family)
   "Проверить, доступен ли шрифт FAMILY."
   (find-font (font-spec :family family)))
@@ -149,20 +142,20 @@ all-the-icons — fallback, если nerd-icons недоступен. Семей
     (pro-compat--add-hook-once 'minibuffer-setup-hook #'pro--show-minibuffer-hint-once)))
 
 ;; Wire ui subsystems implemented in separate files (pro-nix style).
-(when (file-readable-p (expand-file-name "ui-fonts.el" (file-name-directory (or load-file-name buffer-file-name))))
-  (ignore-errors (load (expand-file-name "ui-fonts.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
-(when (file-readable-p (expand-file-name "ui-completion.el" (file-name-directory (or load-file-name buffer-file-name))))
-  (ignore-errors (load (expand-file-name "ui-completion.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
-(when (file-readable-p (expand-file-name "ui-icons.el" (file-name-directory (or load-file-name buffer-file-name))))
-  (ignore-errors (load (expand-file-name "ui-icons.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
-(when (file-readable-p (expand-file-name "ui-modeline.el" (file-name-directory (or load-file-name buffer-file-name))))
-  (ignore-errors (load (expand-file-name "ui-modeline.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
-(when (file-readable-p (expand-file-name "ui-theme.el" (file-name-directory (or load-file-name buffer-file-name))))
-  (ignore-errors (load (expand-file-name "ui-theme.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
-(when (file-readable-p (expand-file-name "ui-fringes.el" (file-name-directory (or load-file-name buffer-file-name))))
-  (ignore-errors (load (expand-file-name "ui-fringes.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
-(when (file-readable-p (expand-file-name "ui-tty.el" (file-name-directory (or load-file-name buffer-file-name))))
-  (ignore-errors (load (expand-file-name "ui-tty.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
+(when (file-readable-p (expand-file-name "pro-ui-fonts.el" (file-name-directory (or load-file-name buffer-file-name))))
+  (ignore-errors (load (expand-file-name "pro-ui-fonts.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
+(when (file-readable-p (expand-file-name "pro-ui-completion.el" (file-name-directory (or load-file-name buffer-file-name))))
+  (ignore-errors (load (expand-file-name "pro-ui-completion.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
+(when (file-readable-p (expand-file-name "pro-ui-icons.el" (file-name-directory (or load-file-name buffer-file-name))))
+  (ignore-errors (load (expand-file-name "pro-ui-icons.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
+(when (file-readable-p (expand-file-name "pro-ui-modeline.el" (file-name-directory (or load-file-name buffer-file-name))))
+  (ignore-errors (load (expand-file-name "pro-ui-modeline.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
+(when (file-readable-p (expand-file-name "pro-ui-theme.el" (file-name-directory (or load-file-name buffer-file-name))))
+  (ignore-errors (load (expand-file-name "pro-ui-theme.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
+(when (file-readable-p (expand-file-name "pro-ui-fringes.el" (file-name-directory (or load-file-name buffer-file-name))))
+  (ignore-errors (load (expand-file-name "pro-ui-fringes.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
+(when (file-readable-p (expand-file-name "pro-ui-tty.el" (file-name-directory (or load-file-name buffer-file-name))))
+  (ignore-errors (load (expand-file-name "pro-ui-tty.el" (file-name-directory (or load-file-name buffer-file-name))) nil t)))
 
 (when (fboundp 'add-hook)
   ;; Embark: enable if available to provide quick-actions for candidates
@@ -207,6 +200,16 @@ all-the-icons — fallback, если nerd-icons недоступен. Семей
       (setq pro-tabs-enable-icons t)
       (when (fboundp 'pro-tabs-mode)
         (pro-tabs-mode 1)))))
+
+(defcustom pro-ui-corfu-colors nil
+  "Alist overriding Corfu face colors.
+Each element is (FACE . ATTRS) where FACE is `default' or `current'
+and ATTRS is a plist accepted by `set-face-attribute'.
+When nil (the default), colors are auto-detected from the current
+frame background: dark colors for light themes, light colors for
+dark themes."
+  :type '(alist :key-type symbol :value-type plist)
+  :group 'pro-ui)
 
 (defun pro-ui-apply-completion ()
   "Подключить полезные подсказки для завершения."
@@ -254,9 +257,27 @@ all-the-icons — fallback, если nerd-icons недоступен. Семей
       (setq kind-icon-default-face 'corfu-default)
       (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
-    (when (fboundp 'set-face-attribute)
-      (set-face-attribute 'corfu-default nil :background "#1c1f26" :foreground "#dcdfe4")
-      (set-face-attribute 'corfu-current nil :background "#2a2f36" :foreground "#ffffff" :weight 'bold))))
+    (defun pro-ui--apply-corfu-colors ()
+      "Set Corfu faces to match the current frame background.
+Uses dark colors on light backgrounds and light colors on dark
+backgrounds.  Can be overridden via `pro-ui-corfu-colors'."
+      (let* ((bg (face-background 'default nil t))
+             (darkp (and bg (> (apply #'+ (color-values bg)) (* 3 32768))))
+             (overrides (when (boundp 'pro-ui-corfu-colors) pro-ui-corfu-colors)))
+        (if overrides
+            (progn
+              (when (alist-get 'default overrides)
+                (apply #'set-face-attribute 'corfu-default nil (alist-get 'default overrides)))
+              (when (alist-get 'current overrides)
+                (apply #'set-face-attribute 'corfu-current nil (alist-get 'current overrides))))
+          (if darkp
+              (progn
+                (set-face-attribute 'corfu-default nil :background "#1c1f26" :foreground "#dcdfe4")
+                (set-face-attribute 'corfu-current nil :background "#2a2f36" :foreground "#ffffff" :weight 'bold))
+            (set-face-attribute 'corfu-default nil :background "#f0f0f0" :foreground "#1c1f26")
+            (set-face-attribute 'corfu-current nil :background "#d0d0d0" :foreground "#000000" :weight 'bold)))))
+    (pro-ui--apply-corfu-colors)
+    (add-hook 'pro-ui-after-load-theme-hook #'pro-ui--apply-corfu-colors)))
 
 ;; Cursor appearance helpers
 ;; Небольшая утилита: менять цвет и тип курсора в зависимости от

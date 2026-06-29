@@ -365,17 +365,22 @@
     noto-fonts
     noto-fonts-cjk-sans
     noto-fonts-color-emoji
+    # Aporetic (nixpkgs `aporetic` / `aporetic-bin`): основной шрифт
+    # pro-nix. Sans — для интерфейса, Sans Mono — для кода (см. pro-ui.el).
+    # Содержит все 4 семейства (sans/serif × proportional/mono) под OFL-1.1.
+    aporetic
     liberation_ttf
     dejavu_fonts
     cantarell-fonts
   ];
 
-  # Use DejaVu Sans / DejaVu Sans Mono as system defaults. Previously Aporetic
-  # Sans was first choice, but the source lived in ./fonts/ (97 MB) and was
-  # superseded by DejaVu when Aporetic was removed.
+  # Aporetic Sans (Mono) как первый кандидат; DejaVu и Terminus — резерв
+  # на случай, если Aporetic не дошёл до closure конкретного хоста.
+  # Прошлый комментарий про 97 MB ./fonts/ уже неактуален: nixpkgs-пакет
+  # `aporetic` собирается из upstream и закеширован на cache.nixos.org.
   fonts.fontconfig.defaultFonts = {
-    sansSerif = [ "DejaVu Sans" ];
-    monospace = [ "DejaVu Sans Mono" "Terminus" ];
+    sansSerif = [ "Aporetic Sans" "DejaVu Sans" ];
+    monospace = [ "Aporetic Sans Mono" "DejaVu Sans Mono" "Terminus" ];
   };
 
   # Optional guidance: hosts that need to force VT native resolution can add

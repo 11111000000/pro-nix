@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Оконные менеджеры · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="active">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class="active"><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">Оконные менеджеры</h1>
+  <h1 id="okonnye-menedzhery">Оконные менеджеры</h1>
+<p>Проект поддерживает <strong>три</strong> оконных менеджера с общей
+клавиатурной философией:</p>
+<ul>
+<li><strong>EXWM</strong> — Emacs X Window Manager. Используется как основная
+сессия на <code>cf19</code> и <code>desktop</code> (через <code>profile-exwm-minimal.nix</code>).</li>
+<li><strong>Sway</strong> — Wayland-композитор. Используется на <code>huawei</code> и как
+fallback на <code>desktop</code> / <code>cf19</code> (оба импортируют
+<code>session-sway.nix</code>).</li>
+<li><strong>i3</strong> — X11 tiling WM. Та же fallback-роль, что и Sway;
+настраивается в <code>session-i3.nix</code>.</li>
+</ul>
+<p>EXWM-клавиатура — каноническая. Sway и i3 сконфигурированы так,
+чтобы следовать ей; мышечная память переносится чисто.</p>
+<h2 id="obshchaia-klaviaturnaia-karta">Общая клавиатурная карта</h2>
+<table><thead><tr><th>Действие</th><th>EXWM</th><th>Sway</th><th>i3</th></tr></thead><tbody>
+<tr><td>Фокус влево/вниз/вверх/вправо</td><td><code>s-h/j/k/l</code></td><td><code>Mod4+h/j/k/l</code></td><td><code>Mod4+h/j/k/l</code></td></tr>
+<tr><td>Переместить окно</td><td><code>s-H/J/K/L</code></td><td><code>Mod4+Shift+h/j/k/l</code></td><td><code>Mod4+Shift+h/j/k/l</code></td></tr>
+<tr><td>Рабочий стол 1..9</td><td><code>s-1</code>..<code>s-9</code></td><td><code>Mod4+1</code>..<code>Mod4+9</code></td><td><code>Mod4+1</code>..<code>Mod4+9</code></td></tr>
+<tr><td>Переместить окно на рабочий стол</td><td>—</td><td><code>Mod4+Shift+1</code>..<code>9</code></td><td><code>Mod4+Shift+1</code>..<code>9</code></td></tr>
+<tr><td>Терминал</td><td><code>C-c t o</code> (multi-vterm-project)</td><td><code>Mod4+Return</code> (foot)</td><td><code>Mod4+Return</code> (xterm)</td></tr>
+<tr><td>Запуск приложения</td><td><code>s-x</code> (consult)</td><td><code>Mod4+Space</code> (wofi)</td><td><code>Mod4+Space</code> (dmenu)</td></tr>
+<tr><td>Закрыть окно</td><td><code>C-x k 0</code></td><td><code>Mod4+q</code></td><td><code>Mod4+q</code></td></tr>
+<tr><td>Перезагрузить WM-конфиг</td><td>—</td><td><code>Mod4+Shift+c</code></td><td><code>Mod4+Shift+c</code></td></tr>
+<tr><td>Перезапустить WM</td><td>—</td><td><code>Mod4+Shift+r</code></td><td><code>Mod4+Shift+r</code></td></tr>
+<tr><td>Fullscreen</td><td>(Emacs full-buffer)</td><td><code>Mod4+f</code></td><td><code>Mod4+f</code></td></tr>
+<tr><td>Lock</td><td>(loginctl)</td><td><code>Mod4+Escape</code> (swaylock)</td><td>—</td></tr>
+<tr><td>Сплит горизонтально/вертикально</td><td>(Emacs)</td><td><code>Mod4+b</code> / <code>Mod4+v</code></td><td><code>Mod4+b</code> / <code>Mod4+v</code></td></tr>
+<tr><td>Layout stacking/tabbed</td><td>—</td><td><code>Mod4+s</code> / <code>Mod4+w</code></td><td><code>Mod4+s</code> / <code>Mod4+w</code></td></tr>
+<tr><td>Toggle split</td><td>—</td><td><code>Mod4+e</code></td><td><code>Mod4+e</code></td></tr>
+</tbody></table>
+<blockquote>
+<p><code>Mod4+d</code> в Sway/i3 <strong>намеренно не забиндена</strong> — она бы
+конфликтовала с <code>EXWM s-d = treemacs</code>.</p>
+</blockquote>
+<h2 id="exwm">EXWM</h2>
+<p>EXWM — самый opinionated из трёх: Emacs становится оконным
+менеджером. Session-launcher в <code>emacs/exwm.nix:96-176</code> делает
+следующее по порядку:</p>
+<ol>
+<li>Дописывает startup-лог в
+<code>~/.cache/emacs-startup/gdm-exwm.log</code>.</li>
+<li><code>eval $(ssh-agent -s)</code>, <code>export SSH_AUTH_SOCK</code>.</li>
+<li><code>xset -b</code> (выключить bell), <code>xhost +SI:localuser:$USER</code> и
+<code>+SI:localuser:root</code> (разрешить локальные X-подключения для
+<code>emacsclient</code>).</li>
+<li>Экспорт IME-env: <code>XMODIFIERS=@im=exwm-xim</code>,
+<code>GTK_IM_MODULE=xim</code>, <code>QT_IM_MODULE=xim</code>,
+<code>CLUTTER_IM_MODULE=xim</code>, <code>GTK_KEY_THEME=Emacs</code>.</li>
+<li><code>LSP_USE_PLISTS=true</code> (Haskell LSP quirk).</li>
+<li><code>xsetroot -cursor_name left_ptr</code> и <code>VISUAL=emacsclient</code>.</li>
+<li><code>xrdb -merge /etc/X11/Xresources</code> (системный) затем
+<code>~/.Xresources</code> (HM override). Порядок важен: сначала
+системный, пользователь выигрывает на конфликте.</li>
+<li>Re-launch rescue xbindkeys grab (идемпотентно — <code>~/.xprofile</code>
+уже стартовал его под lightdm, это защитный pgrep для
+пользователей <code>startx</code>).</li>
+<li><code>systemctl --user import-environment</code> для X11-переменных.</li>
+<li><code>exec systemd-run --user --scope -p MemoryMax=2G -p MemoryHigh=1800M -p CPUQuota=120% -p CPUWeight=200 -E XDG_CURRENT_DESKTOP=EXWM -E DISPLAY ... exec emacs --init-directory $HOME/.config/emacs</code>.</li>
+</ol>
+<p>Resource-лимиты (<code>MemoryMax</code>, <code>MemoryHigh</code>, <code>CPUQuota</code>, <code>CPUWeight</code>)
+не дают взбесившемуся Emacs положить всю машину.</p>
+<h3 id="spetsifichnyi-dlia-exwm-emacs-kod">Специфичный для EXWM Emacs-код</h3>
+<ul>
+<li><code>emacs/base/modules/pro-exwm.el</code> — <code>pro-exwm-start-session</code>,
+<code>pro/exwm-urxvt-toggle</code> (urxvt sidebar), autostart-хелперы,
+prefix-клавиши для IME.</li>
+<li><code>emacs/base/modules/pro-exwm-sim.el</code> — <code>exwm-input-simulation-keys</code>,
+чтобы Emacs-стиль навигации работал в X11-приложениях
+(например, C-n/C-p в Telegram).</li>
+<li><code>modules/pro-emacs-rescue.nix</code> — <code>Control+Alt+Shift+r</code> (по умолчанию)
+→ xbindkeys grab <strong>до</strong> EXWM (в <code>~/.xprofile</code>) → emacsclient probe →
+poke зависший <code>*package*</code> / <code>*elpaca*</code> буфер → <code>kill -USR2</code> →
+<code>systemd-run --user --scope</code> restart. 3-секундный cooldown.
+notify-send при успехе.</li>
+</ul>
+<h2 id="sway-wayland">Sway (Wayland)</h2>
+<p><code>modules/session-sway.nix</code> оборачивает Sway-сессию в
+<code>dbus-run-session</code> (обход краша <code>wl_compositor</code> ~2 с после старта)
+и устанавливает <code>WLR_NO_HARDWARE_CURSORS=1</code> (Intel hw-cursor fix
+для multi-monitor и after-sleep).</p>
+<p>Общий конфиг — в <code>conf/sway-config.in</code>. Sway-специфичное:</p>
+<ul>
+<li><code>Mod4</code> = Super.</li>
+<li><code>xkb_layout "us,ru"</code>, <code>xkb_options "ctrl:nocaps,grp:toggle,grp_led:caps"</code>
+(CapsLock становится Ctrl, Right Alt переключает, светодиод
+CapsLock показывает активную группу).</li>
+<li>Touchpad: <code>tap enabled</code>, <code>natural_scroll enabled</code>.</li>
+<li><code>exec waybar</code>, <code>exec mako</code> (status + notifications).</li>
+<li><code>gaps inner 4</code>, <code>gaps outer 4</code>, <code>default_border pixel 2</code>
+(визуальное разделение между окнами).</li>
+<li><code>seat seat0 cursor hide_when_typing enabled</code>.</li>
+</ul>
+<p>Пакеты: <code>sway</code>, <code>waybar</code>, <code>mako</code>, <code>swaybg</code>, <code>swaylock</code>,
+<code>swayidle</code>, <code>wl-clipboard</code>, <code>wofi</code>, <code>foot</code>, <code>grim</code>, <code>slurp</code>.</p>
+<h2 id="i3-x11">i3 (X11)</h2>
+<p><code>modules/session-i3.nix</code>. Конфиг (<code>conf/i3-config.in</code>) зеркалит
+Sway-layout, но использует X11-примитивы. <code>i3-nagbar</code> бандлится с
+<code>i3</code> (отдельного пакета нет). Статус-бар — <code>polybar</code> (конфиг в
+<code>environment.etc."polybar/config.ini".text</code>).</p>
+<p>Пакеты: <code>i3</code>, <code>i3status</code>, <code>dmenu</code>, <code>xterm</code>, <code>dex</code>, <code>feh</code>, <code>dunst</code>,
+<code>polybar</code>, <code>libnotify</code>.</p>
+<h2 id="xresources">Xresources</h2>
+<p><code>conf/Xresources</code> — единственный источник правды для X11
+визуальных настроек. Определяет:</p>
+<ul>
+<li><code>Xft.*</code> дефолты (antialias on, hintfull, lcdfilter lcddefault, rgb).</li>
+<li><code>Emacs.font: Aporetic Sans Mono 14</code>, <code>Emacs.useXIM: false</code>
+(чтобы exwm-xim был единственным XIM-сервером).</li>
+<li>URxvt: <code>Terminus 14</code>, foreground <code>#b0b0b0</code>, background <code>#000000</code>,
+cursor <code>#88ff88</code>, 16-цветная палитра
+<code>#1c1c1c, #c25c5c, #5cc25c, #c2c25c, #5c5cc2, #c25cc2, #5cc2c2, #c0c0c0, #666666, #d87575, #75d875, #d8d875, #7575d8, #d875d8, #75d8d8, #e5e5e5</code>.</li>
+<li>XTerm fallback (та же палитра).</li>
+<li>Xmessage (диалоги): <code>#3c3c3c</code> фон, <code>#c2c2c2</code> foreground.</li>
+<li>Xpdf: <code>Aporetic Sans 12</code>.</li>
+</ul>
+<p>Палитра — это <strong>design system</strong> и для этого сайта; CSS в
+<code>site/static/css/main.css</code> использует те же 16 цветов.</p>
+<h2 id="per-host-wm-naznachenie">Per-host WM-назначение</h2>
+<table><thead><tr><th>Хост</th><th>Основной WM</th><th>Также доступен</th></tr></thead><tbody>
+<tr><td><code>desktop</code></td><td>EXWM (через <code>profile-exwm-minimal.nix</code>)</td><td>Sway, i3, Cinnamon (mkForce false)</td></tr>
+<tr><td><code>cf19</code></td><td>EXWM (через <code>profile-exwm-minimal.nix</code>)</td><td>Sway, i3, Cinnamon (mkForce false), fbterm-tty2 (mkForce false)</td></tr>
+<tr><td><code>huawei</code></td><td>Sway (ручной старт, без EXWM-minimal import)</td><td>i3, heavy-desktop (без Cinnamon)</td></tr>
+<tr><td><code>vm</code></td><td>нет (<code>services.xserver.enable = mkForce false</code>)</td><td>—</td></tr>
+</tbody></table>
+<p>Хосты импортируют и <code>session-sway.nix</code>, и <code>session-i3.nix</code>, так что
+пользователь выбирает в GDM-сессион-чузере.</p>
+
+
+  
+  <hr>
+  <p><strong>Дальше:</strong>
+  
+    <a href="&#x2F;stack&#x2F;privacy&#x2F;">Приватность и Tor</a> · 
+  
+    <a href="&#x2F;hosts&#x2F;">Хосты</a>
+  
+  </p>
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

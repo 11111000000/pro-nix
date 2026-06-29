@@ -1,0 +1,54 @@
+{
+  "_comment": [
+    "SRT (sandbox runtime) policy для `ellama-setup-agentic-coding'.",
+    "Активируется в `pro-ai-ellama.el' при `pro-ai-ellama-agentic-profile = autonomous'.",
+    "Файл живёт в `~/.config/ellama/srt-autonomous.json' (см. `ellama-tools-srt-args' опцию).",
+    "",
+    "Политика ниже ограничивает filesystem writes:",
+    "  - $HOME и текущий проект — read/write;",
+    "  - .ssh, .aws, .gnupg, .config/pro-nix/local.nix — read-deny;",
+    "  - остальные — read-deny (если явно не listed).",
+    "Это fail-closed defense-in-depth поверх `ellama-tools-irreversible-default-action = block'."
+  ],
+  "version": "1.0",
+  "filesystem": {
+    "denyRead": [
+      "~/.ssh",
+      "~/.ssh/*",
+      "~/.aws",
+      "~/.aws/*",
+      "~/.gnupg",
+      "~/.gnupg/*",
+      "~/.config/pro-nix/local.nix",
+      "/etc/shadow",
+      "/etc/sudoers"
+    ],
+    "allowWrite": [
+      ".",
+      "~/.cache/ellama",
+      "~/.cache/ellama/*"
+    ],
+    "denyWrite": [
+      "~/.ssh",
+      "~/.ssh/*",
+      "~/.aws",
+      "~/.aws/*",
+      "~/.gnupg",
+      "~/.gnupg/*",
+      "~/.config/pro-nix/local.nix",
+      "/etc"
+    ]
+  },
+  "network": {
+    "_comment": "Network policy: by default SRT-allow all outbound; project may override.",
+    "allowOutbound": [
+      "api.openrouter.ai",
+      "api.openai.com",
+      "api.anthropic.com",
+      "api.aitunnel.ru",
+      "localhost",
+      "127.0.0.1",
+      "ollama.internal"
+    ]
+  }
+}

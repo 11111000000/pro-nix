@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ page.title | default(value=config.title) }}{% endblock title %} · {{ config.title }}</title>
+  <meta name="description" content="{{ page.description | default(value=config.description) }}">
+  <link rel="stylesheet" href="{{ get_url(path='css/main.css') }}">
+  {% set rss_url = get_url(path='atom.xml', lang=lang) %}
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="{{ rss_url }}">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  {% if lang == config.default_language %}<meta name="robots" content="index, follow">{% endif %}
+</head>
+<body>
+{% set nav = config.extra.nav %}
+{% set sidenav = config.extra.sidebar %}
+{% set is_default = lang == config.default_language %}
+{% set base = "" %}
+{% if not is_default %}{% set base = "/" ~ lang %}{% endif %}
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="{{ base ~ "/" }}">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="{% if lang == 'ru' %}Поиск… (Enter){% else %}Search docs… (Enter){% endif %}" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      {% for n in nav %}
+      <a href="{{ base ~ n.url }}" class="{% if current_path is starting_with(n.url) %}active{% endif %}">{{ n.label[lang] | default(value=n.label.ru) }}</a>
+      {% endfor %}
+    </nav>
+    {% if is_default %}
+      <a class="lang-switch" href="/en/">EN</a>
+    {% else %}
+      <a class="lang-switch" href="{{ get_url(path='/', lang=lang) }}">RU</a>
+    {% endif %}
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    {% for group in sidenav %}
+    <h3>{{ group.title[lang] | default(value=group.title.ru) }}</h3>
+    <ul>
+      {% for item in group.items %}
+      <li class="{% if current_path == item.url %}active{% endif %}"><a href="{{ base ~ item.url }}">{{ item.label[lang] | default(value=item.label.ru) }}</a></li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+  </aside>
+
+  <main class="content">
+    {% block content %}{{ page.content | safe }}{% endblock content %}
+  </main>
+
+  <footer class="site-footer">
+    {% if lang == "ru" %}
+      про-nix {{ config.extra.build }} · <a href="{{ config.extra.github }}">GitHub</a> ·
+      <a href="{{ rss_url }}">RSS</a> ·
+      Собрано: {{ now() | date(format="%Y-%m-%d") }}
+    {% else %}
+      pro-nix {{ config.extra.build }} · <a href="{{ config.extra.github }}">GitHub</a> ·
+      <a href="{{ rss_url }}">RSS</a> ·
+      Built: {{ now() | date(format="%Y-%m-%d") }}
+    {% endif %}
+  </footer>
+</div>
+<script src="{{ get_url(path='js/main.js') }}"></script>
+{% if config.build_search_index %}
+<script src="{{ get_url(path='search_index.' ~ lang ~ '.js') }}" defer></script>
+{% endif %}
+</body>
+</html>

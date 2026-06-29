@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Загрузка Emacs · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="active">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class="active"><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">Загрузка Emacs</h1>
+  <h1 id="zagruzka-emacs">Загрузка Emacs</h1>
+<p>Сторона Emacs имеет свой четырёхфазный bootstrap, намеренно
+отвязанный от Nix-системы. Можно использовать тот же <code>emacs/base/</code>
+с non-NixOS хоста — <code>pro-nix-emacs-sync.sh</code> делает именно это.</p>
+<h2 id="faza-1-early-init-el">Фаза 1: <code>early-init.el</code></h2>
+<p><code>emacs/base/early-init.el</code> запускается <strong>до</strong> активации <code>package.el</code>.
+Устанавливает:</p>
+<ul>
+<li><code>package-enable-at-startup = nil</code> — никогда не авто-устанавливать
+при первом старте.</li>
+<li><code>package-quickstart-file</code> — указывает на
+<code>~/.config/emacs/quickstart.el</code> (в <code>user-emacs-directory</code>).</li>
+<li><code>package-quickstart-sync = nil</code> — не перезаписывать quickstart-файл.</li>
+<li><code>frame-inhibit-implied-resize = t</code> — без мерцания на первом фрейме.</li>
+<li><code>inhibit-splash-screen = t</code>.</li>
+</ul>
+<p>Также добавляет <code>modules/</code> в <code>load-path</code> (относительно файла), чтобы
+<code>require 'pro-foo</code> в <code>init.el</code> работало, даже если <code>init.el</code> сам
+загружается из <code>/nix/store/...</code>.</p>
+<p>Best-effort: <code>(require 'treesit nil t)</code>, чтобы tree-sitter-символы
+были доступны native-компиляции сторонних пакетов.</p>
+<p>В GUI-фреймах: выключает fringes, ставит window-divider. Затем
+грузит <code>pro-ui-theme</code>, чтобы тема была на месте до отрисовки
+первого фрейма.</p>
+<h2 id="faza-2-init-el">Фаза 2: <code>init.el</code></h2>
+<p><code>emacs/base/init.el</code> — главный загрузчик. Делает:</p>
+<ol>
+<li>Устанавливает <code>user-emacs-directory</code> в <code>~/.config/emacs/</code>.</li>
+<li>Устанавливает <code>custom-file</code> в <code>~/.config/emacs/custom.el</code>
+(чтобы пользовательские настройки пережили
+<code>nixos-rebuild switch</code>).</li>
+<li><code>load custom.el</code>, если есть.</li>
+<li><code>setq pro-emacs-base-system-modules-dir</code> в каталог <code>modules/</code>
+репо.</li>
+<li><code>load pro-compat</code> и <code>pro-packages</code> рано, чтобы любой
+последующий модуль мог к ним обращаться.</li>
+<li>Настраивает MELPA / ELPA-архивы через
+<code>pro-packages-configure-archives</code>.</li>
+<li><code>pro-packages-initialize</code> готовит package-систему.</li>
+<li><code>package-install-upgrade-built-in = t</code> — разрешает обновлять
+<code>transient</code> (идёт с Emacs, но для <code>magit</code> нужен свежее).</li>
+<li>Добавляет <code>modules/</code> в <code>load-path</code>.</li>
+<li><code>load site-init.el</code>.</li>
+<li><code>pro-emacs-maybe-bootstrap-on-first-start</code> — на маркере, без
+сети на последующих стартах.</li>
+<li><code>pro-emacs-base-start</code> — собственно загрузчик модулей.</li>
+</ol>
+<p>Финальный <code>provide 'pro-init</code> — для тестов / интроспекции.</p>
+<h2 id="faza-3-site-init-el">Фаза 3: <code>site-init.el</code></h2>
+<p><code>emacs/base/site-init.el</code> — <strong>манифест модулей и резолвер</strong>. Его
+задача — прочитать манифест, найти файл каждого модуля (с
+предпочтением user-override), и загрузить его.</p>
+<h3 id="manifest">Манифест</h3>
+<pre data-lang="elisp" class="language-elisp "><code class="language-elisp" data-lang="elisp">(defvar pro-emacs-base-default-modules
+    &#x27;(pro-core pro-ui pro-packages pro-package-bootstrap pro-project pro-git
+      pro-nix pro-js pro-ai pro-agent-shell pro-emcp pro-c pro-chat pro-telega pro-compat
+      pro-completion pro-completion-keys pro-consult-helpers pro-dired
+      pro-app-launcher pro-clipboard
+      pro-emacs-check-fonts pro-exwm-sim pro-exwm pro-feeds pro-fix-corfu
+      pro-haskell pro-java pro-key-utils pro-keys pro-lisp pro-markdown pro-nix-refresh
+      pro-org pro-python pro-reload pro-session pro-history pro-spell pro-startup-metrics pro-profiler pro-tabs
+      pro-terminals pro-test-helpers pro-tests pro-tests-keys pro-text
+      pro-ui-completion pro-ui-fonts pro-ui-fringes pro-ui-icons
+      pro-ui-improvements pro-buffer-banner pro-ui-modeline pro-ui-theme pro-ui-tty
+      pro-dashboard pro-help pro-windows-popups
+      pro-vterm-theme pro-windows pro-nav pro-docker)
+  &quot;Полный список модулей, загружаемых по умолчанию при старте Emacs.&quot;)
+</code></pre>
+<p>Пользователь может переопределить через <code>pro-emacs-modules</code> (или
+<code>my-emacs-modules</code>, или <code>pro-emacs-base-modules</code>) в
+<code>~/.config/emacs/modules.el</code>. См. snippets в стиле
+<code>templates/decisions.el.example</code>.</p>
+<h3 id="rezolver">Резолвер</h3>
+<p><code>pro-emacs-base--resolve-module</code> ищет в двух местах:</p>
+<ol>
+<li><code>~/.config/emacs/modules/&lt;name&gt;.el</code> (HM-деплой, user-override).</li>
+<li><code>pro-emacs-base-system-modules-dir/&lt;name&gt;.el</code> (модули репо).</li>
+</ol>
+<p>User-override выигрывает <strong>только если файл принадлежит
+текущему пользователю</strong>. Это защита от root-owned HM-файлов,
+которые ломают Emacs:</p>
+<pre data-lang="elisp" class="language-elisp "><code class="language-elisp" data-lang="elisp">(user-owner-ok (or user-dir-symlink
+                 user-file-symlink
+                 (and user-attrs
+                      (= (nth 2 user-attrs) (user-uid)))))
+</code></pre>
+<p>Если user-файл <strong>не</strong> принадлежит текущему пользователю, резолвер
+предпочитает системный модуль и логирует сообщение <code>[pro-emacs]</code>.
+Поэтому <code>helper-switch.sh</code> делает <code>chown -R $USER ~/.config/emacs</code>
+после <code>nixos-rebuild switch</code>.</p>
+<h3 id="zagruzka">Загрузка</h3>
+<p><code>pro-emacs-base-start</code>:</p>
+<pre data-lang="elisp" class="language-elisp "><code class="language-elisp" data-lang="elisp">(dolist (module pro-emacs-base-default-modules)
+  (let ((resolved-file (pro-emacs-base--resolve-module module)))
+    (if resolved-file
+        (condition-case err
+            (load resolved-file nil t)
+          (error (message &quot;[pro-emacs] failed to load %s: %S&quot; resolved-file err)))
+      (message &quot;[pro-emacs] missing module: %s&quot; module))))
+</code></pre>
+<p>Идемпотентно: каждая top-level форма модуля защищена
+<code>pro-compat--add-hook-once</code> и подобными, так что re-evaluation не
+пере-устанавливает hooks, не пере-добавляет в списки, не
+пере-применяет advice.</p>
+<h3 id="provided-packages-el"><code>provided-packages.el</code></h3>
+<p><code>site-init.el</code> сначала пробует загрузить
+<code>~/.config/emacs/provided-packages.el</code> (HM-деплой). Если файл
+отсутствует <strong>или</strong> не доступен для записи (признак того, что им
+владеет HM), откатывается на копию репо в
+<code>emacs/base/provided-packages.el</code>.</p>
+<p>Содержимое файла — <code>(setq pro-packages-provided-by-nix '(magit vertico consult …))</code> — те же 58 имён, что и в
+<code>emacs/core.nix#pro.emacs.providedPackages</code>.</p>
+<p><code>pro-packages.el</code> обращается к <code>pro-packages-provided-by-nix</code>,
+чтобы решить: «этот пакет дан Nix, или мне ставить из MELPA?».</p>
+<h3 id="pending-bindingi">Pending-биндинги</h3>
+<p>После загрузки всех модулей <code>site-init.el</code> вызывает
+<code>pro-keys-apply-pending</code> и <code>pro-keys-report-pending</code>. Первая
+пере-применяет глобальные клавиши, которые были отложены, потому
+что их целевой пакет ещё не загружен; вторая печатает сводку
+pending-биндингов, чтобы пользователь мог <code>M-x package-install</code>
+необходимые пакеты.</p>
+<h2 id="faza-4-pro-emacs-base-start">Фаза 4: <code>pro-emacs-base-start</code></h2>
+<p>Здесь происходит собственно работа. Это функция
+<code>pro-emacs-base-start</code>, вызываемая из <code>init.el:50</code>. Она
+итерирует манифест, резолвит каждый модуль и загружает его.
+Функция <strong>идемпотентна</strong>: можно вызвать дважды, и второй вызов —
+no-op (потому что <code>provide</code> защищён <code>(featurep 'pro-foo)</code>, а
+top-level формы защищены).</p>
+<p>После загрузки всех модулей вызываются
+<code>pro-keys-apply-pending</code> и <code>pro-keys-report-pending</code>. Затем
+<code>pro--reconstruct</code> (если предоставлен <code>pro-epistemology.el</code>)
+восстанавливает эпистемическое состояние из сохранённого
+снапшота — это фича «сохрани мои мысли между перезагрузками».</p>
+<h2 id="kontrakt-soft-reload">Контракт soft-reload</h2>
+<p><code>emacs/base/modules/pro-reload.el</code> определяет:</p>
+<pre data-lang="elisp" class="language-elisp "><code class="language-elisp" data-lang="elisp">(defvar pro--before-reload-hook nil)
+(defvar pro--after-reload-hook  nil)
+
+(defun pro&#x2F;before-reload (fn) ...)
+(defun pro&#x2F;after-reload  (fn) ...)
+(defun pro--forget-file-in-load-history (file) ...)
+(defun pro&#x2F;reload-module (module) ...)
+(defun pro&#x2F;reload-all-modules () ...)
+(defun pro&#x2F;reload-config (&amp;optional full) ...)
+</code></pre>
+<p><code>pro--forget-file-in-load-history</code> удаляет файл из <code>load-history</code>
+и <code>unload-feature</code>’ит предоставленную фичу, чтобы следующий
+<code>load</code> действительно переоценил файл (без этого Emacs видит
+совпадающий mtime и тихо пропускает).</p>
+<p><code>pro/reload-config</code>:</p>
+<ol>
+<li>Обновить Nix-сгенерированные пути (если скрипт доступен).</li>
+<li><code>run-hooks 'pro--before-reload-hook</code> (модули tear down child
+frames, фоновые процессы, кэшированный state).</li>
+<li>Если <code>full</code>, re-eval <code>site-init.el</code> (так что манифест и
+<code>provided-packages.el</code> подхватывают изменения); затем
+<code>pro/reload-all-modules</code>. Иначе — только
+<code>pro/reload-all-modules</code>.</li>
+<li>Re-apply клавиши, шрифты, fringes, completion, иконки, modeline,
+тему.</li>
+<li><code>run-hooks 'pro--after-reload-hook</code> (модули пере-создают
+persistent state из свежезагруженного кода).</li>
+<li>Печатает сводку с затраченным временем.</li>
+</ol>
+<h3 id="chek-list-avtora-modulia">Чек-лист автора модуля</h3>
+<p>Из шапки <code>pro-reload.el</code>:</p>
+<blockquote>
+<p>Reload contract for module authors:</p>
+<ul>
+<li>Re-evaluating a module via <code>pro/reload-module</code> always runs the
+<em>current</em> contents of the .el file (we drop the load-history
+entry, so mtime tricks with .elc don’t mask changes).</li>
+<li>Modules that own persistent state (child frames, background
+processes, globalised variables) should register a teardown
+function on <code>pro--after-reload-hook</code> so a reload actually
+re-creates that state from the freshly-loaded code. Use
+<code>pro/after-reload #'my-reset-fn</code>.</li>
+<li>Modules should keep their top-level forms idempotent (use the
+<code>pro-compat--add-hook-once</code> / <code>add-to-list-once</code> /
+<code>advice-add-once</code> helpers) — re-evaluation will re-run them
+on every reload.</li>
+</ul>
+</blockquote>
+<p>Три правила. Первое поддерживается
+<code>pro--forget-file-in-load-history</code> — вам ничего не нужно делать.
+Второе — <strong>ваша</strong> работа. Третье поддерживается
+<code>pro-compat</code>-хелперами.</p>
+<h2 id="manifest-eto-dannye">Манифест — это данные</h2>
+<p>Поскольку <code>pro-emacs-base-default-modules</code> — <code>defvar</code> (а не
+<code>defconst</code>), пользователь может переопределить его из
+<code>~/.config/emacs/modules.el</code> в load-time. Это <strong>единственный</strong>
+способ кастомизировать манифест — per-host NixOS-опции для этого
+нет.</p>
+<p><code>templates/decisions.el.example</code> — стартовая точка:</p>
+<pre data-lang="elisp" class="language-elisp "><code class="language-elisp" data-lang="elisp">(setq pro-emacs-modules
+      &#x27;(pro-core pro-ui pro-...))
+</code></pre>
+<p><code>site-init.el</code> читает этот файл первым (<code>load-file pro-emacs-base-user-manifest</code>), затем откатывается на
+<code>pro-emacs-base-default-modules</code>.</p>
+<h2 id="config-emacs-decisions-el"><code>~/.config/emacs/decisions.el</code></h2>
+<p>Решения — per-package override’ы, не per-module:</p>
+<pre data-lang="elisp" class="language-elisp "><code class="language-elisp" data-lang="elisp">(setq pro-packages-decisions
+      &#x27;((gptel . always)        ; всегда ставить из MELPA, даже если Nix даёт
+        (magit . always)
+        (somepkg . never)))     ; никогда не ставить, даже если просят
+</code></pre>
+<p><code>pro-packages.el</code> проверяет <code>pro-packages-decisions</code> перед
+auto-установкой отсутствующего пакета. Это позволяет пользователю
+opt-out из конкретных пакетов без удаления модуля, который их
+тянет.</p>
+
+
+  
+  <hr>
+  <p><strong>Дальше:</strong>
+  
+    <a href="&#x2F;architecture&#x2F;agents&#x2F;">Стек AI-агентов</a> · 
+  
+    <a href="&#x2F;reference&#x2F;defcustom&#x2F;">Справочник defcustom</a>
+  
+  </p>
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

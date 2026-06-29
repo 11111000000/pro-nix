@@ -10,7 +10,7 @@
 ;; гарантирует, что все помощники и адаптеры будут загружены при старте.
 (defvar pro-emacs-base-default-modules
     '(pro-core pro-ui pro-packages pro-package-bootstrap pro-project pro-git
-    pro-nix pro-js pro-ai pro-agent-shell pro-emcp pro-c pro-chat pro-telega pro-compat
+    pro-nix pro-js pro-ai pro-ai-ellama pro-ai-anvil pro-agent-shell pro-emcp pro-c pro-chat pro-telega pro-compat
     pro-completion pro-completion-keys pro-consult-helpers pro-dired
     pro-app-launcher pro-clipboard
     pro-emacs-check-fonts pro-exwm-sim pro-exwm pro-feeds pro-fix-corfu
@@ -26,6 +26,23 @@
 (defvar pro-emacs-base-user-modules-dir (expand-file-name "~/.config/emacs/modules"))
 (defvar pro-emacs-base-user-manifest (expand-file-name "~/.config/emacs/modules.el"))
 (defvar pro-emacs-base-disable-marker (expand-file-name "~/.config/emacs/.disable-nixos-base"))
+
+(defvar pro-emacs-base-lazy-modules
+  '(pro-telega pro-feeds pro-docker pro-haskell pro-java pro-exwm-sim
+    pro-ai-ellama pro-ai-anvil)
+  "Modules deferred until first use.
+Each module is loaded on demand via `pro-emacs-base-load-lazy-module'.
+Modules listed here must `provide' a feature matching their name.
+
+Why these are lazy:
+  - `pro-telega'      : needs telega-server (TDLib JSON bridge), ~50 MB.
+  - `pro-feeds'       : elfeed needs sqlite, periodic DB writes.
+  - `pro-docker'      : docker-tramp + transient, only useful with docker.
+  - `pro-haskell'     : haskell-mode + lsp, only for Haskell buffers.
+  - `pro-java'        : lsp-java + eglot, only for Java buffers.
+  - `pro-exwm-sim'    : sim-keymap only meaningful in EXWM.
+  - `pro-ai-ellama'   : ellama + llm stack ~30+ .el files, only when user invokes.
+  - `pro-ai-anvil'    : anvil.el ~100+ .el files, only when user invokes.")
 
 (defun pro-emacs-base--canonical-name (name)
   "Каноническое имя модуля NAME как строка.
@@ -141,20 +158,31 @@ NAME может быть 'core' или 'pro-core' — функция норма�
         (message "[pro-emacs] module lookup failed: %s user=%s system=%s" name user-file system-file)
         nil)))))
 
+(defun pro-emacs-base-load-lazy-module (module-name)
+  "Load MODULE-NAME if it is in `pro-emacs-base-lazy-modules' and not yet loaded."
+  (let ((sym (if (symbolp module-name) module-name (intern module-name))))
+    (unless (featurep sym)
+      (let ((resolved (pro-emacs-base--resolve-module (symbol-name sym))))
+        (when resolved
+          (condition-case err
+              (load resolved nil t)
+            (error
+             (message "[pro-emacs] failed to lazy-load module %s: %S" module-name err))))))))
+
 (defun pro-emacs-base-start ()
   (let ((modules (pro-emacs-base--manifest-modules)))
     (dolist (module modules)
       (let* ((module-name (if (symbolp module) (symbol-name module) module))
-             ;; Use the centralized resolver which implements the owner/readable
-             ;; heuristics. This avoids loading files from the Nix store or
-             ;; other locations that are readable but not owned by the user.
-             (resolved-file (pro-emacs-base--resolve-module module-name)))
-        (if resolved-file
-            (condition-case err
-                (load resolved-file nil t)
-              (error
-               (message "[pro-emacs] failed to load module %s: %S" resolved-file err)))
-          (message "[pro-emacs] missing module: %s" module-name)))))
+             (sym (intern module-name)))
+        (if (memq sym pro-emacs-base-lazy-modules)
+            (message "[pro-emacs] deferred lazy module: %s" module-name)
+          (let ((resolved-file (pro-emacs-base--resolve-module module-name)))
+            (if resolved-file
+                (condition-case err
+                    (load resolved-file nil t)
+                  (error
+                   (message "[pro-emacs] failed to load module %s: %S" resolved-file err)))
+              (message "[pro-emacs] missing module: %s" module-name)))))))
     ;; After all modules loaded: reconstruct epistemic state
     (let ((epistemology-file (expand-file-name "pro-epistemology.el" pro-emacs-base-system-modules-dir)))
       (when (file-readable-p epistemology-file)

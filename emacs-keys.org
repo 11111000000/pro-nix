@@ -141,3 +141,19 @@
 | Profiler   | S-<f8>        | pro/profiler-stop                     | Остановить профайлер                 |
 | Profiler   | M-<f8>        | pro/profiler-report                   | Открыть отчёт профайлера             |
 | Profiler   | C-S-<f8>      | pro/profiler-reset                    | Сбросить данные профайлера           |
+| AI         | C-c e e       | pro-ai-ellama-open                    | Ellama chat (transient-меню)         |
+| AI         | C-c e s       | pro-ai-ellama-summarize               | Ellama: summarize region/buffer      |
+| AI         | C-c e r       | pro-ai-ellama-code-review             | Ellama: code-review region/buffer    |
+| AI         | C-c e p       | pro-ai-ellama-plan-and-act            | Ellama: plan-and-act agent loop      |
+| AI         | C-c e l       | pro-ai-ellama-list-sessions           | Ellama: list/manage sessions         |
+| AI         | C-c e a       | pro-ai-ellama-load-agents-md          | Ellama: перечитать AGENTS.md         |
+| AI         | C-c e m       | pro-ai-ellama-use-shared-model        | Ellama: подцепить провайдер из gptel |
+| AI         | C-c e b       | pro-ai-ellama-add-buffer-as-context   | Ellama: buffer → /tmp → ephemeral    |
+| AI         | C-c e r       | pro-ai-ellama-add-region-as-context   | Ellama: region → /tmp → ephemeral    |
+| AI         | C-c e h       | pro-ai-ellama-show-sessions           | Ellama: показать список sessions     |
+| AI         | C-c e d       | pro-ai-ellama-delete-session          | Ellama: удалить session              |
+| AI         | C-c a a       | pro-ai-anvil-server-start             | anvil: запустить MCP-сервер          |
+| AI         | C-c a s       | pro-ai-anvil-server-stop              | anvil: остановить сервер             |
+| AI         | C-c a t       | pro-ai-anvil-server-status            | anvil: статус сервера                |
+| AI         | C-c a l       | pro-ai-anvil-list-tools               | anvil: перечислить активные tools    |
+| AI         | C-c a d       | pro-ai-anvil-describe-setup           | anvil: JSON-фрагмент для mcp.json    |

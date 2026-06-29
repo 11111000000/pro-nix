@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Composition files · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">Composition files</h1>
+  <h1 id="composition-files">Composition files</h1>
+<p>A <strong>composition file</strong> is <code>modules/system-package-sets-*.nix</code>. It is
+<strong>not</strong> a NixOS module — it does not declare options, does not appear
+in <code>imports</code>, and does not get evaluated as part of a module
+configuration. It is a plain function:</p>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">{ pkgs }:
+{
+  somePackages = with pkgs; [
+    package-a
+    package-b
+    ...
+  ];
+}
+</code></pre>
+<p>The host’s <code>composition.nix</code> imports one or more of these, calls them
+with the right <code>pkgs</code>, and <code>++</code>s the resulting <code>somePackages</code> list
+into <code>environment.systemPackages</code>.</p>
+<h2 id="why-this-pattern">Why this pattern</h2>
+<p>Three reasons:</p>
+<ol>
+<li><strong>No merge semantics.</strong> <code>environment.systemPackages</code> is a list, and
+list concatenation is well-defined. There is no <code>mkDefault</code> / <code>mkForce</code>
+interaction — every <code>++</code> just appends. Duplicates are deduped at
+build time.</li>
+<li><strong>Reuse across hosts.</strong> The same <code>runtime</code> set is on <code>cf19</code>,
+<code>huawei</code>, and <code>vm</code>. The same <code>desktopHeavy</code> set is on <code>huawei</code> and
+<code>desktop</code> (in the future). Without the function indirection, you
+would copy-paste the package list.</li>
+<li><strong>No accidental coupling.</strong> Because it is not a module, it cannot
+declare <code>options</code>, cannot read <code>config</code>, cannot have side effects.
+It is a pure function of <code>pkgs</code> → <code>attrsOf (listOf package)</code>.</li>
+</ol>
+<h2 id="the-nine-composition-files">The nine composition files</h2>
+<table><thead><tr><th>File</th><th>Returns</th><th>What it contains</th></tr></thead><tbody>
+<tr><td><code>system-package-sets-runtime.nix</code></td><td><code>runtimePackages</code></td><td>The base runtime (bashInteractive, openssh, python3, dbus, gawk, kbd, mc, emacs, rxvt-unicode, curl, wget, jq, just, git, gh, ripgrep, fd, tmux, tree, htop, lsof, alsa-utils, beep, …)</td></tr>
+<tr><td><code>system-package-sets-dev.nix</code></td><td><code>devPackages</code>, <code>llmLabCmd</code>, <code>pythonCmd</code></td><td>Dev toolchain (direnv, shellcheck, shfmt, bat, tldr, pipx, nodejs_20, …), the <code>llm-lab</code> Python wrapper with jupyter/transformers/datasets, …</td></tr>
+<tr><td><code>system-package-sets-exwm.nix</code></td><td><code>exwmPackages</code></td><td>X11 / EXWM UI helpers (xset, xhost, setxkbmap, wmname, xbindkeys, xdotool, xclip, xauth, feh, xterm, scrot, dunst, flameshot, …)</td></tr>
+<tr><td><code>system-package-sets-desktop-heavy.nix</code></td><td><code>desktopHeavyPackages</code></td><td>Chromium (with <code>systemd-run --user --scope -p MemoryMax=4500M -p CPUQuota=90%</code>), Firefox (2.5G / 90%), telegram-desktop, element-desktop, jami, ffmpeg-full, steam, steam-run, …</td></tr>
+<tr><td><code>system-package-sets-lsp.nix</code></td><td><code>lspPackages</code></td><td>pyright, jdtls, rust-analyzer, gopls, bash-language-server (all <code>maybe</code>’d so a missing upstream returns <code>[]</code>)</td></tr>
+<tr><td><code>system-package-sets-media.nix</code></td><td><code>mediaPackages</code></td><td>ffmpeg-full, mpv, ffmpegthumbnailer</td></tr>
+<tr><td><code>system-package-sets-privacy.nix</code></td><td><code>privacyPackages</code></td><td>tor, torsocks, obfs4, snowflake, nyx, onionshare, dnscrypt-proxy, wireguard-tools, yggdrasil, i2p, proxychains, mullvad-vpn, tor-browser</td></tr>
+<tr><td><code>system-package-sets-tor.nix</code></td><td><code>torControlPackages</code></td><td><code>pro-tor</code> (writeShellApplication), <code>torwrap</code> (writeShellApplication), torsocks, proxychains</td></tr>
+<tr><td><code>system-package-sets-lsp.nix</code></td><td><code>lspPackages</code></td><td>(see above)</td></tr>
+</tbody></table>
+<h2 id="reading-a-composition-file">Reading a composition file</h2>
+<p>Example — <code>system-package-sets-tor.nix</code>:</p>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">{ pkgs }:
+let
+  proTor = pkgs.writeShellApplication {
+    name = &quot;pro-tor&quot;;
+    runtimeInputs = [ pkgs.bash pkgs.iproute2 pkgs.curl pkgs.gnused ];
+    text = builtins.readFile ..&#x2F;..&#x2F;scripts&#x2F;pro-tor;
+  };
+  torwrap = pkgs.writeShellApplication {
+    name = &quot;torwrap&quot;;
+    runtimeInputs = [ pkgs.bash ];
+    text = builtins.readFile ..&#x2F;..&#x2F;bin&#x2F;torwrap;
+  };
+in
+{
+  torControlPackages = [
+    proTor
+    torwrap
+    pkgs.torsocks
+    pkgs.proxychains
+  ];
+}
+</code></pre>
+<p><code>writeShellApplication</code> is <code>nixpkgs</code>’s “build a shell script with
+correct shebang and runtime deps” helper. Reading the script body from
+<code>../../scripts/pro-tor</code> keeps the source of truth in one place.</p>
+<h2 id="how-a-host-uses-a-composition-file">How a host uses a composition file</h2>
+<p><code>hosts/cf19/composition.nix</code>:</p>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">{ lib, pkgs, ... }:
+let
+  tor = import ..&#x2F;..&#x2F;modules&#x2F;system-package-sets-tor.nix { inherit pkgs; };
+in
+{
+  pro.profiles.exwmMinimal.enable = lib.mkDefault true;
+  environment.systemPackages = tor.torControlPackages;
+}
+</code></pre>
+<p><code>hosts/huawei/composition.nix</code>:</p>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">{ pkgs, ... }:
+let
+  desktopHeavy = import ..&#x2F;..&#x2F;modules&#x2F;system-package-sets-desktop-heavy.nix { inherit pkgs; };
+  privacy      = import ..&#x2F;..&#x2F;modules&#x2F;system-package-sets-privacy.nix { inherit pkgs; };
+  lsp          = import ..&#x2F;..&#x2F;modules&#x2F;system-package-sets-lsp.nix { inherit pkgs; };
+  media        = import ..&#x2F;..&#x2F;modules&#x2F;system-package-sets-media.nix { inherit pkgs; };
+  runtime      = import ..&#x2F;..&#x2F;modules&#x2F;system-package-sets-runtime.nix { inherit pkgs; };
+  dev          = import ..&#x2F;..&#x2F;modules&#x2F;system-package-sets-dev.nix { inherit pkgs; };
+  exwm         = import ..&#x2F;..&#x2F;modules&#x2F;system-package-sets-exwm.nix { inherit pkgs; };
+  tor          = import ..&#x2F;..&#x2F;modules&#x2F;system-package-sets-tor.nix { inherit pkgs; };
+in
+{
+  environment.systemPackages = with pkgs;
+    runtime.runtimePackages
+    ++ dev.devPackages
+    ++ exwm.exwmPackages
+    ++ lsp.lspPackages
+    ++ privacy.privacyPackages
+    ++ media.mediaPackages
+    ++ tor.torControlPackages
+    ++ (import ..&#x2F;..&#x2F;modules&#x2F;system-package-sets-desktop-heavy.nix { inherit pkgs; }).desktopHeavyPackages
+    ++ [ tor-browser ];
+}
+</code></pre>
+<p>A pattern: <code>let</code> block imports each composition file with <code>inherit pkgs</code>,
+then <code>environment.systemPackages</code> is a <code>++</code>-concatenated list of the
+relevant <code>.fooPackages</code> attrs.</p>
+<h2 id="adding-a-new-composition-file">Adding a new composition file</h2>
+<ol>
+<li>Create <code>modules/system-package-sets-&lt;name&gt;.nix</code> with the function
+pattern.</li>
+<li>Decide which hosts need it.</li>
+<li>Add the <code>import ../../modules/system-package-sets-&lt;name&gt;.nix { inherit pkgs; }</code> and the <code>++ X.&lt;attr&gt;</code> to each host’s <code>composition.nix</code>.</li>
+<li>Optionally add it to <code>tools/surface-lint.sh</code> and <code>tools/holo-verify.sh</code>
+so the contract is enforced.</li>
+</ol>
+<h2 id="removing-a-composition-file">Removing a composition file</h2>
+<p>A composition file that nothing imports is dead code. Detect:</p>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">rg -l &quot;system-package-sets-&lt;name&gt;&quot; hosts&#x2F;    # should be empty
+</code></pre>
+<p>If empty, delete the file. There is no <code>imports</code> list to clean up,
+because the file is <strong>never</strong> in <code>imports</code>.</p>
+<blockquote>
+<p>**The <code>pro-*.nix</code> and <code>system-package-sets-*.nix</code> distinction is a</p>
+<blockquote>
+<p>known landmine.** New contributors sometimes put a <code>system-package-sets-*</code>
+file into <code>imports</code> — the file then evaluates as a NixOS module
+(a string), which fails with “expected a module attribute set”. The
+fix is to import it from <code>composition.nix</code>, not from
+<code>configuration.nix</code>.</p>
+</blockquote>
+</blockquote>
+
+
+  
+  <hr>
+  <p><strong>Дальше:</strong>
+  
+    <a href="&#x2F;architecture&#x2F;emacs-base&#x2F;">Emacs bootstrap</a> · 
+  
+    <a href="&#x2F;hosts&#x2F;">Hosts</a>
+  
+  </p>
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

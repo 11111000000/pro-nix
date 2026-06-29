@@ -130,6 +130,14 @@
       "type": "remote",
       "url": "http://127.0.0.1:38913/mcp",
       "enabled": true
+    },
+    "anvil": {
+      "_comment": "anvil.el — MCP-сервер в Elisp (~40 default tools: file / org / elisp / sqlite / shell). Запускается локально через `M-x pro-ai-anvil-server-start` в Emacs. Profile по умолчанию: `default` (file/org/elisp/sqlite).",
+      "_status": "experimental — stdio bridge (pro-ai-anvil--stdio-loop) не реализован; пока используйте `emcp` для file/org/eval операций. Подробнее: local-templates/skills/emacs-anvil/SKILL.md и emacs/base/modules/pro-ai-anvil.el. Получить готовый JSON-фрагмент: M-x pro-ai-anvil-describe-setup.",
+      "type": "local",
+      "command": ["emacsclient", "--eval", "(pro-ai-anvil--stdio-loop)"],
+      "enabled": true,
+      "env": {}
     }
   }
 }

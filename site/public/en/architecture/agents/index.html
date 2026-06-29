@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI agent stack · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">AI agent stack</h1>
+  <h1 id="ai-agent-stack">AI agent stack</h1>
+<p>The agent layer is the <strong>youngest</strong> in the project and the most
+frequently changed. It has five parts that compose:</p>
+<ol>
+<li><strong>Binaries</strong> — installed by Nix (pi, pi-acp, opencode).</li>
+<li><strong>Templates</strong> — source of truth in <code>local-templates/</code>, deployed to
+<code>$HOME</code> by <code>pro-agent-configs.nix</code>.</li>
+<li><strong>MCP servers</strong> — <code>emcp</code> (Emacs) and <code>chrome-devtools</code> (browser).</li>
+<li><strong>Skills</strong> — operator guides that the agent loads on demand.</li>
+<li><strong>Permission system</strong> — deny-by-pattern defaults that gate dangerous
+operations.</li>
+</ol>
+<h2 id="1-the-binaries">1. The binaries</h2>
+<table><thead><tr><th>Binary</th><th>Source</th><th>How it’s built</th><th>Where it lands</th></tr></thead><tbody>
+<tr><td><code>pi</code></td><td><code>lukasl-dev/pi.nix</code> (via <code>pi.packages.x86_64-linux.coding-agent</code>)</td><td>Upstream Nix package</td><td><code>/run/current-system/sw/bin/pi</code></td></tr>
+<tr><td><code>pi-acp</code></td><td><code>nix/node-packages/pi-acp.nix</code> (svkozak/pi-acp v0.0.27)</td><td><code>buildNpmPackage</code> with Node 20, <code>npmDepsHash</code> pinned</td><td><code>/run/current-system/sw/bin/pi-acp</code></td></tr>
+<tr><td><code>opencode</code></td><td><code>nix/overlays/opencode-stub.nix</code></td><td><code>fetchurl</code> of npm tarball + <code>patchelf</code> for glibc</td><td><code>/run/current-system/sw/bin/opencode</code></td></tr>
+<tr><td><code>opencode-bwrap</code></td><td><code>opencodeBwrap.homeManagerModules.default</code></td><td>HM module wraps <code>opencode</code> in a bwrap sandbox</td><td><code>~/.local/bin/opencode</code> (per user)</td></tr>
+<tr><td><code>gptel</code> (in Emacs)</td><td><code>pkgs.emacsPackages.gptel</code></td><td>MELPA build</td><td><code>share/emacs/site-lisp/.../gptel*.el</code></td></tr>
+<tr><td><code>emcp</code> (in Emacs)</td><td><code>nix/emacs-recipes/emcp.nix</code></td><td>Trivial <code>cp</code> of submodule</td><td><code>share/emacs/site-lisp/emcp/emcp.el</code></td></tr>
+<tr><td><code>http-server</code> (in Emacs)</td><td><code>nix/emacs-recipes/http-server.nix</code></td><td>Trivial <code>cp</code> of upstream fork</td><td><code>share/emacs/site-lisp/http-server/...</code></td></tr>
+</tbody></table>
+<p><code>pi</code> and <code>pi-acp</code> are launched as <code>pi-acp</code> — the npm package wraps the
+binary in the ACP protocol. <code>opencode</code> is launched directly (or through
+the bwrap wrapper if <code>programs.opencode-bwrap.enable = true</code> for the
+user).</p>
+<h2 id="2-the-templates">2. The templates</h2>
+<p><code>local-templates/</code> is the <strong>single source of truth</strong> for the agent
+configs. There are two subtrees:</p>
+<pre><code>local-templates&#x2F;
+├── opencode&#x2F;
+│   ├── opencode.json
+│   └── skills&#x2F;
+│       └── emacs-emcp&#x2F;
+│           └── SKILL.md
+└── pi&#x2F;
+    ├── extensions&#x2F;
+    │   └── pi-permission-system&#x2F;
+    │       └── config.json
+    ├── mcp.json
+    ├── models.json
+    ├── settings.json
+    └── skills&#x2F;
+        ├── emacs-emcp&#x2F;
+        │   └── SKILL.md
+        └── safe-bash&#x2F;
+            └── SKILL.md
+</code></pre>
+<p>The deployment is in <code>modules/pro-agent-configs.nix</code>:</p>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">templateFiles = [
+  { src = &quot;local-templates&#x2F;opencode&#x2F;opencode.json&quot;;     dst = &quot;.config&#x2F;opencode&#x2F;opencode.json&quot;; }
+  { src = &quot;local-templates&#x2F;pi&#x2F;models.json&quot;;             dst = &quot;.pi&#x2F;agent&#x2F;models.json&quot;; }
+  { src = &quot;local-templates&#x2F;pi&#x2F;mcp.json&quot;;                dst = &quot;.pi&#x2F;agent&#x2F;mcp.json&quot;; }
+  { src = &quot;local-templates&#x2F;pi&#x2F;settings.json&quot;;           dst = &quot;.pi&#x2F;agent&#x2F;settings.json&quot;; }
+  { src = &quot;local-templates&#x2F;pi&#x2F;skills&#x2F;emacs-emcp&#x2F;SKILL.md&quot;; dst = &quot;.pi&#x2F;agent&#x2F;skills&#x2F;emacs-emcp&#x2F;SKILL.md&quot;; }
+  { src = &quot;local-templates&#x2F;opencode&#x2F;skills&#x2F;emacs-emcp&#x2F;SKILL.md&quot;; dst = &quot;.config&#x2F;opencode&#x2F;skills&#x2F;emacs-emcp&#x2F;SKILL.md&quot;; }
+];
+</code></pre>
+<p>The activation script uses <code>install -m 0644 -o $(id -u) -g $(id -g)</code> to
+avoid root-owned files after sudo-activation, and <code>copy_if_missing</code> to
+never overwrite user edits.</p>
+<p>A second activation appends to <code>~/.profile</code>:</p>
+<pre><code># pro-nix: load AI provider keys from authinfo
+[ -f &quot;$HOME&#x2F;.local&#x2F;share&#x2F;pro-nix&#x2F;load-agent-env.sh&quot; ] &amp;&amp; . &quot;$HOME&#x2F;.local&#x2F;share&#x2F;pro-nix&#x2F;load-agent-env.sh&quot;
+</code></pre>
+<p>The marker is idempotent — it is only appended if the marker is not
+already present.</p>
+<p>The deployment step is replicated in <code>scripts/deploy-agent-configs.sh</code>
+for non-NixOS hosts and for forced re-deploys. <code>just deploy-agents</code>
+runs both that script and <code>install-pi-packages.sh</code>.</p>
+<h2 id="3-the-mcp-servers">3. The MCP servers</h2>
+<p>Two MCP servers are registered in <strong>both</strong> <code>pi/mcp.json</code> and
+<code>opencode/opencode.json</code>:</p>
+<h3 id="emcp"><code>emcp</code></h3>
+<p>The HTTP MCP server that lives inside Emacs, on
+<code>http://127.0.0.1:38913/mcp</code>. The server is started by
+<code>pro-emcp.el</code> (default <code>pro-emcp-server-auto-start = t</code>):</p>
+<ul>
+<li>On <code>after-init-hook</code>, <code>pro-emcp--auto-start-fn</code> runs.</li>
+<li>It checks for the <code>emcp</code> package; if absent, it bails silently.</li>
+<li>Otherwise, <code>(require 'emcp)</code> and <code>emcp-server-start</code>.</li>
+<li>The server binds to <code>127.0.0.1:38913</code> (loopback only — never
+exposed externally).</li>
+<li>Default profile is <code>'full-control</code> (inspect + get/set-variable +
+screenshot + eval + send-keys).</li>
+</ul>
+<p><code>emcp-tools-eval-default-policy</code> and
+<code>emcp-tools-send-keys-default-policy</code> default to <code>'ask</code>. The agent
+calling <code>emcp_eval</code> or <code>emcp_send_keys</code> opens a <code>*EMCP confirm*</code> buffer
+in Emacs with the request, and the user chooses <code>y</code> / <code>n</code> / <code>a</code> /
+<code>r</code> / <code>q</code>.</p>
+<p>The MCP transport itself is the <code>http-server</code> package (also a fork
+by <code>martenlienen</code>, the same author as <code>emcp</code>).</p>
+<h3 id="chrome-devtools"><code>chrome-devtools</code></h3>
+<pre data-lang="json" class="language-json "><code class="language-json" data-lang="json">{
+  &quot;command&quot;: &quot;npx&quot;,
+  &quot;args&quot;: [&quot;-y&quot;, &quot;chrome-devtools-mcp@latest&quot;, &quot;--browser-url=http:&#x2F;&#x2F;127.0.0.1:9222&quot;],
+  &quot;directTools&quot;: true,
+  &quot;lifecycle&quot;: &quot;keep-alive&quot;
+}
+</code></pre>
+<p>Lives only on a host that has Chrome / Chromium running with
+<code>--remote-debugging-port=9222</code>. pro-nix does not start Chrome
+automatically; the user starts it when needed:</p>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">google-chrome-stable --remote-debugging-port=9222
+</code></pre>
+<p>When the server is reachable, the agent can navigate, click, take
+screenshots, and evaluate JS in the browser.</p>
+<h3 id="how-pi-reaches-an-mcp-tool">How <code>pi</code> reaches an MCP tool</h3>
+<p><code>pi</code> does <strong>not</strong> expose MCP tools directly. It uses a <strong>proxy tool</strong>:</p>
+<pre><code>pi&gt; mcp({tool: &quot;emcp_apropos&quot;, args: {pattern: &quot;pro-&quot;}})
+</code></pre>
+<p>The <code>mcp</code> tool is registered by <code>pi-mcp-adapter</code>
+(<code>local-templates/pi/settings.json#packages</code>). The agent calls it
+with <code>{tool: ..., args: ...}</code>, the adapter routes to the right server,
+and the response is returned to the agent.</p>
+<h3 id="how-opencode-reaches-an-mcp-tool">How <code>opencode</code> reaches an MCP tool</h3>
+<p><code>opencode</code> exposes MCP tools <strong>directly</strong>, as if they were part of
+its own tool list:</p>
+<pre><code>opencode&gt; emcp_apropos(pattern: &quot;pro-&quot;)
+</code></pre>
+<p>The MCP <code>tools/list</code> is queried at startup; the tools are added to
+the agent’s native function-calling surface.</p>
+<blockquote>
+<p>The asymmetry is a known wart. The <code>emacs-emcp</code> skill notes both
+calling conventions explicitly.</p>
+</blockquote>
+<h2 id="4-the-skills">4. The skills</h2>
+<p>Skills are Markdown files that the agent loads on demand. The
+mechanism is the same in both agents (a <code>SKILL.md</code> file in a
+subdirectory of <code>skills/</code>). pro-nix ships two:</p>
+<h3 id="emacs-emcp"><code>emacs-emcp</code></h3>
+<p><code>local-templates/{pi,opencode}/skills/emacs-emcp/SKILL.md</code> (137 / 123
+lines).</p>
+<p>Covers:</p>
+<ul>
+<li><strong>How to check the server is alive</strong> — <code>curl -fsS http://127.0.0.1:38913/mcp</code>
+with the <code>initialize</code> request.</li>
+<li><strong>The <code>full-control</code> profile</strong> — table of tools: <code>apropos</code>, <code>describe</code>,
+<code>find-definition</code>, <code>find-references</code>, <code>info-search</code>, <code>get-variable</code>,
+<code>set-variable</code>, <code>screenshot</code>, <code>eval</code>, <code>send-keys</code>. Plus the
+<code>info://{manual}/{node}</code> resource and the <code>/screenshot</code> prompt.</li>
+<li><strong>Typical scenarios</strong> — “check a function is defined”, “understand
+why the config is misbehaving”, “check visual state”, “safely fix a
+config”.</li>
+<li><strong>Security</strong> — <code>eval</code> and <code>send-keys</code> are gated by policy; the agent
+must wait for the user’s <code>y</code> / <code>n</code> / <code>a</code> / <code>r</code> / <code>q</code> choice.</li>
+<li><strong>Troubleshooting</strong> — when <code>emcp</code> is not visible to <code>pi</code>, run
+<code>emacsclient -e '(pro-emcp-server-start)'</code>.</li>
+</ul>
+<p>The pi version has YAML frontmatter (<code>name</code>, <code>description</code>); the
+opencode version does not (opencode discovers skills by directory
+layout, not by frontmatter).</p>
+<h3 id="safe-bash"><code>safe-bash</code></h3>
+<p><code>local-templates/pi/skills/safe-bash/SKILL.md</code> (307 lines, only in
+pi — the opencode equivalent is implicit in the agent’s own shell
+tool).</p>
+<p>Covers:</p>
+<ul>
+<li><strong>Classification</strong> — every shell command is either <em>read-only</em> or
+<em>mutating</em>. Always report which.</li>
+<li><strong>Cross-platform considerations</strong> — Windows vs Unix paths, <code>argv</code> vs
+<code>cmd /c</code>, package-manager detection (npm/pnpm/yarn).</li>
+<li><strong>Heredoc and quoting gotchas</strong>.</li>
+<li><strong>Sudo and <code>expect</code></strong> — the rules for using <code>sudo</code> in scripts and the
+<code>expect</code> tool.</li>
+<li><strong>Destructive action confirmation</strong> — patterns for asking before
+running <code>rm -rf</code>, <code>git push --force</code>, etc.</li>
+</ul>
+<p>The skill is loaded by <code>pi</code> automatically when the agent starts
+working on a task that involves shell commands.</p>
+<h2 id="5-the-permission-system">5. The permission system</h2>
+<p><code>local-templates/pi/extensions/pi-permission-system/config.json</code>
+configures <code>@gotgenes/pi-permission-system</code>. The defaults are
+<strong>deny-by-pattern</strong> for the most destructive operations:</p>
+<h3 id="path-rules"><code>path</code> rules</h3>
+<ul>
+<li><strong>deny</strong>: <code>.env*</code>, <code>secrets.*</code>, <code>*.pem</code>, <code>*.key</code>, <code>id_rsa*</code>,
+<code>id_ed25519*</code>, <code>~/.ssh/**</code>, <code>~/.aws/**</code>, <code>~/.gnupg/**</code>,
+<code>~/.pi/agent/auth.json</code></li>
+<li><strong>ask</strong>: <code>~/.pi/agent/models.json</code></li>
+</ul>
+<h3 id="bash-rules"><code>bash</code> rules</h3>
+<ul>
+<li><strong>deny</strong>: <code>rm -rf *</code>, <code>rm -rf /*</code>, <code>dd *</code>, <code>mkfs*</code>, fork bomb,
+<code>chmod 777</code>, <code>curl|sh</code>, <code>wget|sh</code>, <code>git push --force</code>,
+<code>nix-collect-garbage -d</code>, <code>kill -9 1</code>, <code>reboot</code>, <code>shutdown</code></li>
+<li><strong>ask</strong>: <code>sudo *</code>, <code>chown *</code>, <code>git push *</code>, <code>nix-env *</code>, <code>systemctl *</code></li>
+</ul>
+<h3 id="mcp-skill-external-directory"><code>mcp</code> / <code>skill</code> / <code>external_directory</code></h3>
+<ul>
+<li><code>mcp *</code> — allow</li>
+<li><code>skill *</code> — ask</li>
+<li><code>external_directory</code> — ask</li>
+</ul>
+<p><code>yoloMode = false</code>, <code>debugLog = false</code>, <code>permissionReviewLog = true</code>.</p>
+<p>The <code>opencode</code> agent has its own permission system, configured
+through <code>opencode.json</code>. The pro-nix template keeps it permissive by
+default — the user is expected to set their own rules.</p>
+<h2 id="the-end-to-end-flow">The end-to-end flow</h2>
+<p>When the user runs <code>pi -p "fix the typo on line 42 of main.py"</code>:</p>
+<ol>
+<li><code>pi</code> resolves the user message into an ACP request.</li>
+<li><code>pi-acp</code> is launched; it speaks ACP to the agent backend.</li>
+<li>The backend is gptel-style (a remote LLM with tools).</li>
+<li>The tool list includes <code>mcp({tool, args})</code> (proxied) plus the agent’s
+own tools (read-file, write-file, run-shell).</li>
+<li>The LLM decides to call <code>mcp({tool: "emcp_apropos", args: {pattern: "pro-"}})</code>.</li>
+<li><code>pi-mcp-adapter</code> routes the call to <code>emcp</code> (HTTP on 38913).</li>
+<li><code>emcp</code> (inside Emacs) executes <code>apropos "pro-"</code> in the live Emacs
+session.</li>
+<li>Result is returned to the LLM.</li>
+<li>LLM continues, eventually calling <code>shell.run</code> to fix the typo.</li>
+<li>The shell command goes through the <code>bash</code> permission rules
+(deny-by-pattern) and the <code>safe-bash</code> skill is loaded on demand.</li>
+<li>Result is formatted and returned to the user.</li>
+</ol>
+<p>The same flow works for <code>opencode</code>, except MCP tools are called
+directly (not through the <code>mcp</code> proxy).</p>
+<h2 id="deployment-matrix">Deployment matrix</h2>
+<table><thead><tr><th>Where</th><th>What</th></tr></thead><tbody>
+<tr><td>NixOS activation</td><td><code>home.activation.pro-agent-configs-deploy</code> (HM-owned)</td></tr>
+<tr><td><code>just deploy-agents</code></td><td><code>scripts/deploy-agent-configs.sh</code> + <code>scripts/install-pi-packages.sh</code></td></tr>
+<tr><td><code>just switch-with-agents &lt;host&gt;</code></td><td>switch + deploy + install in one</td></tr>
+<tr><td>Manual</td><td><code>cp local-templates/{pi,opencode}/* ~/.config/...</code></td></tr>
+</tbody></table>
+<p><code>deploy-agents.sh</code> is <code>copy_if_missing</code> — safe to run repeatedly.
+<code>install-pi-packages.sh</code> is idempotent (re-runs only update
+<code>settings.json</code> if the package list changed).</p>
+
+
+  
+  <hr>
+  <p><strong>Дальше:</strong>
+  
+    <a href="&#x2F;architecture&#x2F;network&#x2F;">Network layers</a> · 
+  
+    <a href="&#x2F;stack&#x2F;ai&#x2F;">AI agents layer</a>
+  
+  </p>
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

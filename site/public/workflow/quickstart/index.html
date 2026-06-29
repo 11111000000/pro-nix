@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Быстрый старт · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="active">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class="active"><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">Быстрый старт</h1>
+  <h1 id="bystryi-start">Быстрый старт</h1>
+<p>Свежая машина, от <code>clone</code> до <code>boot</code>, занимает около 30 минут.
+Последовательность ниже предполагает, что Nix уже установлен (см.
+<a class="external-link" href="https://nixos.org/manual/nixos.org/">гайд по установке NixOS</a> или
+<a class="external-link" href="https://nixos.org/download.html">установщик Nix package manager</a>).</p>
+<h2 id="1-klonirovat-repo">1. Клонировать репо</h2>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">git clone https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix
+cd pro-nix
+git submodule update --init --recursive
+</code></pre>
+<p>Инициализация сабмодулей занимает 5-10 минут в зависимости от
+сети (11 сабмодулей, ~30 MB всего). HTTPS по умолчанию; переключите
+на SSH через <code>just submodules-ssh</code>, если есть write-доступ.</p>
+<h2 id="2-vybrat-khost">2. Выбрать хост</h2>
+<p>Четыре хоста:</p>
+<table><thead><tr><th>Хост</th><th>Класс</th><th>Когда использовать</th></tr></thead><tbody>
+<tr><td><code>desktop</code></td><td>сервер, control plane</td><td>Always-on башня</td></tr>
+<tr><td><code>cf19</code></td><td>ноутбук, BIOS-эра</td><td>Старый ноутбук (Panasonic CF-MX или похожий)</td></tr>
+<tr><td><code>huawei</code></td><td>ноутбук, современный Intel</td><td>Современный Intel-ноутбук</td></tr>
+<tr><td><code>vm</code></td><td>изолированная тестовая VM</td><td>QEMU/KVM-гость для тестов</td></tr>
+</tbody></table>
+<p>Если стартуете с нуля, <strong><code>vm</code> — самый безопасный выбор</strong> — не
+требует специфического железа и использует минимальный baseline.</p>
+<h2 id="3-voiti-v-devshell">3. Войти в devShell</h2>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">nix develop
+</code></pre>
+<p>Это:</p>
+<ul>
+<li>Подтянет все нужные инструменты (nix, just, direnv, gh, emacs, …).</li>
+<li>Создаст скрипт <code>.pro-emacs-wrapper/emacs-pro</code>, оборачивающий
+Emacs с <code>-L</code> флагами для каждого overlay-предоставленного пакета.</li>
+<li>Экспортирует <code>just</code>-рецепты, которые использует остальная часть
+страницы.</li>
+</ul>
+<p>Если используете <code>direnv</code>, <code>.envrc</code> загрузит ту же shell
+автоматически при <code>cd</code> в директорию.</p>
+<h2 id="4-sobrat-khost">4. Собрать хост</h2>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">just build &lt;host&gt;
+# например just build vm
+</code></pre>
+<p>Это запускает
+<code>nix build ".#nixosConfigurations.&lt;host&gt;.config.system.build.toplevel"</code>
+с <strong>правильным</strong> URL flake (<code>git+file://$(pwd)?submodules=1</code>).
+Первая сборка занимает 10-30 минут в зависимости от машины
+(скачивается ~5 GB бинарного кэша + собирается всё, что не в
+кэше).</p>
+<h2 id="5-switch-primenit-sborku">5. Switch (применить сборку)</h2>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">sudo just switch &lt;host&gt;
+# например sudo just switch vm
+</code></pre>
+<p><code>just switch</code> запускает <code>scripts/helper-switch.sh</code>, который:</p>
+<ul>
+<li>Инициализирует сабмодули, если они не инициализированы.</li>
+<li>Запускает <code>sudo nixos-rebuild switch</code> с правильным URL flake.</li>
+<li>При успехе: фиксит владение <code>~/.config/emacs</code>,
+<code>~/.local/state/pro-emacs</code>, <code>~/.cache/pro-emacs</code> (потому что
+<code>nixos-rebuild switch</code> мог записать их под root).</li>
+<li>Деплоит <code>bin/*</code> в <code>~/bin</code> и добавляет <code>~/bin</code> в PATH в
+<code>~/.profile</code>.</li>
+</ul>
+<h2 id="6-zadeploit-ai-agentskie-konfigi">6. Задеплоить AI-агентские конфиги</h2>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">just deploy-agents
+</code></pre>
+<p>Это запускает <code>scripts/deploy-agent-configs.sh</code> (copy-if-missing
+деплой <code>local-templates/*</code> в <code>~/.config/opencode/</code> и
+<code>~/.pi/agent/</code>) и <code>scripts/install-pi-packages.sh</code>
+(идемпотентный <code>pi install npm:&lt;pkg&gt;</code> для каждого пакета в
+<code>settings.json</code>).</p>
+<p>Файл <code>~/.pi/agent/auth.json</code> <strong>никогда</strong> не пишется деплоем — он
+создаётся при первом запуске <code>pi</code> и в deny-листе permission-системы.</p>
+<h2 id="7-nastroit-sekrety">7. Настроить секреты</h2>
+<p>Добавьте ваши AI-провайдер-ключи в <code>~/.authinfo</code>:</p>
+<pre><code>machine api.aitunnel.ru  login token  &lt;AITUNNEL_KEY&gt;
+machine openrouter.ai    login token  &lt;OPENROUTER_KEY&gt;
+machine api.openai.com   login openai &lt;OPENAI_KEY&gt;
+</code></pre>
+<p>Или, если предпочитаете GPG-шифрование, <code>~/.authinfo.gpg</code> в том же
+формате.</p>
+<p>Скрипт <code>~/.local/share/pro-nix/load-agent-env.sh</code> (деплоится через
+<code>pro-agent-configs.nix</code>) читает authinfo-файл и экспортирует
+<code>AITUNNEL_KEY</code>, <code>OPENROUTER_KEY</code>, <code>OPENAI_API_KEY</code> и т.д. Строка в
+<code>~/.profile</code> добавляется автоматически активацией.</p>
+<h2 id="8-nastroit-ssh-kliuchi">8. Настроить SSH-ключи</h2>
+<p>Для SSH-доступа с других хостов в кластере (или с внешней машины
+на этот):</p>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash"># Сгенерировать ключ (один раз, на машине, с которой будете подключаться)
+ssh-keygen -t ed25519 -C &quot;&lt;user&gt;@$(hostname)&quot; -f ~&#x2F;.ssh&#x2F;id_ed25519
+
+# Скопировать на целевой хост
+ssh-copy-id -i ~&#x2F;.ssh&#x2F;id_ed25519.pub &lt;user&gt;@desktop.local
+
+# Проверить
+ssh -o ConnectTimeout=3 desktop &#x27;uname -a&#x27;
+</code></pre>
+<p><code>~/.ssh/authorized_keys</code> на каждом хосте стартует <strong>пустым</strong> by
+design (<code>users.users.&lt;name&gt;.openssh.authorizedKeys.keys = []</code> в
+<code>pro-users.nix</code>) — ключи должны быть добавлены явно, либо через
+<code>local.nix</code>, либо через <code>ssh-copy-id</code>.</p>
+<h2 id="9-proverit-setevoi-sloi">9. Проверить сетевой слой</h2>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash"># mDNS-резолв
+getent hosts desktop.local      # должен вернуть LAN-IP
+
+# NFS autofs (на клиентском хосте)
+systemctl status mnt-desktop.automount
+ls &#x2F;mnt&#x2F;desktop                  # ≤ 3 с, даже если desktop выключен
+
+# SSH-список кандидатов
+ssh -G desktop | head -30       # показывает кандидатов из ssh_config.d&#x2F;pro.conf
+</code></pre>
+<h2 id="10-smoke-test">10. Smoke-test</h2>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash"># NixOS-уровень
+nix flake check
+
+# Emacs-уровень
+M-x pro&#x2F;reload-config            # внутри Emacs
+M-x pro-keys-report-pending      # должно напечатать &quot;no pending bindings&quot;
+
+# Network-контракт
+just network-contract
+
+# Headless Emacs-тесты
+just headless-tests
+</code></pre>
+<p>Если все четыре пройдут — у вас рабочая установка pro-nix.</p>
+<h2 id="tipichnye-problemy-pri-pervoi-ustanovke">Типичные проблемы при первой установке</h2>
+<table><thead><tr><th>Симптом</th><th>Фикс</th></tr></thead><tbody>
+<tr><td><code>nix flake check</code> жалуется на отсутствующие сабмодули</td><td><code>git submodule update --init --recursive</code></td></tr>
+<tr><td><code>just switch</code> падает с <code>error: path '/nix/store/...emcp' does not exist</code></td><td>Сабмодули не инициализированы. См. выше.</td></tr>
+<tr><td><code>ssh desktop</code> висит</td><td>mDNS / Avahi не работает. <code>sudo systemctl restart avahi-daemon</code></td></tr>
+<tr><td><code>pi</code> жалуется на отсутствие <code>mcp.json</code></td><td><code>just deploy-agents</code></td></tr>
+<tr><td><code>pi install</code> падает с “package not found”</td><td><code>just install-pi-packages</code> перезапускает с деплоированным <code>settings.json</code></td></tr>
+<tr><td><code>M-x pro/reload-config</code> падает с “module not owned by current user”</td><td><code>sudo chown -R $USER ~/.config/emacs</code> (helper-switch.sh делает это)</td></tr>
+</tbody></table>
+<h2 id="chto-delat-posle-pervoi-ustanovki">Что делать после первой установки</h2>
+<ul>
+<li>См. <a href="http://127.0.0.1:8000/workflow/quickstart/workflow/per-host.md">Per-host чек-лист</a> для шагов,
+специфичных для каждого хоста.</li>
+<li>См. <a href="http://127.0.0.1:8000/workflow/quickstart/workflow/troubleshoot.md">Troubleshooting</a> для таблицы
+симптом → причина → фикс.</li>
+<li>Прочтите <a href="http://127.0.0.1:8000/workflow/quickstart/conventions/_index.md">Соглашения</a> перед любым
+изменением.</li>
+</ul>
+
+
+  
+  <hr>
+  <p><strong>Дальше:</strong>
+  
+    <a href="&#x2F;workflow&#x2F;just&#x2F;">just-рецепты</a> · 
+  
+    <a href="&#x2F;workflow&#x2F;submodules&#x2F;">Сабмодули</a>
+  
+  </p>
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

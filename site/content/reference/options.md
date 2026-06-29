@@ -1,0 +1,99 @@
++++
+title = "NixOS-опции"
+sort_by = "weight"
+template = "page.html"
+
+[extra]
+tldr = "Публичные NixOS-опции, экспонируемые pro-nix модулями. Сгенерировано tools/generate-options-md.sh из 6 модулей с mkOption."
++++
+
+# NixOS-опции
+
+<span class="gen-badge">auto-gen</span> Сгенерировано `tools/generate-options-md.sh` из модулей с `mkOption`.
+
+> Исходные модули: `pro-peer.nix`, `headscale.nix`, `emacs/home-manager.nix`, `opencode-tui.nix`, `zram-slice.nix`, `ssh-agent.nix`.
+
+## modules/pro-peer.nix
+
+  options = {
+    pro-peer = {
+      enable = lib.mkEnableOption "Enable pro peer discovery defaults (Avahi + SSH hardening)";
+      allowTorHiddenService = lib.mkEnableOption "Enable Tor hidden service for SSH (off by default)";
+      enableKeySync = lib.mkEnableOption "Enable automatic authorized_keys sync from an encrypted file";
+      keysGpgPath = lib.mkOption {
+        type = lib.types.str;
+        description = "Path to GPG-encrypted authorized_keys (default: /etc/pro-peer/authorized_keys.gpg)";
+        default = "/etc/pro-peer/authorized_keys.gpg";
+      };
+
+      keySyncInterval = lib.mkOption {
+        type = lib.types.str;
+        description = "Systemd timer OnCalendar/OnUnitActiveSec for key sync (default: 1h)";
+        default = "1h";
+      };
+
+      torBackupRecipient = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        description = "GPG recipient to encrypt HiddenService backup to (optional).";
+        default = null;
+      };
+
+      enableYggdrasil = lib.mkEnableOption "Enable Yggdrasil mesh daemon (optional)";
+      yggdrasilConfigPath = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        description = "Path to yggdrasil config file (optional). If null a default will be used in /etc/yggdrasil.conf";
+        default = null;
+      };
+
+      enableWireguardHelper = lib.mkEnableOption "Enable simple WireGuard helper (wg-quick) (optional)";
+      wireguardConfigPath = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        description = "Path to wireguard config (wg0.conf) to be used by helper service";
+        default = null;
+      };
+
+
+## emacs/home-manager.nix
+
+
+## modules/headscale.nix
+
+    enable = lib.mkEnableOption "Enable Headscale service (control plane for WireGuard)";
+    listenAddress = lib.mkOption {
+      type = lib.types.str;
+      default = "0.0.0.0:8080";
+      description = "Address Headscale listens on";
+    };
+
+    baseDomain = lib.mkOption {
+      type = lib.types.str;
+      default = "pro-nix.ts.net";
+      description = ''
+        Base domain advertised by the embedded DNS server. Each node gets
+        `<shortname>.<baseDomain>`. Must match the tailscale `loginServer`
+        configured on the client side.
+      '';
+    };
+
+    nameservers = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [
+        "1.1.1.1"
+        "8.8.8.8"
+        "2606:4700:4700::1111"
+      ];
+      description = "Upstream resolvers advertised via MagicDNS to clients.";
+    };
+
+    derpUrls = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      example = [ "https://control.pro-nix.lan/derp" ];
+      description = ''
+        Optional DERP map URLs. When set, clients prefer the embedded DERP
+        server (run separately) before falling back to the public Tailscale
+        DERP map.
+      '';
+    };
+
+

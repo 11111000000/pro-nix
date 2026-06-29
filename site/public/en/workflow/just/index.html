@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>just recipes · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">just recipes</h1>
+  <h1 id="just-recipes">just recipes</h1>
+<p><code>justfile</code> is the <strong>canonical command surface</strong>. There are ~30
+recipes in five clusters. Below is the full list with what each
+does and when to use it.</p>
+<h2 id="cluster-1-build-switch">Cluster 1: build / switch</h2>
+<table><thead><tr><th>Recipe</th><th>Command</th><th>When</th></tr></thead><tbody>
+<tr><td><code>just build &lt;host&gt;</code></td><td><code>sudo nixos-rebuild build --flake "git+file://$(pwd)?submodules=1#{{HOST}}"</code></td><td>Build only, no apply. Use when validating a change.</td></tr>
+<tr><td><code>just switch &lt;host&gt;</code></td><td><code>scripts/switch.sh "{{HOST}}"</code></td><td>Apply. The most common command. Runs <code>helper-switch.sh</code> under the hood.</td></tr>
+<tr><td><code>just switch &lt;host&gt; update-submodules</code></td><td>Same + <code>update-submodules</code> flag</td><td>Refresh submodules from remote before building.</td></tr>
+<tr><td><code>just switch &lt;host&gt; sync</code></td><td>Same + <code>sync</code> flag</td><td>Alias for <code>update-submodules</code>.</td></tr>
+<tr><td><code>just test &lt;host&gt;</code></td><td><code>sudo nixos-rebuild test --flake "git+file://$(pwd)?submodules=1#{{HOST}}"</code></td><td>Apply for the duration of the next boot, then revert. Safer than <code>switch</code> for risky changes.</td></tr>
+<tr><td><code>just flake-check</code></td><td><code>nix flake check "git+file://$(pwd)?submodules=1"</code></td><td>Syntax + check types. Fast (~30 s).</td></tr>
+<tr><td><code>just check-all</code></td><td><code>nix run .#check-all</code></td><td>Build all 3 full hosts. Slow (10-30 min).</td></tr>
+<tr><td><code>just check-fast</code></td><td><code>./tools/holo-verify.sh --help &gt;/dev/null</code></td><td>Sanity check that <code>holo-verify</code> runs.</td></tr>
+<tr><td><code>just check-docs</code></td><td><code>./tools/holo-verify.sh --help &gt;/dev/null</code></td><td>Same (placeholder for future docs-only check).</td></tr>
+<tr><td><code>just check-elisp</code></td><td><code>./tools/holo-verify.sh elisp</code></td><td>All <code>pro-*.el</code> modules parse and load.</td></tr>
+</tbody></table>
+<h2 id="cluster-2-submodules">Cluster 2: submodules</h2>
+<table><thead><tr><th>Recipe</th><th>Command</th><th>When</th></tr></thead><tbody>
+<tr><td><code>just sync-submodules</code></td><td><code>scripts/sync-submodules.sh</code></td><td>Refresh all submodules from remote. Sequential (15 submodules × ~11 s).</td></tr>
+<tr><td><code>just submodules-ssh</code></td><td><code>scripts/submodules-ssh.sh</code></td><td>Convert all HTTPS submodule URLs to SSH. Use if you have write access.</td></tr>
+<tr><td><code>PRO_NIX_NO_SUBMODULE_UPDATE=1 just switch &lt;host&gt;</code></td><td>Escape hatch</td><td>Skip submodule policy entirely.</td></tr>
+</tbody></table>
+<p><code>just switch</code> itself <strong>does not</strong> refresh submodules from remote by
+default. It initializes them only if they are uninitialized. If you
+want a refresh, use the <code>update-submodules</code> flag.</p>
+<h2 id="cluster-3-agents">Cluster 3: agents</h2>
+<table><thead><tr><th>Recipe</th><th>Command</th><th>When</th></tr></thead><tbody>
+<tr><td><code>just deploy-agents</code></td><td><code>scripts/deploy-agent-configs.sh &amp;&amp; scripts/install-pi-packages.sh</code></td><td>Deploy templates + npm packages. No <code>nixos-rebuild</code>.</td></tr>
+<tr><td><code>just install-pi-packages</code></td><td><code>scripts/install-pi-packages.sh</code></td><td>Just the npm packages.</td></tr>
+<tr><td><code>just switch-with-agents &lt;host&gt;</code></td><td>deploy + install + switch, in order</td><td>The full cycle. Use on a fresh machine.</td></tr>
+<tr><td><code>just update-pi-version</code></td><td><code>scripts/update-pi-version.sh</code></td><td>Bump the <code>pi</code> input in <code>flake.lock</code>. Dry-run by default.</td></tr>
+</tbody></table>
+<p><code>deploy-agents.sh</code> is <code>copy_if_missing</code> — safe to run repeatedly. To
+force a re-deploy of a specific file, <code>rm</code> it first, then run the
+script.</p>
+<h2 id="cluster-4-tests">Cluster 4: tests</h2>
+<table><thead><tr><th>Recipe</th><th>Command</th><th>When</th></tr></thead><tbody>
+<tr><td><code>just headless-tty</code></td><td><code>./scripts/emacs-verify.sh tty</code></td><td>TTY headless smoke.</td></tr>
+<tr><td><code>just headless-xorg</code></td><td><code>./scripts/emacs-verify.sh xorg</code></td><td>Xvfb headless smoke.</td></tr>
+<tr><td><code>just headless</code></td><td><code>./scripts/emacs-verify.sh both</code></td><td>Both.</td></tr>
+<tr><td><code>just headless-tests</code></td><td><code>./scripts/test-emacs-headless.sh both</code></td><td>Full headless ERT suite.</td></tr>
+<tr><td><code>just headless-parse</code></td><td><code>./scripts/parse-emacs-logs.sh</code></td><td>Pretty-print latest <code>*test*</code> / <code>[pro-emacs]</code> / ERT / error lines.</td></tr>
+<tr><td><code>just headless-report</code></td><td><code>./scripts/emacs-headless-report.sh</code></td><td>Print date + hostname + Emacs version + tail of last <code>run.log</code>.</td></tr>
+<tr><td><code>just logs-latest</code></td><td><code>./scripts/emacs-headless-report.sh</code></td><td>Alias for <code>headless-report</code>.</td></tr>
+<tr><td><code>just emacs-verify</code></td><td><code>./scripts/emacs-verify.sh both</code></td><td>Alias for <code>headless</code>.</td></tr>
+<tr><td><code>just network-contract</code></td><td><code>./tests/contract/pro-network-01.sh</code></td><td>5 checks on the network layer.</td></tr>
+<tr><td><code>just emacs-sync</code></td><td><code>./scripts/dev-emacs-sync.sh</code></td><td>Sync the portable Emacs profile to <code>~/.config/emacs</code>.</td></tr>
+</tbody></table>
+<h2 id="cluster-5-docker">Cluster 5: Docker</h2>
+<p>The Docker recipes are aliases around <code>lazydocker</code> and the Docker
+CLI. They assume the user is in the <code>docker</code> group (set by
+<code>pro-users.nix</code>).</p>
+<table><thead><tr><th>Recipe</th><th>Command</th><th>When</th></tr></thead><tbody>
+<tr><td><code>just d</code></td><td><code>lazydocker</code></td><td>TUI: ps / logs / exec / restart / prune.</td></tr>
+<tr><td><code>just dl &lt;name&gt;</code></td><td><code>docker logs -f --tail 100 &lt;name&gt;</code></td><td>Tail logs.</td></tr>
+<tr><td><code>just dsh &lt;name&gt; [cmd]</code></td><td><code>docker exec -it &lt;name&gt; &lt;cmd&gt;</code> (default <code>sh</code>)</td><td>Shell into a container.</td></tr>
+<tr><td><code>just dr &lt;name&gt;</code></td><td><code>docker restart &lt;name&gt; &amp;&amp; sleep 1 &amp;&amp; docker logs --tail 30 &lt;name&gt;</code></td><td>Restart + first 30 lines.</td></tr>
+<tr><td><code>just dprune</code></td><td><code>docker system prune -f</code> + image + network</td><td>Cleanup. <strong>Destructive.</strong></td></tr>
+<tr><td><code>just dscan &lt;image&gt; [severity]</code></td><td><code>trivy image --severity &lt;severity&gt; --no-progress &lt;image&gt;</code></td><td>Vulnerability scan.</td></tr>
+<tr><td><code>just dlint [&lt;dockerfile&gt;]</code></td><td><code>hadolint &lt;dockerfile&gt;</code> (default <code>Dockerfile</code>)</td><td>Lint a Dockerfile.</td></tr>
+<tr><td><code>just dup</code></td><td><code>docker compose up -d</code></td><td>Compose up.</td></tr>
+<tr><td><code>just ddown</code></td><td><code>docker compose down</code></td><td>Compose down.</td></tr>
+<tr><td><code>just dps</code></td><td><code>docker compose ps</code></td><td>Compose ps.</td></tr>
+<tr><td><code>just dclogs</code></td><td><code>docker compose logs -f --tail 50</code></td><td>Compose logs.</td></tr>
+</tbody></table>
+<h2 id="cluster-6-site-this-site">Cluster 6: site (this site)</h2>
+<table><thead><tr><th>Recipe</th><th>Command</th><th>When</th></tr></thead><tbody>
+<tr><td><code>just site-serve</code></td><td>(manual <code>zola serve</code> in <code>site/</code>)</td><td>Local preview with live reload.</td></tr>
+<tr><td><code>just site-build</code></td><td><code>nix build ".#site"</code></td><td>Produce the final static output.</td></tr>
+<tr><td><code>just site-regen</code></td><td><code>scripts/site-regen.sh</code></td><td>Regenerate every auto-gen page.</td></tr>
+</tbody></table>
+<h2 id="bootstrap-recipes">Bootstrap recipes</h2>
+<table><thead><tr><th>Recipe</th><th>Command</th><th>When</th></tr></thead><tbody>
+<tr><td><code>just install</code> / <code>just install-nixos</code></td><td><code>./bootstrap/install.sh</code></td><td>Bootstrap script.</td></tr>
+<tr><td><code>just install-emacs</code> / <code>just install-plain</code></td><td><code>./scripts/dev-emacs-sync.sh</code></td><td>Sync Emacs to <code>~/.config/emacs</code>.</td></tr>
+</tbody></table>
+<h2 id="aliases">Aliases</h2>
+<p><code>switch</code> and <code>switch.sh</code> are aliases (the just recipe calls the
+script). <code>check-fast</code> and <code>check-docs</code> are placeholders for future
+docs-only fast check (currently they are no-ops).</p>
+<h2 id="how-the-recipes-resolve">How the recipes resolve</h2>
+<p><code>just</code> looks up recipes in <code>justfile:1-164</code>. The shell is set to
+<code>bash -eu -o pipefail -c</code> for safety. Recipes can use any of:</p>
+<ul>
+<li><code>nix</code> (subprocess)</li>
+<li><code>sudo</code> (where required)</li>
+<li><code>bash</code> (for in-recipe logic)</li>
+<li>Any of the just variables: <code>{{HOST}}</code>, <code>{{FLAGS}}</code>, <code>{{NAME}}</code>, <code>{{CMD}}</code>, <code>{{IMAGE}}</code>, <code>{{SEVERITY}}</code>, <code>{{DOCKERFILE}}</code>.</li>
+</ul>
+<h2 id="adding-a-new-recipe">Adding a new recipe</h2>
+<ol>
+<li>Decide the cluster (build / submodules / agents / tests /
+docker / site / bootstrap).</li>
+<li>Add the recipe to <code>justfile</code> in the matching section.</li>
+<li>Document it here in the table above.</li>
+<li>Add a one-liner test to <code>tests/contract/unit/</code> if the recipe
+has any non-trivial side effect.</li>
+</ol>
+<h2 id="see-also">See also</h2>
+<ul>
+<li><a href="http://127.0.0.1:8000/en/workflow/just/workflow/quickstart.md">Quick start</a> — the end-to-end onboarding flow.</li>
+<li><a href="http://127.0.0.1:8000/en/workflow/just/workflow/submodules.md">Submodules</a> — the SSH/HTTPS policy.</li>
+<li><a href="http://127.0.0.1:8000/en/workflow/just/workflow/troubleshoot.md">Troubleshooting</a> — when a recipe misbehaves.</li>
+</ul>
+
+
+  
+  <hr>
+  <p><strong>Дальше:</strong>
+  
+    <a href="&#x2F;workflow&#x2F;submodules&#x2F;">Submodules</a> · 
+  
+    <a href="&#x2F;workflow&#x2F;reload&#x2F;">Soft-reload</a>
+  
+  </p>
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

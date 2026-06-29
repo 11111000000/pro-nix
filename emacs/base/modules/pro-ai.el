@@ -5,6 +5,11 @@
 (require 'subr-x)
 (require 'pro-compat)
 
+(defgroup pro-ai nil
+  "AI integration for pro Emacs."
+  :group 'applications
+  :prefix "pro-ai-")
+
 (defun pro-ai--ensure-gptel-openai ()
   "Load gptel OpenAI backend support if available."
   (or (featurep 'gptel-openai)
@@ -13,17 +18,17 @@
 (defcustom pro-ai-backend 'aitunnel
   "Предпочтительный AI-backend."
   :type '(choice (const openrouter) (const siliconflow) (const aitunnel))
-  :group 'pro-ui)
+  :group 'pro-ai)
 
 (defcustom pro-ai-enable-gptel-history t
   "Сохранять историю gptel-переписки."
   :type 'boolean
-  :group 'pro-ui)
+  :group 'pro-ai)
 
 (defcustom pro-ai-auto-load-gptel t
   "Автоматически загружать gptel при старте Emacs, если пакет доступен."
   :type 'boolean
-  :group 'pro-ui)
+  :group 'pro-ai)
 
 (defvar pro-ai--config-cache nil)
 (defvar pro-ai--registered-backends nil)
@@ -36,13 +41,13 @@
   (expand-file-name "ai-models.json" (pro-ai--module-directory))
   "Путь к базовому JSON-каталогу моделей."
   :type 'file
-  :group 'pro-ui)
+  :group 'pro-ai)
 
 (defcustom pro-ai-user-models-file
   (expand-file-name "ai-models.json" user-emacs-directory)
   "Пользовательский JSON-каталог моделей."
   :type 'file
-  :group 'pro-ui)
+  :group 'pro-ai)
 
 (defun pro-ai--read-json-file (path)
   "Прочитать JSON из PATH как alist."
@@ -278,18 +283,22 @@ by providers and prints a short status message."
 
 ;; --- Carriage integration -------------------------------------------------
 (defcustom pro-ai-carriage-path
-  (expand-file-name "~/Code/carriage")
+  (let ((module-dir (file-name-directory (or load-file-name buffer-file-name)))
+        (repo-root (locate-dominating-file (or load-file-name buffer-file-name) "flake.nix")))
+    (if repo-root
+        (expand-file-name "submodules/carriage" repo-root)
+      (expand-file-name "~/Code/carriage")))
   "Каталог локального клона carriage (см. README в репозитории).
 Если каталог присутствует, модуль попытается добавить его \"lisp\"-папку
 в `load-path' и загрузить пакет carriage.
 "
   :type 'directory
-  :group 'pro-ui)
+  :group 'pro-ai)
 
 (defcustom pro-ai-enable-carriage t
   "Если non-nil, попытаться загрузить carriage из `pro-ai-carriage-path'."
   :type 'boolean
-  :group 'pro-ui)
+  :group 'pro-ai)
 
 (defcustom pro-ai-carriage-enable-global-mode nil
   "Если non-nil — включать `carriage-global-mode' после загрузки carriage.

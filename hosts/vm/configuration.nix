@@ -28,6 +28,23 @@
 
   # VM follows the same shared package policy, including Tor Browser.
 
+  # Шрифты. Корневой `configuration.nix` здесь не импортируется (vm
+  # собирается через `mkVmHost`, минуя общий слой), но Emacs-тесты и
+  # любой запуск GUI-приложений ожидают Aporetic Sans / Sans Mono.
+  # Минимально необходимый набор: основной шрифт + DejaVu как fallback.
+  fonts.packages = with pkgs; [
+    terminus_font
+    noto-fonts
+    noto-fonts-color-emoji
+    aporetic
+    dejavu_fonts
+  ];
+
+  fonts.fontconfig.defaultFonts = {
+    sansSerif = [ "Aporetic Sans" "DejaVu Sans" ];
+    monospace = [ "Aporetic Sans Mono" "DejaVu Sans Mono" "Terminus" ];
+  };
+
   # NFS-клиент: монтируем station:/srv/nfs автоматически по обращение.
   pro.nfs.client.enable = true;
 

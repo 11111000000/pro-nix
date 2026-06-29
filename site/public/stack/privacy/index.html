@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Приватность и Tor · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="active">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class="active"><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">Приватность и Tor</h1>
+  <h1 id="privatnost-i-tor">Приватность и Tor</h1>
+<p>Проект считает <strong>анонимность и censorship-resistance</strong>
+first-class-инфраструктурой. Пользователь на гостиничном Wi-Fi,
+журналист под давлением режима, разработчик за корпоративным
+прокси — все могут направить любую команду через Tor одной
+shell-командой.</p>
+<h2 id="tor-stek">Tor-стек</h2>
+<p><code>modules/pro-privacy.nix</code> активирует:</p>
+<ul>
+<li><code>services.tor.enable = true</code> (задаётся на верхнем уровне в
+<code>configuration.nix:138-147</code>; pro-privacy добавляет pluggable
+transports).</li>
+<li><code>services.tor.client.enable = true</code>.</li>
+<li><code>services.torsocks.enable = true</code> — LD_PRELOAD-шим.</li>
+<li><code>ClientTransportPlugin</code>:
+<ul>
+<li><code>obfs4 exec ${pkgs.obfs4}/bin/lyrebird</code></li>
+<li><code>meek exec ${pkgs.meek}/bin/meek-client</code></li>
+<li><code>snowflake exec ${pkgs.snowflake}/bin/snowflake-client</code></li>
+</ul>
+</li>
+<li><code>ControlPort 9051</code> (cookie auth).</li>
+<li><code>DNSPort 9053</code> с <code>AutomapHostsOnResolve = true</code> и
+<code>AutomapHostsSuffixes = ".onion", ".exit"</code>.</li>
+<li><code>services.i2p.enable = lib.mkDefault false</code> (выключен по умолчанию).</li>
+</ul>
+<p>Мосты управляются <code>host-policies.nix</code> (per-host) и
+<code>conf/tor-bridges.conf</code> (пример). <code>huawei</code> имеет snowflake
+включённым по умолчанию; <code>cf19</code> опционально включает Tor hidden
+service для SSH.</p>
+<h2 id="pro-tor-cli"><code>pro-tor</code> CLI</h2>
+<p><code>scripts/pro-tor</code> (~400 строк, bash) — user-facing переключатель
+Tor. Два режима:</p>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">pro-tor local on|off|status|detect        # локальный tor.service, 127.0.0.1:9050
+pro-tor remote on|off|status|detect       # Orbot на Android AP, сканируемый &#x2F;24
+pro-tor detect [--mode local|remote]      # найти прокси, не включая
+pro-tor verify [HOST[:PORT]]              # подтвердить, что это настоящий Tor exit
+pro-tor env                               # напечатать export-строки (для eval)
+</code></pre>
+<h3 id="kak-detektiruetsia-udalionnyi-proksi">Как детектируется удалённый прокси</h3>
+<p>Дефолтный набор кандидатов:</p>
+<ol>
+<li>Default gateway (из <code>ip -4 route show default</code>).</li>
+<li><code>&lt;gw%.*.*&gt;.1.1</code> (если gateway в <code>*.1.*</code> паттерне).</li>
+<li><code>192.168.43.1</code> (Android AP default).</li>
+<li><code>192.168.49.1</code> (USB-tethering default).</li>
+<li>С <code>--scan-subnet</code>: каждый адрес в /24 gateway’а.</li>
+</ol>
+<p>Для каждого кандидата <code>nc -z -w 1</code> (или <code>bash /dev/tcp/...</code> как
+fallback) проверяет TCP 9050, затем
+<code>curl --socks5-hostname $host:9050 https://check.torproject.org/ | grep "Congratulations"</code>
+подтверждает, что это настоящий Tor exit (пропускаемо через
+<code>--no-verify</code>).</p>
+<h3 id="chto-delaet-on">Что делает <code>on</code></h3>
+<p><code>do_on</code> пишет <code>~/.config/pro-tor/env</code> (mode 0700 dir, 0600 file):</p>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">export ALL_PROXY=&quot;socks5h:&#x2F;&#x2F;host:port&quot;
+export all_proxy=&quot;socks5h:&#x2F;&#x2F;host:port&quot;
+export HTTP_PROXY=&quot;http:&#x2F;&#x2F;host:port&quot;
+export HTTPS_PROXY=&quot;http:&#x2F;&#x2F;host:port&quot;
+export NO_PROXY=&quot;127.0.0.1,localhost,*.local,.local,::1&quot;
+export PRO_TOR_MODE=&quot;local&quot;   # или &quot;remote&quot;
+export PRO_TOR_TARGET=&quot;host:port&quot;
+export PRO_TOR_ENABLED=1
+</code></pre>
+<p>Применить в текущей shell-сессии: <code>source ~/.config/pro-tor/env</code> или
+<code>eval "$(pro-tor env)"</code>.</p>
+<h2 id="bin-torwrap"><code>bin/torwrap</code></h2>
+<p><code>bin/torwrap</code> — тонкая обёртка «запусти эту команду через Tor»:</p>
+<ol>
+<li>Найти <code>pro-tor</code> в PATH или в известных Nix-profile путях.</li>
+<li><code>pro-tor detect --no-verify --mode local</code> (затем <code>--mode remote</code>).</li>
+<li>Если прокси найден, <code>exec</code> через <code>torsocks</code> → <code>proxychains4</code> →
+raw <code>ALL_PROXY=...</code>.</li>
+</ol>
+<p>Коды выхода:</p>
+<ul>
+<li><code>3</code> — <code>pro-tor</code> не найден.</li>
+<li><code>4</code> — Tor-прокси не обнаружен.</li>
+<li><code>5</code> — плохой формат <code>host:port</code>.</li>
+</ul>
+<h2 id="onion-servisy">Onion-сервисы</h2>
+<p><code>modules/pro-peer.nix</code> (когда <code>pro-peer.allowTorHiddenService = true</code>)
+поднимает SSH onion service:</p>
+<ul>
+<li><code>services.tor.hiddenService."ssh" = { port = 22; target = "127.0.0.1:22"; }</code>.</li>
+<li><code>pro-peer.torBackupRecipient</code> (GPG key id) используется
+<code>ops-backup-hiddenservice.sh</code> для шифрования hidden service dir в
+<code>/var/lib/pro-peer/hidden-service.gpg</code>.</li>
+<li>Сгенерированный <code>ssh_config.d/pro.conf</code> имеет отдельный
+<code>Host &lt;name&gt;-onion</code> блок, использующий torsocks как <code>ProxyCommand</code>.</li>
+</ul>
+<p>Имя onion регистрируется в <code>pro.hosts.&lt;name&gt;.onion</code> и переживает
+перезагрузку хоста.</p>
+<h2 id="yggdrasil-i-wireguard">Yggdrasil и WireGuard</h2>
+<p><code>modules/pro-peer.nix</code> имеет две opt-in фичи (выключены по
+умолчанию):</p>
+<ul>
+<li><code>pro-peer.enableYggdrasil</code> — запускает <code>yggdrasil</code> с
+<code>pro-peer.yggdrasilConfigPath</code> (по умолчанию <code>/etc/yggdrasil.conf</code>).</li>
+<li><code>pro-peer.enableWireguardHelper</code> — устанавливает <code>wg-quick</code>-обёртку
+(<code>pro-peer-wg-quick-wrapper</code>), которая игнорирует exit-код
+«already up». Использует <code>pro-peer.wireguardConfigPath</code> (по
+умолчанию <code>wg0</code>).</li>
+</ul>
+<p>Это mesh / overlay network fallbacks для случаев, когда ни
+LAN-mDNS, ни headscale не дотягиваются до хоста.</p>
+<h2 id="firewall">Firewall</h2>
+<p><code>pro-privacy.nix</code> открывает:</p>
+<ul>
+<li><code>9050/tcp</code> — SOCKS5.</li>
+<li><code>9051/tcp</code> — Control.</li>
+<li><code>9052/tcp</code> — fetch.</li>
+<li><code>9053/udp</code> — DNS.</li>
+<li><code>7657/tcp</code> — I2P console.</li>
+<li><code>4444/tcp</code>, <code>4445/tcp</code> — I2P services.</li>
+<li><code>9564/udp</code> — mDNS helper (не используется pro-nix).</li>
+</ul>
+<p>По умолчанию они <strong>LAN-only</strong> (RFC1918 sources) через iptables-правила
+host-policy в <code>host-policies.nix</code>.</p>
+<h2 id="drugie-privacy-instrumenty-v-closure">Другие privacy-инструменты в closure</h2>
+<table><thead><tr><th>Пакет</th><th>Назначение</th></tr></thead><tbody>
+<tr><td><code>dnscrypt-proxy</code></td><td>Зашифрованный DNS к Cloudflare/Quad9.</td></tr>
+<tr><td><code>onionshare</code></td><td>Анонимный файлообмен через Tor.</td></tr>
+<tr><td><code>nyx</code></td><td>Tor relay monitor (TTY).</td></tr>
+<tr><td><code>proxychains</code></td><td>Альтернатива torsocks для non-LD_PRELOAD сценариев.</td></tr>
+<tr><td><code>mullvad-vpn</code></td><td>Коммерческий VPN-клиент (без аккаунта).</td></tr>
+<tr><td><code>wireguard-tools</code></td><td><code>wg</code>, <code>wg-quick</code>.</td></tr>
+<tr><td><code>i2p</code></td><td>I2P router (выключен по умолчанию).</td></tr>
+</tbody></table>
+<p>Они лежат в <strong>privacy</strong> composition-файле
+(<code>system-package-sets-privacy.nix</code>) и ставятся на <code>huawei</code> и <code>vm</code> по
+умолчанию.</p>
+<h2 id="chego-v-steke-net">Чего в стеке <strong>нет</strong></h2>
+<ul>
+<li><code>services.tailscale.enable = true</code> — требует auth-key, ломает
+<code>nixos-rebuild</code> без секрета. Роль headscale даёт Tailscale-эквивалентный
+mesh без auth-key.</li>
+<li><code>i2p</code> — включается только по запросу.</li>
+<li><code>mullvad-vpn</code> аккаунт — бинарь установлен, пользователь вводит
+свой аккаунт при первом использовании.</li>
+</ul>
+
+
+  
+  <hr>
+  <p><strong>Дальше:</strong>
+  
+    <a href="&#x2F;stack&#x2F;dev&#x2F;">Инструменты разработчика</a> · 
+  
+    <a href="&#x2F;architecture&#x2F;network&#x2F;">Сетевые слои</a>
+  
+  </p>
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

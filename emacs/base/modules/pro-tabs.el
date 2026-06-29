@@ -170,4 +170,4 @@ silently falls through to `tab-bar' switching."
 ;; after our central binding was queued in `pro-keys-pending-bindings'.
 (pro-tabs--apply-tab-line-keybindings)
 
-(provide 'pro-tabs-integration)
+(provide 'pro-tabs)

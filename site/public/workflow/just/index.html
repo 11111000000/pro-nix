@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>just-рецепты · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="active">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class="active"><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">just-рецепты</h1>
+  <h1 id="just-retsepty">just-рецепты</h1>
+<p><code>justfile</code> — <strong>каноническая поверхность команд</strong>. ~30 рецептов в
+пяти кластерах. Ниже — полный список с тем, что каждый делает и
+когда использовать.</p>
+<h2 id="klaster-1-build-switch">Кластер 1: build / switch</h2>
+<table><thead><tr><th>Рецепт</th><th>Команда</th><th>Когда</th></tr></thead><tbody>
+<tr><td><code>just build &lt;host&gt;</code></td><td><code>sudo nixos-rebuild build --flake "git+file://$(pwd)?submodules=1#{{HOST}}"</code></td><td>Только сборка, без применения. Используйте для валидации правки.</td></tr>
+<tr><td><code>just switch &lt;host&gt;</code></td><td><code>scripts/switch.sh "{{HOST}}"</code></td><td>Применить. Самая частая команда. Запускает <code>helper-switch.sh</code>.</td></tr>
+<tr><td><code>just switch &lt;host&gt; update-submodules</code></td><td>То же + флаг <code>update-submodules</code></td><td>Обновить сабмодули с remote перед сборкой.</td></tr>
+<tr><td><code>just switch &lt;host&gt; sync</code></td><td>То же + флаг <code>sync</code></td><td>Алиас для <code>update-submodules</code>.</td></tr>
+<tr><td><code>just test &lt;host&gt;</code></td><td><code>sudo nixos-rebuild test --flake "git+file://$(pwd)?submodules=1#{{HOST}}"</code></td><td>Применить на время следующей загрузки, затем откатить. Безопаснее, чем <code>switch</code>, для рискованных правок.</td></tr>
+<tr><td><code>just flake-check</code></td><td><code>nix flake check "git+file://$(pwd)?submodules=1"</code></td><td>Синтаксис + проверка типов. Быстрый (~30 с).</td></tr>
+<tr><td><code>just check-all</code></td><td><code>nix run .#check-all</code></td><td>Собрать 3 полных хоста. Медленно (10-30 мин).</td></tr>
+<tr><td><code>just check-fast</code></td><td><code>./tools/holo-verify.sh --help &gt;/dev/null</code></td><td>Sanity-check что <code>holo-verify</code> запускается.</td></tr>
+<tr><td><code>just check-docs</code></td><td><code>./tools/holo-verify.sh --help &gt;/dev/null</code></td><td>То же (плейсхолдер для будущей docs-only проверки).</td></tr>
+<tr><td><code>just check-elisp</code></td><td><code>./tools/holo-verify.sh elisp</code></td><td>Все <code>pro-*.el</code>-модули парсятся и загружаются.</td></tr>
+</tbody></table>
+<h2 id="klaster-2-sabmoduli">Кластер 2: сабмодули</h2>
+<table><thead><tr><th>Рецепт</th><th>Команда</th><th>Когда</th></tr></thead><tbody>
+<tr><td><code>just sync-submodules</code></td><td><code>scripts/sync-submodules.sh</code></td><td>Обновить все сабмодули с remote. Sequential (15 сабмодулей × ~11 с).</td></tr>
+<tr><td><code>just submodules-ssh</code></td><td><code>scripts/submodules-ssh.sh</code></td><td>Конвертировать все HTTPS-URL сабмодулей в SSH. Используйте, если есть write-доступ.</td></tr>
+<tr><td><code>PRO_NIX_NO_SUBMODULE_UPDATE=1 just switch &lt;host&gt;</code></td><td>Escape hatch</td><td>Пропустить политику сабмодулей полностью.</td></tr>
+</tbody></table>
+<p><code>just switch</code> сам <strong>не</strong> обновляет сабмодули с remote по
+умолчанию. Он инициализирует их только если они не инициализированы.
+Если хотите обновление — используйте флаг <code>update-submodules</code>.</p>
+<h2 id="klaster-3-agenty">Кластер 3: агенты</h2>
+<table><thead><tr><th>Рецепт</th><th>Команда</th><th>Когда</th></tr></thead><tbody>
+<tr><td><code>just deploy-agents</code></td><td><code>scripts/deploy-agent-configs.sh &amp;&amp; scripts/install-pi-packages.sh</code></td><td>Задеплоить шаблоны + npm-пакеты. Без <code>nixos-rebuild</code>.</td></tr>
+<tr><td><code>just install-pi-packages</code></td><td><code>scripts/install-pi-packages.sh</code></td><td>Только npm-пакеты.</td></tr>
+<tr><td><code>just switch-with-agents &lt;host&gt;</code></td><td>deploy + install + switch, по порядку</td><td>Полный цикл. Используйте на свежей машине.</td></tr>
+<tr><td><code>just update-pi-version</code></td><td><code>scripts/update-pi-version.sh</code></td><td>Bump входа <code>pi</code> в <code>flake.lock</code>. Dry-run по умолчанию.</td></tr>
+</tbody></table>
+<p><code>deploy-agents.sh</code> — <code>copy_if_missing</code> — безопасно запускать
+многократно. Чтобы форсировать re-deploy конкретного файла —
+<code>rm</code> его сначала, затем запустите скрипт.</p>
+<h2 id="klaster-4-testy">Кластер 4: тесты</h2>
+<table><thead><tr><th>Рецепт</th><th>Команда</th><th>Когда</th></tr></thead><tbody>
+<tr><td><code>just headless-tty</code></td><td><code>./scripts/emacs-verify.sh tty</code></td><td>TTY headless smoke.</td></tr>
+<tr><td><code>just headless-xorg</code></td><td><code>./scripts/emacs-verify.sh xorg</code></td><td>Xvfb headless smoke.</td></tr>
+<tr><td><code>just headless</code></td><td><code>./scripts/emacs-verify.sh both</code></td><td>Оба.</td></tr>
+<tr><td><code>just headless-tests</code></td><td><code>./scripts/test-emacs-headless.sh both</code></td><td>Полный headless ERT-набор.</td></tr>
+<tr><td><code>just headless-parse</code></td><td><code>./scripts/parse-emacs-logs.sh</code></td><td>Pretty-print последних <code>*test*</code> / <code>[pro-emacs]</code> / ERT / error строк.</td></tr>
+<tr><td><code>just headless-report</code></td><td><code>./scripts/emacs-headless-report.sh</code></td><td>Печатает дату + hostname + версию Emacs + хвост последнего <code>run.log</code>.</td></tr>
+<tr><td><code>just logs-latest</code></td><td><code>./scripts/emacs-headless-report.sh</code></td><td>Алиас для <code>headless-report</code>.</td></tr>
+<tr><td><code>just emacs-verify</code></td><td><code>./scripts/emacs-verify.sh both</code></td><td>Алиас для <code>headless</code>.</td></tr>
+<tr><td><code>just network-contract</code></td><td><code>./tests/contract/pro-network-01.sh</code></td><td>5 чеков на сетевой слой.</td></tr>
+<tr><td><code>just emacs-sync</code></td><td><code>./scripts/dev-emacs-sync.sh</code></td><td>Синхронизировать портативный Emacs-профиль в <code>~/.config/emacs</code>.</td></tr>
+</tbody></table>
+<h2 id="klaster-5-docker">Кластер 5: Docker</h2>
+<p>Docker-рецепты — алиасы вокруг <code>lazydocker</code> и Docker CLI.
+Предполагается, что пользователь в группе <code>docker</code> (задано в
+<code>pro-users.nix</code>).</p>
+<table><thead><tr><th>Рецепт</th><th>Команда</th><th>Когда</th></tr></thead><tbody>
+<tr><td><code>just d</code></td><td><code>lazydocker</code></td><td>TUI: ps / logs / exec / restart / prune.</td></tr>
+<tr><td><code>just dl &lt;name&gt;</code></td><td><code>docker logs -f --tail 100 &lt;name&gt;</code></td><td>Хвост логов.</td></tr>
+<tr><td><code>just dsh &lt;name&gt; [cmd]</code></td><td><code>docker exec -it &lt;name&gt; &lt;cmd&gt;</code> (default <code>sh</code>)</td><td>Shell в контейнер.</td></tr>
+<tr><td><code>just dr &lt;name&gt;</code></td><td><code>docker restart &lt;name&gt; &amp;&amp; sleep 1 &amp;&amp; docker logs --tail 30 &lt;name&gt;</code></td><td>Restart + первые 30 строк.</td></tr>
+<tr><td><code>just dprune</code></td><td><code>docker system prune -f</code> + image + network</td><td>Cleanup. <strong>Деструктивно.</strong></td></tr>
+<tr><td><code>just dscan &lt;image&gt; [severity]</code></td><td><code>trivy image --severity &lt;severity&gt; --no-progress &lt;image&gt;</code></td><td>Скан уязвимостей.</td></tr>
+<tr><td><code>just dlint [&lt;dockerfile&gt;]</code></td><td><code>hadolint &lt;dockerfile&gt;</code> (default <code>Dockerfile</code>)</td><td>Линт Dockerfile.</td></tr>
+<tr><td><code>just dup</code></td><td><code>docker compose up -d</code></td><td>Compose up.</td></tr>
+<tr><td><code>just ddown</code></td><td><code>docker compose down</code></td><td>Compose down.</td></tr>
+<tr><td><code>just dps</code></td><td><code>docker compose ps</code></td><td>Compose ps.</td></tr>
+<tr><td><code>just dclogs</code></td><td><code>docker compose logs -f --tail 50</code></td><td>Compose logs.</td></tr>
+</tbody></table>
+<h2 id="klaster-6-sait-etot-sait">Кластер 6: сайт (этот сайт)</h2>
+<table><thead><tr><th>Рецепт</th><th>Команда</th><th>Когда</th></tr></thead><tbody>
+<tr><td><code>just site-serve</code></td><td>(ручной <code>zola serve</code> в <code>site/</code>)</td><td>Локальный preview с live reload.</td></tr>
+<tr><td><code>just site-build</code></td><td><code>nix build ".#site"</code></td><td>Произвести финальный static-выход.</td></tr>
+<tr><td><code>just site-regen</code></td><td><code>scripts/site-regen.sh</code></td><td>Регенерировать все auto-gen страницы.</td></tr>
+</tbody></table>
+<h2 id="bootstrap-retsepty">Bootstrap-рецепты</h2>
+<table><thead><tr><th>Рецепт</th><th>Команда</th><th>Когда</th></tr></thead><tbody>
+<tr><td><code>just install</code> / <code>just install-nixos</code></td><td><code>./bootstrap/install.sh</code></td><td>Bootstrap-скрипт.</td></tr>
+<tr><td><code>just install-emacs</code> / <code>just install-plain</code></td><td><code>./scripts/dev-emacs-sync.sh</code></td><td>Синхронизировать Emacs в <code>~/.config/emacs</code>.</td></tr>
+</tbody></table>
+<h2 id="aliasy">Алиасы</h2>
+<p><code>switch</code> и <code>switch.sh</code> — алиасы (just-рецепт вызывает скрипт).
+<code>check-fast</code> и <code>check-docs</code> — плейсхолдеры для будущей docs-only
+быстрой проверки (сейчас no-op).</p>
+<h2 id="kak-razreshaiutsia-retsepty">Как разрешаются рецепты</h2>
+<p><code>just</code> ищет рецепты в <code>justfile:1-164</code>. Shell установлен в
+<code>bash -eu -o pipefail -c</code> для безопасности. Рецепты могут
+использовать любую из:</p>
+<ul>
+<li><code>nix</code> (subprocess)</li>
+<li><code>sudo</code> (где требуется)</li>
+<li><code>bash</code> (для логики внутри рецепта)</li>
+<li>Любую из just-переменных: <code>{{HOST}}</code>, <code>{{FLAGS}}</code>, <code>{{NAME}}</code>, <code>{{CMD}}</code>, <code>{{IMAGE}}</code>, <code>{{SEVERITY}}</code>, <code>{{DOCKERFILE}}</code>.</li>
+</ul>
+<h2 id="dobavlenie-novogo-retsepta">Добавление нового рецепта</h2>
+<ol>
+<li>Решите, в какой кластер (build / submodules / agents / tests /
+docker / site / bootstrap).</li>
+<li>Добавьте рецепт в <code>justfile</code> в соответствующей секции.</li>
+<li>Документируйте его здесь в таблице выше.</li>
+<li>Добавьте однострочный тест в <code>tests/contract/unit/</code>, если у
+рецепта есть нетривиальный side-effect.</li>
+</ol>
+<h2 id="sm-takzhe">См. также</h2>
+<ul>
+<li><a href="http://127.0.0.1:8000/workflow/just/workflow/quickstart.md">Быстрый старт</a> — end-to-end онбординг.</li>
+<li><a href="http://127.0.0.1:8000/workflow/just/workflow/submodules.md">Сабмодули</a> — политика SSH/HTTPS.</li>
+<li><a href="http://127.0.0.1:8000/workflow/just/workflow/troubleshoot.md">Troubleshooting</a> — когда рецепт
+сбоит.</li>
+</ul>
+
+
+  
+  <hr>
+  <p><strong>Дальше:</strong>
+  
+    <a href="&#x2F;workflow&#x2F;submodules&#x2F;">Сабмодули</a> · 
+  
+    <a href="&#x2F;workflow&#x2F;reload&#x2F;">Soft-reload</a>
+  
+  </p>
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

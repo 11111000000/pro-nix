@@ -1,7 +1,10 @@
 ;;; pro-emacs-check-fonts.el --- runtime font/icon availability checks -*- lexical-binding: t; -*-
 
-(defvar pro--required-fonts '("Nerd Font" "DejaVu Sans Mono" "Source Code Pro")
-  "Simple list of font family substrings that are recommended for UI icons/text.")
+(defvar pro--required-fonts '("Aporetic Sans Mono" "Aporetic Sans" "Nerd Font" "DejaVu Sans Mono" "Source Code Pro")
+  "Simple list of font family substrings that are recommended for UI icons/text.
+Aporetic Sans (Mono) — основной шрифт pro-nix (см. configuration.nix и
+`pro-ui.el'); остальные — резерв на случай, если Aporetic не попал в
+system closure (например, headless CI/тесты вне графической сессии).")
 
 (defun pro--find-font (name)
   "Return t if a font family containing NAME exists in `font-family-list'." 

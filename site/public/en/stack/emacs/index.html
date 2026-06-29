@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emacs layer · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">Emacs layer</h1>
+  <h1 id="emacs-layer">Emacs layer</h1>
+<p>The editor layer is <strong>Nix-provided</strong>. ~60 Emacs packages come from
+<code>pkgs.emacsPackages</code> and are made visible to Emacs at build time through
+<code>EMACSLOADPATH</code>. The user does not need to interact with <code>package.el</code> —
+<code>pro-packages.el</code> is policy-driven: Nix first, then MELPA fallback, then
+package-vc, with <code>~/.config/emacs/decisions.el</code> as the override.</p>
+<h2 id="what-ships-in-the-closure">What ships in the closure</h2>
+<p><code>emacs/core.nix#pro.emacs.providedPackages</code> — 60+ names including
+<code>magit</code>, <code>vertico</code>, <code>vertico-sort</code>, <code>orderless</code>, <code>marginalia</code>, <code>gptel</code>,
+<code>consult</code>, <code>consult-dash</code>, <code>dash-docs</code>, <code>consult-eglot</code>, <code>consult-yasnippet</code>,
+<code>corfu</code>, <code>cape</code>, <code>kind-icon</code>, <code>avy</code>, <code>expand-region</code>, <code>yasnippet</code>,
+<code>projectile</code>, <code>treemacs</code>, <code>consult-projectile</code>, <code>elfeed</code>, <code>eglot</code>,
+<code>rainbow-delimiters</code>, <code>nix-mode</code>, <code>markdown-mode</code>, <code>mmm-mode</code>, <code>org</code>,
+<code>ob-mermaid</code>, <code>vterm</code>, <code>multi-vterm</code>, <code>eshell-toggle</code>, <code>ace-window</code>,
+<code>undo-tree</code>, <code>haskell-mode</code>, <code>haskell-snippets</code>, <code>which-key</code>,
+<code>which-key-posframe</code>, <code>eldoc-box</code>, <code>keyfreq</code>, <code>helpful</code>, <code>popper</code>,
+<code>buffer-expose</code>, <code>buffer-move</code>, <code>golden-ratio</code>, <code>embark</code>,
+<code>embark-consult</code>, <code>exwm</code>, <code>xelb</code>, <code>agent-shell</code>, <code>agent-shell-hud</code>, <code>acp</code>,
+<code>emcp</code>, <code>telega</code>, <code>transient</code>, <code>visual-fill-column</code>, <code>pro-tabs</code>,
+<code>goto-chg</code>, <code>docker</code>, <code>tao-theme</code>, <code>shaoline</code>, <code>nerd-icons</code>,
+<code>all-the-icons</code>, <code>treemacs-icons-dired</code>, <code>eldoc-box</code>.</p>
+<p>The <code>providedPackages</code> is <strong>the</strong> catalogue. It is regenerated into
+<code>~/.config/emacs/provided-packages.el</code> on every activation
+(<code>emacs/core.nix:194-196</code>), so a fresh host has the same set as
+<code>desktop</code> from the first <code>pro-emacs-base-start</code>.</p>
+<h2 id="the-four-phase-bootstrap">The four-phase bootstrap</h2>
+<table><thead><tr><th>Phase</th><th>File</th><th>When it runs</th></tr></thead><tbody>
+<tr><td>1. <code>early-init.el</code></td><td><code>emacs/base/early-init.el</code></td><td>Before package system starts</td></tr>
+<tr><td>2. <code>init.el</code></td><td><code>emacs/base/init.el</code></td><td>Main init; sets <code>user-emacs-directory</code></td></tr>
+<tr><td>3. <code>site-init.el</code></td><td><code>emacs/base/site-init.el</code></td><td>Module manifest + resolver + key loader</td></tr>
+<tr><td>4. <code>pro-emacs-base-start</code></td><td>(in <code>site-init.el</code>)</td><td>Loads every module in the manifest</td></tr>
+</tbody></table>
+<p><code>early-init.el</code> does the things that have to happen <strong>before</strong> any package
+loads: <code>package-enable-at-startup = nil</code>, load-path setup, GUI hygiene,
+best-effort <code>treesit</code> require. The <code>pro-ui-theme.el</code> is loaded here too,
+so the theme is in place before the first frame paints.</p>
+<h2 id="the-soft-reload-contract">The soft-reload contract</h2>
+<p><code>M-x pro/reload-config</code> (C-x M-c) re-evaluates every loaded module
+<strong>in place</strong>. With <code>C-u</code>, it re-evals <code>site-init.el</code> first, so a freshly
+edited manifest or <code>provided-packages.el</code> takes effect.</p>
+<p>Modules that own persistent state (child frames, background processes,
+cached values) must register teardown on <code>pro--after-reload-hook</code>. The
+canonical example is <code>pro-buffer-banner.el</code>:</p>
+<pre data-lang="elisp" class="language-elisp "><code class="language-elisp" data-lang="elisp">(when (fboundp &#x27;pro&#x2F;after-reload)
+  (pro&#x2F;after-reload #&#x27;pro-buffer-banner--reload-reset))
+</code></pre>
+<p>The reset function destroys the persistent banner frame and the backing
+buffer; the next <code>pro-buffer-banner--show</code> rebuilds them with the freshly
+loaded code’s geometry math.</p>
+<h2 id="the-visual-identity">The visual identity</h2>
+<ul>
+<li><strong>Theme</strong> — <code>tao-yang</code> (light, default) or <code>tao-yin</code> (dark). Set via
+<code>pro-ui-default-theme</code>.</li>
+<li><strong>Code font</strong> — <code>Aporetic Sans Mono</code> 13pt. Set via
+<code>pro-ui-code-font-family</code>, <code>pro-ui-font-height</code>.</li>
+<li><strong>Text font</strong> — <code>Aporetic Sans</code>. Set via <code>pro-ui-text-font-family</code>.</li>
+<li><strong>Cursor</strong> — orange <code>#ff8800</code> for Russian input, green <code>#0d7a32</code> for
+English, grey <code>#808080</code> for read-only buffers. Configurable via
+<code>pro-ui-cursor-{russian,english,readonly}-color</code>.</li>
+<li><strong>Modeline</strong> — <code>shaoline</code> (minimalist). Configurable via
+<code>pro-ui-modeline-style</code>.</li>
+<li><strong>Buffer banner</strong> — child-frame at the top of the selected window,
+shows buffer name + project + branch, theme-aware inverted colors,
+3-second fade-out. See <a href="http://127.0.0.1:8000/en/stack/emacs/reference/defcustom.md">Reference → defcustom → pro-buffer-banner</a>.</li>
+</ul>
+<h2 id="the-completion-stack">The completion stack</h2>
+<ul>
+<li><strong>Vertico</strong> (minibuffer, GUI + TTY) — flat list, cycle, no popup.</li>
+<li><strong>Corfu</strong> (in-buffer, GUI + TTY) — child frame or in-buffer popup.
+<code>corfu-auto = t</code>, <code>corfu-auto-prefix = 3</code>, <code>corfu-auto-delay = 0.25</code>.</li>
+<li><strong>Cape</strong> (CAPF backends) — <code>cape-file</code>, <code>cape-keyword</code>,
+<code>cape-dabbrev</code> (on <code>prog-mode-hook</code>), <code>cape-symbol</code>, <code>cape-history</code>,
+<code>cape-abbrev</code>, <code>cape-line</code>, <code>cape-dict</code>. Bound to <code>C-c o {f, d, h, k, s, a, .}</code>.</li>
+<li><strong>Orderless</strong> — fuzzy, used in <code>command</code> and <code>symbol</code> categories.</li>
+<li><strong>Consult</strong> — <code>consult-line</code>, <code>consult-buffer</code>, <code>consult-ripgrep</code>,
+<code>consult-find</code>, <code>consult-imenu</code>, <code>consult-yasnippet</code>, <code>consult-eglot-symbols</code>.</li>
+</ul>
+<p>The minibuffer gets <code>vertico</code>. The buffer gets <code>corfu</code>. They do not
+collide because <code>pro-completion--maybe-enable-corfu-in-minibuffer</code> turns
+off <code>corfu-mode</code> and <code>corfu-auto</code> when <code>vertico--input</code> or <code>mct--active</code>
+is bound.</p>
+<h2 id="where-the-global-keys-live">Where the global keys live</h2>
+<p><code>emacs-keys.org</code> is the source. <code>emacs-keys.org</code> is <strong>executable</strong> — each
+row becomes a real <code>global-set-key</code> at startup. See
+<a href="http://127.0.0.1:8000/en/stack/emacs/reference/keys.md">Reference → Keys</a> for the full table.</p>
+<p>Per-user overrides go in <code>~/.config/emacs/keys.org</code> (same org-table
+format). If both exist, both are parsed in order; user wins on conflict.</p>
+
+
+  
+  <hr>
+  <p><strong>Дальше:</strong>
+  
+    <a href="&#x2F;stack&#x2F;ai&#x2F;">AI agents layer</a> · 
+  
+    <a href="&#x2F;architecture&#x2F;emacs-base&#x2F;">Emacs bootstrap</a>
+  
+  </p>
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

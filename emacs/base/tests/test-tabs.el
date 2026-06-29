@@ -21,7 +21,7 @@
                                        (or load-file-name buffer-file-name))))
   "Path to the pro-tabs.el module under test.")
 
-(unless (featurep 'pro-tabs-integration)
+(unless (featurep 'pro-tabs)
   ;; Use `load-file' (not `require') to avoid the recursive-load trap:
   ;; `(require 'pro-tabs ...)' inside the module would resolve to this
   ;; file and recurse in environments where the submodule is not on
