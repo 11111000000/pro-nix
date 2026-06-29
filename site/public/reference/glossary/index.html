@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Глоссарий · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="active">Справочник</a>
+      
+      <a href="/workflow/" class="">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class="active"><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">Глоссарий</h1>
+  <h1 id="glossarii">Глоссарий</h1>
+<blockquote>
+<p>Ведётся вручную. Термины, которые проект использует в
+специфическом смысле, неочевидном из кода. Не глоссарий Nix или
+Emacs — для них см. upstream-доки.</p>
+</blockquote>
+<h2 id="a">A</h2>
+<p><strong>Aporetic</strong> — Семейство шрифтов проекта (<code>Aporetic Sans</code>,
+<code>Aporetic Sans Mono</code>). Default для <code>pro-ui-{code,text}-font-family</code>
+и <code>conf/fonts.conf</code>. Fallback на DejaVu, если не в system closure.</p>
+<p><strong>agent</strong> — CLI-тулза, оборачивающая LLM с tool-use протоколом.
+Проект использует <code>pi</code> (lukasl-dev) и <code>opencode</code> (npm-бинарь).
+Оба настраиваются через <code>local-templates/{pi,opencode}/</code> и
+деплоятся через <code>pro-agent-configs.nix</code>.</p>
+<p><strong>agent-shell</strong> — Emacs-пакет (сабмодуль <code>11111000000/agent-shell</code>),
+превращающий Emacs в chat-UI для ACP-говорящих агентов.
+Адаптируется <code>pro-agent-shell.el</code>.</p>
+<p><strong>ACP</strong> — Agent Client Protocol. JSON-RPC-протокол, на котором
+<code>agent-shell</code> говорит с бэкендами. Реализация — в
+<code>submodules/acp/</code> (xenodium/acp.el форк).</p>
+<p><strong>autoload</strong> — <code>(autoload 'name "file")</code> откладывает загрузку
+функции до первого вызова. pro-*.el-модули используют <code>###autoload</code>
+для интерактивных команд, которые могут быть не доступны в момент
+загрузки.</p>
+<h2 id="b">B</h2>
+<p><strong>Buffer banner</strong> — Transient child-frame вверху выбранного
+окна, показывает имя буфера / проект / ветку. Theme-aware
+инвертированные цвета, 3-секундный fade-out, debounce 200ms.
+Реализация — <code>emacs/base/modules/pro-buffer-banner.el</code>.</p>
+<h2 id="c">C</h2>
+<p><strong>Change-Gate</strong> — Четырёхполе-формат в начале каждого PR body:
+<code>Intent:</code>, <code>Pressure:</code>, <code>Surface:</code>, <code>Proof:</code>. Обеспечивается
+<code>actions/check-change-gate/action.sh</code>.</p>
+<p><strong>composition</strong> — <code>hosts/&lt;name&gt;/composition.nix</code> файл. Импортирует
+<code>system-package-sets-*</code> и <code>++</code>ит их в <code>environment.systemPackages</code>.
+Composition — <strong>не</strong> NixOS-модуль — это обычное Nix-выражение,
+возвращающее attrset.</p>
+<p><strong>contract-тест</strong> — Тест в <code>tests/contract/*</code>, проверяющий
+структурное свойство конфигурации. Пять contract-тестов сейчас
+покрывают сетевой слой (<code>pro-network-01.sh</code>), модуль peer
+(<code>pro-peer-01.sh</code>), tor (<code>tor-01.sh</code>), surface-заголовки
+(<code>surface-headers.sh</code>) и Docker dev chain (<code>test_docker_dev.sh</code>).</p>
+<p><strong>CUDA compat</strong> — <code>nix-cuda-compat.nix</code> добавляет <code>types.atom</code> в
+formats-инфраструктуру и <code>cudaPackages.{cudaFlags, cudaVersion}</code>
+шим. Загружается через <code>flake.nix#pkgsOverlay</code>, так что каждый
+хост его видит.</p>
+<h2 id="d">D</h2>
+<p><strong>defcustom</strong> — Emacs-механизм для пользовательской настройки.
+pro-*.el-модули экспортируют ~70 defcustom’ов в 22 <code>defgroup</code>’ах.
+Каталог — в <a href="http://127.0.0.1:8000/reference/glossary/reference/defcustom.md">Справочник → defcustom</a>.</p>
+<p><strong>defgroup</strong> — Логическая группировка для <code>defcustom</code> и <code>defface</code>.
+Проект использует группы вроде <code>pro</code>, <code>pro-ui</code>, <code>pro-ui-theme</code>,
+<code>pro-ui-modeline</code>, <code>pro-history</code>, <code>pro-buffer-banner</code>, <code>pro-docker</code>,
+<code>pro-emcp</code>, <code>pro-exwm</code>, <code>pro/chat</code>, <code>pro/chat-telega</code>, <code>pro-tabs</code>,
+<code>pro-profiler</code>, <code>pro-spell</code>, <code>pro-windows</code>, <code>pro-completion</code> и т.д.</p>
+<p><strong>DERP</strong> — Tailscale-протокол relay. Headscale может обслуживать
+DERP map; в <code>modules/headscale.nix</code> он выключен по умолчанию
+(<code>derp.server.enabled = false</code>).</p>
+<p><strong>devShell</strong> — <code>flake.nix#devShells.x86_64-linux.default</code>. Даёт
+Emacs с ~25 emacsPackages на <code>EMACSLOADPATH</code>, плюс <code>ripgrep</code>, <code>fd</code>,
+<code>findutils</code>, <code>stress-ng</code>, <code>fio</code>, <code>powertop</code>, <code>iotop</code>, <code>lm_sensors</code>,
+<code>time</code>, <code>shellcheck</code>, <code>direnv</code>, <code>gh</code>. Скрипт-обёртка в
+<code>$PWD/.pro-emacs-wrapper/emacs-pro</code> создаётся на <code>nix develop</code> с
+<code>-L &lt;pkg&gt;/share/emacs/site-lisp</code> для каждого overlay-предоставленного
+пакета.</p>
+<h2 id="e">E</h2>
+<p><strong>EMCP</strong> — Emacs MCP. HTTP MCP-сервер, живущий на
+<code>http://127.0.0.1:38913/mcp</code>. Реализован в сабмодуле <code>emcp</code>
+(codeberg <code>martenlienen/emcp</code>), с бэкендом <code>http-server.el</code> (тоже
+форк того же автора). Emacs-сторона обёрнута <code>pro-emcp.el</code> с
+4 defcustom’ами (<code>port</code>, <code>host</code>, <code>profile</code> ∈ {<code>inspect</code>,
+<code>develop</code>, <code>full-control</code>}, <code>auto-start</code>) и 5 командами
+(<code>start</code>, <code>stop</code>, <code>restart</code>, <code>status</code>, <code>url</code>).</p>
+<p><strong>EXWM</strong> — Emacs X Window Manager. EXWM — канонический WM в
+pro-nix — скрипт <code>~/.config/pro/exwm-session</code> (генерируется
+<code>emacs/exwm.nix:96-176</code>) запускает Emacs под <code>systemd-run --user --scope</code> с resource-лимитами и IME env-ами.</p>
+<p><strong>exwm-xim</strong> — X Input Method-мост в EXWM. Устанавливается через
+<code>XMODIFIERS=@im=exwm-xim</code> в session-launcher. <strong>Не</strong> связан с
+симуляцией клавиш в Emacs (это в <code>exwm-input-simulation-keys</code> в
+<code>pro-exwm-sim.el</code>).</p>
+<h2 id="f">F</h2>
+<p><strong>FROZEN</strong> — Маркер поверхности в Change-Gate PR body, говорящий:
+любое изменение этой поверхности требует migration notes.
+Используется для публичных NixOS-опций, на которые downstream-пользователи
+(или будущий я) могут полагаться.</p>
+<p><strong>FLUID</strong> — Противоположность: поверхность в работе, может
+меняться без migration notes.</p>
+<h2 id="g">G</h2>
+<p><strong>GCM</strong> — Guarded Configuration Modules. Паттерн, используемый в
+<code>pro-emacs.el</code>, где <code>pro-compat--add-hook-once</code>,
+<code>pro-compat--add-to-list-once</code>, <code>pro-compat--advice-add-once</code>
+обеспечивают идемпотентность top-level форм под soft-reload.</p>
+<p><strong>guix</strong> — <code>services.guix.enable = true</code> установлен глобально;
+pro-nix держит Guix как fallback пакетного менеджера для случаев,
+когда бинаря нет в nixpkgs.</p>
+<h2 id="h">H</h2>
+<p><strong>headscale</strong> — Самохостящийся Tailscale control-plane. Реализован
+в <code>modules/headscale.nix</code> с YAML-конфигом, следующим upstream
+<code>headscale</code> 0.27+ schema. Роль <code>headscale</code> назначается ровно
+одному хосту — <code>desktop</code> — и <code>lib.mkForce false</code> на всех остальных.</p>
+<p><strong>holo-verify</strong> — <code>tools/holo-verify.sh</code> — top-level
+verification-драйвер. Режимы: <code>unit</code>/<code>--quick</code> (default), <code>elisp</code>,
+<code>nixos-fast</code>, <code>full</code>. Сообщает, совпадают ли ссылки <code>HOLO.md</code> на
+тесты с реальными test-файлами.</p>
+<p><strong>HOLO.md</strong> — «frozen» документ, перечисляющий инварианты,
+которые система обещает соблюдать. Не в текущем дереве
+исходников (файл упоминается в PR-шаблонах); будет создан.</p>
+<p><strong>HUD</strong> — В <code>agent-shell-hud</code> (сабмодуль
+<code>11111000000/agent-shell-hud</code>), многоязычный heads-up display
+(модель + token usage + permissions). Биндинги <code>C-c a</code> (menu),
+<code>C-c i</code> (info), <code>C-c r</code> (refresh) внутри <code>agent-shell-mode</code>.</p>
+<h2 id="i">I</h2>
+<p><strong>icp</strong> — Identity Control Plane. Не в этом проекте; упоминается
+здесь только потому что «icp» иногда появляется в headscale
+Tailscale-доках.</p>
+<p><strong>imc</strong> — <code>systemd --user import-environment</code>. Вызывается из
+<code>~/.local/bin/pro-emacs-env-fix.sh</code> (autostart) и из EXWM-session-launcher,
+чтобы <code>DISPLAY</code>, <code>XAUTHORITY</code>, <code>DBUS_SESSION_BUS_ADDRESS</code>,
+<code>XDG_CURRENT_DESKTOP</code> дошли до Emacs под <code>systemd-run</code>.</p>
+<h2 id="m">M</h2>
+<p><strong>MagicDNS</strong> — Tailscale-внутренний DNS-резолвер.
+<code>pro-ssh-clients.nix</code>-сгенерированный <code>ssh_config.d/pro.conf</code>
+ставит MagicDNS-FQDN первым в списке кандидатов, чтобы SSH-подключение
+попало на правильный хост, даже когда LAN mDNS down.</p>
+<p><strong>mkDefault</strong> — Приоритетный маркер на NixOS-опции, default
+100. Позволяет другим модулям переопределять без конфликта.
+<strong>Анти-паттерн:</strong> использовать его для обязательных
+<code>environment.systemPackages</code> (plain assignment — обязательно;
+mkDefault — для дефолтов).</p>
+<p><strong>mkForce</strong> — Приоритет 50, побеждает plain и <code>lib.mkDefault</code>.
+Используется в <code>hosts/*/configuration.nix</code>, чтобы сознательно
+переопределить то, что даёт глобальный модуль. Канонический
+<code>cf19</code>/<code>huawei</code> <code>headscale.enable = lib.mkForce false</code>.</p>
+<p><strong>mkVmHost</strong> — Второй host-конструктор в <code>flake.nix:92-102</code>. <strong>Не</strong>
+импортирует <code>configuration.nix</code>. Используется для <code>vm</code>, чтобы
+держать eval минимальным и не тянуть в <code>headscale.nix</code>,
+<code>pro-network.nix</code> и т.д. Побочный эффект — <code>headscale.enable</code> <strong>даже
+не валидный атрибут</strong> в eval <code>vm</code> — см.
+<code>hosts/vm/configuration.nix:35-37</code>.</p>
+<p><strong>Mole</strong> — В Emacs-терминологии: mode + role pair (например,
+<code>pro-c-mole</code>, <code>pro-python-mole</code>). pro-nix не использует термин
+сильно, но <code>pro-c.el</code>, <code>pro-python.el</code> и т.д. имеют контракт
+«set up the mole on <code>xxx-mode-hook</code>».</p>
+<h2 id="n">N</h2>
+<p><strong>NSP</strong> — NSS-плагин. Пакет <code>nss-mdns</code> — это NSP для <code>.local</code>
+mDNS-резолва на glibc-системах. Без него <code>getent hosts &lt;name&gt;.local</code> пусто, даже когда Avahi публикует имя.</p>
+<h2 id="o">O</h2>
+<p><strong>opencode</strong> — Второй AI-агент, npm-бинарь. <code>opencode-stub.nix</code>
+overlay скачивает tarball и patchelf’ит под glibc. Bwrap-вариант
+через <code>opencodeBwrap.homeManagerModules.default</code>.</p>
+<p><strong>overlay</strong> — Функция <code>(final: prev: { ... })</code>, патчащая пакетный
+сет. Пять overlays: <code>emacs-extra</code>, <code>opencode-stub</code>, <code>pi-acp</code>,
+<code>mirrors</code>, <code>github-proxy</code>. Применяются через
+<code>flake.nix#pkgsOverlay</code>.</p>
+<h2 id="p">P</h2>
+<p><strong>pending binding</strong> — Глобальная клавиша, ссылающаяся на команду
+из пакета, ещё не загруженного. <code>pro-keys-pending-bindings</code>
+хранит её; когда пакет становится доступен (MELPA install,
+Nix-provided load), биндинг применяется.</p>
+<p><strong>pi</strong> — Основной CLI-агент кодинга. <code>lukasl-dev/pi.nix</code> даёт
+NixOS-модуль (<code>pi.nixosModules.default</code>), подключённый глобально.
+<code>pi</code> запускается через <code>pi-acp</code> (svkozak/pi-acp v0.0.27) для
+ACP-коммуникации.</p>
+<p><strong>pi-crew</strong> — Multi-agent orchestration npm-пакет, который
+pro-nix <strong>не</strong> устанавливает (исключён из
+<code>local-templates/pi/settings.json</code>).</p>
+<p><strong>pro-</strong> — Префикс проекта. Используется для NixOS-модулей
+(<code>modules/pro-*.nix</code>) и Emacs-модулей
+(<code>emacs/base/modules/pro-*.el</code>). Префикс <strong>информативный</strong>:
+<code>pro-</code>-файлы принадлежат pro-nix, а не upstream-пакетам.</p>
+<p><strong>providedPackages</strong> — Список имён Emacs-пакетов (58), которые
+Nix <strong>предоставляет</strong> в closure. Хранится в
+<code>emacs/core.nix#pro.emacs.providedPackages</code> и становится виден
+Emacs через <code>EMACSLOADPATH</code>.</p>
+<h2 id="r">R</h2>
+<p><strong>recipe</strong> — <code>nix/emacs-recipes/*.nix</code> файл. Каждый —
+<code>stdenv.mkDerivation</code>, собирающий один Emacs-пакет из сабмодуля
+или внешнего источника. Overlays подтягивают recipes через
+<code>emacsPackages.elpaBuild</code> или <code>emacsPackages.trivialBuild</code>-эквиваленты.</p>
+<p><strong>resolve</strong> — per-candidate fallback в <code>pro-ssh-clients.nix</code>:
+каждый candidate hostname в сгенерированном <code>Host</code>-блоке имеет
+свой <code>ConnectTimeout</code>, так что мёртвый <code>.local</code> не блокирует
+рабочий tailnet-FQDN.</p>
+<h2 id="s">S</h2>
+<p><strong>searxng</strong> — Самохостящийся мета-поисковик, запускаемый
+<code>modules/searxng.nix</code>. Сейчас <strong>выключен</strong> на верхнем уровне
+(<code>services.searxng.enable = lib.mkForce false</code> в
+<code>configuration.nix:85</code>) из-за бага <code>settings.yml</code>, вызывающего
+restart loop и усиливающего boot/switch-таймауты D-Bus/systemd
+на <code>cf19</code>. TODO: починить и re-enable.</p>
+<p><strong>SearXNG-secret</strong> — <code>secret_key</code> генерируется в activation-time
+и пишется в <code>/var/lib/searxng/env</code> (chmod 0400, вне
+<code>/nix/store</code>). Ссылается как <code>EnvironmentFile</code> systemd-юнитом.
+Литерал <code>$SEARXNG_SECRET_KEY</code> в рендеренном <code>settings.yml</code> —
+SearXNG разворачивает из env-файла.</p>
+<p><strong>shaoline</strong> — Минималистичный mode-line. Сабмодуль
+<code>11111000000/shaoline</code>. Установлен как <code>pro-ui-modeline-style = 'shaoline</code> в <code>pro-ui.el</code>.</p>
+<p><strong>SSOT</strong> — Single Source of Truth. Три в этом проекте: <code>pro.hosts</code>
+(хосты), <code>emacs-keys.org</code> (клавиши), <code>local.nix</code> (per-host секреты).</p>
+<p><strong>soft reload</strong> — <code>M-x pro/reload-config</code> (C-x M-c) переоценивает
+все загруженные модули в месте. <code>C-u</code> re-evals <code>site-init.el</code> первым
+(full reload). Модули, владеющие persistent state, регистрируют
+teardown на <code>pro--after-reload-hook</code>, чтобы soft reload
+пересоздавал их state из свежезагруженного кода.</p>
+<p><strong>surface</strong> — Набор публичных атрибутов, которые модуль
+экспортирует. <code>tools/surface-lint.sh</code> обеспечивает пятисекционную
+шапку (Назначение / Цель / Контракт / Побочные эффекты / Proof)
+на каждом <code>modules/*.nix</code>.</p>
+<h2 id="t">T</h2>
+<p><strong>tailscale</strong> — Tailscale-клиент. <code>services.tailscale.enable</code> <strong>не</strong>
+установлен глобально в этом проекте (требует auth-key, ломает
+<code>nixos-rebuild</code> без секрета). Tailnet-связность даётся через
+<code>headscale</code>.</p>
+<p><strong>tao-yang / tao-yin</strong> — Дефолтные Emacs-темы.
+<code>pro-ui-default-theme = 'tao-yang</code> — default (светлая);
+альтернатива — <code>'tao-yin</code> (тёмная). Обе из сабмодуля
+<code>tao-theme</code> (<code>11111000000/tao-theme-emacs</code>).</p>
+<p><strong>telega</strong> — Telegram-клиент для Emacs. Реализован в
+<code>submodules/telega.el/</code> (zevlg/telega.el), с отдельным
+TDLib-бинарём <code>telega-server</code>, собираемым
+<code>nix/emacs-recipes/telega-server.nix</code>. Emacs-сторона обёрнута
+<code>pro-telega.el</code> и <code>pro-chat.el</code>.</p>
+<p><strong>TORSOCKS</strong> — <code>torsocks</code> оборачивает системные вызовы в
+LD_PRELOAD-шим, форсирующий подключения через локальный SOCKS5
+на 9050. <code>bin/torwrap</code> использует его (или <code>proxychains4</code> как
+fallback) для запуска произвольных команд через Tor.</p>
+<h2 id="w">W</h2>
+<p><strong>WAYLAND_NO_HARDWARE_CURSORS</strong> — Установлен как
+<code>WLR_NO_HARDWARE_CURSORS=1</code> в Sway-сессии. Intel workaround для
+hw-курсоров на multi-monitor и after-sleep.</p>
+<p><strong>winner-mode</strong> — Встроенный Emacs minor mode, записывающий
+window-конфигурации и позволяющий undo/redo их. Забинден на
+<code>&lt;XF86Back&gt;</code> / <code>&lt;XF86Forward&gt;</code> в <code>emacs-keys.org</code>.</p>
+<h2 id="x">X</h2>
+<p><strong>xdg.portal</strong> — <code>xdg-desktop-portal-gtk</code> установлен как
+<code>configPackages</code> и <code>extraPortals</code> на верхнем уровне. EXWM-minimal
+тоже его добавляет. Реализация <code>gtk</code> предпочтительна для
+стабильности, перед <code>xdg-desktop-portal-kde</code> или <code>-gnome</code>.</p>
+<p><strong>Xresources</strong> — <code>conf/Xresources</code> — единственный source of
+truth для Emacs/URxvt/XTerm/Xmessage/Xpdf Xresources. Деплоится
+в <code>/etc/X11/Xresources</code> через
+<code>configuration.nix#environment.etc."X11/Xresources".text</code>.
+<code>exwm-session</code> мерджит его с <code>xrdb -merge</code> при старте, так что
+первый фрейм flicker-free.</p>
+<h2 id="z">Z</h2>
+<p><strong>zram</strong> — Compressed-RAM swap. <code>services.zramSlice.enable</code> и
+<code>size = "auto"</code> (50% RAM, cap 16384 MB) на <code>desktop</code> и <code>huawei</code>.
+Не на <code>cf19</code> (уже есть дисковый swap) или <code>vm</code>.</p>
+
+
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

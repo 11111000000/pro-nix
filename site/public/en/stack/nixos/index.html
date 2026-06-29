@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NixOS layer · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">NixOS layer</h1>
+  <h1 id="nixos-layer">NixOS layer</h1>
+<p>The system layer is pure NixOS — no out-of-band package management, no
+hand-written files in <code>/etc/</code>, no <code>apt-get install</code> for system packages.
+Everything is either a NixOS option, a custom module in <code>modules/</code>, or a
+package pulled in by <code>nix/overlays/</code>.</p>
+<h2 id="pin">Pin</h2>
+<p><code>nixpkgs/nixos-25.11</code> in <code>flake.nix:6</code>. <code>home-manager/release-25.11</code>
+follows nixpkgs.</p>
+<p>The flake URL <strong>must</strong> be <code>git+file://$(pwd)?submodules=1</code> for <code>nix flake check</code>, <code>nix build</code>, and <code>nixos-rebuild</code>. The <code>path:</code> and <code>.</code> shorthands
+do <strong>not</strong> include submodules in captured source, and the Emacs recipes
+read <code>../../submodules/&lt;name&gt;</code> as their source.</p>
+<h2 id="overlays">Overlays</h2>
+<table><thead><tr><th>Overlay</th><th>Adds</th></tr></thead><tbody>
+<tr><td><code>emacs-extra.nix</code></td><td>~15 Emacs recipes (pro-tabs, telega, emcp, http-server, agent-shell, …) and external MELPA packages (embark, eldoc-box)</td></tr>
+<tr><td><code>opencode-stub.nix</code></td><td><code>opencode</code> v1.15.10 from npm, patchelf’d for glibc</td></tr>
+<tr><td><code>pi-acp.nix</code></td><td><code>piAcp</code> (<code>nix/node-packages/pi-acp.nix</code>)</td></tr>
+<tr><td><code>mirrors.nix</code></td><td>URL rewriter for <code>curl.haxx.se</code>, <code>astron.com</code>, <code>git.kernel.org</code></td></tr>
+<tr><td><code>github-proxy.nix</code></td><td>Opt-in <code>NIX_GITHUB_PROXY</code> (env)</td></tr>
+</tbody></table>
+<p><code>pkgsOverlay = import nixpkgs { overlays = [...]; }</code> is the <strong>only</strong> way
+overlays are applied. Host-specific overlays are not used.</p>
+<h2 id="modules">Modules</h2>
+<p>See <a href="http://127.0.0.1:8000/en/stack/nixos/reference/options.md">Reference → NixOS options</a> for the 6 modules
+that declare <code>mkOption</code>. The rest are option-free policy modules.</p>
+<p>Composition files (<code>system-package-sets-*.nix</code>) are <strong>not</strong> NixOS modules —
+they are functions <code>{ pkgs }: { somePackages = [...]; }</code> that are
+imported from <code>hosts/*/composition.nix</code> and <code>++</code>d into
+<code>environment.systemPackages</code>.</p>
+<h2 id="build-switch">Build / switch</h2>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">nix build &quot;.#nixosConfigurations.&lt;host&gt;.config.system.build.toplevel&quot;
+nix build &quot;.#nixosConfigurations.{cf19,desktop,vm}.config.system.build.toplevel&quot;
+nix run .#check-all    # all three full hosts in one command
+</code></pre>
+<p>The slow VM tests are gated by <code>PRO_NIX_RUN_SLOW_CHECKS=1</code> — they are
+expensive (full NixOS VM boot/activation) and not run by default.</p>
+<h2 id="the-after-switch-checklist">The “after switch” checklist</h2>
+<p><code>nixos-rebuild switch</code> activates the system but does <strong>not</strong>:</p>
+<ul>
+<li>deploy <code>local-templates/{pi,opencode}/*</code> (use <code>just deploy-agents</code> or
+<code>just switch-with-agents</code>).</li>
+<li>install <code>pi</code> npm packages (use <code>just install-pi-packages</code>).</li>
+<li>restore SSH keys (run <code>ssh-copy-id</code> per host).</li>
+<li>bring up <code>tor</code> service on a host where the user wants a hidden service.</li>
+</ul>
+<p>See <a href="http://127.0.0.1:8000/en/stack/nixos/workflow/per-host.md">Workflow → per-host checklist</a> for the full
+table.</p>
+
+
+  
+  <hr>
+  <p><strong>Дальше:</strong>
+  
+    <a href="&#x2F;stack&#x2F;emacs&#x2F;">Emacs layer</a> · 
+  
+    <a href="&#x2F;architecture&#x2F;flake&#x2F;">Flake inputs</a>
+  
+  </p>
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

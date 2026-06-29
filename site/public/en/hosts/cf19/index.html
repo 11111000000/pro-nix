@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cf19 · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">cf19</h1>
+  <h1 id="cf19">cf19</h1>
+<p><code>cf19</code> is a <strong>Panasonic Let’s Note CF-MX</strong> laptop, one of the older
+machines in the cluster. The hardware class is “BIOS-era laptop
+with weird keyboard controller” — almost every kernel-parameter line
+in the host config is a workaround for that.</p>
+<ul>
+<li><strong>Class.</strong> Laptop, BIOS boot, not EFI.</li>
+<li><strong>Boot.</strong> GRUB on <code>/dev/sda</code>, no EFI NVRAM writes.</li>
+<li><strong>Kernel.</strong> <code>linuxPackages_6_6</code> (the LTS line, more stable on this
+generation).</li>
+<li><strong>Roles.</strong> <code>laptop, tor</code>.</li>
+</ul>
+<h2 id="the-kernel-parameter-list">The kernel parameter list</h2>
+<pre><code>boot.kernelParams = [
+  &quot;i8042.reset&quot;
+  &quot;i8042.nomux&quot;
+  &quot;mitigations=off&quot;
+  &quot;preempt=full&quot;
+  &quot;mem_sleep_default=s2idle&quot;
+];
+</code></pre>
+<ul>
+<li><code>i8042.reset</code> + <code>i8042.nomux</code> — the i8042 keyboard controller on this
+laptop occasionally fails to enumerate the touchpad after resume.
+Resetting it on resume + disabling multiplex mode works around the
+bug.</li>
+<li><code>mitigations=off</code> — disable CPU vulnerability mitigations. This is
+a single-user machine with no untrusted code; the perf cost of
+mitigations is not worth the marginal security benefit. <strong>Not</strong>
+appropriate for a multi-user or shared machine.</li>
+<li><code>preempt=full</code> — full preemption. Improves interactive latency
+for Emacs (which is always “running”) at the cost of a small
+throughput hit on long-running CPU jobs.</li>
+<li><code>mem_sleep_default=s2idle</code> — modern suspend mode. The laptop does
+not support <code>deep</code> (S3) reliably; <code>s2idle</code> works on all recent
+kernels.</li>
+</ul>
+<h2 id="the-modprobe-config">The modprobe config</h2>
+<p>The base <code>modules/host-policies.nix</code> (under <code>mkIf isCf19</code>) adds:</p>
+<pre><code>options iwlwifi power_save=0
+options iwlmvm power_scheme=1
+options cfg80211 ieee80211_default_rc_algo=minstrel_ht
+options iwlwifi 11n_disable=8
+options iwlmvm uapsd_disable=1
+</code></pre>
+<ul>
+<li><code>iwlwifi power_save=0</code> — disable power-save on the WiFi chip.
+Resume from s2idle can leave the chip in a low-power state that
+prevents re-association.</li>
+<li><code>iwlmvm power_scheme=1</code> — same, for the mvm (Multi-Virtual-MAC)
+driver.</li>
+<li><code>cfg80211 ieee80211_default_rc_algo=minstrel_ht</code> — use minstrel_ht
+as the rate-control algorithm. The default (PID) is unstable on
+this chip.</li>
+<li><code>iwlwifi 11n_disable=8</code> — disable 802.11n features that cause
+throughput drops in this driver version.</li>
+<li><code>iwlmvm uapsd_disable=1</code> — disable U-APSD (unscheduled automatic
+power-save delivery), which is incompatible with <code>power_save=0</code>.</li>
+</ul>
+<h2 id="the-post-resume-wifi-recovery">The post-resume WiFi recovery</h2>
+<p>Even with the modprobe config, the WiFi chip sometimes refuses to
+re-associate after s2idle. <code>scripts/ops-wifi-recover.sh</code> is wired
+into the resume and power-up commands:</p>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">powerManagement.resumeCommands = lib.mkAfter &#x27;&#x27;
+  for n in XHCI RP05; do
+    if ${pkgs.gawk}&#x2F;bin&#x2F;gawk -v d=&quot;$n&quot; &#x27;$1==d &amp;&amp; $3 ~ &#x2F;\*enabled&#x2F;&#x27; &#x2F;proc&#x2F;acpi&#x2F;wakeup &gt;&#x2F;dev&#x2F;null 2&gt;&amp;1; then
+      echo &quot;$n&quot; &gt; &#x2F;proc&#x2F;acpi&#x2F;wakeup || true
+    fi
+  done
+  ${wifiRecover}&#x2F;bin&#x2F;ops-wifi-recover || true
+&#x27;&#x27;;
+</code></pre>
+<p><code>ops-wifi-recover.sh</code> has three escalating strategies:</p>
+<ol>
+<li><code>nmcli radio wifi off</code> then <code>nmcli radio wifi on</code>.</li>
+<li><code>nmcli connection reload</code> + <code>nmcli connection up &lt;active-profile&gt;</code>.</li>
+<li><code>systemctl try-restart NetworkManager</code>.</li>
+</ol>
+<p>Each strategy pings the gateway first; on success, it returns 0; on
+failure, it tries the next.</p>
+<h2 id="the-dbus-regression-override">The dbus-regression override</h2>
+<p>The <code>cf19-switch-dbus-regression.nix</code> test was added after a
+<code>nixos-rebuild switch</code> repeatedly caused the host to fall to TTY
+during the dbus-broker restart that happens as part of systemd
+activation. The fix is to disable dbus reloading entirely:</p>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">systemd.services.dbus = {
+  reloadIfChanged  = lib.mkForce false;
+  restartIfChanged = lib.mkForce false;
+  restartTriggers  = lib.mkForce [ ];
+  stopIfChanged    = lib.mkForce false;
+};
+
+systemd.user.services.dbus = {
+  reloadIfChanged  = lib.mkForce false;
+  restartIfChanged = lib.mkForce false;
+  restartTriggers  = lib.mkForce [ ];
+  stopIfChanged    = lib.mkForce false;
+};
+</code></pre>
+<p>The trade-off: the dbus daemon is not reloaded after a switch. New
+dbus configuration takes effect only on a full reboot. The user
+is expected to reboot <code>cf19</code> after major dbus changes (rare in
+practice).</p>
+<h2 id="the-storage-layout">The storage layout</h2>
+<pre><code>fileSystems.&quot;&#x2F;&quot; = lib.mkForce {
+  device = &quot;&#x2F;dev&#x2F;disk&#x2F;by-uuid&#x2F;d7d6e5f8-2c00-47ad-931a-a6b73a1cdcc2&quot;;
+  fsType = &quot;ext4&quot;;
+};
+
+fileSystems.&quot;&#x2F;boot&quot; = lib.mkForce {
+  device = &quot;&#x2F;dev&#x2F;disk&#x2F;by-uuid&#x2F;c3ff38e8-0de3-427a-983f-86871ed38d32&quot;;
+  fsType = &quot;ext4&quot;;
+};
+
+fileSystems.&quot;&#x2F;mnt&#x2F;sda4&quot; = lib.mkForce {
+  device = &quot;&#x2F;dev&#x2F;disk&#x2F;by-uuid&#x2F;f422300d-3217-4bb8-b611-e88491c6901d&quot;;
+  fsType = &quot;ext4&quot;;
+  options = [ &quot;noatime&quot; ];
+};
+
+swapDevices = [ { device = &quot;&#x2F;dev&#x2F;disk&#x2F;by-uuid&#x2F;68ade83c-1e5b-4f37-a13f-2c386be87be6&quot;; } ];
+</code></pre>
+<p><code>/boot</code> is on a small ext4 partition (no EFI on this machine). <code>/</code>
+is the main system partition. <code>/mnt/sda4</code> is a data partition
+mounted at the fourth partition on the first disk (no label, just
+the partition number — the user’s choice). Swap is on its own
+partition.</p>
+<p>The <code>boot.initrd.kernelModules</code> are the right set for this hardware:</p>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">boot.initrd.kernelModules = [ &quot;ahci&quot; &quot;ata_piix&quot; &quot;usb_storage&quot; &quot;sd_mod&quot; ];
+</code></pre>
+<p><code>ata_piix</code> is the IDE-compatible driver for the laptop’s storage
+controller. <code>ahci</code> is for the (rarely used) SATA port.</p>
+<h2 id="the-session">The session</h2>
+<p><code>cf19</code> imports <code>profile-exwm-minimal.nix</code>, so EXWM is the primary
+session. Sway and i3 are also installed (<code>session-sway.nix</code> and
+<code>session-i3.nix</code> are imported); the user picks at the GDM session
+chooser.</p>
+<p>Cinnamon and fbterm-tty2 are <strong>forcibly off</strong>:</p>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">services.xserver.desktopManager.cinnamon.enable = lib.mkForce false;
+systemd.services.&quot;fbterm-tty2&quot;.enable              = lib.mkForce false;
+</code></pre>
+<p>The Cinnamon exclusion is because the EXWM-minimal profile already
+sets <code>cinnamon.enable = false</code> (default); <code>mkForce</code> makes it stick
+even if a later module tries to enable it. fbterm-tty2 is excluded
+because it occupies <code>/dev/tty2</code> and can conflict with the
+display-manager grab.</p>
+<h2 id="the-tor-hidden-service">The Tor hidden service</h2>
+<p><code>cf19</code> opts into the SSH hidden service:</p>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix"># base config (configuration.nix)
+pro-peer.enable = true;
+pro-peer.enableKeySync = true;
+
+# host override
+pro-peer.allowTorHiddenService = true;  # in modules&#x2F;host-policies.nix (mkIf isCf19)
+</code></pre>
+<p>The onion hostname is registered in <code>pro.hosts.cf19.onion</code> (an empty
+string until the first activation generates one). After
+<code>nixos-rebuild switch</code>, the onion hostname is at
+<code>/var/lib/tor/ssh_hidden_service/hostname</code>.</p>
+<h2 id="nfs">NFS</h2>
+<p><code>cf19</code> mounts the desktop’s <code>/srv/nfs</code> at <code>/mnt/desktop</code>:</p>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">pro.nfs.client.enable = true;
+</code></pre>
+<p><code>modules/pro-nfs.nix</code> configures the autofs unit
+<code>mnt-desktop.automount</code> with <code>timeo=10,retrans=1,x-systemd.mount-timeout=3,nofail</code>.
+The 3-second timeout is hard-coded — <code>ls /mnt/desktop</code> returns
+<code>No such file or directory</code> (not a hang) when the desktop is
+offline.</p>
+<h2 id="the-composition">The composition</h2>
+<p><code>hosts/cf19/composition.nix</code> is the <strong>minimal</strong> one:</p>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">{ lib, pkgs, ... }:
+let
+  tor = import ..&#x2F;..&#x2F;modules&#x2F;system-package-sets-tor.nix { inherit pkgs; };
+in
+{
+  pro.profiles.exwmMinimal.enable = lib.mkDefault true;
+  environment.systemPackages = tor.torControlPackages;
+}
+</code></pre>
+<p>Only <code>exwmMinimal</code> (the EXWM session) and <code>tor.torControlPackages</code>
+(<code>pro-tor</code> CLI, <code>torwrap</code>, <code>torsocks</code>, <code>proxychains</code>). No Haskell,
+no <code>desktopHeavy</code>, no <code>dev</code> toolchain.</p>
+<h2 id="post-switch-checklist">Post-switch checklist</h2>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash"># 1. SSH keys (one-time)
+ssh-copy-id -i ~&#x2F;.ssh&#x2F;id_ed25519.pub az@cf19.local
+
+# 2. BIOS-mode sanity
+cat &#x2F;proc&#x2F;cmdline | tr &#x27; &#x27; &#x27;\n&#x27; | rg i8042
+# Should include: i8042.reset, i8042.nomux
+
+# 3. WiFi recovery script is installed
+command -v ops-wifi-recover
+# Use it after s2idle if WiFi doesn&#x27;t come back
+sudo ops-wifi-recover
+
+# 4. Avahi
+getent hosts desktop.local    # should return desktop&#x27;s LAN IP
+getent hosts cf19.local       # should return cf19&#x27;s LAN IP
+
+# 5. NFS autofs
+systemctl status mnt-desktop.automount
+ls &#x2F;mnt&#x2F;desktop                # ≤ 3 s even if desktop is offline
+
+# 6. EXWM session
+ls &#x2F;run&#x2F;systemd&#x2F;system&#x2F;display-manager.service
+# Should be present (gdm). Login → EXWM.
+# If black screen: Ctrl+Alt+F2, log in to tty2, check
+# ~&#x2F;.local&#x2F;share&#x2F;xorg&#x2F;Xorg.0.log
+
+# 7. Emacs soft-reload
+M-x pro&#x2F;reload-config
+# Should reload all 60 modules without errors
+</code></pre>
+
+
+  
+  <hr>
+  <p><strong>Дальше:</strong>
+  
+    <a href="&#x2F;hosts&#x2F;huawei&#x2F;">huawei</a> · 
+  
+    <a href="&#x2F;hosts&#x2F;">All hosts</a>
+  
+  </p>
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

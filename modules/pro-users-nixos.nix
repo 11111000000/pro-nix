@@ -52,6 +52,12 @@
             "treemacs" "vertico" "vterm" "yasnippet" "embark-consult" "dash-docs" "consult-dash"
             "multi-vterm" "eshell-toggle" "acapella" "atlas" "shaoline" "tao-theme" "pro-tabs"
             "agent-shell" "agent-shell-hud" "acp" "emcp" "http-server" "shell-maker"
+            # Ellama — see nix/emacs-recipes/ellama.nix and
+            # emacs/base/modules/pro-ai-ellama.el. llm / llm-ollama / plz /
+            # transient / yaml / compat propagate from the ellama recipe.
+            # We list the tops explicitly so provided-packages.el knows they
+            # are available.
+            "ellama" "llm" "llm-ollama" "plz"
             "treemacs-icons-dired"
             "async" "dash" "embark" "popon" "cond-let" "magit-section" "visual-fill-column"
             "buffer-move" "golden-ratio"

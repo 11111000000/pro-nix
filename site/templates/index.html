@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<article>
+  {{ section.content | safe }}
+</article>
+
+{% if section.pages %}
+<h2 class="section-pages-title">{% if lang == "ru" %}Страницы в этом разделе{% else %}Pages in this section{% endif %}</h2>
+<ul class="section-pages">
+  {% for p in section.pages %}
+  <li><a href="{{ p.path }}">{{ p.title }}</a>{% if p.extra.tldr %} <span class="page-tldr">— {{ p.extra.tldr }}</span>{% endif %}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endblock content %}

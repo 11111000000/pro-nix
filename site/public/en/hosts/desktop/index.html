@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>desktop · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">desktop</h1>
+  <h1 id="desktop">desktop</h1>
+<p><code>desktop</code> is the always-on tower that acts as the cluster’s control
+plane. It is the only host with <code>headscale.enable = true</code>, the only
+host that exports NFS, and the only host that is a LAN gateway.</p>
+<ul>
+<li><strong>Class.</strong> Desktop tower, always on.</li>
+<li><strong>Boot.</strong> systemd-boot (EFI).</li>
+<li><strong>Kernel.</strong> <code>linuxPackages_latest</code> (newer than the other hosts).</li>
+<li><strong>Roles.</strong> <code>server, headscale, lan-gw, nfs, tor</code>.</li>
+<li><strong>Headscale role.</strong> Single control plane for the WireGuard mesh.</li>
+<li><strong>NFS role.</strong> Exports <code>/srv/nfs</code> to the LAN; members of group <code>pro</code>
+can write, setgid.</li>
+<li><strong>LAN-gw role.</strong> Routes tailnet-client traffic through the main
+uplink via MASQUERADE.</li>
+</ul>
+<h2 id="hardware-kernel">Hardware / kernel</h2>
+<pre><code>boot.loader.systemd-boot.enable = lib.mkForce true;
+boot.loader.grub.enable         = lib.mkForce false;
+boot.loader.efi.canTouchEfiVariables = lib.mkForce true;
+boot.loader.efi.efiSysMountPoint    = &quot;&#x2F;boot&quot;;
+boot.loader.systemd-boot.configurationLimit = 6;
+boot.loader.timeout = 5;
+
+boot.kernelPackages = lib.mkForce pkgs.linuxPackages_latest;
+boot.kernelParams = [ &quot;nvme_core.default_ps_max_latency_us=5500&quot; ];
+boot.extraModprobeConfig = &quot;options btusb enable_autosuspend=0&quot;;
+
+boot.initrd.availableKernelModules = [ &quot;xhci_pci&quot; &quot;ahci&quot; &quot;nvme&quot; &quot;usbhid&quot; &quot;usb_storage&quot; &quot;sd_mod&quot; ];
+boot.initrd.kernelModules = [ ];
+boot.kernelModules = [ &quot;kvm-intel&quot; ];
+boot.extraModulePackages = [ ];
+
+hardware.cpu.intel.updateMicrocode = true;
+</code></pre>
+<p>The <code>btusb enable_autosuspend=0</code> is an explicit quirk — Bluetooth
+keyboards drop input if the USB autosuspend timer fires during a
+long Emacs session. The kernel modules are the
+<strong>available</strong>-in-initrd set, not the loaded set, so the initrd can
+pull the right driver without explicit <code>boot.initrd.kernelModules</code>.</p>
+<p><code>KVM-intel</code> is enabled for VMs (the host runs a few test VMs
+occasionally — <code>vm-switch-loop.sh</code> exercises the regression test).</p>
+<h2 id="storage">Storage</h2>
+<pre><code>fileSystems.&quot;&#x2F;&quot; = lib.mkForce {
+  device = &quot;&#x2F;dev&#x2F;disk&#x2F;by-uuid&#x2F;ef0ab8ba-27f8-4595-8595-79390078ef46&quot;;
+  fsType = &quot;ext4&quot;;
+  options = [ &quot;noatime&quot; ];
+};
+
+fileSystems.&quot;&#x2F;boot&quot; = lib.mkForce {
+  device = &quot;&#x2F;dev&#x2F;disk&#x2F;by-uuid&#x2F;B994-87FC&quot;;
+  fsType = &quot;vfat&quot;;
+  options = [ &quot;fmask=0077&quot; &quot;dmask=0077&quot; ];
+};
+
+fileSystems.&quot;&#x2F;mnt&#x2F;storage&quot; = lib.mkForce {
+  device = &quot;&#x2F;dev&#x2F;disk&#x2F;by-uuid&#x2F;23ab71c8-d86f-4f92-802a-9cb706261f3f&quot;;
+  fsType = &quot;ext4&quot;;
+  options = [ &quot;noatime&quot; ];
+};
+
+swapDevices = [ ];
+</code></pre>
+<p>Three filesystems, no swap device. The zram slice replaces swap
+entirely (see below).</p>
+<p>The <code>noatime</code> on <code>/</code> and <code>/mnt/storage</code> reduces disk writes for a
+heavy-traffic home directory and a media-archive storage disk.</p>
+<h2 id="power-and-memory">Power and memory</h2>
+<pre><code>services.zramSlice = {
+  enable = true;
+  size = &quot;auto&quot;;
+};
+</code></pre>
+<p><code>size = "auto"</code> is <code>50% RAM, capped at 16384 MB</code> (see
+<code>modules/zram-slice.nix</code>). On a 32 GB tower, this gives a 16 GB
+zram swap. Used heavily during Emacs GC pauses and when the
+<code>trivy image --severity HIGH,CRITICAL</code> job scans a multi-GB Docker
+image.</p>
+<h2 id="resolved-avahi">Resolved / Avahi</h2>
+<pre><code>services.resolved = {
+  enable = true;
+  llmnr = &quot;false&quot;;   # NB: NixOS option is enum [ &quot;true&quot; &quot;resolve&quot; &quot;false&quot; ] — STRING
+  extraConfig = builtins.readFile ..&#x2F;..&#x2F;conf&#x2F;resolved-extra.conf;
+};
+</code></pre>
+<p><code>llmnr = "false"</code> is <strong>a string</strong>, not a bool — the NixOS option is an
+enum, not a <code>types.bool</code>. <code>MulticastDNS=no</code> and <code>LLMNR=no</code> are
+appended via <code>extraConfig</code> (from <code>conf/resolved-extra.conf</code>) to make
+Avahi the sole mDNS stack.</p>
+<h2 id="audit">Audit</h2>
+<pre><code>security.audit.enable = false;
+</code></pre>
+<p><code>auditctl</code> cannot watch <code>/.host-etc/</code> symlinks — the audit subsystem
+is incompatible with NixOS’s symlink-based <code>/etc/</code> layout. The
+trade-off: no audit on this host. The headscale control plane, the
+NFS server, and the LAN gateway are all on this host, so the loss
+of audit is non-trivial — the user is expected to compensate with
+journal monitoring and fail2ban.</p>
+<h2 id="nfs">NFS</h2>
+<pre><code>pro.nfs.server.enable = true;
+pro.nfs.server.exportPath = &quot;&#x2F;srv&#x2F;nfs&quot;;
+# pro.nfs.client.enable — INTENTIONALLY NOT set on this host.
+# A loopback mount from this host to itself would fail with
+# &quot;No such file or directory&quot; from mountd. NFS client is for
+# cf19&#x2F;huawei&#x2F;vm only.
+</code></pre>
+<p>The export has <code>rw,sync,no_subtree_check,no_root_squash,sec=sys,fsid=0,crossmnt</code>.
+Allowed clients: 3 RFC1918 CIDRs.</p>
+<h2 id="headscale">Headscale</h2>
+<pre><code>headscale.enable = lib.mkForce true;
+pro.network.allowSubnetRouter = lib.mkForce true;
+</code></pre>
+<p>See <a href="http://127.0.0.1:8000/en/hosts/desktop/architecture/network.md#layer-2-mesh-headscale">Architecture → Network layers → headscale</a>
+for the per-host invariant (one control plane only).</p>
+<h2 id="what-is-on-this-host">What is on this host</h2>
+<ul>
+<li><code>desktop-heavy</code> composition: chromium, firefox, telegram-desktop,
+element-desktop, jami, weechat, ffmpegthumbnailer, baobab,
+pavucontrol, deluge, steam, steam-run, copyq, dunst, flameshot,
+playerctl.</li>
+<li>Chromium wrapper: <code>systemd-run --user --scope -p MemoryMax=4500M -p MemoryHigh=4G -p CPUQuota=90%</code>.</li>
+<li>Firefox wrapper: <code>MemoryMax=2500M -p MemoryHigh=2G -p CPUQuota=90%</code>.</li>
+<li>NFS server, Syncthing (gui 127.0.0.1:8384, openDefaultPorts = false,
+single shared folder <code>/srv/syncthing/share</code>), Samba server
+(private + public shares, members of <code>pro</code> group can write).</li>
+</ul>
+<h2 id="post-switch-checklist">Post-switch checklist</h2>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash"># 1. SSH keys
+ssh-copy-id -i ~&#x2F;.ssh&#x2F;id_ed25519.pub az@desktop.local
+
+# 2. Avahi
+systemctl status avahi-daemon
+avahi-browse -rt _ssh._tcp | grep desktop
+
+# 3. NFS export
+install -d -m 2775 -o root -g pro &#x2F;srv&#x2F;nfs
+exportfs -v | grep &#x2F;srv&#x2F;nfs
+
+# 4. Headscale — back up the noise key ONCE
+sudo cp &#x2F;var&#x2F;lib&#x2F;headscale&#x2F;noise_private.key &#x2F;etc&#x2F;headscale&#x2F;
+sudo chmod 0600 &#x2F;etc&#x2F;headscale&#x2F;noise_private.key
+# pin via local.nix: headscale.settings.noise.private_key = &quot;&lt;base64&gt;&quot;
+
+# 5. Headscale user + preauthkey
+sudo headscale users create az
+sudo headscale preauthkeys create --user az --reusable --expiration 24h
+
+# 6. Firewall (if accepting registrations from WAN)
+# Add to local.nix: networking.firewall.allowedTCPPorts = [ 8080 ];
+
+# 7. Tor (if you want the onion hostname)
+# See modules&#x2F;pro-privacy.nix + scripts&#x2F;ops-ensure-tor.sh
+
+# 8. zram
+systemctl status zram.slice
+
+# 9. LAN-gw
+sysctl net.ipv4.ip_forward    # should be 1
+ip route show default
+</code></pre>
+
+
+  
+  <hr>
+  <p><strong>Дальше:</strong>
+  
+    <a href="&#x2F;hosts&#x2F;cf19&#x2F;">cf19</a> · 
+  
+    <a href="&#x2F;hosts&#x2F;">All hosts</a>
+  
+  </p>
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

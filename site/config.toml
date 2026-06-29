@@ -1,0 +1,370 @@
+# Zola config for pro-nix site
+# https://www.getzola.org/documentation/getting-started/configuration/
+
+base_url = "http://127.0.0.1:8000"
+default_language = "ru"
+generate_feeds = true
+feed_limit = 50
+build_search_index = true
+
+[markdown]
+external_links_class = "external-link"
+render_emoji = false
+smart_punctuation = true
+allow_html_in_markdown = true
+
+[languages.en]
+title = "pro-nix"
+description = "Portable NixOS + Emacs + AI-agents stack. Declarative, idempotent, opinionated."
+taxonomies = [{ name = "tags", feed = true }]
+generate_feeds = true
+build_search_index = true
+
+[extra]
+build = "0.1.0"
+github = "https://github.com/11111000000/pro-nix"
+copyright = "про-nix контрибьюторы"
+
+# Design palette (16-color, from conf/Xresources)
+[extra.palette]
+fg = "#b0b0b0"
+bg = "#000000"
+fg_dim = "#666666"
+fg_light = "#c0c0c0"
+bg_light = "#1c1c1c"
+surface1 = "#1c1c1c"
+surface2 = "#2a2a2a"
+surface3 = "#3c3c3c"
+border = "#2a2a2a"
+accent = "#5cc25c"
+warn = "#c2c25c"
+info = "#5c5cc2"
+danger = "#c25c5c"
+special = "#c25cc2"
+special2 = "#5cc2c2"
+cursor = "#88ff88"
+
+# Top navigation. url is the path under each language's root.
+[[extra.nav]]
+url = "/about/"
+[extra.nav.label]
+ru = "О проекте"
+en = "About"
+
+[[extra.nav]]
+url = "/principles/"
+[extra.nav.label]
+ru = "Принципы"
+en = "Principles"
+
+[[extra.nav]]
+url = "/stack/"
+[extra.nav.label]
+ru = "Стек"
+en = "Stack"
+
+[[extra.nav]]
+url = "/architecture/"
+[extra.nav.label]
+ru = "Архитектура"
+en = "Architecture"
+
+[[extra.nav]]
+url = "/hosts/"
+[extra.nav.label]
+ru = "Хосты"
+en = "Hosts"
+
+[[extra.nav]]
+url = "/reference/"
+[extra.nav.label]
+ru = "Справочник"
+en = "Reference"
+
+[[extra.nav]]
+url = "/workflow/"
+[extra.nav.label]
+ru = "Рабочий процесс"
+en = "Workflow"
+
+[[extra.nav]]
+url = "/conventions/"
+[extra.nav.label]
+ru = "Соглашения"
+en = "Conventions"
+
+# Sidebar groups
+[[extra.sidebar]]
+[extra.sidebar.title]
+ru = "Начать"
+en = "Get started"
+[[extra.sidebar.items]]
+url = "/"
+[extra.sidebar.items.label]
+ru = "Обзор"
+en = "Overview"
+[[extra.sidebar.items]]
+url = "/about/"
+[extra.sidebar.items.label]
+ru = "Что такое pro-nix"
+en = "What is pro-nix"
+[[extra.sidebar.items]]
+url = "/principles/"
+[extra.sidebar.items.label]
+ru = "Принципы"
+en = "Principles"
+[[extra.sidebar.items]]
+url = "/workflow/quickstart/"
+[extra.sidebar.items.label]
+ru = "Быстрый старт"
+en = "Quick start"
+
+[[extra.sidebar]]
+[extra.sidebar.title]
+ru = "Стек"
+en = "The stack"
+[[extra.sidebar.items]]
+url = "/stack/"
+[extra.sidebar.items.label]
+ru = "Обзор"
+en = "Overview"
+[[extra.sidebar.items]]
+url = "/stack/nixos/"
+[extra.sidebar.items.label]
+ru = "NixOS"
+en = "NixOS"
+[[extra.sidebar.items]]
+url = "/stack/emacs/"
+[extra.sidebar.items.label]
+ru = "Emacs"
+en = "Emacs"
+[[extra.sidebar.items]]
+url = "/stack/ai/"
+[extra.sidebar.items.label]
+ru = "AI-агенты"
+en = "AI agents"
+[[extra.sidebar.items]]
+url = "/stack/wm/"
+[extra.sidebar.items.label]
+ru = "Оконные менеджеры"
+en = "Window managers"
+[[extra.sidebar.items]]
+url = "/stack/privacy/"
+[extra.sidebar.items.label]
+ru = "Приватность и Tor"
+en = "Privacy & Tor"
+[[extra.sidebar.items]]
+url = "/stack/dev/"
+[extra.sidebar.items.label]
+ru = "Инструменты разработчика"
+en = "Dev tooling"
+
+[[extra.sidebar]]
+[extra.sidebar.title]
+ru = "Архитектура"
+en = "Architecture"
+[[extra.sidebar.items]]
+url = "/architecture/"
+[extra.sidebar.items.label]
+ru = "Обзор"
+en = "Overview"
+[[extra.sidebar.items]]
+url = "/architecture/flake/"
+[extra.sidebar.items.label]
+ru = "Flake inputs"
+en = "Flake inputs"
+[[extra.sidebar.items]]
+url = "/architecture/modules/"
+[extra.sidebar.items.label]
+ru = "NixOS-модули"
+en = "NixOS modules"
+[[extra.sidebar.items]]
+url = "/architecture/composition/"
+[extra.sidebar.items.label]
+ru = "Composition-файлы"
+en = "Composition files"
+[[extra.sidebar.items]]
+url = "/architecture/emacs-base/"
+[extra.sidebar.items.label]
+ru = "Загрузка Emacs"
+en = "Emacs bootstrap"
+[[extra.sidebar.items]]
+url = "/architecture/agents/"
+[extra.sidebar.items.label]
+ru = "Стек AI-агентов"
+en = "AI agent stack"
+[[extra.sidebar.items]]
+url = "/architecture/network/"
+[extra.sidebar.items.label]
+ru = "Сетевые слои"
+en = "Network layers"
+
+[[extra.sidebar]]
+[extra.sidebar.title]
+ru = "Хосты"
+en = "Hosts"
+[[extra.sidebar.items]]
+url = "/hosts/"
+[extra.sidebar.items.label]
+ru = "Все хосты"
+en = "All hosts"
+[[extra.sidebar.items]]
+url = "/hosts/desktop/"
+[extra.sidebar.items.label]
+ru = "desktop"
+en = "desktop"
+[[extra.sidebar.items]]
+url = "/hosts/cf19/"
+[extra.sidebar.items.label]
+ru = "cf19"
+en = "cf19"
+[[extra.sidebar.items]]
+url = "/hosts/huawei/"
+[extra.sidebar.items.label]
+ru = "huawei"
+en = "huawei"
+[[extra.sidebar.items]]
+url = "/hosts/vm/"
+[extra.sidebar.items.label]
+ru = "vm"
+en = "vm"
+
+[[extra.sidebar]]
+[extra.sidebar.title]
+ru = "Справочник"
+en = "Reference"
+[[extra.sidebar.items]]
+url = "/reference/"
+[extra.sidebar.items.label]
+ru = "Обзор"
+en = "Overview"
+[[extra.sidebar.items]]
+url = "/reference/keys/"
+[extra.sidebar.items.label]
+ru = "Глобальные клавиши"
+en = "Global keys"
+[[extra.sidebar.items]]
+url = "/reference/defcustom/"
+[extra.sidebar.items.label]
+ru = "defcustom"
+en = "defcustom"
+[[extra.sidebar.items]]
+url = "/reference/options/"
+[extra.sidebar.items.label]
+ru = "NixOS-опции"
+en = "NixOS options"
+[[extra.sidebar.items]]
+url = "/reference/scripts/"
+[extra.sidebar.items.label]
+ru = "Скрипты"
+en = "Scripts"
+[[extra.sidebar.items]]
+url = "/reference/submodules/"
+[extra.sidebar.items.label]
+ru = "Сабмодули"
+en = "Submodules"
+[[extra.sidebar.items]]
+url = "/reference/tests/"
+[extra.sidebar.items.label]
+ru = "Тесты"
+en = "Tests"
+[[extra.sidebar.items]]
+url = "/reference/ci/"
+[extra.sidebar.items.label]
+ru = "CI-workflow"
+en = "CI workflows"
+[[extra.sidebar.items]]
+url = "/reference/ai-models/"
+[extra.sidebar.items.label]
+ru = "AI-модели"
+en = "AI models"
+[[extra.sidebar.items]]
+url = "/reference/glossary/"
+[extra.sidebar.items.label]
+ru = "Глоссарий"
+en = "Glossary"
+
+[[extra.sidebar]]
+[extra.sidebar.title]
+ru = "Рабочий процесс"
+en = "Workflow"
+[[extra.sidebar.items]]
+url = "/workflow/"
+[extra.sidebar.items.label]
+ru = "Все процессы"
+en = "All workflows"
+[[extra.sidebar.items]]
+url = "/workflow/just/"
+[extra.sidebar.items.label]
+ru = "just-рецепты"
+en = "just recipes"
+[[extra.sidebar.items]]
+url = "/workflow/submodules/"
+[extra.sidebar.items.label]
+ru = "Сабмодули"
+en = "Submodules"
+[[extra.sidebar.items]]
+url = "/workflow/agents/"
+[extra.sidebar.items.label]
+ru = "AI-агенты"
+en = "AI agents"
+[[extra.sidebar.items]]
+url = "/workflow/keys/"
+[extra.sidebar.items.label]
+ru = "Клавиши"
+en = "Keys"
+[[extra.sidebar.items]]
+url = "/workflow/reload/"
+[extra.sidebar.items.label]
+ru = "Soft-reload"
+en = "Soft-reload"
+[[extra.sidebar.items]]
+url = "/workflow/tests/"
+[extra.sidebar.items.label]
+ru = "Тесты"
+en = "Tests"
+[[extra.sidebar.items]]
+url = "/workflow/per-host/"
+[extra.sidebar.items.label]
+ru = "Чек-листы хостов"
+en = "Per-host"
+[[extra.sidebar.items]]
+url = "/workflow/troubleshoot/"
+[extra.sidebar.items.label]
+ru = "Troubleshooting"
+en = "Troubleshooting"
+
+[[extra.sidebar]]
+[extra.sidebar.title]
+ru = "Соглашения"
+en = "Conventions"
+[[extra.sidebar.items]]
+url = "/conventions/"
+[extra.sidebar.items.label]
+ru = "Обзор"
+en = "Overview"
+[[extra.sidebar.items]]
+url = "/conventions/commit/"
+[extra.sidebar.items.label]
+ru = "Коммиты"
+en = "Commits"
+[[extra.sidebar.items]]
+url = "/conventions/mkforce/"
+[extra.sidebar.items.label]
+ru = "mkForce"
+en = "mkForce"
+[[extra.sidebar.items]]
+url = "/conventions/change-gate/"
+[extra.sidebar.items.label]
+ru = "Change-Gate"
+en = "Change-Gate"
+[[extra.sidebar.items]]
+url = "/conventions/dead-code/"
+[extra.sidebar.items.label]
+ru = "Мёртвый код"
+en = "Dead-code"
+[[extra.sidebar.items]]
+url = "/conventions/anti-patterns/"
+[extra.sidebar.items.label]
+ru = "Анти-паттерны"
+en = "Anti-patterns"

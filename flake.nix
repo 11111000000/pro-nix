@@ -141,18 +141,58 @@
       apps.${system} = {
         check-all = {
           type = "app";
-          meta.description = "Build all machine configurations explicitly";
+          meta.description = "Build all 3 full NixOS hosts sequentially";
           program = toString (pkgs.writeShellScript "check-all-hosts" ''
             set -eu
-            # Используем git+file://...?submodules=1 — path: и . НЕ включают
-            # submodules в captured source (см. AGENTS.md §6a).
             FLAKE="git+file://$PWD?submodules=1"
             nix build "$FLAKE#nixosConfigurations.cf19.config.system.build.toplevel"
             nix build "$FLAKE#nixosConfigurations.huawei.config.system.build.toplevel"
-            nix build "$FLAKE#nixosConfigurations.desktop.config.system.build.toplevel"
+            nix build "$FLAKE#nixosConfigurations.station.config.system.build.toplevel"
           '');
         };
+        site-serve = {
+          type = "app";
+          meta.description = "Serve the pro-nix docs site locally with Zola (live reload)";
+          program = toString (pkgs.writeShellScript "site-serve" ''
+            cd "$PWD/site"
+            ${pkgs.zola}/bin/zola serve --port 8000 --open
+          '');
+        };
+        site-regen = {
+          type = "app";
+          meta.description = "Regenerate all auto-gen pages of the docs site (EN+RU)";
+          program = toString (pkgs.writeShellScript "site-regen" ''
+            set -eu
+            cd "$PWD"
+            bash scripts/site-regen.sh
+          '');
+        };
+        site-build = {
+          type = "app";
+          meta.description = "Build the static docs site (output in ./site/public)";
+          program = toString (pkgs.writeShellScript "site-build" ''
+            set -eu
+            cd "$PWD/site"
+            ${pkgs.zola}/bin/zola build
+          '');
+        };
+      };
 
+      packages.${system} = {
+        site = pkgs.stdenv.mkDerivation {
+          name = "pro-nix-site";
+          srcs = [ ./site/config.toml ./site/content ./site/templates ./site/static ];
+          nativeBuildInputs = [ pkgs.zola ];
+          buildPhase = ''
+            cp -r ${./site/config.toml} config.toml
+            chmod -R u+w .
+            ${pkgs.zola}/bin/zola build
+          '';
+          installPhase = ''
+            mkdir -p $out
+            cp -r public $out/
+          '';
+        };
       };
 
       devShells.${system}.default = let
@@ -180,7 +220,7 @@
         name = "pro-nix-dev";
         # Ensure overlay-provided emacs package derivations are present in the shell
         # so their /share/emacs/site-lisp paths exist for the emacs wrapper.
-        buildInputs = [ emacsPkg pkgs.ripgrep pkgs.fd pkgs.findutils pkgs.stress-ng pkgs.fio pkgs.powertop pkgs.iotop pkgs.lm_sensors pkgs.time pkgs.shellcheck pkgs.direnv pkgs.gh ] ++ presentPkgs;
+        buildInputs = [ emacsPkg pkgs.zola pkgs.ripgrep pkgs.fd pkgs.findutils pkgs.stress-ng pkgs.fio pkgs.powertop pkgs.iotop pkgs.lm_sensors pkgs.time pkgs.shellcheck pkgs.direnv pkgs.gh pkgs.python3 ] ++ presentPkgs;
         shellHook = let
           flags = lib.concatStringsSep " " (map (p: "-L " + p + "/share/emacs/site-lisp") presentPkgs);
         in ''

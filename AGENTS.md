@@ -288,6 +288,45 @@ cp .gitmodules.backup.<timestamp> .gitmodules
 git submodule sync && git submodule update --remote --merge
 ```
 
+### 6e. Ellama + llm: upstream ELPA tarball gone
+
+Upstream nixpkgs `pkgs.emacsPackages.llm` (в nixpkgs 25.11) запинен на
+`llm-0.27.2.tar` в ELPA mirrors. Этот tarball **удалён** с зеркал (HTTP 404
+на `elpa.gnu.org`, `melpa.org`, и пр.) — пакет удалён по retention policy.
+Результат: build `emacs-llm-0.27.2` падает с `cannot download llm-0.27.2.tar`
+на каждом из зеркал. Это **drift upstream ELPA**, не вина нашего кода.
+
+Наш `nix/emacs-recipes/llm.nix` обходит проблему: `fetchFromGitHub`
+`ahyatt/llm@745f9b10…` (HEAD от 2026-06-28) + обычный `mkDerivation`
+без `elpa2nix`. Это работает потому что ellama 1.29+ просто требует
+`llm 0.31+`, а upstream HEAD уже совместим.
+
+**Alphabetic-order gotcha** (см. `nix/overlays/emacs-extra.nix`):
+attrset literal `localRecipes` оценивается **по алфавиту** — `ellama`
+оценивается раньше `llm`. Если ellama recipe берёт
+`super.emacsPackages.llm`, получит upstream broken, а не наш patched.
+Решение — патчим llm в `let patchedLlm = super.callPackage ...` **до**
+`localRecipes`, и в `ellama = ...` явно пробрасываем
+`emacsPackages_llm = patchedLlm` (плюс остальные buildInputs).
+
+Также учтите, что ellama.el `require`-ит `plz-event-source` и
+`plz-media-type` напрямую — это **отдельные** emacsPackages, не
+подкаталоги plz. Их надо явно передавать в recipe как
+`emacsPackages_plz_event_source` / `emacsPackages_plz_media_type`.
+
+Симптомы и диагностика:
+
+- `error: cannot download llm-0.27.2.tar from any mirror` → upstream
+  ELPA tarball gone. Решение: убедитесь, что `nix/emacs-recipes/llm.nix`
+  подключён в `nix/overlays/emacs-extra.nix`, и `llm = patchedLlm` стоит
+  через `let binding`.
+- `error: Cannot open load file: llm` (но build deps включают llm)
+  → alphabetic-order gotcha; ellama recipe получает upstream llm. См.
+  выше.
+- `error: Cannot open load file: plz-event-source` или
+  `plz-media-type` → не добавлены в `buildInputs` ellama recipe. Это
+  отдельные packages, не subdir of plz.
+
 ## 8. Процесс развёртывания
 
 ### Подготовка новой среды

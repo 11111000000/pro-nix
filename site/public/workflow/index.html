@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="active">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class="active"><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">Рабочий процесс</h1>
+  <p>Большая часть того, что вы делаете в репо, идёт через <code>just</code>. Рецепты
+в <code>justfile:1-164</code> и сгруппированы в пять кластеров.</p>
+<h2 id="1-build-switch">1. Build / switch</h2>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">just switch &lt;host&gt;               # nixos-rebuild switch, post-fix emacs ownership, deploy bin&#x2F;
+just switch-with-agents &lt;host&gt;   # то же + deploy-agent-configs + install-pi-packages
+just build &lt;host&gt;                # nixos-rebuild build (без применения)
+just test &lt;host&gt;                 # nixos-rebuild test (оффлайн активация)
+just flake-check                 # nix flake check с submodules=1
+just check-all                   # nix run .#check-all — собирает 3 полных хоста
+</code></pre>
+<p><code>just switch</code> запускает <code>scripts/helper-switch.sh</code>, который:</p>
+<ul>
+<li>Использует <code>git+file://$PWD?submodules=1</code> (path: и . не включают
+сабмодули в captured source)</li>
+<li>Решает политику сабмодулей: <code>init</code> если не инициализированы,
+<code>skip</code> если есть, <code>update</code> только на <code>--update-submodules</code> / <code>sync</code></li>
+<li>Пишет <code>nixos-rebuild switch</code> в <code>/tmp/switch-&lt;epoch&gt;.log</code></li>
+<li>При успехе: <code>chown -R $USER</code> для <code>~/.config/emacs</code>,
+<code>~/.local/state/pro-emacs</code>, <code>~/.cache/pro-emacs</code> (sudo-активация
+может оставить root-owned файлы там)</li>
+<li>Деплоит <code>bin/*</code> в <code>~/bin</code> и добавляет <code>~/bin</code> в <code>~/.profile</code> PATH</li>
+</ul>
+<h2 id="2-sabmoduli">2. Сабмодули</h2>
+<p>В репо 11 git-сабмодулей, все HTTPS по умолчанию. SSH — opt-in per host.</p>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">git submodule update --init --recursive   # первый раз
+just sync-submodules                       # обновить все с remote (sequential, 20s&#x2F;10s таймауты)
+just submodules-ssh                        # конвертировать все HTTPS в SSH (если есть write-доступ)
+</code></pre>
+<p><code>just switch</code> <strong>не</strong> обновляет сабмодули с remote по умолчанию;
+инициализирует их только если они не инициализированы. Чтобы
+форсировать обновление — <code>just switch &lt;host&gt; update-submodules</code>.
+Чтобы пропустить политику — <code>PRO_NIX_NO_SUBMODULE_UPDATE=1</code>.</p>
+<h2 id="3-deploi-ai-agentov">3. Деплой AI-агентов</h2>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">just deploy-agents            # скопировать local-templates&#x2F;{pi,opencode}&#x2F;* в $HOME
+just install-pi-packages      # pi install npm:&lt;pkg&gt; для каждого пакета из settings.json
+just switch-with-agents &lt;host&gt;    # цепочка: deploy-agents + install-pi-packages + switch
+</code></pre>
+<p><code>deploy-agent-configs.sh</code> — <strong>copy-if-missing</strong> — никогда не перезаписывает
+локальные правки пользователя. Чтобы форсировать — <code>rm</code> нужный файл
+и снова запустить. Скрипт также создаёт
+<code>~/.local/share/pro-nix/load-agent-env.sh</code> и добавляет маркер-строку
+в <code>~/.profile</code>, чтобы shell-сессии подхватывали <code>AITUNNEL_KEY</code>,
+<code>OPENROUTER_KEY</code> и т.д. из <code>~/.authinfo</code> (или <code>~/.authinfo.gpg</code>).</p>
+<h2 id="4-emacs-soft-reload">4. Emacs soft-reload</h2>
+<p>Внутри Emacs:</p>
+<pre><code>C-x M-c            M-x pro&#x2F;reload-config       быстрый reload (модули в месте)
+C-u M-x pro&#x2F;reload-config                      полный reload (re-evals site-init + все модули)
+M-x pro-keys-reload                            перечитать emacs-keys.org
+M-x pro-keys-report-pending                    список биндингов, ожидающих пакетов
+</code></pre>
+<p>См. <a href="http://127.0.0.1:8000/workflow/architecture/emacs-base.md">Архитектура → Загрузка Emacs</a> для
+четырёхфазной модели. См. <code>emacs/base/modules/pro-reload.el:11-22</code> для
+контракта автора модуля.</p>
+<h2 id="5-testy">5. Тесты</h2>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">just flake-check         # nix flake check
+just network-contract    # tests&#x2F;contract&#x2F;pro-network-01.sh (5 чеков)
+just headless-tests      # запуск Emacs headless ERT
+just headless-report     # хвост последнего run-лога
+</code></pre>
+<p>Пять слоёв тестов:</p>
+<ol>
+<li><strong><code>nix flake check</code></strong> — синтаксические и type-level проверки.</li>
+<li><strong>Slow VM-тесты</strong> — gated by <code>PRO_NIX_RUN_SLOW_CHECKS=1</code>;
+поднимают NixOS VM и проверяют, что она загружается / активируется
+чисто.</li>
+<li><strong>Contract-тесты</strong> — <code>tests/contract/*</code> (sh + el + spec файлы) —
+структурные свойства (pro.hosts имеет 4 записи, headscale
+включён только на desktop, EMCP-порт 38913, …).</li>
+<li><strong>Unit-тесты</strong> — <code>tests/contract/unit/*</code> (10 коротких скриптов).</li>
+<li><strong>GUI smoke</strong> — <code>tests/gui/gui-smoke.el</code> под Xvfb.</li>
+</ol>
+<h2 id="6-per-host-chek-list">6. Per-host чек-лист</h2>
+<p>После свежего <code>just switch</code> для каждого хоста:</p>
+<p><strong>desktop:</strong></p>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash"># 1. SSH-ключи (один раз, см. README §1)
+# 2. Avahi: getent hosts desktop.local
+# 3. NFS-export: install -d -m 2775 -o root -g pro &#x2F;srv&#x2F;nfs
+# 4. headscale: cp &#x2F;var&#x2F;lib&#x2F;headscale&#x2F;noise_private.key &#x2F;etc&#x2F;headscale&#x2F;
+# 5. headscale users create az; preauthkeys create --user az --reusable --expiration 24h
+# 6. systemctl status headscale avahi-daemon tor
+</code></pre>
+<p><strong>cf19 / huawei:</strong></p>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash"># 1. SSH-ключи
+# 2. getent hosts desktop.local   (должен резолвиться)
+# 3. ls &#x2F;mnt&#x2F;desktop             (≤ 3 с, даже если desktop выключен)
+# 4. M-x pro&#x2F;reload-config        (подхватывает свежеактивированные модули)
+# 5. C-c a  M-x pro-ai-open-entry (gptel-бэкенд доступен)
+</code></pre>
+<p><strong>vm:</strong></p>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash"># 1. SSH-ключи
+# 2. systemctl --no-pager --failed
+# 3. mount | grep &#x2F;mnt&#x2F;desktop
+# 4. nix flake check  (sanity)
+</code></pre>
+<h2 id="7-troubleshooting">7. Troubleshooting</h2>
+<table><thead><tr><th>Симптом</th><th>Где смотреть</th></tr></thead><tbody>
+<tr><td><code>Permission denied (publickey)</code> на <code>ssh desktop</code></td><td><code>~/.ssh/authorized_keys</code> на сервере; <code>~/.ssh/id_ed25519</code> на клиенте</td></tr>
+<tr><td><code>getent hosts desktop.local</code> пусто</td><td><code>systemctl restart avahi-daemon</code>; проверьте <code>nss-mdns</code> в <code>/etc/nsswitch.conf</code></td></tr>
+<tr><td><code>ls /mnt/desktop</code> висит &gt; 3 с</td><td><code>grep /mnt/desktop /etc/fstab</code> должен показать <code>timeo=10,retrans=1,x-systemd.mount-timeout=3,nofail</code></td></tr>
+<tr><td><code>Cannot open load file "some-pkg"</code> в Emacs</td><td><code>git submodule update --init --recursive</code></td></tr>
+<tr><td><code>headscale: noise key regenerated, all sessions lost</code></td><td>Backup <code>noise_private.key</code> из <code>/var/lib/headscale/</code> в <code>local.nix</code></td></tr>
+<tr><td><code>nixos-rebuild switch</code> висит на <code>mount</code></td><td>NFS-монит без <code>nofail</code>. Добавьте <code>x-systemd.mount-timeout=1</code> per-mount</td></tr>
+<tr><td><code>emcp</code> не виден в pi</td><td><code>emacsclient -e '(pro-emcp-server-start)'</code>, потом <code>pi -p 'mcp({})'</code></td></tr>
+<tr><td><code>*.el</code> reload предупреждает “not owned by current user”</td><td><code>sudo chown -R $USER ~/.config/emacs</code> (helper-switch.sh делает это при успехе)</td></tr>
+<tr><td>surface-lint жалуется на модуль</td><td>Добавьте 4 обязательных секции в шапку: Назначение / Цель / Контракт / Proof</td></tr>
+</tbody></table>
+<h2 id="8-pravka-repozitoriia">8. Правка репозитория</h2>
+<p>Всегда:</p>
+<ol>
+<li>Прочтите <a href="http://127.0.0.1:8000/workflow/conventions/_index.md">Соглашения</a> — формат коммитов,
+правила mkForce, анти-паттерны, детекторы мёртвого кода.</li>
+<li><code>nix flake check</code> перед push.</li>
+<li><code>just network-contract</code>, если трогали сетевой модуль.</li>
+<li><code>just headless-tests</code>, если трогали Emacs-модуль.</li>
+<li>Заполните Change-Gate (<code>Intent:</code> / <code>Pressure:</code> / <code>Surface:</code> /
+<code>Proof:</code>) в теле PR.</li>
+</ol>
+
+</article>
+
+
+<h2 class="section-pages-title">Страницы в этом разделе</h2>
+<ul class="section-pages">
+  
+  <li><a href="&#x2F;workflow&#x2F;quickstart&#x2F;">Быстрый старт</a> <span class="page-tldr">— git clone, git submodule update --init, just switch &lt;host&gt;. Четыре хоста: desktop, cf19, huawei, vm. От clone до загрузки свежей машины — около 30 минут.</span></li>
+  
+  <li><a href="&#x2F;workflow&#x2F;just&#x2F;">just-рецепты</a> <span class="page-tldr">— 30+ just-рецептов в 5 кластерах: build&#x2F;switch, сабмодули, агенты, тесты, Docker. Все используют git+file:&#x2F;&#x2F;...?submodules=1.</span></li>
+  
+  <li><a href="&#x2F;workflow&#x2F;submodules&#x2F;">Сабмодули</a> <span class="page-tldr">— 11 сабмодулей, HTTPS по умолчанию, переключение just submodules-ssh. just switch не обновляет с remote, если не передан --update-submodules &#x2F; sync. Хелпер-скрипт: scripts&#x2F;sync-submodules.sh (sequential, таймауты).</span></li>
+  
+  <li><a href="&#x2F;workflow&#x2F;agents&#x2F;">Агенты</a> <span class="page-tldr">— just deploy-agents запускает deploy-agent-configs.sh + install-pi-packages.sh. Семантика copy_if_missing. Цепочка ~&#x2F;.authinfo → ~&#x2F;.profile экспортирует AITUNNEL_KEY, OPENROUTER_KEY, OPENAI_API_KEY, MISTRAL_API_KEY, MINIMAX_API_KEY, DEEPSEEK_API_KEY.</span></li>
+  
+  <li><a href="&#x2F;workflow&#x2F;keys&#x2F;">Клавиши</a> <span class="page-tldr">— emacs-keys.org — исполняемый код. pro-keys-reload парсит его, применяет глобальные клавиши, откладывает pending-биндинги до загрузки целевого пакета. User override: ~&#x2F;.config&#x2F;emacs&#x2F;keys.org. Модули предлагают через pro&#x2F;register-module-keys.</span></li>
+  
+  <li><a href="&#x2F;workflow&#x2F;reload&#x2F;">Soft-reload</a> <span class="page-tldr">— C-x M-c (pro&#x2F;reload-config) переоценивает каждый загруженный модуль в месте. C-u re-evals site-init.el первым. Модули, владеющие persistent state, регистрируются на pro--after-reload-hook. Идемпотентные top-level формы через pro-compat--add-{hook,to-list,advice}-once.</span></li>
+  
+  <li><a href="&#x2F;workflow&#x2F;tests&#x2F;">Тесты</a> <span class="page-tldr">— 5 слоёв: flake check (быстрый), unit (10 скриптов), contract (5 скриптов), VM (slow, gated), GUI (Xvfb). Запускаются в CI: hds-verify, unit-ci, validate-pr. Локально: just flake-check, just headless-tests, just network-contract, tools&#x2F;holo-verify.sh.</span></li>
+  
+  <li><a href="&#x2F;workflow&#x2F;per-host&#x2F;">Per-host чек-лист</a> <span class="page-tldr">— После just switch у каждого хоста свой маленький список post-install шагов. desktop нуждается в бэкапе noise-ключа + создании user; cf19 — в i8042-sanity + WiFi-recovery; huawei — в SOF-аудио; vm — в sudo-sanity.</span></li>
+  
+  <li><a href="&#x2F;workflow&#x2F;troubleshoot&#x2F;">Troubleshooting</a> <span class="page-tldr">— Таблица симптом → где смотреть. Самые частые: SSH Permission denied, getent hosts .local пуст, ls &#x2F;mnt&#x2F;desktop &gt; 3 с, headscale потерял noise-ключ, emcp не виден в pi.</span></li>
+  
+</ul>
+
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

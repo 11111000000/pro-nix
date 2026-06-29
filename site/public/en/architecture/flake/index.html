@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flake inputs · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">Flake inputs</h1>
+  <h1 id="flake-inputs">Flake inputs</h1>
+<p><code>flake.nix</code> is the <strong>entry point</strong> of the project. Everything else is a
+module, a composition file, or a recipe that the flake glues together.</p>
+<h2 id="inputs">Inputs</h2>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">inputs = {
+  nixpkgs.url       = &quot;nixpkgs&#x2F;nixos-25.11&quot;;
+  systems.url       = &quot;github:nix-systems&#x2F;default&quot;;
+  home-manager.url  = &quot;github:nix-community&#x2F;home-manager&#x2F;release-25.11&quot;;
+  opencodeBwrap.url = &quot;github:michalrus&#x2F;opencode-bwrap-nix&quot;;
+  pi.url            = &quot;github:lukasl-dev&#x2F;pi.nix&quot;;
+};
+</code></pre>
+<ul>
+<li><code>home-manager.inputs.nixpkgs.follows = "nixpkgs"</code> — HM shares the same
+nixpkgs pin.</li>
+<li><code>opencodeBwrap.inputs.nixpkgs.follows = "nixpkgs"</code> — same.</li>
+<li><code>pi.inputs.nixpkgs.follows = "nixpkgs"</code>.</li>
+<li><code>pi.inputs.systems.follows = "systems"</code>.</li>
+</ul>
+<blockquote>
+<p>nix-hermes was removed (it was a fork provided by the user; no longer
+used).</p>
+</blockquote>
+<h2 id="nixpkgsconfig"><code>nixpkgsConfig</code></h2>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">nixpkgsConfig = {
+  allowUnfree = true;
+  rewriteURL = url: ...;  # see below
+};
+</code></pre>
+<p>The <code>rewriteURL</code> function rewrites a few hard-to-reach URLs:</p>
+<ul>
+<li><code>https://astron.com/pub/file/</code> → <code>https://distfiles.macports.org/file/</code></li>
+<li><code>https://astron.com/</code> → <code>https://distfiles.macports.org/</code></li>
+<li><code>https://git.kernel.org/</code> → <code>https://mirrors.edge.kernel.org/</code></li>
+<li><code>https://www.kernel.org/</code> → <code>https://mirrors.edge.kernel.org/</code></li>
+<li><code>https://curl.haxx.se/</code> → <code>https://curl.se/</code></li>
+</ul>
+<p>If <code>NIX_GITHUB_PROXY</code> is set, GitHub URLs are prefixed with it
+(<code>https://ghproxy.com/</code>).</p>
+<h2 id="overlays">Overlays</h2>
+<p><code>pkgsOverlay = import nixpkgs { overlays = [ ... ]; }</code> applies five:</p>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">overlays = [
+  (import .&#x2F;nix&#x2F;overlays&#x2F;emacs-extra.nix)
+  (import .&#x2F;nix&#x2F;overlays&#x2F;opencode-stub.nix)
+  (import .&#x2F;nix&#x2F;overlays&#x2F;pi-acp.nix)
+  (import .&#x2F;nix&#x2F;overlays&#x2F;mirrors.nix)
+  (import .&#x2F;nix&#x2F;overlays&#x2F;github-proxy.nix)
+];
+</code></pre>
+<p><code>emacsPkg = pkgs.emacs30 or pkgs.emacs</code> — preference for Emacs 30.
+<code>piPkg = pi.packages.x86_64-linux.coding-agent</code> — the actual <code>pi</code> package.</p>
+<h2 id="special-args">Special args</h2>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">specialArgs = { inherit emacsPkg piPkg opencodeBwrapModule; };
+</code></pre>
+<p>These are visible to every module. The <code>emacsPkg</code> is consumed by
+<code>emacs/exwm.nix</code> (so the EXWM session launcher points at the right
+binary). <code>piPkg</code> is consumed by <code>configuration.nix</code> (the upstream
+<code>programs.pi.coding-agent</code> module). <code>opencodeBwrapModule</code> is the
+<code>homeManagerModules.default</code> of <code>michalrus/opencode-bwrap-nix</code>; it is
+imported by <code>modules/pro-users-nixos.nix</code> to wire the bwrap’d opencode
+into Home Manager.</p>
+<h2 id="globalmodules"><code>globalModules</code></h2>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">globalModules = [ pi.nixosModules.default .&#x2F;modules&#x2F;ssh-agent.nix ];
+</code></pre>
+<p>These are added to <strong>every</strong> host evaluation. <code>pi.nixosModules.default</code>
+brings in the upstream <code>programs.pi.coding-agent</code> option set. The local
+<code>modules/ssh-agent.nix</code> enables the per-user systemd <code>ssh-agent</code>
+service.</p>
+<h2 id="the-two-host-constructors">The two host constructors</h2>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">mkHost = extraModules: nixpkgs.lib.nixosSystem {
+  inherit system;
+  pkgs = pkgsOverlay;
+  specialArgs = { inherit emacsPkg piPkg opencodeBwrapModule; };
+  modules = [
+    home-manager.nixosModules.home-manager
+    .&#x2F;configuration.nix
+    .&#x2F;modules&#x2F;searxng.nix
+  ] ++ globalModules ++ extraModules;
+};
+
+mkVmHost = extraModules: nixpkgs.lib.nixosSystem {
+  inherit system;
+  pkgs = pkgsOverlay;
+  specialArgs = { inherit emacsPkg piPkg opencodeBwrapModule; };
+  modules = [
+    home-manager.nixosModules.home-manager
+    .&#x2F;modules&#x2F;packages-runtime.nix
+    .&#x2F;modules&#x2F;tty-console.nix
+    .&#x2F;modules&#x2F;searxng.nix
+  ] ++ extraModules;
+};
+</code></pre>
+<p><code>mkHost</code> is the <strong>full</strong> constructor. It imports <code>configuration.nix</code> and
+<code>modules/searxng.nix</code>, plus the per-host modules.</p>
+<p><code>mkVmHost</code> is the <strong>minimal</strong> constructor. It does <strong>not</strong> import
+<code>configuration.nix</code>. This is intentional: the <code>vm</code> host is meant for
+isolated testing and should not pull in <code>headscale.nix</code>, the pro-user
+modules, the EXWM glue, etc. As a side effect, <code>headscale.enable</code> is
+<strong>not even a valid attribute</strong> in the <code>vm</code> evaluation — see
+<code>hosts/vm/configuration.nix:35-37</code> for the comment.</p>
+<h2 id="hosts">Hosts</h2>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">hosts = {
+  cf19    = mkHost [ .&#x2F;hosts&#x2F;cf19&#x2F;configuration.nix    .&#x2F;hosts&#x2F;cf19&#x2F;composition.nix ];
+  huawei  = mkHost [ .&#x2F;hosts&#x2F;huawei&#x2F;configuration.nix  .&#x2F;hosts&#x2F;huawei&#x2F;composition.nix ];
+  desktop = mkHost [ .&#x2F;hosts&#x2F;desktop&#x2F;configuration.nix .&#x2F;hosts&#x2F;desktop&#x2F;composition.nix ];
+  vm      = mkVmHost [ .&#x2F;hosts&#x2F;vm&#x2F;configuration.nix    .&#x2F;hosts&#x2F;vm&#x2F;composition.nix ];
+};
+</code></pre>
+<p>Each <code>mkHost</code> call passes the host’s <code>configuration.nix</code> (kernel,
+hostname, hardware) and <code>composition.nix</code> (which
+<code>system-package-sets-*</code> to add).</p>
+<h2 id="outputs">Outputs</h2>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">nixosConfigurations = hosts;          # the four hosts above
+
+checks.${system} = { default = hosts.huawei.config.system.build.toplevel; ... };
+
+apps.${system} = {
+  check-all   = ...;    # builds the three full hosts in sequence
+  site-serve  = ...;    # zola serve, see flake.nix
+  site-regen  = ...;    # regenerate auto-gen pages
+};
+
+devShells.${system}.default = ...;   # emacs with 25+ packages on EMACSLOADPATH
+
+packages.${system}.site = ...;       # the static site (this site)
+
+treesitterGrammars = import .&#x2F;nix&#x2F;treesitter-grammars.nix { inherit pkgs; };
+</code></pre>
+<h2 id="checks-slow-gated">Checks (slow, gated)</h2>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">checks.${system} = (
+  { default = hosts.huawei.config.system.build.toplevel; }
+  &#x2F;&#x2F; (if runSlow then {
+    huawei-boot               = import .&#x2F;tests&#x2F;vm&#x2F;huawei-boot.nix { ... };
+    basic-activation-test     = import .&#x2F;tests&#x2F;vm&#x2F;test-basic-activation.nix { ... };
+    cf19-switch-dbus-regression = import .&#x2F;tests&#x2F;vm&#x2F;cf19-switch-dbus-regression.nix { ... };
+  } else {})
+);
+</code></pre>
+<p><code>runSlow = builtins.getEnv "PRO_NIX_RUN_SLOW_CHECKS" == "1"</code>. By
+default only the fast toplevel check runs. Set the env var to run the
+three VM tests too.</p>
+<h2 id="the-devshell-emacs-pro-wrapper">The devShell <code>emacs-pro</code> wrapper</h2>
+<p>On <code>nix develop</code>, the flake writes a script at
+<code>$PWD/.pro-emacs-wrapper/emacs-pro</code> (in the current working directory):</p>
+<pre data-lang="sh" class="language-sh "><code class="language-sh" data-lang="sh">#!&#x2F;bin&#x2F;sh
+EMACS_BIN=&quot;${emacsPkg}&#x2F;bin&#x2F;emacs&quot;
+exec &quot;$EMACS_BIN&quot; -Q -L &lt;pkg1&gt;&#x2F;share&#x2F;emacs&#x2F;site-lisp \
+                  -L &lt;pkg2&gt;&#x2F;share&#x2F;emacs&#x2F;site-lisp \
+                  ... \
+                  &quot;$@&quot;
+</code></pre>
+<p>The <code>-L</code> flags cover every overlay-provided Emacs package (visually,
+<code>acp</code>, <code>agent-shell</code>, <code>agent-shell-hud</code>, <code>atlas</code>, <code>carriage</code>, <code>emcp</code>,
+<code>http-server</code>, <code>pro-tabs</code>, <code>shaoline</code>, <code>telega</code>, <code>telega-server</code>). The
+script is also added to <code>$PATH</code> for the session.</p>
+
+
+  
+  <hr>
+  <p><strong>Дальше:</strong>
+  
+    <a href="&#x2F;architecture&#x2F;modules&#x2F;">NixOS modules</a>
+  
+  </p>
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

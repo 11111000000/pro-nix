@@ -42,6 +42,14 @@ let
   # доступен в nixpkgs 25.11. Раньше мы переопределяли его через
   # `emacsPackageFromRepository`, но в новых nixpkgs эта функция удалена,
   # и весь `localRecipes` падал. Берём апстрим-версию напрямую.
+  #
+  # IMPORTANT: alphabetic-order evaluation в attrset literal означает, что
+  # атрибут `ellama` (имя начинается с 'e') оценивается раньше `llm` ('l').
+  # Это проблема: если ellama recipe берёт `super.emacsPackages.llm`,
+  # получит upstream `emacs-llm-0.27.2` (у которого архив удалён с ELPA).
+  # Решение: патчим upstream llm до того, как ellama recipe оцéнивается,
+  # через `let binding` — patched llm фиксируется до `localRecipes`.
+  patchedLlm = super.callPackage ../emacs-recipes/llm.nix {};
   localRecipes = {
     # visual-fill-column: upstream-рецепт в nixpkgs запинен на
     # codeberg.org/joostkremers/visual-fill-column@a38e3a28 — коммит
@@ -57,6 +65,13 @@ let
         hash = "sha256-HG06pGehmxUDhDex639bG7rGkGrXCdNyzeWxPTbX9Nw=";
       };
     });
+    # llm: см. nix/emacs-recipes/llm.nix. Upstream nixpkgs-рецепт
+    # запинен на ELPA tarball `llm-0.27.2.tar`, который удалён с зеркал.
+    # Используем собственный recipe: `fetchFromGitHub` + `mkDerivation`,
+    # минуя elpa2nix (для которого нужен standard ELPA-style tar).
+    # Привязка через `let patchedLlm` (выше) гарантирует, что alphabetic-order
+    # eval этого attrset не подменит наш patched llm на upstream broken.
+    llm = patchedLlm;
     pro-tabs = super.callPackage ../emacs-recipes/pro-tabs.nix {
       all-the-icons = super.emacsPackages.all-the-icons or null;
     };
@@ -78,6 +93,27 @@ let
     shaoline = super.callPackage ../emacs-recipes/shaoline.nix {};
     shaoline-package = super.emacsPackages.shaoline;
     shell-maker = super.callPackage ../emacs-recipes/shell-maker.nix {};
+    # Ellama — Emacs client for local + cloud LLMs. AGENTS.md-aware, has
+    # sessions, DLP, skills, blueprints, plan-and-act. Pinned to a commit
+    # upstream of GNU ELPA so we get the agentic-coding profile faster.
+    #
+    # `emacsPackages` передаётся явно: alphabetic-order evaluation в
+    # `localRecipes` означает, что `ellama` оценивается до `llm`, и если
+    # recipe использует `emacs.pkgs.llm` (т.е. `super.emacsPackages.llm`),
+    # получит upstream broken `emacs-llm-0.27.2`, не наш patched.
+    ellama = super.callPackage ../emacs-recipes/ellama.nix {
+      emacsPackages = super.emacsPackages // { inherit (super.emacsPackages) plz transient compat yaml; } // { llm = patchedLlm; };
+      emacsPackages_llm = patchedLlm;
+      emacsPackages_plz = super.emacsPackages.plz;
+      emacsPackages_transient = super.emacsPackages.transient;
+      emacsPackages_compat = super.emacsPackages.compat;
+      emacsPackages_yaml = super.emacsPackages.yaml;
+      # plz-event-source и plz-media-type — отдельные emacsPackage
+      # (транзитивные deps `plz`). ellama-transient.el требует
+      # `plz-event-source`, ellama-eval.el требует `plz-media-type`.
+      emacsPackages_plz_event_source = super.emacsPackages.plz-event-source or null;
+      emacsPackages_plz_media_type = super.emacsPackages.plz-media-type or null;
+    };
   };
 in {
   emacsPackages = super.emacsPackages // repoExtras // localRecipes;

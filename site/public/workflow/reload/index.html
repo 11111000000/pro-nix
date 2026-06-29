@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soft-reload · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="active">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class="active"><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">Soft-reload</h1>
+  <h1 id="soft-reload">Soft-reload</h1>
+<p><code>M-x pro/reload-config</code> (<strong>C-x M-c</strong>) переоценивает каждый
+загруженный модуль <strong>в месте</strong>. Это вторая по частоте команда в
+проекте (после <code>M-x</code>).</p>
+<h2 id="chto-ona-delaet">Что она делает</h2>
+<pre data-lang="elisp" class="language-elisp "><code class="language-elisp" data-lang="elisp">(defun pro&#x2F;reload-config (&amp;optional full)
+  &quot;Reload the whole pro Emacs configuration to apply changes
+without restarting.
+
+If FULL is non-nil (or called with a prefix argument), re-eval
+site-init.el from disk (which re-runs provided-packages loading
+and the top-level init) AND re-load every module. The non-full
+path re-evaluates each module&#x27;s .el file in place.
+
+Both paths run pro--before-reload-hook (modules can tear down
+child frames &#x2F; bg processes &#x2F; cached state) and
+pro--after-reload-hook (modules re-create persistent state
+from the freshly loaded code).&quot;
+  (interactive &quot;P&quot;)
+  ...)
+</code></pre>
+<p>Полная последовательность (не-full путь):</p>
+<ol>
+<li>Обновить Nix-сгенерированные пути (если скрипт доступен).</li>
+<li><code>run-hooks 'pro--before-reload-hook</code> — модули tear down.</li>
+<li><code>pro/reload-all-modules</code> — выбросить каждый модуль из
+<code>load-history</code>, затем <code>load-file</code> его. Хелпер
+<code>pro--forget-file-in-load-history</code> удаляет соответствующую
+запись из <code>load-history</code> и <code>unload-feature</code>’ит
+предоставленную фичу.</li>
+<li><code>pro-keys-reload</code> + <code>pro-keys-apply-pending</code> +
+<code>pro-keys-report-pending</code> — пере-применить глобальные клавиши.</li>
+<li><code>pro--reconstruct</code> (если <code>pro-epistemology.el</code> загружен) —
+восстанавливает эпистемическое состояние из сохранённого
+снапшота.</li>
+<li>Пере-применить UI-настройки: шрифты, fringes, completion,
+иконки, modeline, тему.</li>
+<li><code>run-hooks 'pro--after-reload-hook</code> — модули пере-создают
+persistent state.</li>
+<li>Печатает затраченное время.</li>
+</ol>
+<p>Full-путь добавляет шаг 3.5: re-eval <code>site-init.el</code> первым. Это
+полезно, когда изменился манифест или <code>provided-packages.el</code>.</p>
+<h2 id="pochemu-pro-forget-file-in-load-history">Почему <code>pro--forget-file-in-load-history</code></h2>
+<p>Emacs использует <code>load-history</code> как источник правды о том,
+«загружен» ли файл и «актуален» ли он. Если mtime файла совпадает
+с записанным временем загрузки, <code>load</code> тихо пропускает
+переоценку — даже когда пользователь явно просит reload.</p>
+<pre data-lang="elisp" class="language-elisp "><code class="language-elisp" data-lang="elisp">(defun pro--forget-file-in-load-history (file)
+  &quot;Remove all load-history entries whose file is FILE (or its .elc).
+Also unbind features provided by the file.&quot;
+  ...)
+</code></pre>
+<p>Этот хелпер:</p>
+<ol>
+<li>Проходит по <code>load-history</code> и удаляет записи, чей <code>car</code> — это
+<code>file</code> (или его <code>file-truename</code>, или его <code>.elc</code>).</li>
+<li>Собирает фичи, предоставленные этими записями.</li>
+<li><code>unload-feature</code> каждую, так что следующий <code>provide</code> будет
+«настоящим».</li>
+<li>Удаляет соответствующий <code>.elc</code> из <code>load-history</code> тоже (чтобы
+свежий <code>.el</code> выигрывал у устаревшего <code>.elc</code>).</li>
+</ol>
+<p>После этого следующий <code>load-file file</code> переоценивает файл с нуля.</p>
+<h2 id="kontrakt-avtora-modulia">Контракт автора модуля</h2>
+<p>Из шапки <code>pro-reload.el</code>:</p>
+<blockquote>
+<p>Reload contract for module authors:</p>
+<ul>
+<li>Re-evaluating a module via <code>pro/reload-module</code> always runs the
+<em>current</em> contents of the .el file (we drop the load-history
+entry, so mtime tricks with .elc don’t mask changes).</li>
+<li>Modules that own persistent state (child frames, background
+processes, globalised variables) should register a teardown
+function on <code>pro--after-reload-hook</code> so a reload actually
+re-creates that state from the freshly-loaded code. Use
+<code>pro/after-reload #'my-reset-fn</code>.</li>
+<li>Modules should keep their top-level forms idempotent (use the
+<code>pro-compat--add-hook-once</code> / <code>add-to-list-once</code> /
+<code>advice-add-once</code> helpers) — re-evaluation will re-run them
+on every reload.</li>
+</ul>
+</blockquote>
+<p>Три правила. Первое поддерживается
+<code>pro--forget-file-in-load-history</code> — вам ничего не нужно делать.
+Второе — <strong>ваша</strong> работа. Третье поддерживается
+<code>pro-compat</code>-хелперами.</p>
+<h2 id="khelpery-pro-compat">Хелперы <code>pro-compat</code></h2>
+<pre data-lang="elisp" class="language-elisp "><code class="language-elisp" data-lang="elisp">(pro-compat--add-hook-once       &#x27;some-hook  #&#x27;some-function)
+(pro-compat--add-to-list-once    &#x27;some-list  &#x27;some-symbol)
+(pro-compat--advice-add-once     &#x27;some-fn :before #&#x27;some-wrapper)
+</code></pre>
+<p>Каждый — тонкая обёртка, которая проверяет <code>memq</code> (для hooks),
+<code>member</code> (для lists) или <code>advice-member-p</code> (для advice) перед
+добавлением. Это делает top-level формы безопасными для
+переоценки.</p>
+<p>Без этих хелперов soft-reload добавлял бы один и тот же хук
+дважды, один и тот же элемент списка дважды, или двойную обёртку
+advice. Результат: тонкие баги (например, функция запускается
+дважды после каждого reload), которые проявляются только на
+втором или третьем reload.</p>
+<h2 id="pattern-teardown">Паттерн teardown</h2>
+<p>Для модуля, который создаёт child-frame на load:</p>
+<pre data-lang="elisp" class="language-elisp "><code class="language-elisp" data-lang="elisp">(defun pro-mine--reset ()
+  &quot;Teardown for pro-mine. Called on pro--after-reload-hook.&quot;
+  (when (frame-live-p pro-mine--frame)
+    (delete-frame pro-mine--frame))
+  (setq pro-mine--frame nil
+        pro-mine--cache nil))
+
+(when (fboundp &#x27;pro&#x2F;after-reload)
+  (pro&#x2F;after-reload #&#x27;pro-mine--reset))
+</code></pre>
+<p>Reset-функция:</p>
+<ol>
+<li>Проверяет, что frame всё ещё жив.</li>
+<li>Удаляет его.</li>
+<li>Сбрасывает module-level cache-переменные.</li>
+<li>В следующий раз, когда модульная “show”-функция запустится
+(после reload пользователь делает то, что её триггерит), frame
+пересоздаётся с геометрией свежезагруженного кода.</li>
+</ol>
+<p>Канонический пример — <code>pro-buffer-banner.el</code>. Reset-функция — в
+<code>emacs/base/modules/pro-buffer-banner.el:737-760</code>.</p>
+<h2 id="soft-reload-vs-hard-restart">Soft reload vs hard restart</h2>
+<table><thead><tr><th></th><th>Soft reload (C-x M-c)</th><th>Hard restart</th></tr></thead><tbody>
+<tr><td>Скорость</td><td>&lt; 1 с</td><td>5-10 с</td></tr>
+<tr><td>Состояние</td><td>Раскладки фреймов, терминальные буферы, magit, … выживают</td><td>Всё потеряно</td></tr>
+<tr><td>Persistent state модуля</td><td>Сбрасывается <code>pro--after-reload-hook</code></td><td>Всё уходит</td></tr>
+<tr><td>Web-mode, LSP-серверы</td><td>Остаются (они external-процессы)</td><td>Нужно перезапускать</td></tr>
+<tr><td>Изменение <code>provided-packages.el</code></td><td>Не подхватывается — используйте <code>C-u</code> для re-eval <code>site-init</code></td><td>Подхватывается</td></tr>
+<tr><td>Изменение манифеста</td><td>Не подхватывается — используйте <code>C-u</code></td><td>Подхватывается</td></tr>
+<tr><td>Баг в модуле</td><td>Reload покажет его как явную ошибку в <code>*Messages*</code></td><td>Может зависнуть при старте</td></tr>
+</tbody></table>
+<p>Общее правило: используйте soft reload для «я отредактировал
+функцию и хочу её протестировать». Используйте hard restart для
+«я отредактировал манифест или <code>provided-packages.el</code>» или
+«soft reload ведёт себя плохо».</p>
+<h2 id="escape-hatch-pro-session-save-and-restart-emacs">Escape hatch <code>pro/session-save-and-restart-emacs</code></h2>
+<p>Для редкого случая, когда soft reload недостаточен, но вы не
+хотите терять сессию:</p>
+<pre data-lang="elisp" class="language-elisp "><code class="language-elisp" data-lang="elisp">M-x pro&#x2F;session-save-and-restart-emacs
+</code></pre>
+<p>Это:</p>
+<ol>
+<li>Вызывает <code>pro/session-save</code>, чтобы записать
+<code>~/.emacs.d/.pro-session.el</code> (открытые файлы + point + window
+state).</li>
+<li>Стартует новый Emacs-сабпроцесс, который загружает сохранённую
+сессию.</li>
+<li>Убивает текущий Emacs.</li>
+</ol>
+<p>Результат: свежий Emacs со всеми файлами и состоянием окон,
+которые были у вас до.</p>
+<h2 id="soft-reload-vsego-saita">Soft-reload всего сайта</h2>
+<p>Если вы редактируете <code>emacs/base/modules/pro-reload.el</code> сам,
+soft reload не подхватит изменение (модуль, который выполняет
+reload, не может перезагрузить себя). Нужно:</p>
+<ul>
+<li><code>M-x pro/reload-module pro-reload</code> — перезагружает только этот
+модуль.</li>
+<li><code>C-u M-x pro/reload-config</code> — full reload (re-evals <code>site-init</code>
+<ul>
+<li>все модули).</li>
+</ul>
+</li>
+<li>Перезапустить Emacs — последнее средство.</li>
+</ul>
+<h2 id="tipichnye-problemy">Типичные проблемы</h2>
+<table><thead><tr><th>Симптом</th><th>Причина</th><th>Фикс</th></tr></thead><tbody>
+<tr><td>“Module not owned by current user” на каждом reload</td><td>sudo-активация записала файлы под root</td><td><code>sudo chown -R $USER ~/.config/emacs</code> (helper-switch.sh делает это)</td></tr>
+<tr><td>Reload вроде ничего не делает</td><td>mtime-трюк — <code>load-history</code> думает, что файл актуален</td><td>Проверьте, что хелпер <code>pro--forget-file-in-load-history</code> запустился (он по умолчанию)</td></tr>
+<tr><td>Frame выживает после reload, но в неправильной позиции</td><td>У модуля нет reset-функции на <code>pro--after-reload-hook</code></td><td>Добавьте одну (см. паттерн teardown выше)</td></tr>
+<tr><td>Функция вызывается дважды после reload</td><td>Top-level форма модуля не идемпотентна</td><td>Оберните в <code>pro-compat--add-{hook,to-list,advice}-once</code></td></tr>
+<tr><td>Reload падает с “Cannot open load file”</td><td>Модуль удалён, но манифест всё ещё ссылается</td><td>Удалите из <code>pro-emacs-base-default-modules</code> в <code>site-init.el</code></td></tr>
+</tbody></table>
+
+
+  
+  <hr>
+  <p><strong>Дальше:</strong>
+  
+    <a href="&#x2F;workflow&#x2F;tests&#x2F;">Тесты</a> · 
+  
+    <a href="&#x2F;workflow&#x2F;per-host&#x2F;">Per-host чек-лист</a>
+  
+  </p>
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

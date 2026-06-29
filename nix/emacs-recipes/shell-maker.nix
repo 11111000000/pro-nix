@@ -2,12 +2,12 @@
 
 stdenv.mkDerivation rec {
   pname = "shell-maker";
-  version = "0";
+  version = "0.93.1";
   src = fetchFromGitHub {
     owner = "xenodium";
     repo = "shell-maker";
-    rev = "8fb4a30da4479d50d273a1dbafa61420cca36619";
-    sha256 = "09lgcvcvnrkfxg47m844177c1cns2qjkjv34lpn1k6pakias6xrn";
+    rev = "43ee9e1862994cbaa89715d324edb7a424181f22";
+    sha256 = "0bdicj2bclx65n1lx1kwywfksbg1sd02yi03wrklbk56j82mk4ww";
   };
   nativeBuildInputs = [ emacs ];
   installPhase = ''

@@ -33,12 +33,8 @@
   ;; possible during startup when we explicitly request them below.
   (setq package-install-upgrade-built-in t)
 
-  ;; Обязательно добавляем каталог модулей в `load-path' — это делает
-  ;; локальные вспомогательные пакеты (pro-*) доступными для `require' и
-  ;; `locate-library' в ранней стадии загрузки.
-  (when (file-directory-p pro-emacs-base-system-modules-dir)
-    (add-to-list 'load-path pro-emacs-base-system-modules-dir))
-  ;; Now load site-init which will load configured modules
+   ;; NOTE: modules dir is already on `load-path' via early-init.el.
+   ;; Now load site-init which will load configured modules
   (load (expand-file-name "site-init.el" base-dir) nil t)
   ;; First-start bootstrap: один раз (marker-based) устанавливает transient
   ;; и declared-пакеты через MELPA. На обычных запусках marker существует,

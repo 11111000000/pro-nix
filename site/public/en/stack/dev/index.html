@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dev tooling · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">Dev tooling</h1>
+  <h1 id="dev-tooling">Dev tooling</h1>
+<p>The dev layer is <strong>purpose-built for one developer</strong> (the repo owner)
+and is opt-in per host. <code>huawei</code> carries the heaviest composition;
+<code>cf19</code> is the minimal dev surface; <code>vm</code> is a middle ground for testing.</p>
+<h2 id="haskell">Haskell</h2>
+<p><code>modules/pro-haskell.nix</code> — host-imported only on <code>huawei</code>.</p>
+<p>Packages: <code>ghc</code>, <code>haskell-language-server</code>, <code>cabal-install</code>, <code>stack</code>,
+<code>ghcid</code>, <code>hlint</code>, <code>fourmolu</code>.</p>
+<p>The Emacs side (<code>emacs/base/modules/pro-haskell.el</code>) wires <code>haskell-mode</code></p>
+<ul>
+<li><code>haskell-indentation</code> + <code>haskell-doc</code> + <code>haskell-cabal</code>, then registers
+<code>haskell-language-server-wrapper</code> as the eglot LSP server. Five
+interactive commands:</li>
+</ul>
+<ul>
+<li><code>M-x pro-haskell-load-buffer</code> — load the current buffer in the cabal/ghci REPL.</li>
+<li><code>M-x pro-haskell-switch-to-repl</code> — pop to the REPL.</li>
+<li><code>M-x pro-haskell-format-buffer</code> — <code>fourmolu</code> (C-c h f).</li>
+<li><code>M-x pro-haskell-lint</code> — <code>hlint</code> (C-c h i).</li>
+<li><code>M-x pro-haskell-browse-haddock</code> — Haddock for the symbol at point (C-c h d).</li>
+</ul>
+<p>The LSP server program is <code>pro-haskell-lsp-server-program</code>, default
+<code>("haskell-language-server-wrapper" "--lsp")</code>.</p>
+<p><code>ghcup</code> is <strong>not</strong> in the project — every Haskell tool comes from
+nixpkgs.</p>
+<h2 id="lsp-servers">LSP servers</h2>
+<p><code>system-package-sets-lsp.nix</code> is a <strong>function</strong> that returns the
+optional LSP packages. Each is <code>maybe</code> (returns <code>[]</code> if the upstream
+package is missing):</p>
+<ul>
+<li><code>pyright</code> (from nodePackages) — Python.</li>
+<li><code>jdtls</code> — Java (downloads Eclipse JDT Language Server on first run).</li>
+<li><code>rust-analyzer</code> — Rust.</li>
+<li><code>gopls</code> (from goPackages) — Go.</li>
+<li><code>bash-language-server</code> (from nodePackages) — Bash.</li>
+</ul>
+<p>The <code>gptel</code> “completion for code” feature is <em>not</em> an LSP — it uses
+gptel directly with a code-aware prompt.</p>
+<h2 id="docker-and-lazydocker">Docker and lazydocker</h2>
+<p><code>modules/pro-docker.nix</code> enables <code>virtualisation.docker</code>. It also
+creates a custom bridge <code>pro-dev</code> (172.20.0.0/16, gateway 172.20.0.1)
+via a oneshot service. The <code>writeShellScriptBin</code> indirection is a
+workaround for a systemd &lt; 258 argv-parsing bug with <code>2&gt;</code> / <code>||</code> adjacent
+in <code>ExecStart</code>.</p>
+<p>Packages: <code>docker</code>, <code>docker-compose</code>, <code>docker-credential-helpers</code>,
+plus the operator stack: <code>lazydocker</code>, <code>dive</code>, <code>ctop</code>, <code>trivy</code>,
+<code>hadolint</code>, <code>sops</code>, <code>age</code>.</p>
+<p>The <code>just</code> surface has ten Docker recipes:</p>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">just d              # lazydocker
+just dl NAME        # docker logs -f --tail 100 NAME
+just dsh NAME [CMD] # docker exec -it NAME CMD (default sh)
+just dr NAME        # docker restart NAME + sleep 1 + logs --tail 30
+just dprune         # docker system&#x2F;image&#x2F;network prune -f
+just dscan IMAGE [SEVERITY]   # trivy image --severity HIGH,CRITICAL
+just dlint DOCKERFILE         # hadolint
+just dup            # docker compose up -d
+just ddown          # docker compose down
+just dps            # docker compose ps
+just dclogs         # docker compose logs -f --tail 50
+</code></pre>
+<h2 id="the-microservice-template">The microservice template</h2>
+<p><code>templates/microservice/</code> — a self-contained starter for a new
+containerised service. Contents:</p>
+<ul>
+<li><code>Dockerfile</code> — <code>alpine:3.20</code>, <code>tini</code>, <code>ca-certificates</code>, non-root user
+<code>app</code> (UID 1000), <code>pip install -r requirements.txt</code>.</li>
+<li><code>compose.yaml</code> — <code>my-svc</code> with <code>external: true</code> on the <code>pro-dev</code>
+network, healthcheck <code>wget /healthz</code>, <code>${SERVICE_PORT:-8000}</code> host
+mapping, <code>restart: unless-stopped</code>, code volume mount.</li>
+<li><code>justfile</code> — <code>build</code>, <code>up</code>, <code>down</code>, <code>restart SERVICE</code>, <code>logs</code>,
+<code>logs-svc</code>, <code>sh</code>, <code>ps</code>, <code>scan</code> (trivy), <code>lint</code> (hadolint),
+<code>encrypt-secrets</code>, <code>decrypt-secrets</code>, <code>clean</code>.</li>
+<li><code>.sops.yaml</code> — regex <code>.*\.sops\.ya?ml$</code>, age recipient placeholder.</li>
+<li><code>.env.sops.yaml.example</code> — <code>SERVICE_PORT</code>, <code>LOG_LEVEL</code>,
+<code>DATABASE_URL</code>, <code>API_KEY</code>, <code>JWT_SECRET</code> (CHANGE_ME placeholders).</li>
+<li><code>.gitignore</code> — ignores <code>.env</code> and <code>keys/*.age</code>.</li>
+</ul>
+<p>Use the template:</p>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">cp -r templates&#x2F;microservice ~&#x2F;my-svc
+cd ~&#x2F;my-svc
+# Edit Dockerfile, compose.yaml, requirements.txt
+just build
+just up
+just scan    # trivy
+just encrypt-secrets    # sops --encrypt --in-place
+</code></pre>
+<h2 id="the-npm-template">The npm template</h2>
+<p><code>templates/.opencode/config.json</code> — a stub opencode config with the
+<code>aitunnel</code> provider (host <code>api.aitunnel.ru</code>, empty token, model
+<code>gpt-5.4-mini</code>), <code>autoUpdatePlugins: false</code>, <code>telemetry: false</code>. Copy
+into a project as <code>.opencode/config.json</code> to give the agent a default
+context.</p>
+<h2 id="nix-side-tooling">Nix-side tooling</h2>
+<p><code>modules/pro-dev.nix</code> (host-imported on <code>huawei</code> via composition) brings
+in:</p>
+<ul>
+<li><code>direnv</code>, <code>shellcheck</code>, <code>shfmt</code>, <code>bat</code>, <code>tldr</code>, <code>pipx</code>.</li>
+<li><code>nodejs_20</code>, <code>esbuild</code>, <code>prettier</code>, <code>typescript-language-server</code>,
+<code>typescript</code>.</li>
+<li><code>rust-analyzer</code>, <code>bash-language-server</code>.</li>
+<li><code>cmake</code>, <code>gcc</code>, <code>clang</code>, <code>binutils</code>, <code>gnumake</code>, <code>pkg-config</code>,
+<code>libtool</code>, <code>automake</code>, <code>autoconf</code>, <code>ncurses</code>.</li>
+<li><code>ag</code> (silver-searcher), <code>pt</code> (the_platinum_searcher), <code>fzf</code>, <code>lnav</code>.</li>
+<li><code>mosh</code>, <code>pandoc</code>, <code>graphviz</code>, <code>plantuml</code>, <code>mermaid-cli</code>.</li>
+<li><code>emacsPackages.eldev</code>, <code>emacsPackages.cask</code>.</li>
+</ul>
+<p>Plus the container stack (see above).</p>
+<p>The <code>llm-lab</code> wrapper around <code>python3.withPackages [jupyterlab, ipykernel, transformers, datasets, sentencepiece, tokenizers, numpy, pandas, matplotlib, scipy, plotly, seaborn]</code> is in
+<code>system-package-sets-dev.nix</code> — a one-shot for ad-hoc ML experiments.</p>
+<h2 id="the-decisions-file">The decisions file</h2>
+<p><code>templates/decisions.el.example</code> — example user-level Emacs config
+that overrides the auto-install policy:</p>
+<pre data-lang="elisp" class="language-elisp "><code class="language-elisp" data-lang="elisp">(setq pro-packages-decisions
+      &#x27;((gptel . always)        ; always install from MELPA, even if Nix provides it
+        (magit . always)
+        (somepkg . never)))     ; never install, even if requested
+</code></pre>
+<p>Drop this in <code>~/.config/emacs/decisions.el</code> and <code>pro-packages--maybe-install</code>
+will respect it.</p>
+
+
+  
+  <hr>
+  <p><strong>Дальше:</strong>
+  
+    <a href="&#x2F;stack&#x2F;nixos&#x2F;">NixOS layer</a> · 
+  
+    <a href="&#x2F;architecture&#x2F;">Architecture overview</a>
+  
+  </p>
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

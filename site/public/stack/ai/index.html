@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Слой AI-агентов · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="active">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class="active"><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">Слой AI-агентов</h1>
+  <h1 id="sloi-ai-agentov">Слой AI-агентов</h1>
+<p>Слой агентов — <strong>Nix-installed для бинарей, template-deployed
+для конфигов, runtime-configured для ключей</strong>. Ни один из трёх
+агентов не хранит секреты на диске; они читают <code>~/.authinfo</code>
+(или <code>~/.authinfo.gpg</code>) через
+<code>~/.local/share/pro-nix/load-agent-env.sh</code>, который sourced из
+<code>~/.profile</code>.</p>
+<h2 id="tri-agenta">Три агента</h2>
+<h3 id="pi-lukasl-dev-pi-nix"><code>pi</code> (lukasl-dev/pi.nix)</h3>
+<p>Основной CLI. NixOS-модуль (<code>pi.nixosModules.default</code>) подключён
+глобально в <code>configuration.nix</code>:</p>
+<pre data-lang="nix" class="language-nix "><code class="language-nix" data-lang="nix">programs.pi.coding-agent = lib.mkIf (piPkg != null) {
+  enable = lib.mkDefault true;
+  package = lib.mkDefault piPkg;
+  rules = lib.mkDefault &quot;&quot;;
+};
+</code></pre>
+<p><code>pi</code> запускается через <code>pi-acp</code> (<code>svkozak/pi-acp</code> v0.0.27, собирается
+через <code>nix/node-packages/pi-acp.nix</code>) для ACP-коммуникации. Полные
+настройки — в <code>local-templates/pi/settings.json</code>:</p>
+<pre data-lang="json" class="language-json "><code class="language-json" data-lang="json">{
+  &quot;defaultProvider&quot;: &quot;minimax&quot;,
+  &quot;defaultModel&quot;: &quot;MiniMax-M3&quot;,
+  &quot;packages&quot;: [
+    &quot;npm:pi-mcp-adapter&quot;, &quot;npm:pi-smart-fetch&quot;, &quot;npm:pi-web-access&quot;,
+    &quot;npm:@spences10&#x2F;pi-redact&quot;, &quot;npm:@spences10&#x2F;pi-recall&quot;,
+    &quot;npm:@gotgenes&#x2F;pi-permission-system&quot;, &quot;npm:pi-compass&quot;, &quot;npm:pi-blueprint&quot;
+  ]
+}
+</code></pre>
+<p><code>pi-crew</code> и <code>pi-subagents</code> <strong>намеренно исключены</strong> — см.
+<code>local-templates/pi/settings.json</code> для списка неподдерживаемых
+multi-agent пакетов.</p>
+<h3 id="opencode"><code>opencode</code></h3>
+<p>Второй агент. npm-бинарь (<code>v1.15.10</code>), скачивается через
+<code>nix/overlays/opencode-stub.nix</code> и <code>patchelf</code>’ится под NixOS-glibc.
+Sandbox-вариант через <code>opencodeBwrap.homeManagerModules.default</code>
+(Home Manager module от <code>michalrus/opencode-bwrap-nix</code>).</p>
+<p>Конфиг в <code>local-templates/opencode/opencode.json</code> — те же 3
+провайдера, что и в <code>pi</code>, те же MCP-серверы.</p>
+<h3 id="gptel-emacs-storona-llm-klienta"><code>gptel</code> (Emacs-сторона LLM-клиента)</h3>
+<p><code>emacs/base/modules/pro-ai.el</code> — это policy-слой поверх gptel:</p>
+<ul>
+<li>3 провайдера из <code>emacs/base/modules/ai-models.json</code> (openrouter,
+siliconflow, aitunnel, плюс пользовательские override’ы).</li>
+<li><code>pro-ai-backend</code> (по умолчанию <code>'aitunnel</code>) выбирает активный.</li>
+<li><code>pro-ai-open-entry</code> (C-c a) открывает gptel-transient; пользователь
+выбирает модель.</li>
+<li>Carriage integration (<code>gnu-emacs-ru/carriage</code>): Org-mode
+«code knitting» workflow с dry-run/apply и воспроизводимостью.</li>
+</ul>
+<h2 id="mcp-most-k-emacs">MCP — мост к Emacs</h2>
+<p>EMCP (Emacs MCP) — главная интеграция. Он выставляет работающую
+Emacs-сессию как MCP-сервер, так что любой MCP-capable агент может
+читать буферы, выполнять elisp, делать скриншоты, отправлять
+клавиши.</p>
+<table><thead><tr><th>Сервер</th><th>Где работает</th><th>Что делает</th></tr></thead><tbody>
+<tr><td><code>emcp</code></td><td>Внутри Emacs, порт 38913</td><td>Read/eval/send-keys/screenshot на живой сессии</td></tr>
+<tr><td><code>chrome-devtools</code></td><td><code>npx chrome-devtools-mcp@latest</code> (когда запущен)</td><td>Автоматизация браузера через Chrome DevTools Protocol</td></tr>
+</tbody></table>
+<p>Оба зарегистрированы и в <code>local-templates/pi/mcp.json</code>, и в
+<code>local-templates/opencode/opencode.json</code>.</p>
+<h3 id="kak-pi-vyzyvaet-emcp">Как <code>pi</code> вызывает emcp</h3>
+<p><code>pi</code> маршрутизирует MCP через <strong>прокси-тулзу</strong>:</p>
+<pre><code>pi&gt; mcp({tool: &quot;emcp_apropos&quot;, args: {pattern: &quot;pro-&quot;}})
+</code></pre>
+<p>Это <strong>единственный</strong> способ, которым <code>pi</code> достигает MCP-тулзов —
+прямого <code>emcp_apropos</code> в <code>pi</code> нет.</p>
+<h3 id="kak-opencode-vyzyvaet-emcp">Как <code>opencode</code> вызывает emcp</h3>
+<p><code>opencode</code> выставляет MCP-тулзы <strong>напрямую</strong>:</p>
+<pre><code>opencode&gt; emcp_apropos(pattern: &quot;pro-&quot;)
+</code></pre>
+<p>MCP <code>tools/list</code> возвращает полный набор emcp.</p>
+<h3 id="policy-gate-dlia-eval-send-keys">Policy-gate для <code>eval</code> / <code>send-keys</code></h3>
+<p>Два emcp-тулза <strong>опасны по умолчанию</strong> и гейтнуты Emacs-side
+политикой:</p>
+<ul>
+<li><code>emcp_eval</code> — выполняет произвольный elisp в пользовательской
+сессии.</li>
+<li><code>emcp_send_keys</code> — отправляет клавиатурную последовательность в
+пользовательскую сессию.</li>
+</ul>
+<p><code>emcp-tools-eval-default-policy</code> и
+<code>emcp-tools-send-keys-default-policy</code> по умолчанию равны <code>'ask</code>.
+Когда агент вызывает любой из них, Emacs открывает буфер
+<code>*EMCP confirm*</code> с <code>y</code> / <code>n</code> / <code>a</code> (всегда принимать для сессии)
+/ <code>r</code> (всегда отклонять для сессии) / <code>q</code> (отменить).</p>
+<p>Гейт описан в деталях в
+<code>local-templates/pi/skills/emacs-emcp/SKILL.md</code> и
+<code>local-templates/opencode/skills/emacs-emcp/SKILL.md</code>.</p>
+<h2 id="permission-sistema">Permission-система</h2>
+<p><code>local-templates/pi/extensions/pi-permission-system/config.json</code>
+настраивает <code>@gotgenes/pi-permission-system</code>. Дефолты:</p>
+<ul>
+<li><code>path</code>:
+<ul>
+<li><strong>deny</strong> <code>.env*</code>, <code>secrets.*</code>, <code>*.pem</code>, <code>*.key</code>, <code>id_rsa*</code>,
+<code>id_ed25519*</code>, <code>~/.ssh/**</code>, <code>~/.aws/**</code>, <code>~/.gnupg/**</code>,
+<code>~/.pi/agent/auth.json</code></li>
+<li><strong>ask</strong> <code>~/.pi/agent/models.json</code></li>
+</ul>
+</li>
+<li><code>bash</code>:
+<ul>
+<li><strong>deny</strong> <code>rm -rf *</code>, <code>rm -rf /*</code>, <code>dd *</code>, <code>mkfs*</code>, fork bomb,
+<code>chmod 777</code>, <code>curl|sh</code>, <code>wget|sh</code>, <code>git push --force</code>,
+<code>nix-collect-garbage -d</code>, <code>kill -9 1</code>, <code>reboot</code>, <code>shutdown</code></li>
+<li><strong>ask</strong> <code>sudo *</code>, <code>chown *</code>, <code>git push *</code>, <code>nix-env *</code>, <code>systemctl *</code></li>
+</ul>
+</li>
+<li><code>mcp</code>: <code>*</code> = allow</li>
+<li><code>skill</code>: <code>*</code> = ask</li>
+<li><code>external_directory</code>: ask</li>
+</ul>
+<p><code>yoloMode = false</code>, <code>debugLog = false</code>, <code>permissionReviewLog = true</code>.</p>
+<h2 id="skills">Skills</h2>
+<p>Два skill’а деплоятся и в <code>~/.pi/agent/skills/</code>, и в
+<code>~/.config/opencode/skills/</code>:</p>
+<table><thead><tr><th>Skill</th><th>Файл</th><th>Назначение</th></tr></thead><tbody>
+<tr><td><code>emacs-emcp</code></td><td><code>local-templates/{pi,opencode}/skills/emacs-emcp/SKILL.md</code></td><td>Operator guide для emcp MCP-сервера. Список тулов, policy gate, профиль <code>full-control</code>, troubleshooting.</td></tr>
+<tr><td><code>safe-bash</code></td><td><code>local-templates/pi/skills/safe-bash/SKILL.md</code></td><td>Cross-platform shell safety. Read-only vs mutating классификация, destructive confirmation паттерны, Windows/Unix path conventions, signal handling, анти-паттерны.</td></tr>
+</tbody></table>
+<h2 id="deploi-local-templates-home">Деплой <code>local-templates</code> → <code>$HOME</code></h2>
+<p><code>modules/pro-agent-configs.nix</code> определяет 6 копий файлов:</p>
+<pre><code>local-templates&#x2F;opencode&#x2F;opencode.json        → ~&#x2F;.config&#x2F;opencode&#x2F;opencode.json
+local-templates&#x2F;opencode&#x2F;skills&#x2F;...          → ~&#x2F;.config&#x2F;opencode&#x2F;skills&#x2F;...
+local-templates&#x2F;pi&#x2F;models.json               → ~&#x2F;.pi&#x2F;agent&#x2F;models.json
+local-templates&#x2F;pi&#x2F;mcp.json                  → ~&#x2F;.pi&#x2F;agent&#x2F;mcp.json
+local-templates&#x2F;pi&#x2F;settings.json             → ~&#x2F;.pi&#x2F;agent&#x2F;settings.json
+local-templates&#x2F;pi&#x2F;skills&#x2F;...                → ~&#x2F;.pi&#x2F;agent&#x2F;skills&#x2F;...
+</code></pre>
+<p>Activation-скрипт использует
+<code>install -m 0644 -o $(id -u) -g $(id -g)</code>, чтобы избежать
+проблемы «файлы под root после sudo-активации». Семантика —
+<strong>copy-if-missing</strong> — никогда не перезаписывает правки пользователя.</p>
+<p>В <code>~/.profile</code> добавляется маркер-комментарий:</p>
+<pre><code># pro-nix: load AI provider keys from authinfo
+[ -f &quot;$HOME&#x2F;.local&#x2F;share&#x2F;pro-nix&#x2F;load-agent-env.sh&quot; ] &amp;&amp; . &quot;$HOME&#x2F;.local&#x2F;share&#x2F;pro-nix&#x2F;load-agent-env.sh&quot;
+</code></pre>
+<p>Маркер идемпотентен — добавляется только если его ещё нет.</p>
+<h2 id="poverkhnost-just">Поверхность <code>just</code></h2>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">just deploy-agents            # скопировать local-templates в $HOME
+just install-pi-packages      # pi install npm:&lt;pkg&gt; для каждого пакета в settings.json
+just switch-with-agents &lt;host&gt;    # цепочка: deploy + install + switch
+just update-pi-version       # bump pi в flake.lock (dry-run по умолчанию)
+</code></pre>
+<p><code>deploy-agents.sh</code> — ручной эквивалент Nix-активации. Используйте
+его на non-NixOS хосте или чтобы форсировать деплой.</p>
+
+
+  
+  <hr>
+  <p><strong>Дальше:</strong>
+  
+    <a href="&#x2F;stack&#x2F;wm&#x2F;">Оконные менеджеры</a> · 
+  
+    <a href="&#x2F;architecture&#x2F;agents&#x2F;">Стек AI-агентов</a>
+  
+  </p>
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

@@ -123,31 +123,29 @@ in
       #                            (без него systemd ретраит холодный старт
       #                            долго и boot ощутимо висит, пока ARP сходится)
       #   nofail                — не блокировать загрузку, если шари нет
-      #   nobootwait            — то же самое, при `bg`-режиме systemd-fstab-generator
       #
-      # NB: we deliberately do NOT set `x-systemd.automount`. With that
-      # option, systemd-fstab-generator emits an *automount* unit (named
-      # `mnt-desktop.automount`) that systemd tries to `reload` on every
-      # `nixos-rebuild switch` whenever `/etc` changes. Automount units
-      # have `CanReload=no`, so the reload fails and the entire switch
-      # exits with code 4. A plain `mount` unit reloads fine. If we ever
-      # want on-demand mounting (lazy mount on first access), we should
-      # declare it via `systemd.automounts."mnt-desktop"` in NixOS instead
-      # of fstab, so the unit comes from a managed declaration rather
-      # than the fstab generator.
-      # Explicit systemd mount unit so the unit exists even if the remote
-      # server is unavailable. This prevents activation scripts from failing
-      # when they try to inspect/reload the unit during `switch`.
-      systemd.mounts = lib.mkIf cfg.client.enable [ {
+      # Используем NixOS-managed systemd.automounts (НЕ fstab-генератор)
+      # чтобы сделать mount ленивым: реальная попытка mount происходит
+      # только при обращении к /mnt/desktop. Это:
+      #   1. Не валит `nixos-rebuild switch`, когда desktop недоступен —
+      #      активация трогает только .automount (CanReload=yes для
+      #      Nix-managed unit), а .mount не стартует до первого access.
+      #   2. Делает шару опциональной: хочешь — зашёл в /mnt/desktop,
+      #      и она подмонтировалась; не нужно — просто не трогаешь путь.
+      #
+      # NB: если бы мы оставили `x-systemd.automount` в fstab-опциях,
+      # systemd-fstab-generator создал бы mnt-desktop.automount с
+      # CanReload=no, и `nixos-rebuild switch` падал бы с code 4 при
+      # каждой правке /etc. Поэтому automount объявлен через NixOS-опцию,
+      # а не через fstab.
+      systemd.mounts = [ {
         name = "mnt-desktop.mount";
         what = "${cfg.client.server}.local:${cfg.client.remotePath}";
         where = cfg.client.mountPoint;
-        # Почему wantedBy top-level, а не unitConfig.WantedBy:
-        #   в NixOS `unitConfig` маппится в секцию [Unit], где `WantedBy`
-        #   неизвестен — systemd его игнорирует с warning
-        #   "Unknown key 'WantedBy' in section [Unit], ignoring."
-        #   и mount не стартует после загрузки. Top-level `wantedBy` →
-        #   [Install] (правильная секция).
+        # Почему без wantedBy: mount стартует только когда automount-unit
+        # его дёрнет при обращении к /mnt/desktop. Если оставить
+        # wantedBy=[multi-user.target], активация при switch попытается
+        # запустить mount — и упадёт, если NFS-сервер недоступен.
         # Почему Options — одна строка, а не список:
         #   systemd `[Mount].Options=` — единственное поле, не повторяется;
         #   список из 9 элементов NixOS рендерит как 9 отдельных `Options=`,
@@ -156,7 +154,16 @@ in
         mountConfig = {
           Options = "vers=4.2,rsize=1048576,wsize=1048576,soft,timeo=10,retrans=1,_netdev,nofail,noatime,x-systemd.mount-timeout=3s";
         };
+      } ];
+
+      # Lazy-mount через NixOS-managed automount unit. Стартует при
+      # загрузке, но реальный mount происходит только при первом
+      # обращении к /mnt/desktop. Если сервер недоступен — `ls /mnt/desktop`
+      # вернёт ошибку через ~3 с (без зависания), а `just switch` пройдёт.
+      systemd.automounts = [ {
+        where = cfg.client.mountPoint;
         wantedBy = [ "multi-user.target" ];
+        automountConfig.IdleTimeoutSec = "5min";
       } ];
 
       # nfs-utils для showmount, mountstats и т.п.

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Мёртвый код · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="active">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class="active"><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">Мёртвый код</h1>
+  <h1 id="miortvyi-kod">Мёртвый код</h1>
+<p>Репозиторий использует несколько сигналов, чтобы обнаруживать
+модули, которые нужно удалить.</p>
+<h2 id="detektory">Детекторы</h2>
+<ul>
+<li>Модуль содержит <code>placeholder</code>, <code>заглушка</code>, <code>stub</code>, <code>not populated yet</code>, <code>not implemented</code> или <code>WIP</code> в описании, имени
+или шапке.</li>
+<li><code>environment.systemPackages = with pkgs; [ ];</code> (пусто).</li>
+<li>Тело модуля — <code>lib.mkIf false { ... }</code>.</li>
+<li><code>sha256 = "0000…000"</code> в любом <code>fetchurl</code> / <code>fetchFromGitHub</code> /
+<code>fetchTarball</code>.</li>
+<li><code>submodule { options = {}; }</code> без полей.</li>
+<li><code>enable = false;</code> по умолчанию + <code>mkIf cfg.enable</code> оборачивает всё
+тело.</li>
+<li>Файл импортируется, но его публичные атрибуты никем не
+используются (<code>rg "&lt;attributeName&gt;"</code> пусто).</li>
+<li>Файл есть в <code>modules/</code>, но не в <code>imports</code> ни одного
+<code>configuration.nix</code> или <code>hosts/*/configuration.nix</code>.</li>
+</ul>
+<h2 id="ritual-pered-udaleniem">Ритуал перед удалением</h2>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash"># 1. Прямые импорты
+rg -l &quot;&lt;filename&gt;&quot; hosts&#x2F; configuration.nix modules&#x2F;
+
+# 2. Использования публичных экспортов
+rg &quot;&lt;attributeName&gt;&quot; --type nix
+
+# 3. Синтаксис каждого файла, который трогаем
+nix-instantiate --parse &lt;каждый файл&gt;
+
+# 4. Полная eval-валидация
+nix-instantiate --eval -E &#x27;
+  let
+    nixpkgs = builtins.getFlake &quot;git+file:&#x2F;&#x2F;$PWD?submodules=1&quot;;
+    cfg = nixpkgs.nixosConfigurations.cf19.config;
+  in builtins.toString cfg.environment.systemPackages&#x27; | head -5
+</code></pre>
+<p>Шаг 4 — самый важный. Если удаление ломает eval, вернуть файл
+просто (один коммит отката).</p>
+<h2 id="cleanup-kommity">Cleanup-коммиты</h2>
+<ul>
+<li><code>nix: remove X</code> — <code>flake.nix</code> + <code>configuration.nix</code> +
+<code>composition.nix</code> + удаляемый модуль. <strong>Один коммит</strong>, потому что
+промежуточное состояние сломано.</li>
+<li><code>chore: drop unused Y</code> — <code>conf/</code>, тесты, артефакты,
+<code>.gitignore</code>.</li>
+<li><code>emacs: …</code> — только <code>.el</code>.</li>
+</ul>
+<p>Заголовок: <code>nix: &lt;что&gt;</code>. В теле — список всех затронутых файлов и
+почему удаляется.</p>
+<h2 id="detektor-v-ci">Детектор в CI</h2>
+<p><code>tests/contract/unit/05-mkforce-lint-test.sh</code> — smoke-тест, что
+<code>tools/mkforce-lint.sh</code> запускается. Непосредственно dead-code
+детектор в CI пока нет (TODO: добавить в <code>holo-verify.sh</code>).</p>
+<h2 id="kogda-ne-udaliat">Когда НЕ удалять</h2>
+<ul>
+<li>Файл — это <code>pro-users.nix</code> или <code>modules/searxng.nix</code> с
+<code>enable = false</code> по умолчанию. Это <strong>опц.</strong> модули, не мёртвый
+код. Хост может включить.</li>
+<li>Файл — <code>pro-emacs-rescue.nix</code> с <code>enable = mkEnableOption "..." // { default = true; }</code>. По умолчанию включён; хост может
+отключить. Это не <code>mkIf false {}</code> — это правильный паттерн.</li>
+<li><code>pro-styles/</code>-подобные директории, не импортируемые, но
+перечисленные в <code>flake.nix</code> outputs как devShell-пакеты. Они
+могут быть полезны, не нужно удалять.</li>
+</ul>
+<h2 id="instrumenty">Инструменты</h2>
+<ul>
+<li><code>rg "&lt;pattern&gt;"</code> — manual ripgrep для поиска использований.</li>
+<li><code>nix-instantiate --parse &lt;file&gt;</code> — syntax check одного файла.</li>
+<li><code>nix flake check</code> — eval всех хостов.</li>
+<li><code>nix-instantiate --eval -E '&lt;expr&gt;'</code> — ad-hoc eval.</li>
+</ul>
+<h2 id="shpargalka-rituala">Шпаргалка ритуала</h2>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash"># Перед удалением pro-foo.nix
+rg -l &quot;pro-foo&quot; hosts&#x2F; configuration.nix modules&#x2F; tests&#x2F; scripts&#x2F; docs&#x2F;
+# Если все hits — в импортах &#x2F; ссылках &#x2F; тестах, не в комментариях:
+rg -l &quot;^.*pro-foo&quot; flake.nix
+
+# После удаления
+nix-instantiate --parse flake.nix configuration.nix hosts&#x2F;*&#x2F;configuration.nix
+nix flake check
+
+# Проверить, что auto-gen сайт ещё строится
+just site-regen
+nix build &quot;.#site&quot;
+</code></pre>
+<h2 id="gde-eto-uzhe-sdelano">Где это уже сделано</h2>
+<ul>
+<li><code>modules/opencode-tui.nix</code> — пример маленького, полезного модуля
+с <code>enable = mkEnableOption</code>. Не мёртвый код.</li>
+<li><code>pro-*-nix</code> модули, у которых <code>enable = false</code> по умолчанию +
+<code>mkIf</code> — это опц. фичи. Хосты включают через <code>imports</code>.</li>
+</ul>
+<h2 id="sviazannye">Связанные</h2>
+<ul>
+<li><a href="http://127.0.0.1:8000/conventions/dead-code/conventions/mkforce.md">mkForce</a> — per-host override паттерн
+часто использует <code>mkForce false</code> для отключения default-включённой
+опции.</li>
+<li><a href="http://127.0.0.1:8000/conventions/dead-code/conventions/commit.md">Commit format</a> — <code>nix: remove X</code> —
+правильный тип коммита для удаления.</li>
+<li><a href="http://127.0.0.1:8000/conventions/dead-code/conventions/anti-patterns.md">Anti-patterns</a> — <code>mkIf false {}</code> —
+один из анти-паттернов; это <strong>сигнал</strong> что модуль нужно удалить.</li>
+</ul>
+
+
+  
+  <hr>
+  <p><strong>Дальше:</strong>
+  
+    <a href="&#x2F;conventions&#x2F;anti-patterns&#x2F;">Анти-паттерны</a>
+  
+  </p>
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

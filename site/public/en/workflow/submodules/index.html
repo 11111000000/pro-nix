@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submodules · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">Submodules</h1>
+  <h1 id="submodules">Submodules</h1>
+<p>The repo pulls in <strong>11 git submodules</strong> for Emacs packages and
+upstream forks. They are configured in <code>.gitmodules</code> with HTTPS
+URLs by default; SSH is opt-in per host.</p>
+<h2 id="the-11-submodules">The 11 submodules</h2>
+<table><thead><tr><th>Name</th><th>Path</th><th>URL</th><th>What</th></tr></thead><tbody>
+<tr><td><code>pro-tabs</code></td><td><code>submodules/pro-tabs</code></td><td>github.com/gnu-emacs-ru/pro-tabs</td><td>Unified Emacs tab-bar + tab-line with icons</td></tr>
+<tr><td><code>carriage</code></td><td><code>submodules/carriage</code></td><td>github.com/gnu-emacs-ru/carriage</td><td>“Code knitting” workflow for Org</td></tr>
+<tr><td><code>emcp</code></td><td><code>submodules/emcp</code></td><td>codeberg.org/martenlienen/emcp</td><td>Emacs MCP server (HTTP on 38913)</td></tr>
+<tr><td><code>telega.el</code></td><td><code>submodules/telega.el</code></td><td>github.com/zevlg/telega.el</td><td>Telegram client for Emacs (TDLib-based)</td></tr>
+<tr><td><code>agent-shell</code></td><td><code>submodules/agent-shell</code></td><td>github.com/11111000000/agent-shell</td><td>Emacs shell for ACP-speaking agents</td></tr>
+<tr><td><code>acapella</code></td><td><code>submodules/acapella</code></td><td>github.com/gnu-emacs-ru/acapella</td><td>A2A-protocol Emacs client</td></tr>
+<tr><td><code>atlas</code></td><td><code>submodules/atlas</code></td><td>github.com/gnu-emacs-ru/atlas</td><td>Universal project map (APM v2 format)</td></tr>
+<tr><td><code>tao-theme</code></td><td><code>submodules/tao-theme</code></td><td>github.com/11111000000/tao-theme-emacs</td><td>tao-yang (light) and tao-yin (dark) themes</td></tr>
+<tr><td><code>shaoline</code></td><td><code>submodules/shaoline</code></td><td>github.com/11111000000/shaoline</td><td>Minimalist mode-line</td></tr>
+<tr><td><code>agent-shell-hud</code></td><td><code>submodules/agent-shell-hud</code></td><td>github.com/11111000000/agent-shell-hud</td><td>Multilingual HUD overlay for agent-shell</td></tr>
+<tr><td><code>acp</code></td><td><code>submodules/acp</code></td><td>github.com/xenodium/acp.el</td><td>Emacs implementation of the Agent Client Protocol</td></tr>
+</tbody></table>
+<p>See <a href="http://127.0.0.1:8000/en/workflow/submodules/reference/submodules.md">Reference → Submodules</a> for the full
+auto-generated catalogue.</p>
+<h2 id="the-https-by-default-policy">The HTTPS-by-default policy</h2>
+<p><code>.gitmodules</code> has HTTPS URLs everywhere. This is so that <strong>anyone
+can clone without an SSH key</strong> — including CI runners, containers,
+and one-off development environments.</p>
+<p>The trade-off: HTTPS users can read but cannot push to the upstream
+forks. For users with write access, <code>just submodules-ssh</code> converts
+all URLs to SSH form.</p>
+<h2 id="the-submodule-policy-during-just-switch">The submodule policy during <code>just switch</code></h2>
+<p><code>just switch &lt;host&gt;</code> runs <code>scripts/helper-switch.sh</code>, which
+implements a <strong>three-mode</strong> policy:</p>
+<table><thead><tr><th>Mode</th><th>When</th><th>What</th></tr></thead><tbody>
+<tr><td><code>init</code></td><td>Any submodule is uninitialized (detected via <code>git submodule status | grep '^-'</code>)</td><td><code>git submodule update --init --recursive</code></td></tr>
+<tr><td><code>skip</code></td><td>All submodules are initialized</td><td>Use as-is. <strong>No fetch, no merge, no remote touch.</strong></td></tr>
+<tr><td><code>update</code></td><td>The user passed <code>update-submodules</code> or <code>sync</code> as the <code>FLAGS</code> arg</td><td><code>scripts/sync-submodules.sh</code> (refresh from remote, sequential, with timeouts)</td></tr>
+</tbody></table>
+<p>The default is <code>skip</code> — <code>just switch</code> does <strong>not</strong> touch the
+network for submodules. To force a refresh, pass the flag:</p>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">just switch huawei update-submodules
+just switch cf19 sync
+</code></pre>
+<p>To skip the policy entirely (escape hatch):</p>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">PRO_NIX_NO_SUBMODULE_UPDATE=1 just switch huawei
+</code></pre>
+<h2 id="why-sequential-not-parallel">Why sequential, not parallel</h2>
+<p><code>scripts/sync-submodules.sh</code> does <strong>not</strong> use <code>git submodule foreach</code> in the background. It runs sequentially, with a 20-second
+fetch timeout and a 10-second merge timeout per submodule. The
+reason: parallel fetches against GitHub’s anonymous API hit rate
+limits within minutes. Sequential is slower worst case (165 s for
+15 submodules × 11 s each) but reliable.</p>
+<h2 id="what-happens-when-a-fetch-fails">What happens when a fetch fails</h2>
+<p><code>sync-submodules.sh</code> does <strong>not</strong> fail the build when a fetch
+fails. It logs <code>WARNING: fetch failed for &lt;submodule&gt;</code>, skips the
+update for that submodule, and continues. The reason: the Nix
+recipes read the <strong>local</strong> <code>submodules/&lt;name&gt;</code>, not the remote, so
+a previous valid commit/submodule-pair remains buildable. The user
+gets a working build even if one upstream is down.</p>
+<h2 id="the-dirty-submodule-check">The dirty-submodule check</h2>
+<p><code>sync-submodules.sh</code> does a dirty check <strong>before</strong> any fetch:</p>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">git submodule foreach &#x27;git diff --quiet HEAD&#x27;
+</code></pre>
+<p>If any submodule has uncommitted changes, the script fails loudly.
+This protects against “I edited a submodule, then ran <code>just sync-submodules</code>, and the script stomped my work” — the dirty
+check makes the user fix the dirty submodule first.</p>
+<h2 id="manual-submodule-operations">Manual submodule operations</h2>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash"># Just init
+git submodule update --init --recursive
+
+# Refresh one submodule from remote
+git submodule update --remote --merge submodules&#x2F;agent-shell
+
+# Refresh all submodules from remote
+just sync-submodules
+# or
+git submodule update --remote --merge
+
+# Switch one submodule to a fork
+git config submodule.submodules&#x2F;agent-shell.url git@github.com:YOUR_USER&#x2F;agent-shell.git
+git submodule sync
+</code></pre>
+<h2 id="https-ssh">HTTPS → SSH</h2>
+<p><code>just submodules-ssh</code> runs <code>scripts/submodules-ssh.sh</code>. The script:</p>
+<ol>
+<li>Backs up <code>.gitmodules</code> to <code>.gitmodules.backup.&lt;ts&gt;</code>.</li>
+<li><code>trap EXIT</code> to restore on error.</li>
+<li>Reads the URL for each submodule.</li>
+<li>For <code>github.com</code> URLs, converts <code>https://github.com/&lt;owner&gt;/&lt;repo&gt;.git</code>
+to <code>git@github.com:&lt;owner&gt;/&lt;repo&gt;.git</code>.</li>
+<li>For <code>codeberg.org</code> URLs, converts to <code>git@codeberg.org:&lt;owner&gt;/&lt;repo&gt;.git</code>.</li>
+<li>Writes the new URL via <code>git config -f .gitmodules</code>.</li>
+<li><code>git submodule sync --recursive</code> to update the local config.</li>
+<li><code>git submodule update --remote --merge</code> to actually pull from the
+new URL.</li>
+</ol>
+<p>To revert to HTTPS:</p>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash"># Find the latest backup
+ls -t .gitmodules.backup.* | head -1
+
+# Restore
+cp $(ls -t .gitmodules.backup.* | head -1) .gitmodules
+git submodule sync
+git submodule update --remote --merge
+</code></pre>
+<h2 id="why-git-file-pwd-submodules-1-matters">Why <code>git+file://$(pwd)?submodules=1</code> matters</h2>
+<p><code>flake.nix</code> references all submodules through recipes in
+<code>nix/emacs-recipes/*.nix</code>. Each recipe has
+<code>src = ../../submodules/&lt;name&gt;</code>. When <code>nix</code> evaluates the flake, it
+captures the source from the local path — <strong>but only if the flake
+URL is <code>git+file://...</code> with <code>?submodules=1</code></strong>. The <code>path:</code> and <code>.</code>
+shorthands do <strong>not</strong> include submodules in the captured source,
+so the recipes fail with “path does not exist”.</p>
+<p>This is why every <code>just</code> recipe that runs <code>nix</code> (build, switch,
+test, flake-check, check-all) uses the explicit URL. The
+<code>helper-switch.sh</code> script sets it once at the top:</p>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">FLAKE_REF=&quot;git+file:&#x2F;&#x2F;$PWD?submodules=1&quot;
+</code></pre>
+<p>The <code>just</code> recipes that need to set it inline do so too:</p>
+<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">nix build &quot;.#nixosConfigurations.cf19.config.system.build.toplevel&quot;  # uses . → FAILS for submodules
+nix build &quot;git+file:&#x2F;&#x2F;$(pwd)?submodules=1#nixosConfigurations.cf19.config.system.build.toplevel&quot;  # works
+</code></pre>
+<p><code>nix run .#check-all</code> is an exception — it is an <code>app</code>, and the
+<code>program</code> is a shell script that sets the URL internally. The
+recipe lives at <code>flake.nix:137-146</code> and is safe to call as
+<code>nix run .#check-all</code>.</p>
+
+
+  
+  <hr>
+  <p><strong>Дальше:</strong>
+  
+    <a href="&#x2F;workflow&#x2F;agents&#x2F;">Agents</a> · 
+  
+    <a href="&#x2F;workflow&#x2F;per-host&#x2F;">Per-host checklist</a>
+  
+  </p>
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-06-16
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

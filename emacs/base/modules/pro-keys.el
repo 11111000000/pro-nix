@@ -288,6 +288,9 @@
 (defvar pro/registered-module-keys (make-hash-table :test 'eq)
   "Hash table mapping module symbol to its suggested keys alist.")
 
+(defvar pro-keys-debug nil
+  "When non-nil, write per-module registration logs to /tmp/.")
+
 (defun pro/register-module-keys (module keys-alist)
   "Register KEYS-ALIST suggested by MODULE.
 KEYS-ALIST is an alist of (KEY . command-symbol)."
@@ -295,35 +298,38 @@ KEYS-ALIST is an alist of (KEY . command-symbol)."
       (when (and module keys-alist)
         (let* ((module-id (if (symbolp module) (symbol-name module) (format "%S" module)))
                (raw (if (listp keys-alist) keys-alist (list keys-alist)))
-               (safe-keys '())
-               (preview '())
-               (count 0))
-          (ignore-errors
-            (let ((file (format "/tmp/pro-register-%s.log" module-id)))
-              (with-temp-file file
-                (insert (format "CALL: time=%s module=%s type=%S\n" (current-time-string) module-id (type-of keys-alist)))
-                (prin1 keys-alist (current-buffer)))))
+          (safe-keys '())
+                (preview '())
+                (count 0))
+          (when pro-keys-debug
+            (ignore-errors
+              (let ((file (format "/tmp/pro-register-%s.log" module-id)))
+                (with-temp-file file
+                  (insert (format "CALL: time=%s module=%s type=%S\n" (current-time-string) module-id (type-of keys-alist)))
+                  (prin1 keys-alist (current-buffer))))))
           (message "pro/register-module-keys: module=%s" module-id)
           (dolist (e raw)
             (condition-case _ (when (and (consp e) (stringp (car e))) (push e safe-keys) (push (cons (car e) (if (and (consp e) (symbolp (cdr e))) (cdr e) (format "%S" (cdr e)))) preview)) (error (push (format "<invalid:%S>" e) preview))))
           (setq safe-keys (nreverse safe-keys) preview (nreverse preview) count (length safe-keys))
           (puthash module safe-keys pro/registered-module-keys)
-          (ignore-errors
-            (let ((file (format "/tmp/pro-register-%s.success.log" module-id)))
-              (with-temp-file file
-                (insert (format "OK: time=%s module=%s registered=%d\n" (current-time-string) module-id count))
-                (prin1 preview (current-buffer)))))
+          (when pro-keys-debug
+            (ignore-errors
+              (let ((file (format "/tmp/pro-register-%s.success.log" module-id)))
+                (with-temp-file file
+                  (insert (format "OK: time=%s module=%s registered=%d\n" (current-time-string) module-id count))
+                  (prin1 preview (current-buffer))))))
           (message "pro: registered %d suggested keys from %s" count module-id)))
-    (error
-     (let ((module-id (if (symbolp module) (symbol-name module) (format "%S" module))))
-       (message "pro: failed to register module keys for %s - %S" module-id (or err "<no-error-data>"))
-       (ignore-errors
-         (let ((file (format "/tmp/pro-register-%s.error.log" module-id)))
-           (with-temp-file file
-             (insert (format "ERROR: time=%s module=%s\n" (current-time-string) module-id))
-             (prin1 (or err "<no-error-data>") (current-buffer))
-             (insert "\nBacktrace:\n")
-             (prin1 (with-output-to-string (backtrace)) (current-buffer)))))))))
+     (error
+      (let ((module-id (if (symbolp module) (symbol-name module) (format "%S" module))))
+        (message "pro: failed to register module keys for %s - %S" module-id (or err "<no-error-data>"))
+        (when pro-keys-debug
+          (ignore-errors
+            (let ((file (format "/tmp/pro-register-%s.error.log" module-id)))
+              (with-temp-file file
+                (insert (format "ERROR: time=%s module=%s\n" (current-time-string) module-id))
+                (prin1 (or err "<no-error-data>") (current-buffer))
+                (insert "\nBacktrace:\n")
+                (prin1 (with-output-to-string (backtrace)) (current-buffer))))))))))
 
 (defun pro/export-registered-keys-to-org (&optional out-file)
   "Export registered module key suggestions to OUT-FILE as an Org table." 
