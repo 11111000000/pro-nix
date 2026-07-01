@@ -61,4 +61,8 @@
 
   # headscale control plane — на station; на ноутбуке выключаем явно.
   headscale.enable = lib.mkForce false;
+
+  # Spell checker (ru_RU + optional en_US). Включаем на рабочей станции,
+  # так как Emacs flyspell нужен для комментариев в коде и org-режиме.
+  pro.spellcheck.enable = true;
 }

@@ -50,6 +50,13 @@ let
   # Решение: патчим upstream llm до того, как ellama recipe оцéнивается,
   # через `let binding` — patched llm фиксируется до `localRecipes`.
   patchedLlm = super.callPackage ../emacs-recipes/llm.nix {};
+  # Transient: nixpkgs 25.11 ships `emacs-transient-20251006.1815`
+  # (= transient 0.10.1), но Magit требует >= 0.13. Без этого патча
+  # Magit аварийно завершается на старте с "Emergency: Magit requires
+  # transient >= 0.13". Берём свежий 0.13.4 с GNU ELPA.
+  # Let-binding гарантирует, что `localRecipes` (alphabetic-order eval)
+  # не подменит наш patched на upstream broken при резолве ellama/anvil.
+  patchedTransient = super.callPackage ../emacs-recipes/transient.nix {};
   localRecipes = {
     # visual-fill-column: upstream-рецепт в nixpkgs запинен на
     # codeberg.org/joostkremers/visual-fill-column@a38e3a28 — коммит
@@ -71,7 +78,10 @@ let
     # минуя elpa2nix (для которого нужен standard ELPA-style tar).
     # Привязка через `let patchedLlm` (выше) гарантирует, что alphabetic-order
     # eval этого attrset не подменит наш patched llm на upstream broken.
-    llm = patchedLlm;
+llm = patchedLlm;
+    # transient: см. nix/emacs-recipes/transient.nix. Nixpkgs 25.11
+    # запинен на 0.10.1, Magit требует >= 0.13. Берём свежий 0.13.4 с ELPA.
+    transient = patchedTransient;
     pro-tabs = super.callPackage ../emacs-recipes/pro-tabs.nix {
       all-the-icons = super.emacsPackages.all-the-icons or null;
     };
