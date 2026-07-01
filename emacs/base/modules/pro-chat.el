@@ -278,6 +278,7 @@ Tor доступен (см. scripts/check-tor-socks.sh)."
     (pro/register-module-keys
      'chat
      '(("C-c t o" . pro/chat-open)
+       ("C-c T o" . pro/chat-open)
        ("C-c t k" . pro/chat-close-idle-chats)
        ("C-c t e" . pro/chat-reload-emojis)
        ("C-c t i" . pro/chat-install)

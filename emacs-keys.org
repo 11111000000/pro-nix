@@ -98,7 +98,7 @@
 | AI         | C-c C-h       | agent-shell-hud-menu                  | Пульт агента (в agent-shell-mode)    |
 | AI         | C-c i         | agent-shell-hud-info                  | HUD-инфо (в agent-shell-mode)        |
 | AI         | C-c r         | agent-shell-hud-refresh               | Обновить HUD (в agent-shell-mode)    |
-| Чат        | C-c T         | pro/chat-open                         | Telegram                             |
+| Чат        | C-c T o       | pro/chat-open                         | Telegram (under C-c T prefix)        |
 | Чат        | C-c t o       | pro/chat-open                         | Open Telegram (telega)               |
 | Чат        | C-c t K       | pro/chat-close-idle-chats             | Close idle telega chat buffers       |
 | Чат        | C-c t E       | pro/chat-reload-emojis                | Reload telega emoji tables           |

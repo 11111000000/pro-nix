@@ -33,6 +33,16 @@
   ;; possible during startup when we explicitly request them below.
   (setq package-install-upgrade-built-in t)
 
+  ;; Force-load our patched transient 0.13.4 from EMACSLOADPATH before
+  ;; any module triggers the built-in Emacs 30.x transient. The two are
+  ;; incompatible (cl-defgeneric vs regular defun). The Nix profile puts
+  ;; our transient first in load-path, but some modules (pro-agent-shell)
+  ;; (require 'transient nil t) during loading — without this early
+  ;; require they'd pick up the built-in version, causing:
+  ;;   "transient--init-suffix-key is already defined as something else
+  ;;    than a generic function"
+  (require 'transient nil t)
+
    ;; NOTE: modules dir is already on `load-path' via early-init.el.
    ;; Now load site-init which will load configured modules
   (load (expand-file-name "site-init.el" base-dir) nil t)
