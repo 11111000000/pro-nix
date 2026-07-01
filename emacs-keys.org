@@ -103,6 +103,8 @@
 | Чат        | C-c t K       | pro/chat-close-idle-chats             | Close idle telega chat buffers       |
 | Чат        | C-c t E       | pro/chat-reload-emojis                | Reload telega emoji tables           |
 | Чат        | C-c t i       | pro/chat-install                      | Install telega from MELPA (fallback) |
+| Чат        | C-c T S       | pro/chat-tor-status                   | Telegram: tor proxy status (buffer)  |
+| Чат        | C-c T R       | pro/chat-tor-reroute-now              | Telegram: re-route tor wrapper       |
 | Чат        | C-c t s       | pro/telega-select-chat-or-contact     | Select telega chat/contact (consult) |
 | Чат        | C-c t c       | pro/telega-select-chat-or-contact     | Select telega chat/contact (alias)   |
 | Чат        | C-c t u       | pro/telega-select-chat-or-contact     | Select telega contact (C-u)          |

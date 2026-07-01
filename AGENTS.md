@@ -325,7 +325,44 @@ attrset literal `localRecipes` оценивается **по алфавиту** 
   выше.
 - `error: Cannot open load file: plz-event-source` или
   `plz-media-type` → не добавлены в `buildInputs` ellama recipe. Это
-  отдельные packages, не subdir of plz.
+   отдельные packages, не subdir of plz.
+
+### 6f. Telegram + Tor (TDesktop и telega.el)
+
+Telegram MTProto в mainline tdlib **не поддерживает SOCKS5 proxy** через elisp.
+Поэтому единственный надёжный путь к анонимизации — системный SOCKS5 (Tor)
+через `torsocks`, который прозрачно перехватывает TCP-вызовы через LD_PRELOAD.
+
+Архитектура (см. `local-templates/pi/skills/emacs-telegram-tor/SKILL.md`):
+- `scripts/tdesktop-tor-launch` оборачивает `telegram-desktop` через torsocks
+  когда Tor SOCKS5 доступен; fallback на direct connect если нет.
+- `scripts/telega-server-tor-launch` — то же для telega-server (tdlib-bridge).
+- `pro-chat.el` подменяет `telega-server-command` на `telega-server-tor-launch`
+  при `(require 'telega)` если `pro/chat-use-tor` non-nil.
+- `scripts/check-tor-socks.sh` проверяет TCP + SOCKS5 handshake + опционально
+  `.onion` resolve. Используется как wrapper-launcher pre-check.
+
+Опции `modules/pro-telegram.nix`:
+- `pro.telegram.useTor`            — default true, основной switch.
+- `pro.telegram.disableTor`         — default false (force off).
+- `pro.telegram.socksHost/Port`     — default 127.0.0.1:9050.
+  Override на `local.nix` если точка доступа отдает Tor через Android-tethering
+  (например `192.168.1.42:9050` от Orbot VPN).
+- `pro.telegram.enableTorService`   — default true (регистрирует
+  `pro-telegram-tor.service` boot-time Tor readiness check).
+
+Тест:
+```bash
+scripts/check-tor-socks.sh                 # exit 0 = OK
+scripts/tdesktop-tor-launch.sh --check
+scripts/telega-server-tor-launch.sh --check
+# В Emacs:
+M-x pro/chat-tor-status                   # C-c t s
+```
+
+**Не работает для**: iOS/Android TDesktop (другая бинарь), docker-mode
+(`telega-use-docker = t` — torsocks не работает внутри контейнера без
+явного proxy-sidecar). Для этих случаев — `pro.telegram.disableTor = true`.
 
 ## 8. Процесс развёртывания
 
