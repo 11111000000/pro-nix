@@ -15,7 +15,7 @@ with pkgs;
     gawk
     kbd
     mc
-    emacsPkg
+    (pkgs.emacs30 or pkgs.emacs)
     nix
     nix-info
     acpi
