@@ -53,11 +53,14 @@
             "multi-vterm" "eshell-toggle" "acapella" "atlas" "shaoline" "tao-theme" "pro-tabs"
             "agent-shell" "agent-shell-hud" "acp" "emcp" "http-server" "shell-maker"
             # Ellama — see nix/emacs-recipes/ellama.nix and
-            # emacs/base/modules/pro-ai-ellama.el. llm / llm-ollama / plz /
-            # transient / yaml / compat propagate from the ellama recipe.
-            # We list the tops explicitly so provided-packages.el knows they
-            # are available.
-            "ellama" "llm" "llm-ollama" "plz"
+            # emacs/base/modules/pro-ai-ellama.el. llm / llm-ollama / plz
+            # propagate from the ellama recipe. Мы листим их явно,
+            # чтобы provided-packages.el знал о них. Transient включён
+            # явно: nixpkgs 25.11 transient (0.10.1) слишком стар для
+            # Magit, наш patched 0.13.4 (nix/emacs-recipes/transient.nix)
+            # должен быть в home.packages, а не полагаться на propagate
+            # из magit.
+            "ellama" "llm" "llm-ollama" "plz" "transient"
             "treemacs-icons-dired"
             "async" "dash" "embark" "popon" "cond-let" "magit-section" "visual-fill-column"
             "buffer-move" "golden-ratio"
