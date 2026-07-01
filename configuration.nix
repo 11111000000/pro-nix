@@ -52,6 +52,7 @@
     ./modules/pro-docker.nix
     ./modules/pro-storage.nix
     ./modules/pro-privacy.nix
+    ./modules/pro-telegram.nix
     ./modules/pro-dev.nix
     ./modules/pro-peer.nix
     ./modules/host-policies.nix
@@ -151,6 +152,14 @@
   # LAN advertise via mDNS and can receive centrally-managed authorized_keys.
   pro-peer.enable = true;
   pro-peer.enableKeySync = true;
+
+  # Telegram clients (TDesktop + telega.el через telega-server) routed
+  # через Tor SOCKS5 когда Tor доступен (services.tor.client.enable в
+  # pro-privacy.nix; SOCKS5 default 127.0.0.1:9050). Хосты без Tor —
+  # прямой connect (fallback). Override через local.nix для конкретного
+  # способа подключения (например, Android-tethering на WiFi с SOCKS5
+  # на телефонном IP через ssh-tunnel или Orbot VPN).
+  pro.telegram.useTor = true;
 
   # SSH-ключи для az/za/la/bo. Кладём сюда (а не в `local.nix`), потому
   # что public key по дизайну публичный и может коммититься в репо.
