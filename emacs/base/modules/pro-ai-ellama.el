@@ -680,10 +680,10 @@ auth_host из `pro-ai--provider-config' и ключ из authinfo.
 (with-eval-after-load 'org
   (with-eval-after-load 'ob-core
     ;; Указываем org-babel что `ellama' — известный язык.
-    (add-to-list 'org-babel-load-languages '(ellama . t))
-    ;; Безопасный fallback для users без явной регистрации.
-    (unless (assoc "ellama" org-babel-interpreters)
-      (push '("ellama" . org-babel-execute:ellama) org-babel-interpreters))))
+    ;; В org 9.7+ переменная `org-babel-interpreters' удалена, остаётся
+    ;; только `org-babel-load-languages' (assoc-list lang -> t/nil).
+    ;; Достаточно добавить туда `(ellama . t)`.
+    (add-to-list 'org-babel-load-languages '(ellama . t))))
 
 ;; Регистрация предложений откладывается до момента, когда pro-keys загружен.
 (with-eval-after-load 'pro-keys
