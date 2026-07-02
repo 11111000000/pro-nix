@@ -201,7 +201,9 @@
                   ((memq sym '(goto-last-change goto-last-change-reverse)) (ignore-errors (require 'goto-chg nil t)))
                  ((memq sym '(pro/chat-open pro/chat-close-idle-chats pro/chat-reload-emojis pro/chat-install)) (ignore-errors (require 'pro-chat nil t)))
                  ((memq sym '(pro/vterm-yank pro/vterm-interrupt pro/vterm-copy-mode)) (ignore-errors (require 'pro-terminals nil t)))
-                  ((memq sym '(pro/clipboard-yank-pop pro/clipboard-yank-region)) (ignore-errors (require 'pro-clipboard nil t))))
+                  ((memq sym '(pro/clipboard-yank-pop pro/clipboard-yank-region)) (ignore-errors (require 'pro-clipboard nil t)))
+                 ;; agent-shell-hud команды (для `C-c i' / `C-c C-h' из emacs-keys.org)
+                 ((memq sym '(agent-shell-hud-info agent-shell-hud-menu agent-shell-hud-refresh)) (ignore-errors (require 'agent-shell-hud nil t))))
               ;; If symbol contains a slash (eg. er/expand-region), try requiring
               ;; both parts as packages: before and after the slash.
               (unless (or (fboundp sym) (not (string-match-p "/" (symbol-name sym))))
@@ -214,8 +216,11 @@
               ;; существует lazy-модуль, чьё имя (например `pro-ai-ellama')
               ;; совпадает с префиксом символа до первого `-' после префикса
               ;; (например `pro-ai-ellama-open'), пробуем его загрузить.
-              ;; Это устраняет «навсегда pending» для ключей
-              ;; pro-ai-ellama-*, pro-haskell-*, pro-ai-anvil-*, etc.
+              ;; Также поддерживаем slash-style: `pro-telega' lazy-модуль
+              ;; может соответствовать команде `pro/telega-select-...'
+              ;; (т.е. `pro-' → `pro/'). Это устраняет «навсегда pending»
+              ;; для ключей pro-ai-ellama-*, pro-haskell-*, pro-ai-anvil-*,
+              ;; pro/telega-*, и т.п.
               (unless (fboundp sym)
                 (when (and (boundp 'pro-emacs-base-lazy-modules)
                            (symbol-name sym))
@@ -223,9 +228,13 @@
                          (match (cl-find-if
                                  (lambda (m)
                                    (let* ((ms (symbol-name m))
-                                          (prefix (concat ms "-")))
-                                     (and (string-prefix-p prefix sname)
-                                          (memq m pro-emacs-base-lazy-modules))))
+                                          (prefix-hyphen (concat ms "-"))
+                                          ;; `pro-telega' -> `pro/telega-'
+                                          (prefix-slash (concat (substring ms 0 3) "/" (substring ms 4) "-"))
+                                          (mod-in-list (memq m pro-emacs-base-lazy-modules)))
+                                     (and mod-in-list
+                                          (or (string-prefix-p prefix-hyphen sname)
+                                              (string-prefix-p prefix-slash sname)))))
                                  pro-emacs-base-lazy-modules)))
                     (when (and match (fboundp 'pro-emacs-base-load-lazy-module))
                       (ignore-errors (pro-emacs-base-load-lazy-module match))))))
