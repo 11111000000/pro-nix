@@ -93,7 +93,7 @@
 | EXWM       | s-J           | buf-move-down                         | Переместить буфер вниз               |
 | EXWM       | s-K           | buf-move-up                           | Переместить буфер вверх              |
 | EXWM       | s-L           | buf-move-right                        | Переместить буфер вправо             |
-| AI         | C-c a         | pro-ai-open-entry                     | Вход в AI                            |
+| AI         | C-c a o       | pro-ai-open-entry                     | Вход в AI (under C-c a prefix)        |
 | AI         | C-c A         | pro-agent-open                        | agent-shell                          |
 | AI         | C-c C-h       | agent-shell-hud-menu                  | Пульт агента (в agent-shell-mode)    |
 | AI         | C-c i         | agent-shell-hud-info                  | HUD-инфо (в agent-shell-mode)        |

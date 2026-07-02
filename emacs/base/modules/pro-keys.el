@@ -201,18 +201,46 @@
                   ((memq sym '(goto-last-change goto-last-change-reverse)) (ignore-errors (require 'goto-chg nil t)))
                  ((memq sym '(pro/chat-open pro/chat-close-idle-chats pro/chat-reload-emojis pro/chat-install)) (ignore-errors (require 'pro-chat nil t)))
                  ((memq sym '(pro/vterm-yank pro/vterm-interrupt pro/vterm-copy-mode)) (ignore-errors (require 'pro-terminals nil t)))
-                 ((memq sym '(pro/clipboard-yank-pop pro/clipboard-yank-region)) (ignore-errors (require 'pro-clipboard nil t))))
-             ;; If symbol contains a slash (eg. er/expand-region), try requiring
-             ;; both parts as packages: before and after the slash.
-             (unless (or (fboundp sym) (not (string-match-p "/" (symbol-name sym))))
-               (let* ((parts (split-string (symbol-name sym) "/"))
-                      (first (intern (car parts)))
-                      (second (intern (cadr parts))))
-                 (ignore-errors (require second nil t))
-                 (ignore-errors (require first nil t))))
-             (if (and (symbolp sym) (fboundp sym))
-                 (global-set-key (kbd key) sym)
-               (push entry remaining)))))
+                  ((memq sym '(pro/clipboard-yank-pop pro/clipboard-yank-region)) (ignore-errors (require 'pro-clipboard nil t))))
+              ;; If symbol contains a slash (eg. er/expand-region), try requiring
+              ;; both parts as packages: before and after the slash.
+              (unless (or (fboundp sym) (not (string-match-p "/" (symbol-name sym))))
+                (let* ((parts (split-string (symbol-name sym) "/"))
+                       (first (intern (car parts)))
+                       (second (intern (cadr parts))))
+                  (ignore-errors (require second nil t))
+                  (ignore-errors (require first nil t))))
+              ;; Generic lazy-module fallback. Если команда не определена и
+              ;; существует lazy-модуль, чьё имя (например `pro-ai-ellama')
+              ;; совпадает с префиксом символа до первого `-' после префикса
+              ;; (например `pro-ai-ellama-open'), пробуем его загрузить.
+              ;; Это устраняет «навсегда pending» для ключей
+              ;; pro-ai-ellama-*, pro-haskell-*, pro-ai-anvil-*, etc.
+              (unless (fboundp sym)
+                (when (and (boundp 'pro-emacs-base-lazy-modules)
+                           (symbol-name sym))
+                  (let* ((sname (symbol-name sym))
+                         (match (cl-find-if
+                                 (lambda (m)
+                                   (let* ((ms (symbol-name m))
+                                          (prefix (concat ms "-")))
+                                     (and (string-prefix-p prefix sname)
+                                          (memq m pro-emacs-base-lazy-modules))))
+                                 pro-emacs-base-lazy-modules)))
+                    (when (and match (fboundp 'pro-emacs-base-load-lazy-module))
+                      (ignore-errors (pro-emacs-base-load-lazy-module match))))))
+              (if (and (symbolp sym) (fboundp sym))
+                  ;; При попытке bind-нуть саб-ключ (`C-c a a') под уже
+                  ;; не-prefix родителем (`C-c a' = pro-ai-open-entry)
+                  ;; `global-set-key' бросает `error', который абортнул
+                  ;; весь apply-loop. Ловим, чтобы оставшиеся pending
+                  ;; ключи всё равно обработались.
+                  (condition-case err
+                      (global-set-key (kbd key) sym)
+                    (error
+                     (message "[pro-keys] bind failed for %s -> %s: %S" key sym err)
+                     (push entry remaining)))
+                (push entry remaining)))))
           (`(:exwm ,key ,cmd)
            (let ((sym (if (symbolp cmd) cmd (intern (format "%s" cmd)))))
              (when (display-graphic-p)
@@ -226,12 +254,16 @@
              (unless (fboundp sym)
                (ignore-errors (require 'org nil t))
                (ignore-errors (require sym nil t)))
-             (if (and (symbolp sym) (fboundp sym))
-                 (if (featurep 'org)
-                     (define-key org-mode-map (kbd key) sym)
-                   (with-eval-after-load 'org
-                     (define-key org-mode-map (kbd key) sym)))
-               (push entry remaining))))
+              (if (and (symbolp sym) (fboundp sym))
+                  (if (featurep 'org)
+                      (condition-case err
+                          (define-key org-mode-map (kbd key) sym)
+                        (error
+                         (message "[pro-keys] org-mode bind failed for %s -> %s: %S" key sym err)
+                         (push entry remaining)))
+                    (with-eval-after-load 'org
+                      (define-key org-mode-map (kbd key) sym)))
+                (push entry remaining))))
           (_ (push entry remaining))))
       (setq pro-keys-pending-bindings (nreverse remaining))))
   ;; Always refresh exwm-input-global-keys. Раньше эта форма лежала внутри
