@@ -2,11 +2,11 @@
 final: prev: {
   opencode = prev.stdenv.mkDerivation {
     pname = "opencode";
-    version = "1.15.10";
+    version = "1.17.13";
 
     src = prev.fetchurl {
-      url = "https://registry.npmjs.org/opencode-linux-x64/-/opencode-linux-x64-1.15.10.tgz";
-      sha256 = "0f7n2avwjc54b4lbd9fwqgx9nbjs1v4xa8bnhq4qfk17jf5njcc3";
+      url = "https://registry.npmjs.org/opencode-linux-x64/-/opencode-linux-x64-1.17.13.tgz";
+      sha256 = "0ca3x2s12x3iq74h9fjsih3nl5liqg4lsjvg3wjy2j9l9ks75884";
     };
 
     nativeBuildInputs = [ prev.patchelf ];
