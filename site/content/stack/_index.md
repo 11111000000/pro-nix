@@ -118,7 +118,7 @@ EXWM-session launcher — в `emacs/exwm.nix:96-176`. Делает
 | Linux kernel | `linuxPackages_6_6` (по умолчанию) / `linuxPackages_latest` (desktop) | `configuration.nix`, `hosts/desktop/configuration.nix:26` |
 | Emacs | 30 (предпочтительно) | `flake.nix:56` |
 | pi | (upstream запинен) | `flake.nix#inputs.pi.url` |
-| opencode | 1.15.10 | `nix/overlays/opencode-stub.nix` |
+| opencode | 1.17.13 | `nix/overlays/opencode-stub.nix` |
 | telega | 0.8.632 | `nix/emacs-recipes/telega.nix` |
 | emcp | unstable-2026-06-11 | `nix/emacs-recipes/emcp.nix` |
 | pi-acp | 0.0.27 | `nix/node-packages/pi-acp.nix` |

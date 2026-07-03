@@ -60,7 +60,7 @@ multi-agent packages.
 
 ### `opencode`
 
-The second agent. An npm binary (`v1.15.10`), downloaded by
+The second agent. An npm binary (`v1.17.13`), downloaded by
 `nix/overlays/opencode-stub.nix` and `patchelf`'d to the NixOS glibc.
 The bwrap'd variant is wired through `opencodeBwrap.homeManagerModules.default`
 (Home Manager module from `michalrus/opencode-bwrap-nix`).

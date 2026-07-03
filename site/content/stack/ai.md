@@ -61,7 +61,7 @@ multi-agent пакетов.
 
 ### `opencode`
 
-Второй агент. npm-бинарь (`v1.15.10`), скачивается через
+Второй агент. npm-бинарь (`v1.17.13`), скачивается через
 `nix/overlays/opencode-stub.nix` и `patchelf`'ится под NixOS-glibc.
 Sandbox-вариант через `opencodeBwrap.homeManagerModules.default`
 (Home Manager module от `michalrus/opencode-bwrap-nix`).

@@ -223,6 +223,12 @@
         <loc>http://127.0.0.1:8000/reference/tests/</loc>
     </url>
     <url>
+        <loc>http://127.0.0.1:8000/ru/reference/defcustom/</loc>
+    </url>
+    <url>
+        <loc>http://127.0.0.1:8000/ru/reference/keys/</loc>
+    </url>
+    <url>
         <loc>http://127.0.0.1:8000/stack/</loc>
     </url>
     <url>

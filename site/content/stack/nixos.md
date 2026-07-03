@@ -37,7 +37,7 @@ URL flake **должен** быть `git+file://$(pwd)?submodules=1` для
 | Overlay | Что добавляет |
 |---------|---------------|
 | `emacs-extra.nix` | ~15 Emacs-рецептов (pro-tabs, telega, emcp, http-server, agent-shell, …) и внешние MELPA-пакеты (embark, eldoc-box) |
-| `opencode-stub.nix` | `opencode` v1.15.10 из npm, patchelf'нут под glibc |
+| `opencode-stub.nix` | `opencode` v1.17.13 из npm, patchelf'нут под glibc |
 | `pi-acp.nix` | `piAcp` (`nix/node-packages/pi-acp.nix`) |
 | `mirrors.nix` | URL-rewriter для `curl.haxx.se`, `astron.com`, `git.kernel.org` |
 | `github-proxy.nix` | Опц. `NIX_GITHUB_PROXY` (env) |

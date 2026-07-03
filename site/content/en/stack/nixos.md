@@ -37,7 +37,7 @@ read `../../submodules/<name>` as their source.
 | Overlay | Adds |
 |---------|------|
 | `emacs-extra.nix` | ~15 Emacs recipes (pro-tabs, telega, emcp, http-server, agent-shell, …) and external MELPA packages (embark, eldoc-box) |
-| `opencode-stub.nix` | `opencode` v1.15.10 from npm, patchelf'd for glibc |
+| `opencode-stub.nix` | `opencode` v1.17.13 from npm, patchelf'd for glibc |
 | `pi-acp.nix` | `piAcp` (`nix/node-packages/pi-acp.nix`) |
 | `mirrors.nix` | URL rewriter for `curl.haxx.se`, `astron.com`, `git.kernel.org` |
 | `github-proxy.nix` | Opt-in `NIX_GITHUB_PROXY` (env) |
