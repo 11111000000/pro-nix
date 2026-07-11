@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>defcustom knobs · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">defcustom knobs</h1>
+  <h1 id="defcustom-knobs">defcustom knobs</h1>
+<p><span class="gen-badge">auto-gen</span> Сгенерировано 2026-07-04 из <code>emacs/base/modules/pro-*.el</code>.</p>
+<blockquote>
+<p>Эта страница перечисляет каждый <code>defcustom</code>, экспонируемый pro-*.el модулями. Регенерируется через <code>just site-regen</code> из реального Emacs-исходника — если knob добавлен или удалён, эта страница меняется вместе.</p>
+</blockquote>
+<p><strong>Всего knob’ов:</strong> 76  ·  <strong>Всего групп:</strong> 23  ·  <strong>Файлов просканировано:</strong> 65</p>
+<h2 id="ukazatel-grupp">Указатель групп</h2>
+<ul>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#-no-group-"><code>(no group)</code></a> — 20 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro"><code>pro</code></a> — 5 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro-ai"><code>pro-ai</code></a> — 3 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro-ai-anvil"><code>pro-ai-anvil</code></a> — 2 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro-ai-ellama"><code>pro-ai-ellama</code></a> — 3 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro-buffer-banner"><code>pro-buffer-banner</code></a> — 13 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro-completion"><code>pro-completion</code></a> — 3 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro-docker"><code>pro-docker</code></a> — 1 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro-emcp"><code>pro-emcp</code></a> — 2 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro-exwm"><code>pro-exwm</code></a> — 1 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro-haskell"><code>pro-haskell</code></a> — 1 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro-history"><code>pro-history</code></a> — 5 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro-profiler"><code>pro-profiler</code></a> — 1 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro-spell"><code>pro-spell</code></a> — 1 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro-tabs"><code>pro-tabs</code></a> — 1 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro-ui"><code>pro-ui</code></a> — 7 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro-ui-fonts"><code>pro-ui-fonts</code></a> — 1 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro-windows"><code>pro-windows</code></a> — 1 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro-chat"><code>pro/chat</code></a> — 3 knobs</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/defcustom/#pro-chat-telega"><code>pro/chat-telega</code></a> — 2 knobs</li>
+</ul>
+<hr />
+<h2 id="-no-group-"><code>(no group)</code></h2>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro-ai-anvil-profile</code></td><td><code>default</code></td><td>Профиль модулей anvil.el, которые нужно подгрузить.  Возможные значения:   - <code>default'   — </code>anvil-enable’ без opt-in модулей: file / org / elisp /                   sqlite / shell (~40 tools).   - …</td></tr>
+<tr><td><code>pro-ai-backend</code></td><td><code>aitunnel</code></td><td>Предпочтительный AI-backend.</td></tr>
+<tr><td><code>pro-ai-carriage-path</code></td><td><code>(let ((module-dir (file-name-director…</code></td><td>flake.nix</td></tr>
+<tr><td><code>pro-ai-ellama-agentic-profile</code></td><td><code>default</code></td><td>Какой профиль безопасности применять через <code>ellama-setup-agentic-coding'.  Возможные значения:   - </code>default’   — стандартные настройки: DLP enforce, irreversible block,                   agent loop…</td></tr>
+<tr><td><code>pro-ai-ellama-skill-dirs</code></td><td><code>(let* ((this-dir (file-name-directory…</code></td><td>flake.nix</td></tr>
+<tr><td><code>pro-ai-ellama-srt-policy-file</code></td><td><code>(let* ((this-dir (file-name-directory…</code></td><td>flake.nix</td></tr>
+<tr><td><code>pro-ai-models-file</code></td><td><code>(expand-file-name</code></td><td>ai-models.json</td></tr>
+<tr><td><code>pro-ai-user-models-file</code></td><td><code>(expand-file-name</code></td><td>ai-models.json</td></tr>
+<tr><td><code>pro-app-launcher-directories</code></td><td><code>(let ((home (or (and (getenv</code></td><td>XDG_DATA_HOME</td></tr>
+<tr><td><code>pro-buffer-banner-position</code></td><td><code>:top</code></td><td>Where to show the banner relative to the selected window. <code>:top'    — at the top of the window. </code>:bottom’ — at the bottom of the window.</td></tr>
+<tr><td><code>pro-emcp-server-profile</code></td><td><code>full-control</code></td><td>Профиль EMCP, который стартует автоматически.  <code>full-control' = inspect + develop + eval + send-keys. </code>eval’ и <code>send-keys' гейтнуты политикой </code>emcp-tools-eval-default-policy’ / `emcp-tools-send-key…</td></tr>
+<tr><td><code>pro-history-xdg-cache-home</code></td><td><code>(or (and (getenv</code></td><td>XDG_CACHE_HOME</td></tr>
+<tr><td><code>pro-history-xdg-state-home</code></td><td><code>(or (and (getenv</code></td><td>XDG_STATE_HOME</td></tr>
+<tr><td><code>pro-ui-corfu-colors</code></td><td><code>false</code></td><td>Alist overriding Corfu face colors. Each element is (FACE . ATTRS) where FACE is <code>default' or </code>current’ and ATTRS is a plist accepted by `set-face-attribute’. When nil (the default), colors are aut…</td></tr>
+<tr><td><code>pro-ui-default-theme</code></td><td><code>tao-yang</code></td><td>Symbolic name of theme to load by default at startup. Set to nil to disable automatic theme loading. Loading is guarded so missing packages don’t error out (a message is shown instead). Works in bo…</td></tr>
+<tr><td><code>pro-ui-modeline-style</code></td><td><code>shaoline</code></td><td>Стиль модельного слоя: ’minimal, ’shaoline или ’doom. По умолчанию — ’shaoline. Реализация попытается включить соответствующий пакет, если он доступен; при отсутствии пакета используется минимальна…</td></tr>
+<tr><td><code>pro-ui-shaoline-strategy</code></td><td><code>adaptive</code></td><td>Стратегия shaoline-mode. - ‘yin — обновления только по явному вызову `shaoline-update’. Минимум   активности, mode-line статичен между ручными апдейтами. - ’yang — полная активность: post-command-h…</td></tr>
+<tr><td><code>pro/chat-fill-column</code></td><td><code>80</code></td><td>Ширина telega-chat-fill-column (nil — отключить).</td></tr>
+<tr><td><code>pro/profiler-default-mode</code></td><td><code>cpu</code></td><td>Режим профилирования по умолчанию для <code>pro/profiler-start' и </code>pro/profiler-quick’. Допустимые значения: <code>cpu', </code>mem’, `cpu+mem’.</td></tr>
+<tr><td><code>pro/telega-select-preview</code></td><td><code>echo</code></td><td>Режим предпросмотра кандидата в `pro/telega-select-chat-or-contact’: - echo: краткая подсказка в echo-area; - help-window: описание из telega-describe-*; - nil: без предпросмотра.</td></tr>
+</tbody></table>
+<h2 id="pro"><code>pro</code></h2>
+<p><em>Определён в <a href="file:///home/za/pro-nix/emacs/base/modules/pro-keys.el"><code>pro-keys.el</code></a>.</em></p>
+<blockquote>
+<p>Базовая группа настроек PRO.</p>
+</blockquote>
+<p>Эта группа используется для общих <code>defcustom' переменных, которые не попадают в узкоспециализированные подгруппы. При проектировании интерфейса модуля мы предпочитаем явное именование групп, однако для совместимости оставляем простой корневой </code>pro’.</p>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro-agent-shell-refresh-interval</code></td><td><code>15</code></td><td>Seconds between agent-shell header refreshes. Branch/worktree information rarely changes; a longer interval reduces CPU and GC pressure while keeping the header fresh enough to be useful.</td></tr>
+<tr><td><code>pro-core-gc-cons-percentage</code></td><td><code>0.3</code></td><td>Steady-state value for `gc-cons-percentage’ installed by pro-core.</td></tr>
+<tr><td><code>pro-core-gc-cons-threshold</code></td><td><code>(* 128 1024 1024)</code></td><td>Steady-state value for `gc-cons-threshold’ installed by pro-core. 128 MiB keeps GC pauses rare without making them painfully long; tune downward on memory-constrained hosts (Raspberry Pi, etc.). Ra…</td></tr>
+<tr><td><code>pro-dired-enable</code></td><td><code>true</code></td><td>Enable pro dired helpers. Set to nil to disable.</td></tr>
+<tr><td><code>pro-dired-prefer-short</code></td><td><code>false</code></td><td>If non-nil, use compact/short `ls’ output in dired (one-file-per-line). Default is nil to preserve test compatibility and familiar long listing.</td></tr>
+</tbody></table>
+<h2 id="pro-ai"><code>pro-ai</code></h2>
+<p><em>Определён в <a href="file:///home/za/pro-nix/emacs/base/modules/pro-ai.el"><code>pro-ai.el</code></a>.</em></p>
+<blockquote>
+<p>AI integration for pro Emacs.</p>
+</blockquote>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro-ai-auto-load-gptel</code></td><td><code>true</code></td><td>Автоматически загружать gptel при старте Emacs, если пакет доступен.</td></tr>
+<tr><td><code>pro-ai-enable-carriage</code></td><td><code>true</code></td><td>Если non-nil, попытаться загрузить carriage из `pro-ai-carriage-path’.</td></tr>
+<tr><td><code>pro-ai-enable-gptel-history</code></td><td><code>true</code></td><td>Сохранять историю gptel-переписки.</td></tr>
+</tbody></table>
+<h2 id="pro-ai-anvil"><code>pro-ai-anvil</code></h2>
+<p><em>Определён в <a href="file:///home/za/pro-nix/emacs/base/modules/pro-ai-anvil.el"><code>pro-ai-anvil.el</code></a>.</em></p>
+<blockquote>
+<p>anvil.el — MCP-сервер в Elisp (file / org / elisp / sqlite).</p>
+</blockquote>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro-ai-anvil-auto-start</code></td><td><code>false</code></td><td>Если non-nil, запускать anvil-server при <code>after-init-hook'. По умолчанию nil — anvil тяжёлый и стартует по явному запросу. Включите в </code>custom.el’, если MCP-сервер нужен постоянно.</td></tr>
+<tr><td><code>pro-ai-anvil-mcp-server-port</code></td><td><code>38913</code></td><td>Порт для отладочного HTTP MCP-сервера anvil (если включён). Anvil по умолчанию говорит по stdio. Этот порт нужен только когда вы хотите curl-ом посмотреть, что вообще отвечает anvil. Не путать с `p…</td></tr>
+</tbody></table>
+<h2 id="pro-ai-ellama"><code>pro-ai-ellama</code></h2>
+<p><em>Определён в <a href="file:///home/za/pro-nix/emacs/base/modules/pro-ai-ellama.el"><code>pro-ai-ellama.el</code></a>.</em></p>
+<blockquote>
+<p>Ellama — Emacs client for local + cloud LLMs.</p>
+</blockquote>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro-ai-ellama-agents-md-max-depth</code></td><td><code>8</code></td><td>Максимальная глубина поиска AGENTS.md вверх по дереву. 8 = достаточно для прохождения через `home/<user>/Code/<project>/’.</td></tr>
+<tr><td><code>pro-ai-ellama-confirmations</code></td><td><code>true</code></td><td>Если non-nil, оставлять ask-режим для tool confirmations после setup. При <code>nil' — выставить </code>ellama-tools-allow-all’ (опасно; только для доверенной среды). По умолчанию t — это политика pro-nix.</td></tr>
+<tr><td><code>pro-ai-ellama-load-agents-md</code></td><td><code>true</code></td><td>Если non-nil, при первом запуске Ellama пытается найти файлы инструкций вверх по дереву от <code>default-directory' и подключить их как project context. Какие файлы и в каком порядке — см. </code>pro-ai-ellam…</td></tr>
+</tbody></table>
+<h2 id="pro-buffer-banner"><code>pro-buffer-banner</code></h2>
+<p><em>Определён в <a href="file:///home/za/pro-nix/emacs/base/modules/pro-buffer-banner.el"><code>pro-buffer-banner.el</code></a>.</em></p>
+<blockquote>
+<p>Transient top banner showing buffer/project/branch on switch.</p>
+</blockquote>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro-buffer-banner-debounce</code></td><td><code>0.2</code></td><td>Minimum seconds between successive <em>display</em> calls. This is a pure display-side throttle, NOT a fade-restart trigger: even if a new display is allowed by the debounce, the running fade is NOT resta…</td></tr>
+<tr><td><code>pro-buffer-banner-duration</code></td><td><code>3.0</code></td><td>Total seconds the banner stays visible (including fade-out).  Banner appears after a buffer/window switch, then stays fully visible for ~80% of this duration, with a short fade-out at the end. Thre…</td></tr>
+<tr><td><code>pro-buffer-banner-enable</code></td><td><code>true</code></td><td>Non-nil to enable the transient buffer banner.</td></tr>
+<tr><td><code>pro-buffer-banner-fade-step-ms</code></td><td><code>50</code></td><td>Milliseconds between fade steps.</td></tr>
+<tr><td><code>pro-buffer-banner-fade-steps</code></td><td><code>10</code></td><td>Number of discrete steps in the fade-out animation.</td></tr>
+<tr><td><code>pro-buffer-banner-font-scale</code></td><td><code>0.7</code></td><td>Scale factor for the banner font relative to the parent frame. 0.7 means ~70% the size of the default font (≈ 1/1.5 reduction). 1.0 means same size as the default.</td></tr>
+<tr><td><code>pro-buffer-banner-initial-alpha</code></td><td><code>95</code></td><td>Frame alpha (0-100) when the banner appears.</td></tr>
+<tr><td><code>pro-buffer-banner-margin</code></td><td><code>0</code></td><td>Pixel margin from the window edge (top or bottom, depending on `pro-buffer-banner-position’). 0 means "one line height" of the parent frame’s font — enough to clear the mode-line or first line of…</td></tr>
+<tr><td><code>pro-buffer-banner-max-text-chars</code></td><td><code>80</code></td><td>Maximum length of the banner text. If the composed text exceeds this, it is truncated with a trailing "…" so the frame stays narrow and predictable. Set to 0 to disable truncation.</td></tr>
+<tr><td><code>pro-buffer-banner-pad-chars</code></td><td><code>0</code></td><td>Number of blank chars to pad around the text on each side.</td></tr>
+<tr><td><code>pro-buffer-banner-show-branch</code></td><td><code>true</code></td><td>Show VCS branch (magit or vc) in the banner.</td></tr>
+<tr><td><code>pro-buffer-banner-show-project</code></td><td><code>true</code></td><td>Show project name (via `pro-project-root’) in the banner.</td></tr>
+<tr><td><code>pro-buffer-banner-theme-aware</code></td><td><code>true</code></td><td>Non-nil derives banner colors from the current `default’ face. The banner background is set to the default face’s foreground (the text color of the parent frame) and the banner foreground to the de…</td></tr>
+</tbody></table>
+<h2 id="pro-completion"><code>pro-completion</code></h2>
+<p><em>Определён в <a href="file:///home/za/pro-nix/emacs/base/modules/pro-completion.el"><code>pro-completion.el</code></a>.</em></p>
+<blockquote>
+<p>Completion stack configuration for pro Emacs profile.</p>
+</blockquote>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro-completion-auto-delay</code></td><td><code>0.25</code></td><td>Delay before Corfu auto popup appears.</td></tr>
+<tr><td><code>pro-completion-auto-prefix</code></td><td><code>3</code></td><td>Minimum prefix length before corfu auto-starts when `corfu-auto’ is enabled.</td></tr>
+<tr><td><code>pro-completion-enable-posframe</code></td><td><code>false</code></td><td>Enable corfu-posframe for child-frame based completion in GUI. Disable if you observe frame jitter on your setup.</td></tr>
+</tbody></table>
+<h2 id="pro-docker"><code>pro-docker</code></h2>
+<p><em>Определён в <a href="file:///home/za/pro-nix/emacs/base/modules/pro-docker.el"><code>pro-docker.el</code></a>.</em></p>
+<blockquote>
+<p>Docker integration helpers for pro-nix.</p>
+</blockquote>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro-docker-enable</code></td><td><code>true</code></td><td>Enable pro docker helpers (containers/images/volumes/networks buffers + tramp).</td></tr>
+</tbody></table>
+<h2 id="pro-emcp"><code>pro-emcp</code></h2>
+<p><em>Определён в <a href="file:///home/za/pro-nix/emacs/base/modules/pro-emcp.el"><code>pro-emcp.el</code></a>.</em></p>
+<blockquote>
+<p>EMCP HTTP-сервер для внешних MCP-клиентов.</p>
+</blockquote>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro-emcp-server-auto-start</code></td><td><code>true</code></td><td>Если non-nil, сервер стартует автоматически на `after-init-hook’.</td></tr>
+<tr><td><code>pro-emcp-server-port</code></td><td><code>38913</code></td><td>Фиксированный TCP-порт для EMCP HTTP-сервера.  MCP-клиенты (pi, opencode) настроены на <code>http://127.0.0.1:&lt;port&gt;/mcp</code>. Меняйте здесь, если порт занят — синхронно обновите `local-templates/pi/mcp.jso…</td></tr>
+</tbody></table>
+<h2 id="pro-exwm"><code>pro-exwm</code></h2>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro-exwm-urxvt--height-fraction</code></td><td><code>0.40</code></td><td>Height of the urxvt bottom sidebar as a fraction of the display height. 0.40 ⇒ sidebar занимает 40% высоты экрана снизу.  Минимум — 200px.</td></tr>
+</tbody></table>
+<h2 id="pro-haskell"><code>pro-haskell</code></h2>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro-haskell-enable-eglot</code></td><td><code>true</code></td><td>If non-nil, automatically start HLS via eglot in Haskell buffers. HLS is heavy (it eagerly type-checks the whole package, often 1-2 GiB RSS and noticeable background I/O). Set to nil to fall back t…</td></tr>
+</tbody></table>
+<h2 id="pro-history"><code>pro-history</code></h2>
+<p><em>Определён в <a href="file:///home/za/pro-nix/emacs/base/modules/pro-history.el"><code>pro-history.el</code></a>.</em></p>
+<blockquote>
+<p>pro: runtime history, temp file policies, and Time Machine commands.</p>
+</blockquote>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro-history-backup-retention-days</code></td><td><code>90</code></td><td>Default age in days after which backups are considered for pruning.</td></tr>
+<tr><td><code>pro-history-enable-eyebrowse</code></td><td><code>false</code></td><td>If non-nil, enable eyebrowse workspace management when available.</td></tr>
+<tr><td><code>pro-history-enable-undo-tree</code></td><td><code>true</code></td><td>If non-nil, enable persistent undo via undo-tree when available.</td></tr>
+<tr><td><code>pro-history-max-kill-ring</code></td><td><code>400</code></td><td>Maximum length of kill-ring for pro-history snapshots.</td></tr>
+<tr><td><code>pro-history-session-retention-days</code></td><td><code>365</code></td><td>Default age in days after which session snapshots are pruned.</td></tr>
+</tbody></table>
+<h2 id="pro-profiler"><code>pro-profiler</code></h2>
+<p><em>Определён в <a href="file:///home/za/pro-nix/emacs/base/modules/pro-profiler.el"><code>pro-profiler.el</code></a>.</em></p>
+<blockquote>
+<p>Profiler helpers for pro-emacs.</p>
+</blockquote>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro/profiler-quick-duration</code></td><td><code>15</code></td><td>Длительность (сек) автоматической сессии `pro/profiler-quick’.</td></tr>
+</tbody></table>
+<h2 id="pro-spell"><code>pro-spell</code></h2>
+<p><em>Определён в <a href="file:///home/za/pro-nix/emacs/base/modules/pro-spell.el"><code>pro-spell.el</code></a>.</em></p>
+<blockquote>
+<p>Проверка орфографии на лету (hunspell + ru_RU).</p>
+</blockquote>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro-spell-auto-enable</code></td><td><code>true</code></td><td>Если non-nil, flyspell включается автоматически через хуки. При nil авто-включение отключено; пользователь может включить flyspell вручную через M-x flyspell-mode.</td></tr>
+</tbody></table>
+<h2 id="pro-tabs"><code>pro-tabs</code></h2>
+<p><em>Определён в <a href="file:///home/za/pro-nix/emacs/base/modules/pro-tabs.el"><code>pro-tabs.el</code></a>.</em></p>
+<blockquote>
+<p>Pro tabs integration (opt-in).</p>
+</blockquote>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro-pro-tabs-enable</code></td><td><code>true</code></td><td>Enable pro-tabs integration. When non-nil, configure tab-bar/tab-line and pro-tabs if available. This does not install global keybindings; use emacs-keys.org for that.</td></tr>
+</tbody></table>
+<h2 id="pro-ui"><code>pro-ui</code></h2>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro-ai-carriage-enable-global-mode</code></td><td><code>false</code></td><td>Если non-nil — включать `carriage-global-mode’ после загрузки carriage. Оставьте nil по умолчанию: глобальный режим — опционален и может вмешиваться в интерактивные сессии.</td></tr>
+<tr><td><code>pro-terminals-enable</code></td><td><code>true</code></td><td>Включить вспомогательные функции работы с терминалами (vterm/eshell).  Если установить в nil, модуль не будет подключать нигде дополнительных хэлперов. Этот флаг не управляет установкой пакетов: уб…</td></tr>
+<tr><td><code>pro-ui-cursor-bar-width</code></td><td><code>2</code></td><td>Ширина вертикального бар-курсора в пикселях (используется как (bar . N)).</td></tr>
+<tr><td><code>pro-ui-cursor-readonly-line-width</code></td><td><code>1</code></td><td>Толщина рамки полого прямоугольника в read-only буферах.</td></tr>
+<tr><td><code>pro-ui-enable-icons</code></td><td><code>true</code></td><td>Включать ли иконки в UI-слое.</td></tr>
+<tr><td><code>pro-ui-enable-ligatures</code></td><td><code>true</code></td><td>Включать ли лигатуры в коде.</td></tr>
+<tr><td><code>pro-ui-font-height</code></td><td><code>130</code></td><td>Высота шрифта в десятых долях пункта.</td></tr>
+</tbody></table>
+<h2 id="pro-ui-fonts"><code>pro-ui-fonts</code></h2>
+<p><em>Определён в <a href="file:///home/za/pro-nix/emacs/base/modules/pro-ui-fonts.el"><code>pro-ui-fonts.el</code></a>.</em></p>
+<blockquote>
+<p>Настройки шрифтов и типографии для pro UI</p>
+</blockquote>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro-ui-enable-mixed-pitch</code></td><td><code>false</code></td><td>Включать mixed-pitch-mode для org-mode и help-mode по умолчанию. Опция выключена по умолчанию потому, что некоторые пользователи предпочитают моноширинные шрифты во всех буферах.</td></tr>
+</tbody></table>
+<h2 id="pro-windows"><code>pro-windows</code></h2>
+<p><em>Определён в <a href="file:///home/za/pro-nix/emacs/base/modules/pro-windows.el"><code>pro-windows.el</code></a>.</em></p>
+<blockquote>
+<p>Window and buffer management helpers for pro.</p>
+</blockquote>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro-windows-enable</code></td><td><code>true</code></td><td>Enable pro window management helpers.</td></tr>
+</tbody></table>
+<h2 id="pro-chat"><code>pro/chat</code></h2>
+<p><em>Определён в <a href="file:///home/za/pro-nix/emacs/base/modules/pro-chat.el"><code>pro-chat.el</code></a>.</em></p>
+<blockquote>
+<p>Настройки telega/Telegram для pro-конфигурации.</p>
+</blockquote>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro/chat-history-limit</code></td><td><code>100</code></td><td>Сколько последних сообщений подгружать в чат-буфер.</td></tr>
+<tr><td><code>pro/chat-use-docker</code></td><td><code>true</code></td><td>Запускать telega-server через Docker вместо локального tdlib. Требует установленный Docker (см. virtualisation.docker в NixOS). Если `telega-server’ уже доступен в PATH — можно поставить nil.</td></tr>
+<tr><td><code>pro/chat-use-tor</code></td><td><code>true</code></td><td>Если non-nil, telega-server запускается через `telega-server-tor-launch’ (прозрачный torsocks SOCKS5 → Tor, если доступен).  Когда Tor недоступен (например, AP не пробрасывает SOCKS5), fallback на …</td></tr>
+</tbody></table>
+<h2 id="pro-chat-telega"><code>pro/chat-telega</code></h2>
+<p><em>Определён в <a href="file:///home/za/pro-nix/emacs/base/modules/pro-telega.el"><code>pro-telega.el</code></a>.</em></p>
+<blockquote>
+<p>Дополнительные настройки telega (consult + CAPF).</p>
+</blockquote>
+<table><thead><tr><th>Knob</th><th>Default</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>pro/telega-select-include-saved-messages</code></td><td><code>true</code></td><td>Включать ли чат «Saved Messages» в начало списка (если он уже существует).</td></tr>
+<tr><td><code>pro/telega-select-show-unread</code></td><td><code>true</code></td><td>Показывать ли краткую метку непрочитанного (u, @, rx) в аннотации.</td></tr>
+</tbody></table>
+<hr />
+<h2 id="proskanirovannye-faily">Просканированные файлы</h2>
+<ul>
+<li><code>emacs/base/modules/pro-agent-shell.el</code> — 2 defcustom</li>
+<li><code>emacs/base/modules/pro-ai-anvil.el</code> — 3 defcustom</li>
+<li><code>emacs/base/modules/pro-ai-ellama.el</code> — 9 defcustom</li>
+<li><code>emacs/base/modules/pro-ai.el</code> — 8 defcustom</li>
+<li><code>emacs/base/modules/pro-app-launcher.el</code> — 1 defcustom</li>
+<li><code>emacs/base/modules/pro-buffer-banner.el</code> — 14 defcustom</li>
+<li><code>emacs/base/modules/pro-c.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-chat.el</code> — 6 defcustom</li>
+<li><code>emacs/base/modules/pro-clipboard.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-compat.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-completion-keys.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-completion.el</code> — 3 defcustom</li>
+<li><code>emacs/base/modules/pro-consult-helpers.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-core.el</code> — 2 defcustom</li>
+<li><code>emacs/base/modules/pro-dashboard.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-dired.el</code> — 4 defcustom</li>
+<li><code>emacs/base/modules/pro-docker.el</code> — 2 defcustom</li>
+<li><code>emacs/base/modules/pro-emacs-check-fonts.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-emcp.el</code> — 4 defcustom</li>
+<li><code>emacs/base/modules/pro-epistemology.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-exwm-sim.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-exwm.el</code> — 1 defcustom</li>
+<li><code>emacs/base/modules/pro-feeds.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-fix-corfu.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-git.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-haskell.el</code> — 2 defcustom</li>
+<li><code>emacs/base/modules/pro-help.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-history.el</code> — 7 defcustom</li>
+<li><code>emacs/base/modules/pro-java.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-js.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-key-utils.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-keys.el</code> — 1 defcustom</li>
+<li><code>emacs/base/modules/pro-lisp.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-markdown.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-nav.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-nix-refresh.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-nix.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-org.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-package-bootstrap.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-packages.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-profiler.el</code> — 2 defcustom</li>
+<li><code>emacs/base/modules/pro-project.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-python.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-reload.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-session.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-spell.el</code> — 3 defcustom</li>
+<li><code>emacs/base/modules/pro-startup-metrics.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-tabs.el</code> — 1 defcustom</li>
+<li><code>emacs/base/modules/pro-telega.el</code> — 3 defcustom</li>
+<li><code>emacs/base/modules/pro-terminals.el</code> — 1 defcustom</li>
+<li><code>emacs/base/modules/pro-test-helpers.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-tests.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-text.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-ui-completion.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-ui-fonts.el</code> — 1 defcustom</li>
+<li><code>emacs/base/modules/pro-ui-fringes.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-ui-icons.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-ui-improvements.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-ui-modeline.el</code> — 2 defcustom</li>
+<li><code>emacs/base/modules/pro-ui-theme.el</code> — 1 defcustom</li>
+<li><code>emacs/base/modules/pro-ui-tty.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-ui.el</code> — 12 defcustom</li>
+<li><code>emacs/base/modules/pro-vterm-theme.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-windows-popups.el</code> — 0 defcustom</li>
+<li><code>emacs/base/modules/pro-windows.el</code> — 1 defcustom</li>
+</ul>
+
+
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-07-04
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

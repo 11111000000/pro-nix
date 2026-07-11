@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Клавиши (emacs-keys.org) · </title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="http://127.0.0.1:8000/css/main.css">
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%235cc25c'>p</text></svg>">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+
+
+
+
+
+<div class="layout">
+  <header class="site-header">
+    <a class="brand" href="/">pro<span class="accent">-</span>nix</a>
+    <div class="search">
+      <input type="search" placeholder="Поиск… (Enter)" aria-label="Search">
+    </div>
+    <nav class="main-nav">
+      
+      <a href="/about/" class="">О проекте</a>
+      
+      <a href="/principles/" class="">Принципы</a>
+      
+      <a href="/stack/" class="">Стек</a>
+      
+      <a href="/architecture/" class="">Архитектура</a>
+      
+      <a href="/hosts/" class="">Хосты</a>
+      
+      <a href="/reference/" class="">Справочник</a>
+      
+      <a href="/workflow/" class="">Рабочий процесс</a>
+      
+      <a href="/conventions/" class="">Соглашения</a>
+      
+    </nav>
+    
+      <a class="lang-switch" href="/en/">EN</a>
+    
+    <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </header>
+
+  <aside class="sidebar">
+    
+    <h3>Начать</h3>
+    <ul>
+      
+      <li class=""><a href="/">Обзор</a></li>
+      
+      <li class=""><a href="/about/">Что такое pro-nix</a></li>
+      
+      <li class=""><a href="/principles/">Принципы</a></li>
+      
+      <li class=""><a href="/workflow/quickstart/">Быстрый старт</a></li>
+      
+    </ul>
+    
+    <h3>Стек</h3>
+    <ul>
+      
+      <li class=""><a href="/stack/">Обзор</a></li>
+      
+      <li class=""><a href="/stack/nixos/">NixOS</a></li>
+      
+      <li class=""><a href="/stack/emacs/">Emacs</a></li>
+      
+      <li class=""><a href="/stack/ai/">AI-агенты</a></li>
+      
+      <li class=""><a href="/stack/wm/">Оконные менеджеры</a></li>
+      
+      <li class=""><a href="/stack/privacy/">Приватность и Tor</a></li>
+      
+      <li class=""><a href="/stack/dev/">Инструменты разработчика</a></li>
+      
+    </ul>
+    
+    <h3>Архитектура</h3>
+    <ul>
+      
+      <li class=""><a href="/architecture/">Обзор</a></li>
+      
+      <li class=""><a href="/architecture/flake/">Flake inputs</a></li>
+      
+      <li class=""><a href="/architecture/modules/">NixOS-модули</a></li>
+      
+      <li class=""><a href="/architecture/composition/">Composition-файлы</a></li>
+      
+      <li class=""><a href="/architecture/emacs-base/">Загрузка Emacs</a></li>
+      
+      <li class=""><a href="/architecture/agents/">Стек AI-агентов</a></li>
+      
+      <li class=""><a href="/architecture/network/">Сетевые слои</a></li>
+      
+    </ul>
+    
+    <h3>Хосты</h3>
+    <ul>
+      
+      <li class=""><a href="/hosts/">Все хосты</a></li>
+      
+      <li class=""><a href="/hosts/desktop/">desktop</a></li>
+      
+      <li class=""><a href="/hosts/cf19/">cf19</a></li>
+      
+      <li class=""><a href="/hosts/huawei/">huawei</a></li>
+      
+      <li class=""><a href="/hosts/vm/">vm</a></li>
+      
+    </ul>
+    
+    <h3>Справочник</h3>
+    <ul>
+      
+      <li class=""><a href="/reference/">Обзор</a></li>
+      
+      <li class=""><a href="/reference/keys/">Глобальные клавиши</a></li>
+      
+      <li class=""><a href="/reference/defcustom/">defcustom</a></li>
+      
+      <li class=""><a href="/reference/options/">NixOS-опции</a></li>
+      
+      <li class=""><a href="/reference/scripts/">Скрипты</a></li>
+      
+      <li class=""><a href="/reference/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/reference/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/reference/ci/">CI-workflow</a></li>
+      
+      <li class=""><a href="/reference/ai-models/">AI-модели</a></li>
+      
+      <li class=""><a href="/reference/glossary/">Глоссарий</a></li>
+      
+    </ul>
+    
+    <h3>Рабочий процесс</h3>
+    <ul>
+      
+      <li class=""><a href="/workflow/">Все процессы</a></li>
+      
+      <li class=""><a href="/workflow/just/">just-рецепты</a></li>
+      
+      <li class=""><a href="/workflow/submodules/">Сабмодули</a></li>
+      
+      <li class=""><a href="/workflow/agents/">AI-агенты</a></li>
+      
+      <li class=""><a href="/workflow/keys/">Клавиши</a></li>
+      
+      <li class=""><a href="/workflow/reload/">Soft-reload</a></li>
+      
+      <li class=""><a href="/workflow/tests/">Тесты</a></li>
+      
+      <li class=""><a href="/workflow/per-host/">Чек-листы хостов</a></li>
+      
+      <li class=""><a href="/workflow/troubleshoot/">Troubleshooting</a></li>
+      
+    </ul>
+    
+    <h3>Соглашения</h3>
+    <ul>
+      
+      <li class=""><a href="/conventions/">Обзор</a></li>
+      
+      <li class=""><a href="/conventions/commit/">Коммиты</a></li>
+      
+      <li class=""><a href="/conventions/mkforce/">mkForce</a></li>
+      
+      <li class=""><a href="/conventions/change-gate/">Change-Gate</a></li>
+      
+      <li class=""><a href="/conventions/dead-code/">Мёртвый код</a></li>
+      
+      <li class=""><a href="/conventions/anti-patterns/">Анти-паттерны</a></li>
+      
+    </ul>
+    
+  </aside>
+
+  <main class="content">
+    
+<article>
+  <h1 class="page-title">Клавиши (emacs-keys.org)</h1>
+  <h1 id="klavishi-emacs-keys-org">Клавиши (emacs-keys.org)</h1>
+<p><span class="gen-badge">auto-gen</span> Сгенерировано 2026-07-04 из <code>emacs-keys.org</code>.</p>
+<blockquote>
+<p><strong>Важно:</strong> <code>emacs-keys.org</code> — это <strong>исполняемый код</strong>, не документация. Каждая строка в source-таблице становится реальным <code>global-set-key</code> при старте Emacs, парсится <code>emacs/base/modules/pro-keys.el</code>. Редактируйте source, а не эту страницу.</p>
+</blockquote>
+<p><strong>Всего биндингов:</strong> 157  ·  <strong>Секций:</strong> 25</p>
+<h2 id="ukazatel-sektsii">Указатель секций</h2>
+<ul>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#ai">AI</a> — 21</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#completion">Completion</a> — 11</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#docker">Docker</a> — 8</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#exwm">EXWM</a> — 27</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#git">Git</a> — 2</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#haskell">Haskell</a> — 5</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#history">History</a> — 12</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#lsp">LSP</a> — 1</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#org">ORG</a> — 1</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#org">Org</a> — 1</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#package">Package</a> — 7</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#profiler">Profiler</a> — 5</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#snippet">Snippet</a> — 1</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#suggested">Suggested</a> — 3</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#tabs">Tabs</a> — 5</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#terminal">Terminal</a> — 2</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#ui">UI</a> — 7</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#-">Выделение</a> — 1</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#-">Дерево</a> — 1</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#-">Ключи</a> — 2</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#-">Навигация</a> — 7</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#-">Окна</a> — 3</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#-">Поиск</a> — 10</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#-">Проекты</a> — 4</li>
+<li><a href="http://127.0.0.1:8000/ru/reference/keys/#-">Чат</a> — 10</li>
+</ul>
+<hr />
+<h2 id="ai">AI</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-c a o</code></td><td><code>pro-ai-open-entry</code></td><td>Вход в AI (under C-c a prefix)</td></tr>
+<tr><td><code>C-c A</code></td><td><code>pro-agent-open</code></td><td>agent-shell</td></tr>
+<tr><td><code>C-c C-h</code></td><td><code>agent-shell-hud-menu</code></td><td>Пульт агента (в agent-shell-mode)</td></tr>
+<tr><td><code>C-c i</code></td><td><code>agent-shell-hud-info</code></td><td>HUD-инфо (в agent-shell-mode)</td></tr>
+<tr><td><code>C-c r</code></td><td><code>agent-shell-hud-refresh</code></td><td>Обновить HUD (в agent-shell-mode)</td></tr>
+<tr><td><code>C-c e e</code></td><td><code>pro-ai-ellama-open</code></td><td>Ellama chat (transient-меню)</td></tr>
+<tr><td><code>C-c e s</code></td><td><code>pro-ai-ellama-summarize</code></td><td>Ellama: summarize region/buffer</td></tr>
+<tr><td><code>C-c e r</code></td><td><code>pro-ai-ellama-code-review</code></td><td>Ellama: code-review region/buffer</td></tr>
+<tr><td><code>C-c e p</code></td><td><code>pro-ai-ellama-plan-and-act</code></td><td>Ellama: plan-and-act agent loop</td></tr>
+<tr><td><code>C-c e l</code></td><td><code>pro-ai-ellama-list-sessions</code></td><td>Ellama: list/manage sessions</td></tr>
+<tr><td><code>C-c e a</code></td><td><code>pro-ai-ellama-load-agents-md</code></td><td>Ellama: перечитать AGENTS.md</td></tr>
+<tr><td><code>C-c e m</code></td><td><code>pro-ai-ellama-use-shared-model</code></td><td>Ellama: подцепить провайдер из gptel</td></tr>
+<tr><td><code>C-c e b</code></td><td><code>pro-ai-ellama-add-buffer-as-context</code></td><td>Ellama: buffer → /tmp → ephemeral</td></tr>
+<tr><td><code>C-c e r</code></td><td><code>pro-ai-ellama-add-region-as-context</code></td><td>Ellama: region → /tmp → ephemeral</td></tr>
+<tr><td><code>C-c e h</code></td><td><code>pro-ai-ellama-show-sessions</code></td><td>Ellama: показать список sessions</td></tr>
+<tr><td><code>C-c e d</code></td><td><code>pro-ai-ellama-delete-session</code></td><td>Ellama: удалить session</td></tr>
+<tr><td><code>C-c a a</code></td><td><code>pro-ai-anvil-server-start</code></td><td>anvil: запустить MCP-сервер</td></tr>
+<tr><td><code>C-c a s</code></td><td><code>pro-ai-anvil-server-stop</code></td><td>anvil: остановить сервер</td></tr>
+<tr><td><code>C-c a t</code></td><td><code>pro-ai-anvil-server-status</code></td><td>anvil: статус сервера</td></tr>
+<tr><td><code>C-c a l</code></td><td><code>pro-ai-anvil-list-tools</code></td><td>anvil: перечислить активные tools</td></tr>
+<tr><td><code>C-c a d</code></td><td><code>pro-ai-anvil-describe-setup</code></td><td>anvil: JSON-фрагмент для mcp.json</td></tr>
+</tbody></table>
+<h2 id="completion">Completion</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-c o f</code></td><td><code>cape-file</code></td><td>Источник файлов для CAPF</td></tr>
+<tr><td><code>C-c o d</code></td><td><code>cape-dabbrev</code></td><td>Слова из буферов</td></tr>
+<tr><td><code>C-c o h</code></td><td><code>cape-history</code></td><td>История</td></tr>
+<tr><td><code>C-c o k</code></td><td><code>cape-keyword</code></td><td>Ключевые слова языка</td></tr>
+<tr><td><code>C-c o s</code></td><td><code>cape-symbol</code></td><td>Символы</td></tr>
+<tr><td><code>C-c o a</code></td><td><code>cape-abbrev</code></td><td>Аббревиатуры</td></tr>
+<tr><td><code>C-c o .</code></td><td><code>completion-at-point</code></td><td>Вызвать CAPF</td></tr>
+<tr><td><code>C-c o p</code></td><td><code>completion-at-point</code></td><td>CAPF (alias из pro)</td></tr>
+<tr><td><code>C-c o t</code></td><td><code>complete-tag</code></td><td>Дополнить тег</td></tr>
+<tr><td><code>C-c o i</code></td><td><code>cape-dict</code></td><td>Словарь</td></tr>
+<tr><td><code>C-c o l</code></td><td><code>cape-line</code></td><td>Строка из буфера</td></tr>
+</tbody></table>
+<h2 id="docker">Docker</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-c d c</code></td><td><code>pro-docker-containers</code></td><td>Список контейнеров</td></tr>
+<tr><td><code>C-c d i</code></td><td><code>pro/docker-images</code></td><td>Список образов</td></tr>
+<tr><td><code>C-c d v</code></td><td><code>pro/docker-volumes</code></td><td>Список томов</td></tr>
+<tr><td><code>C-c d n</code></td><td><code>pro/docker-networks</code></td><td>Список сетей</td></tr>
+<tr><td><code>C-c d l</code></td><td><code>pro/docker-logs</code></td><td>Логи контейнера (-f –tail 100)</td></tr>
+<tr><td><code>C-c d e</code></td><td><code>pro/docker-shell</code></td><td>Shell в контейнере</td></tr>
+<tr><td><code>C-c d r</code></td><td><code>pro/docker-restart</code></td><td>Перезапустить контейнер</td></tr>
+<tr><td><code>C-c d p</code></td><td><code>pro/docker-prune</code></td><td>docker system prune -f</td></tr>
+</tbody></table>
+<h2 id="exwm">EXWM</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>s-r</code></td><td><code>exwm-reset</code></td><td>Сброс окна EXWM</td></tr>
+<tr><td><code>s-w</code></td><td><code>tab-bar-close-tab</code></td><td>Закрыть вкладку</td></tr>
+<tr><td><code>s-t</code></td><td><code>pro-tabs-open-new-tab</code></td><td>Новая вкладка</td></tr>
+<tr><td><code>s-n</code></td><td><code>tab-bar-switch-to-next-tab</code></td><td>Следующая вкладка</td></tr>
+<tr><td><code>s-p</code></td><td><code>tab-bar-switch-to-prev-tab</code></td><td>Предыдущая вкладка</td></tr>
+<tr><td><code>s-N</code></td><td><code>tab-bar-move-tab</code></td><td>Переместить вкладку вправо</td></tr>
+<tr><td><code>s-P</code></td><td><code>tab-bar-move-tab-backward</code></td><td>Переместить вкладку влево</td></tr>
+<tr><td><code>s-T</code></td><td><code>tab-bar-undo-close-tab</code></td><td>Восстановить вкладку</td></tr>
+<tr><td><code>s-1</code></td><td><code>pro-tabs-select-tab-1</code></td><td>Вкладка 1</td></tr>
+<tr><td><code>s-2</code></td><td><code>pro-tabs-select-tab-2</code></td><td>Вкладка 2</td></tr>
+<tr><td><code>s-3</code></td><td><code>pro-tabs-select-tab-3</code></td><td>Вкладка 3</td></tr>
+<tr><td><code>s-4</code></td><td><code>pro-tabs-select-tab-4</code></td><td>Вкладка 4</td></tr>
+<tr><td><code>s-5</code></td><td><code>pro-tabs-select-tab-5</code></td><td>Вкладка 5</td></tr>
+<tr><td><code>s-6</code></td><td><code>pro-tabs-select-tab-6</code></td><td>Вкладка 6</td></tr>
+<tr><td><code>s-x</code></td><td><code>pro/app-launcher</code></td><td>Запуск .desktop приложения (consult)</td></tr>
+<tr><td><code>s-&amp;</code></td><td><code>async-shell-command</code></td><td>Запуск команды</td></tr>
+<tr><td><code>s-h</code></td><td><code>windmove-left</code></td><td>Переместить фокус влево</td></tr>
+<tr><td><code>s-j</code></td><td><code>windmove-down</code></td><td>Переместить фокус вниз</td></tr>
+<tr><td><code>s-k</code></td><td><code>windmove-up</code></td><td>Переместить фокус вверх</td></tr>
+<tr><td><code>s-l</code></td><td><code>windmove-right</code></td><td>Переместить фокус вправо</td></tr>
+<tr><td><code>s-H</code></td><td><code>buf-move-left</code></td><td>Переместить буфер влево</td></tr>
+<tr><td><code>s-J</code></td><td><code>buf-move-down</code></td><td>Переместить буфер вниз</td></tr>
+<tr><td><code>s-K</code></td><td><code>buf-move-up</code></td><td>Переместить буфер вверх</td></tr>
+<tr><td><code>s-L</code></td><td><code>buf-move-right</code></td><td>Переместить буфер вправо</td></tr>
+<tr><td>`s-``</td><td><code>multi-vterm-project</code></td><td>vterm по проекту</td></tr>
+<tr><td><code>s-~</code></td><td><code>eshell-toggle</code></td><td>eshell toggle</td></tr>
+<tr><td>`C-s-``</td><td><code>pro/exwm-urxvt-toggle</code></td><td>Toggle urxvt в нижнем sidebar</td></tr>
+</tbody></table>
+<h2 id="git">Git</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-x g</code></td><td><code>pro-git-status</code></td><td>Статус репозитория</td></tr>
+<tr><td><code>C-c g</code></td><td><code>pro-git-status</code></td><td>Magit status</td></tr>
+</tbody></table>
+<h2 id="haskell">Haskell</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-c h l</code></td><td><code>pro-haskell-load-buffer</code></td><td>Загрузить буфер в REPL (cabal/ghci)</td></tr>
+<tr><td><code>C-c h r</code></td><td><code>pro-haskell-switch-to-repl</code></td><td>Переключиться на REPL</td></tr>
+<tr><td><code>C-c h f</code></td><td><code>pro-haskell-format-buffer</code></td><td>Форматировать (fourmolu)</td></tr>
+<tr><td><code>C-c h i</code></td><td><code>pro-haskell-lint</code></td><td>Линтер (hlint)</td></tr>
+<tr><td><code>C-c h d</code></td><td><code>pro-haskell-browse-haddock</code></td><td>Документация символа под курсором</td></tr>
+</tbody></table>
+<h2 id="history">History</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-_</code></td><td><code>pro-history-undo</code></td><td>Шаг назад (undo)</td></tr>
+<tr><td><code>M-_</code></td><td><code>pro-history-redo</code></td><td>Шаг вперёд (redo)</td></tr>
+<tr><td><code>C-z</code></td><td><code>pro-history-undo</code></td><td>Шаг назад (дубль)</td></tr>
+<tr><td><code>C-M-z</code></td><td><code>pro-history-redo</code></td><td>Шаг вперёд (дубль)</td></tr>
+<tr><td><code>C-c u</code></td><td><code>pro-history-time-machine</code></td><td>Дерево отмен</td></tr>
+<tr><td><code>C-c z</code></td><td><code>pro-history-time-machine</code></td><td>Дерево отмен (дубль)</td></tr>
+<tr><td><code>C-c C-,</code></td><td><code>goto-last-change-reverse</code></td><td>К предыдущей правке</td></tr>
+<tr><td><code>C-c .</code></td><td><code>goto-last-change</code></td><td>К последней правке</td></tr>
+<tr><td><code>C-c ,</code></td><td><code>goto-last-change-reverse</code></td><td>К предыдущей правке</td></tr>
+<tr><td><code>&lt;XF86Back&gt;</code></td><td><code>winner-undo</code></td><td>Откат раскладки окон</td></tr>
+<tr><td><code>&lt;XF86Forward&gt;</code></td><td><code>winner-redo</code></td><td>Повтор раскладки окон</td></tr>
+<tr><td><code>C-c M-h</code></td><td><code>pro-history-transient</code></td><td>Меню истории (transient)</td></tr>
+</tbody></table>
+<h2 id="lsp">LSP</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-c C-.</code></td><td><code>consult-eglot-symbols</code></td><td>Поиск символов LSP</td></tr>
+</tbody></table>
+<h2 id="org">ORG</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-c K</code></td><td><code>pro-org-open-keys-file</code></td><td>Открыть файл клавиш</td></tr>
+</tbody></table>
+<h2 id="org">Org</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-c o</code></td><td><code>org-agenda</code></td><td>Повестка</td></tr>
+</tbody></table>
+<h2 id="package">Package</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-c P p</code></td><td><code>pro-packages-menu</code></td><td>Список пакетов</td></tr>
+<tr><td><code>C-c P i</code></td><td><code>pro-packages-install</code></td><td>Установить пакет из ELPA</td></tr>
+<tr><td><code>C-c P v</code></td><td><code>pro-packages-install-vc</code></td><td>Установить пакет из VC</td></tr>
+<tr><td><code>C-c P u</code></td><td><code>pro-packages-upgrade-all</code></td><td>Обновить пакеты</td></tr>
+<tr><td><code>C-c P r</code></td><td><code>pro-packages-refresh</code></td><td>Обновить список архивов</td></tr>
+<tr><td><code>C-c P b</code></td><td><code>pro-packages-upgrade-built-ins</code></td><td>Разрешить built-in upgrade</td></tr>
+<tr><td><code>C-c P a</code></td><td><code>pro-package-bootstrap-install-targets</code></td><td>Установить базовые пакеты</td></tr>
+</tbody></table>
+<h2 id="profiler">Profiler</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>&lt;f8&gt;</code></td><td><code>pro/profiler-quick</code></td><td>Профиль 15 сек + автоматический отчёт</td></tr>
+<tr><td><code>C-&lt;f8&gt;</code></td><td><code>pro/profiler-start</code></td><td>Запустить профайлер (CPU)</td></tr>
+<tr><td><code>S-&lt;f8&gt;</code></td><td><code>pro/profiler-stop</code></td><td>Остановить профайлер</td></tr>
+<tr><td><code>M-&lt;f8&gt;</code></td><td><code>pro/profiler-report</code></td><td>Открыть отчёт профайлера</td></tr>
+<tr><td><code>C-S-&lt;f8&gt;</code></td><td><code>pro/profiler-reset</code></td><td>Сбросить данные профайлера</td></tr>
+</tbody></table>
+<h2 id="snippet">Snippet</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-c y y</code></td><td><code>consult-yasnippet</code></td><td>Выбор сниппета</td></tr>
+</tbody></table>
+<h2 id="suggested">Suggested</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-c v y</code></td><td><code>pro/vterm-yank</code></td><td>suggested from terminals</td></tr>
+<tr><td><code>C-c v i</code></td><td><code>pro/vterm-interrupt</code></td><td>suggested from terminals</td></tr>
+<tr><td><code>C-c v c</code></td><td><code>vterm-copy-mode</code></td><td>suggested from terminals</td></tr>
+</tbody></table>
+<h2 id="tabs">Tabs</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-c t n</code></td><td><code>pro-tabs-open-new-tab</code></td><td>Открыть новую вкладку</td></tr>
+<tr><td><code>C-c t k</code></td><td><code>pro-tabs-close-tab-and-buffer</code></td><td>Закрыть вкладку и буфер</td></tr>
+<tr><td><code>C-c t S</code></td><td><code>tab-bar-switch-to-tab</code></td><td>Переключиться на вкладку</td></tr>
+<tr><td><code>&lt;C-tab&gt;</code></td><td><code>pro-tabs-line-next</code></td><td>Следующая tab-line вкладка (в окне)</td></tr>
+<tr><td><code>&lt;C-S-tab&gt;</code></td><td><code>pro-tabs-line-prev</code></td><td>Предыдущая tab-line вкладка (в окне)</td></tr>
+</tbody></table>
+<h2 id="terminal">Terminal</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-c t v</code></td><td><code>multi-vterm-project</code></td><td>Открыть vterm по проекту</td></tr>
+<tr><td><code>C-c t e</code></td><td><code>eshell-toggle</code></td><td>Toggle eshell</td></tr>
+</tbody></table>
+<h2 id="ui">UI</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-=</code></td><td><code>pro-ui-zoom-in</code></td><td>Увеличить шрифт</td></tr>
+<tr><td><code>C-+</code></td><td><code>pro-ui-zoom-in</code></td><td>Увеличить шрифт (альтернатива)</td></tr>
+<tr><td><code>C--</code></td><td><code>pro-ui-zoom-out</code></td><td>Уменьшить шрифт</td></tr>
+<tr><td><code>C-0</code></td><td><code>pro-ui-zoom-reset</code></td><td>Сбросить масштаб</td></tr>
+<tr><td><code>C-\</code></td><td><code>toggle-input-method</code></td><td>Переключить Emacs-IM (ru/en)</td></tr>
+<tr><td><code>&lt;f5&gt;</code></td><td><code>pro/reload-config</code></td><td>Перечитать весь конфиг (soft reload)</td></tr>
+<tr><td><code>M-/</code></td><td><code>eldoc-box-help-at-point</code></td><td>Подсказка под курсором</td></tr>
+</tbody></table>
+<h2 id="-">Выделение</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>M-SPC</code></td><td><code>er/expand-region</code></td><td>Расширение выделения</td></tr>
+</tbody></table>
+<h2 id="-">Дерево</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>s-d</code></td><td><code>treemacs</code></td><td>Открыть дерево</td></tr>
+</tbody></table>
+<h2 id="-">Ключи</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-c k</code></td><td><code>pro-keys-reload</code></td><td>Перезагрузить клавиши</td></tr>
+<tr><td><code>C-c M-k</code></td><td><code>pro-keys-reload</code></td><td>Перезагрузить клавиши (alias)</td></tr>
+</tbody></table>
+<h2 id="-">Навигация</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-x b</code></td><td><code>pro/consult-buffer</code></td><td>Смена буфера (helper)</td></tr>
+<tr><td><code>C-x C-b</code></td><td><code>pro/consult-buffer-other-window</code></td><td>Смена буфера в другом окне</td></tr>
+<tr><td><code>M-s M-s</code></td><td><code>consult-line-multi</code></td><td>Поиск по нескольким буферам</td></tr>
+<tr><td><code>C-x y</code></td><td><code>consult-yank-from-kill-ring</code></td><td>Вставка из истории kill-ring</td></tr>
+<tr><td><code>M-g i</code></td><td><code>consult-imenu</code></td><td>Символы файла</td></tr>
+<tr><td><code>M-g g</code></td><td><code>consult-goto-line</code></td><td>Переход к строке</td></tr>
+<tr><td><code>M-g M-g</code></td><td><code>avy-goto-char</code></td><td>Прыжок к символу</td></tr>
+</tbody></table>
+<h2 id="-">Окна</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-x +</code></td><td><code>pro-windows-enlarge</code></td><td>Увеличить окно (C-u N — шаг)</td></tr>
+<tr><td><code>C-x -</code></td><td><code>pro-windows-shrink</code></td><td>Уменьшить окно (C-u N — шаг)</td></tr>
+<tr><td><code>C-x =</code></td><td><code>pro-windows-balance</code></td><td>balance-windows + golden-ratio (разово)</td></tr>
+</tbody></table>
+<h2 id="-">Поиск</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-s</code></td><td><code>isearch-forward</code></td><td>Обычный isearch (вперёд)</td></tr>
+<tr><td><code>C-r</code></td><td><code>pro/revert-buffer</code></td><td>Revert буфера без подтверждения</td></tr>
+<tr><td><code>C-M-s</code></td><td><code>isearch-backward</code></td><td>isearch назад (без regex)</td></tr>
+<tr><td><code>M-s s</code></td><td><code>consult-line</code></td><td>Поиск по буферу (alias)</td></tr>
+<tr><td><code>C-c s</code></td><td><code>consult-ripgrep</code></td><td>Поиск по проекту</td></tr>
+<tr><td><code>C-c f</code></td><td><code>pro/consult-find</code></td><td>Поиск файла (project-aware)</td></tr>
+<tr><td><code>M-s d</code></td><td><code>consult-dash</code></td><td>Поиск по документации</td></tr>
+<tr><td><code>C-c p s</code></td><td><code>pro-project-ripgrep</code></td><td>Поиск в проекте</td></tr>
+<tr><td><code>C-c p f</code></td><td><code>pro-project-find-file</code></td><td>Файл проекта</td></tr>
+<tr><td><code>C-c C-f</code></td><td><code>consult-find</code></td><td>Поиск файла (consult)</td></tr>
+</tbody></table>
+<h2 id="-">Проекты</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-c p p</code></td><td><code>projectile-switch-project</code></td><td>Сменить проект</td></tr>
+<tr><td><code>C-c p P</code></td><td><code>projectile-find-file</code></td><td>Файл в проекте (projectile)</td></tr>
+<tr><td><code>C-c C-p</code></td><td><code>projectile-switch-project</code></td><td>Сменить проект (alias)</td></tr>
+<tr><td><code>C-c pa</code></td><td><code>projectile-add-known-project</code></td><td>Добавить проект</td></tr>
+</tbody></table>
+<h2 id="-">Чат</h2>
+<table><thead><tr><th>Клавиша</th><th>Команда</th><th>Описание</th></tr></thead><tbody>
+<tr><td><code>C-c T o</code></td><td><code>pro/chat-open</code></td><td>Telegram (under C-c T prefix)</td></tr>
+<tr><td><code>C-c t o</code></td><td><code>pro/chat-open</code></td><td>Open Telegram (telega)</td></tr>
+<tr><td><code>C-c t K</code></td><td><code>pro/chat-close-idle-chats</code></td><td>Close idle telega chat buffers</td></tr>
+<tr><td><code>C-c t E</code></td><td><code>pro/chat-reload-emojis</code></td><td>Reload telega emoji tables</td></tr>
+<tr><td><code>C-c t i</code></td><td><code>pro/chat-install</code></td><td>Install telega from MELPA (fallback)</td></tr>
+<tr><td><code>C-c T S</code></td><td><code>pro/chat-tor-status</code></td><td>Telegram: tor proxy status (buffer)</td></tr>
+<tr><td><code>C-c T R</code></td><td><code>pro/chat-tor-reroute-now</code></td><td>Telegram: re-route tor wrapper</td></tr>
+<tr><td><code>C-c t s</code></td><td><code>pro/telega-select-chat-or-contact</code></td><td>Select telega chat/contact (consult)</td></tr>
+<tr><td><code>C-c t c</code></td><td><code>pro/telega-select-chat-or-contact</code></td><td>Select telega chat/contact (alias)</td></tr>
+<tr><td><code>C-c t u</code></td><td><code>pro/telega-select-chat-or-contact</code></td><td>Select telega contact (C-u)</td></tr>
+</tbody></table>
+<hr />
+<h2 id="kak-zagruzhaiutsia-bindingi">Как загружаются биндинги</h2>
+<ol>
+<li><code>emacs/base/site-init.el</code> вызывает <code>pro-keys-reload</code> (в <code>emacs/base/modules/pro-keys.el</code>).</li>
+<li><code>pro-keys-reload</code> парсит <code>emacs-keys.org</code> как org-таблицу и применяет каждую строку как глобальный биндинг (или EXWM-специфичный, или <code>org-mode</code> локальный — третий столбец это имя секции, и парсер диспатчит соответственно).</li>
+<li>Если биндинг ссылается на команду из пакета, ещё не загруженного (например, <code>magit-status</code> из <code>magit</code>), биндинг добавляется в <code>pro-keys-pending-bindings</code> и пере-применяется, когда пакет становится доступен.</li>
+<li>Пользовательские override’ы лежат в <code>~/.config/emacs/keys.org</code> (тот же формат org-таблицы). Если оба файла существуют, оба парсятся по порядку; пользователь выигрывает на конфликте.</li>
+</ol>
+<h2 id="dobavlenie-bindinga">Добавление биндинга</h2>
+<p>Отредактируйте <code>emacs-keys.org</code> напрямую — добавьте строку в нужную секцию. Сохраните файл. Внутри Emacs <code>M-x pro-keys-reload</code> (или <code>C-c k</code>). Всё. Никаких <code>global-set-key</code> в коде, никаких <code>use-package</code> <code>:bind</code> блоков не нужно.</p>
+
+
+  
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    
+      про-nix 0.1.0 · <a href="https:&#x2F;&#x2F;github.com&#x2F;11111000000&#x2F;pro-nix">GitHub</a> ·
+      <a href="http:&#x2F;&#x2F;127.0.0.1:8000&#x2F;atom.xml">RSS</a> ·
+      Собрано: 2026-07-04
+    
+  </footer>
+</div>
+<script src="http://127.0.0.1:8000/js/main.js"></script>
+
+<script src="http://127.0.0.1:8000/search_index.ru.js" defer></script>
+
+</body>
+</html>

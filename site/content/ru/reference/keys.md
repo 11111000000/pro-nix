@@ -1,21 +1,21 @@
 +++
-title = "Key bindings (emacs-keys.org)"
+title = "Клавиши (emacs-keys.org)"
 sort_by = "weight"
 template = "page.html"
 
 [extra]
-tldr = "All 157 global key bindings from `emacs-keys.org`, grouped by section. This is the executable source — not documentation."
+tldr = "Все 157 глобальных клавиш из `emacs-keys.org`, сгруппированных по секциям. Это исполняемый source — не документация."
 +++
 
-# Key bindings (emacs-keys.org)
+# Клавиши (emacs-keys.org)
 
-<span class="gen-badge">auto-gen</span> Generated 2026-07-04 from `emacs-keys.org`.
+<span class="gen-badge">auto-gen</span> Сгенерировано 2026-07-04 из `emacs-keys.org`.
 
-> **Important:** `emacs-keys.org` is **executable code**, not documentation. Each row in the source org-table becomes a real `global-set-key` at Emacs startup, parsed by `emacs/base/modules/pro-keys.el`. Edit the source, not this page.
+> **Важно:** `emacs-keys.org` — это **исполняемый код**, не документация. Каждая строка в source-таблице становится реальным `global-set-key` при старте Emacs, парсится `emacs/base/modules/pro-keys.el`. Редактируйте source, а не эту страницу.
 
-**Total bindings:** 157  ·  **Sections:** 25
+**Всего биндингов:** 157  ·  **Секций:** 25
 
-## Section index
+## Указатель секций
 
 * [AI](#ai) — 21
 * [Completion](#completion) — 11
@@ -47,8 +47,8 @@ tldr = "All 157 global key bindings from `emacs-keys.org`, grouped by section. T
 
 ## AI { #ai }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-c a o` | `pro-ai-open-entry` | Вход в AI (under C-c a prefix) |
 | `C-c A` | `pro-agent-open` | agent-shell |
 | `C-c C-h` | `agent-shell-hud-menu` | Пульт агента (в agent-shell-mode) |
@@ -73,8 +73,8 @@ tldr = "All 157 global key bindings from `emacs-keys.org`, grouped by section. T
 
 ## Completion { #completion }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-c o f` | `cape-file` | Источник файлов для CAPF |
 | `C-c o d` | `cape-dabbrev` | Слова из буферов |
 | `C-c o h` | `cape-history` | История |
@@ -89,8 +89,8 @@ tldr = "All 157 global key bindings from `emacs-keys.org`, grouped by section. T
 
 ## Docker { #docker }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-c d c` | `pro-docker-containers` | Список контейнеров |
 | `C-c d i` | `pro/docker-images` | Список образов |
 | `C-c d v` | `pro/docker-volumes` | Список томов |
@@ -102,8 +102,8 @@ tldr = "All 157 global key bindings from `emacs-keys.org`, grouped by section. T
 
 ## EXWM { #exwm }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `s-r` | `exwm-reset` | Сброс окна EXWM |
 | `s-w` | `tab-bar-close-tab` | Закрыть вкладку |
 | `s-t` | `pro-tabs-open-new-tab` | Новая вкладка |
@@ -134,15 +134,15 @@ tldr = "All 157 global key bindings from `emacs-keys.org`, grouped by section. T
 
 ## Git { #git }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-x g` | `pro-git-status` | Статус репозитория |
 | `C-c g` | `pro-git-status` | Magit status |
 
 ## Haskell { #haskell }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-c h l` | `pro-haskell-load-buffer` | Загрузить буфер в REPL (cabal/ghci) |
 | `C-c h r` | `pro-haskell-switch-to-repl` | Переключиться на REPL |
 | `C-c h f` | `pro-haskell-format-buffer` | Форматировать (fourmolu) |
@@ -151,8 +151,8 @@ tldr = "All 157 global key bindings from `emacs-keys.org`, grouped by section. T
 
 ## History { #history }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-_` | `pro-history-undo` | Шаг назад (undo) |
 | `M-_` | `pro-history-redo` | Шаг вперёд (redo) |
 | `C-z` | `pro-history-undo` | Шаг назад (дубль) |
@@ -168,26 +168,26 @@ tldr = "All 157 global key bindings from `emacs-keys.org`, grouped by section. T
 
 ## LSP { #lsp }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-c C-.` | `consult-eglot-symbols` | Поиск символов LSP |
 
 ## ORG { #org }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-c K` | `pro-org-open-keys-file` | Открыть файл клавиш |
 
 ## Org { #org }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-c o` | `org-agenda` | Повестка |
 
 ## Package { #package }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-c P p` | `pro-packages-menu` | Список пакетов |
 | `C-c P i` | `pro-packages-install` | Установить пакет из ELPA |
 | `C-c P v` | `pro-packages-install-vc` | Установить пакет из VC |
@@ -198,8 +198,8 @@ tldr = "All 157 global key bindings from `emacs-keys.org`, grouped by section. T
 
 ## Profiler { #profiler }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `<f8>` | `pro/profiler-quick` | Профиль 15 сек + автоматический отчёт |
 | `C-<f8>` | `pro/profiler-start` | Запустить профайлер (CPU) |
 | `S-<f8>` | `pro/profiler-stop` | Остановить профайлер |
@@ -208,22 +208,22 @@ tldr = "All 157 global key bindings from `emacs-keys.org`, grouped by section. T
 
 ## Snippet { #snippet }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-c y y` | `consult-yasnippet` | Выбор сниппета |
 
 ## Suggested { #suggested }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-c v y` | `pro/vterm-yank` | suggested from terminals |
 | `C-c v i` | `pro/vterm-interrupt` | suggested from terminals |
 | `C-c v c` | `vterm-copy-mode` | suggested from terminals |
 
 ## Tabs { #tabs }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-c t n` | `pro-tabs-open-new-tab` | Открыть новую вкладку |
 | `C-c t k` | `pro-tabs-close-tab-and-buffer` | Закрыть вкладку и буфер |
 | `C-c t S` | `tab-bar-switch-to-tab` | Переключиться на вкладку |
@@ -232,15 +232,15 @@ tldr = "All 157 global key bindings from `emacs-keys.org`, grouped by section. T
 
 ## Terminal { #terminal }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-c t v` | `multi-vterm-project` | Открыть vterm по проекту |
 | `C-c t e` | `eshell-toggle` | Toggle eshell |
 
 ## UI { #ui }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-=` | `pro-ui-zoom-in` | Увеличить шрифт |
 | `C-+` | `pro-ui-zoom-in` | Увеличить шрифт (альтернатива) |
 | `C--` | `pro-ui-zoom-out` | Уменьшить шрифт |
@@ -251,27 +251,27 @@ tldr = "All 157 global key bindings from `emacs-keys.org`, grouped by section. T
 
 ## Выделение { #- }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `M-SPC` | `er/expand-region` | Расширение выделения |
 
 ## Дерево { #- }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `s-d` | `treemacs` | Открыть дерево |
 
 ## Ключи { #- }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-c k` | `pro-keys-reload` | Перезагрузить клавиши |
 | `C-c M-k` | `pro-keys-reload` | Перезагрузить клавиши (alias) |
 
 ## Навигация { #- }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-x b` | `pro/consult-buffer` | Смена буфера (helper) |
 | `C-x C-b` | `pro/consult-buffer-other-window` | Смена буфера в другом окне |
 | `M-s M-s` | `consult-line-multi` | Поиск по нескольким буферам |
@@ -282,16 +282,16 @@ tldr = "All 157 global key bindings from `emacs-keys.org`, grouped by section. T
 
 ## Окна { #- }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-x +` | `pro-windows-enlarge` | Увеличить окно (C-u N — шаг) |
 | `C-x -` | `pro-windows-shrink` | Уменьшить окно (C-u N — шаг) |
 | `C-x =` | `pro-windows-balance` | balance-windows + golden-ratio (разово) |
 
 ## Поиск { #- }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-s` | `isearch-forward` | Обычный isearch (вперёд) |
 | `C-r` | `pro/revert-buffer` | Revert буфера без подтверждения |
 | `C-M-s` | `isearch-backward` | isearch назад (без regex) |
@@ -305,8 +305,8 @@ tldr = "All 157 global key bindings from `emacs-keys.org`, grouped by section. T
 
 ## Проекты { #- }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-c p p` | `projectile-switch-project` | Сменить проект |
 | `C-c p P` | `projectile-find-file` | Файл в проекте (projectile) |
 | `C-c C-p` | `projectile-switch-project` | Сменить проект (alias) |
@@ -314,8 +314,8 @@ tldr = "All 157 global key bindings from `emacs-keys.org`, grouped by section. T
 
 ## Чат { #- }
 
-| Key | Command | Description |
-|-----|---------|-------------|
+| Клавиша | Команда | Описание |
+|-----|---------|----------|
 | `C-c T o` | `pro/chat-open` | Telegram (under C-c T prefix) |
 | `C-c t o` | `pro/chat-open` | Open Telegram (telega) |
 | `C-c t K` | `pro/chat-close-idle-chats` | Close idle telega chat buffers |
@@ -329,13 +329,13 @@ tldr = "All 157 global key bindings from `emacs-keys.org`, grouped by section. T
 
 ---
 
-## How bindings are loaded
+## Как загружаются биндинги
 
-1. `emacs/base/site-init.el` calls `pro-keys-reload` (in `emacs/base/modules/pro-keys.el`).
-2. `pro-keys-reload` parses `emacs-keys.org` as an org-table and applies each row as a global binding (or an EXWM-specific binding, or an `org-mode` local binding — the third column is the section name and the parser dispatches accordingly).
-3. If a binding references a command from a package that is not yet loaded (e.g. `magit-status` from `magit`), the binding is added to `pro-keys-pending-bindings` and re-applied when the package becomes available.
-4. User overrides live in `~/.config/emacs/keys.org` (same org-table format). If both files exist, both are parsed in order; user wins on conflict.
+1. `emacs/base/site-init.el` вызывает `pro-keys-reload` (в `emacs/base/modules/pro-keys.el`).
+2. `pro-keys-reload` парсит `emacs-keys.org` как org-таблицу и применяет каждую строку как глобальный биндинг (или EXWM-специфичный, или `org-mode` локальный — третий столбец это имя секции, и парсер диспатчит соответственно).
+3. Если биндинг ссылается на команду из пакета, ещё не загруженного (например, `magit-status` из `magit`), биндинг добавляется в `pro-keys-pending-bindings` и пере-применяется, когда пакет становится доступен.
+4. Пользовательские override'ы лежат в `~/.config/emacs/keys.org` (тот же формат org-таблицы). Если оба файла существуют, оба парсятся по порядку; пользователь выигрывает на конфликте.
 
-## Adding a binding
+## Добавление биндинга
 
-Edit `emacs-keys.org` directly — add a row in the appropriate section. Save the file. Inside Emacs, `M-x pro-keys-reload` (or `C-c k`). That's it. No `global-set-key` in code, no `use-package` `:bind` block needed.
+Отредактируйте `emacs-keys.org` напрямую — добавьте строку в нужную секцию. Сохраните файл. Внутри Emacs `M-x pro-keys-reload` (или `C-c k`). Всё. Никаких `global-set-key` в коде, никаких `use-package` `:bind` блоков не нужно.
