@@ -22,7 +22,7 @@ stdenv.mkDerivation rec {
   src = fetchFromGitHub {
     owner = "emacs-compat";
     repo = "compat";
-    rev = "v${version}";
+    rev = "${version}";  # теги emacs-compat/compat без префикса 'v'
     hash = "sha256-ptmRg0+ZODG+CeOjaF5jzMmHVrDKujyFiqYW3vWKjS0=";
   };
 
