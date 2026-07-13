@@ -39,6 +39,12 @@
 ;; release for third-party packages like Magit. Setting this here makes the
 ;; behaviour explicit early in the startup sequence.
 (setq package-install-upgrade-built-in t)
+;; Prefer the newest version on `load-path' over the built-in one. Emacs 30.x
+;; ships an old `transient' as a built-in; without this, any `(require
+;; 'transient nil t)' before init.el had a chance to load ELPA `transient'
+;; picks up the built-in. Magit then aborts with the "Magit requires
+;; 'transient' >= 0.13" emergency even though ELPA already provides it.
+(setq load-prefer-newer t)
 
 ;; Try to load Tree-sitter early so that symbols like `treesit-node-at' are
 ;; available to native-comp during compilation of third-party packages
