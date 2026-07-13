@@ -50,6 +50,16 @@ let
   # Решение: патчим upstream llm до того, как ellama recipe оцéнивается,
   # через `let binding` — patched llm фиксируется до `localRecipes`.
   patchedLlm = super.callPackage ../emacs-recipes/llm.nix {};
+  # transient: nixpkgs 25.11-рецепт `emacsPackages.transient` собирает
+  # коммит `053d56e4` (2025-10-06), в котором `transient-version` всё ещё
+  # `"0.10.1"` — между v0.11.0 и v0.13.5 Magit поднял требование до
+  # `>= 0.13`, и эта сборка уже несовместима. Берём официальный тег v0.13.5
+  # через собственный recipe (см. nix/emacs-recipes/transient.nix).
+  # Alphabetic-order gotcha (см. ниже про ellama): если transient
+  # переопределяется только внутри `localRecipes` (имя 't' после 's'),
+  # то recipe ellama успеет подхватить наш patched — но ради симметрии
+  # с `patchedLlm` фиксируем через let binding.
+  patchedTransient = super.callPackage ../emacs-recipes/transient.nix {};
   localRecipes = {
     # visual-fill-column: upstream-рецепт в nixpkgs запинен на
     # codeberg.org/joostkremers/visual-fill-column@a38e3a28 — коммит
@@ -72,6 +82,11 @@ let
     # Привязка через `let patchedLlm` (выше) гарантирует, что alphabetic-order
     # eval этого attrset не подменит наш patched llm на upstream broken.
 llm = patchedLlm;
+    # transient: см. nix/emacs-recipes/transient.nix. Перебиваем
+    # `super.emacsPackages.transient` (0.10.1) нашим tagged v0.13.5.
+    # Magit читает `transient-version` и при `>= 0.10.1 < 0.13` падает
+    # с emergency "Magit requires 'transient' >= 0.13".
+    transient = patchedTransient;
     pro-tabs = super.callPackage ../emacs-recipes/pro-tabs.nix {
       all-the-icons = super.emacsPackages.all-the-icons or null;
     };
@@ -102,10 +117,10 @@ llm = patchedLlm;
     # recipe использует `emacs.pkgs.llm` (т.е. `super.emacsPackages.llm`),
     # получит upstream broken `emacs-llm-0.27.2`, не наш patched.
     ellama = super.callPackage ../emacs-recipes/ellama.nix {
-      emacsPackages = super.emacsPackages // { inherit (super.emacsPackages) plz transient compat yaml; } // { llm = patchedLlm; };
+      emacsPackages = super.emacsPackages // { inherit (super.emacsPackages) plz compat yaml; } // { llm = patchedLlm; transient = patchedTransient; };
       emacsPackages_llm = patchedLlm;
       emacsPackages_plz = super.emacsPackages.plz;
-      emacsPackages_transient = super.emacsPackages.transient;
+      emacsPackages_transient = patchedTransient;
       emacsPackages_compat = super.emacsPackages.compat;
       emacsPackages_yaml = super.emacsPackages.yaml;
       # plz-event-source и plz-media-type — отдельные emacsPackage

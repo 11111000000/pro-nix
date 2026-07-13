@@ -327,6 +327,38 @@ attrset literal `localRecipes` оценивается **по алфавиту** 
   `plz-media-type` → не добавлены в `buildInputs` ellama recipe. Это
    отдельные packages, не subdir of plz.
 
+### 6e.2. Transient: pinned upstream recipe
+
+Nixpkgs 25.11 (`pkgs.emacsPackages.transient`) собирает upstream-коммит
+`magit/transient@053d56e4` (2025-10-06). В этом коммите
+`transient-version` всё ещё `"0.10.1"` — между v0.10.1 и v0.13.5 Magit
+поднял требование до `>= 0.13`. Результат: Magit стартует с emergency
+
+```
+⛔ Emergency (magit): Magit requires 'transient' >= 0.13
+```
+
+хотя кажется, что пакет установлен. Проверка:
+`(emacs --batch --eval "(progn (require 'transient) (princ transient-version))")`
+должна выводить что-то `>= 0.13`; в сломанной системе выдаёт `0.10.1`.
+
+Решение — собственный `nix/emacs-recipes/transient.nix` поверх официального
+тега `v0.13.5` (commit `3d20a78`, 2026-07-01) — прямой `mkDerivation`
++ `fetchFromGitHub`, без `elpa2nix`. По образцу llm-рецепта.
+
+`package-install-upgrade-built-in = t` в `early-init.el` и `init.el`
+**не лечит** эту проблему: built-in transient в Emacs 30.x — старая версия,
+но ELPA даёт 0.13+; конфликт возникает на уровне Nix-профиля, не на уровне
+`package.el`. Magit читает именно ту `transient`, что лежит в
+`EMACSLOADPATH` под именем `transient.el`, а её кладёт туда Nix-сборка.
+
+После правки overlay:
+```nix
+emacsPackages.transient.version  # → "0.13.5"
+```
+
+После `just switch` Magit стартует без emergency.
+
 ### 6f. Telegram + Tor (TDesktop и telega.el)
 
 Telegram MTProto в mainline tdlib **не поддерживает SOCKS5 proxy** через elisp.
