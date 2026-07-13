@@ -53,7 +53,13 @@ trivialBuild rec {
     hash = "sha256-r0LJ6EqlPJDKzbW5Nm3QR34Ha7nz6r8gKax7jKOTIyE=";
   };
 
-  buildInputs = [
+  # propagatedBuildInputs, а не buildInputs: ellama и другие пакеты,
+  # которые требуют `transient`, тянут transitively `cond-let` (через
+  # require внутри transient.el). Nix не подкладывает transitive deps
+  # из buildInputs — только из propagatedBuildInputs (через
+  # `addEmacsNativeLoadPath` в trivialBuild). Иначе байт-компиляция
+  # ellama падает с `Cannot open load file: cond-let`.
+  propagatedBuildInputs = [
     compat
     cond-let
     llama
