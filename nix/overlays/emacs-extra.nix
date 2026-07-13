@@ -59,7 +59,30 @@ let
   # переопределяется только внутри `localRecipes` (имя 't' после 's'),
   # то recipe ellama успеет подхватить наш patched — но ради симметрии
   # с `patchedLlm` фиксируем через let binding.
-  patchedTransient = super.callPackage ../emacs-recipes/transient.nix {};
+  patchedTransient = super.callPackage ../emacs-recipes/transient.nix {
+    # emacsPackages (`compat`, `cond-let`, `llama`, `seq`) не живут в
+    # `pkgs.*` верхнего уровня — `callPackage` не находит их по имени,
+    # поэтому пробрасываем явно.
+    compat = super.emacsPackages.compat;
+    cond-let = super.emacsPackages.cond-let;
+    llama = super.emacsPackages.llama;
+    seq = super.emacsPackages.seq;
+  };
+  # compat: nixpkgs 25.11-рецепт `emacsPackages.compat` запинен на
+  # tag 30.1.0.1 (Jun 2025), а `transient-0.13.5` требует `compat >= 31.0`.
+  # Делаем собственный recipe поверх официального 31.0.0.2
+  # (emacs-compat/compat@df03e91, 2026-07-09) — прямой `mkDerivation`
+  # + `fetchFromGitHub`, без elpa2nix.
+  patchedCompat = super.callPackage ../emacs-recipes/compat.nix {};
+  # transient требует на вход именно наш patchedCompat (а не upstream
+  # `super.emacsPackages.compat`). Передаём его явно через callPackage
+  # override — не полагаемся на alphabetic-order в `localRecipes`.
+  patchedTransientPatchedCompat = super.callPackage ../emacs-recipes/transient.nix {
+    compat = patchedCompat;
+    cond-let = super.emacsPackages.cond-let;
+    llama = super.emacsPackages.llama;
+    seq = super.emacsPackages.seq;
+  };
   localRecipes = {
     # visual-fill-column: upstream-рецепт в nixpkgs запинен на
     # codeberg.org/joostkremers/visual-fill-column@a38e3a28 — коммит
@@ -86,7 +109,12 @@ llm = patchedLlm;
     # `super.emacsPackages.transient` (0.10.1) нашим tagged v0.13.5.
     # Magit читает `transient-version` и при `>= 0.10.1 < 0.13` падает
     # с emergency "Magit requires 'transient' >= 0.13".
-    transient = patchedTransient;
+    transient = patchedTransientPatchedCompat;
+    # compat: см. nix/emacs-recipes/compat.nix. Подменяем
+    # `super.emacsPackages.compat` (30.1.0.1) на 31.0.0.2 — это нужно
+    # для байт-компиляции `transient-0.13.5` (требует compat >= 31.0),
+    # и для всех прочих пакетов, которые зависят от свежего compat.
+    compat = patchedCompat;
     pro-tabs = super.callPackage ../emacs-recipes/pro-tabs.nix {
       all-the-icons = super.emacsPackages.all-the-icons or null;
     };
@@ -117,11 +145,11 @@ llm = patchedLlm;
     # recipe использует `emacs.pkgs.llm` (т.е. `super.emacsPackages.llm`),
     # получит upstream broken `emacs-llm-0.27.2`, не наш patched.
     ellama = super.callPackage ../emacs-recipes/ellama.nix {
-      emacsPackages = super.emacsPackages // { inherit (super.emacsPackages) plz compat yaml; } // { llm = patchedLlm; transient = patchedTransient; };
+      emacsPackages = super.emacsPackages // { inherit (super.emacsPackages) plz yaml; } // { llm = patchedLlm; transient = patchedTransientPatchedCompat; compat = patchedCompat; };
       emacsPackages_llm = patchedLlm;
       emacsPackages_plz = super.emacsPackages.plz;
-      emacsPackages_transient = patchedTransient;
-      emacsPackages_compat = super.emacsPackages.compat;
+      emacsPackages_transient = patchedTransientPatchedCompat;
+      emacsPackages_compat = patchedCompat;
       emacsPackages_yaml = super.emacsPackages.yaml;
       # plz-event-source и plz-media-type — отдельные emacsPackage
       # (транзитивные deps `plz`). ellama-transient.el требует

@@ -1,4 +1,12 @@
-{ stdenv, emacs, lib, fetchFromGitHub }:
+{ stdenv
+, emacs
+, lib
+, fetchFromGitHub
+, compat
+, cond-let
+, llama
+, seq
+}:
 
 # transient (magit/transient) — команды с префиксом/суффиксом, на которых
 # построен интерфейс Magit. Nixpkgs-рецепт `emacsPackages.transient`
@@ -16,9 +24,15 @@
 # License: GPL-3.0.
 #
 # Зависимости (Package-Requires в transient.el):
-#   - emacs  >= 26.1
-#   - compat >= 30.1
-#   - seq    >= 2.24
+#   - emacs    >= 28.1
+#   - compat   >= 31.0
+#   - cond-let >= 1.1
+#   - llama    >= 1.0
+#   - seq      >= 2.24
+#
+# NB: `compat` в nixpkgs 25.11 запинен на 30.1.0.1 — перебиваем в overlay
+# (см. nix/overlays/emacs-extra.nix) на свежий тег 31.0.0.2
+# (emacs-compat/compat@df03e91, 2026-07-09) через собственный fetchFromGitHub.
 
 stdenv.mkDerivation rec {
   pname = "transient";
@@ -33,8 +47,10 @@ stdenv.mkDerivation rec {
 
   nativeBuildInputs = [ emacs ];
 
-  buildInputs = with emacs.pkgs; [
+  buildInputs = [
     compat
+    cond-let
+    llama
     seq
   ];
 

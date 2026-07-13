@@ -346,6 +346,28 @@ Nixpkgs 25.11 (`pkgs.emacsPackages.transient`) собирает upstream-ком�
 тега `v0.13.5` (commit `3d20a78`, 2026-07-01) — прямой `mkDerivation`
 + `fetchFromGitHub`, без `elpa2nix`. По образцу llm-рецепта.
 
+Дополнительно: `transient-0.13.5` требует `compat >= 31.0`, а в nixpkgs
+25.11 `emacsPackages.compat` запинен на tag 30.1.0.1 (Jun 2025). Без
+перепина `compat` байт-компиляция `transient.el` падает с
+`Cannot open load file: cond-let`. Решение — собственный
+`nix/emacs-recipes/compat.nix` поверх официального тега 31.0.0.2
+(commit `df03e91`, 2026-07-09), и `patchedTransient` собирается с
+явным `compat = patchedCompat`.
+
+При пробрасывании зависимостей в `super.callPackage .../transient.nix`
+помни: `compat`, `cond-let`, `llama`, `seq` живут в `super.emacsPackages.*`,
+а **не** в `pkgs.*` верхнего уровня. `callPackage` не находит их по
+имени автоматически — нужно пробрасывать явно:
+
+```nix
+super.callPackage ../emacs-recipes/transient.nix {
+  compat = super.emacsPackages.compat;
+  cond-let = super.emacsPackages.cond-let;
+  llama = super.emacsPackages.llama;
+  seq = super.emacsPackages.seq;
+};
+```
+
 `package-install-upgrade-built-in = t` в `early-init.el` и `init.el`
 **не лечит** эту проблему: built-in transient в Emacs 30.x — старая версия,
 но ELPA даёт 0.13+; конфликт возникает на уровне Nix-профиля, не на уровне
@@ -355,6 +377,7 @@ Nixpkgs 25.11 (`pkgs.emacsPackages.transient`) собирает upstream-ком�
 После правки overlay:
 ```nix
 emacsPackages.transient.version  # → "0.13.5"
+emacsPackages.compat.version    # → "31.0.0.2"
 ```
 
 После `just switch` Magit стартует без emergency.
