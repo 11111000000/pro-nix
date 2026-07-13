@@ -1,5 +1,6 @@
 { stdenv
 , emacs
+, trivialBuild
 , lib
 , fetchFromGitHub
 , compat
@@ -16,9 +17,16 @@
 # Результат: при загрузке Magit выбрасывает emergency "Magit requires
 # 'transient' >= 0.13".
 #
-# Этот recipe — прямой `mkDerivation` поверх официального тега v0.13.5
-# (без elpa2nix, как и llm.nix). Содержимое распаковывается стандартно,
-# все .el файлы попадают в `site-lisp/<pname>/` напрямую.
+# Этот recipe — прямой `trivialBuild` поверх официального тега v0.13.5
+# (без `elpa2nix`/`melpa2nix`). `trivialBuild` запускает
+# `emacs -l package -f package-initialize -L . --batch -f batch-byte-compile`
+# и автоматически подхватывает transitive deps из `propagatedBuildInputs`
+# (здесь — `compat`, `cond-let`, `llama`, `seq`).
+#
+# NB: не пытаемся повторить upstream-Makefile (он использует
+# относительные пути `../../compat`, которые Nix не подкладывает). Вместо
+# этого байт-компилируем через Emacs `package-initialize`, который
+# читает `<pkg>-pkg.el` из buildInputs и поднимает всё в load-path.
 #
 # Pin: tag v0.13.5 (commit 3d20a78…, 2026-07-01).
 # License: GPL-3.0.
@@ -34,7 +42,7 @@
 # (см. nix/overlays/emacs-extra.nix) на свежий тег 31.0.0.2
 # (emacs-compat/compat@df03e91, 2026-07-09) через собственный fetchFromGitHub.
 
-stdenv.mkDerivation rec {
+trivialBuild rec {
   pname = "transient";
   version = "0.13.5";
 
@@ -45,28 +53,12 @@ stdenv.mkDerivation rec {
     hash = "sha256-r0LJ6EqlPJDKzbW5Nm3QR34Ha7nz6r8gKax7jKOTIyE=";
   };
 
-  nativeBuildInputs = [ emacs ];
-
   buildInputs = [
     compat
     cond-let
     llama
     seq
   ];
-
-  dontConfigure = true;
-
-  # В v0.13.x исходники лежат в подкаталоге `lisp/`. Устанавливаем все
-  # .el оттуда; pkg.el автогенерируется elpa-стилем, но для прямого
-  # mkDerivation мы просто кладём всё что есть.
-  installPhase = ''
-    runHook preInstall
-    mkdir -p $out/share/emacs/site-lisp/${pname}
-    for f in lisp/transient.el lisp/transient-*.el; do
-      [ -f "$f" ] && install -m644 "$f" $out/share/emacs/site-lisp/${pname}/
-    done
-    runHook postInstall
-  '';
 
   meta = with lib; {
     description = "Transient commands — prefix/suffix UI primitives used by Magit";

@@ -60,9 +60,10 @@ let
   # то recipe ellama успеет подхватить наш patched — но ради симметрии
   # с `patchedLlm` фиксируем через let binding.
   patchedTransient = super.callPackage ../emacs-recipes/transient.nix {
-    # emacsPackages (`compat`, `cond-let`, `llama`, `seq`) не живут в
-    # `pkgs.*` верхнего уровня — `callPackage` не находит их по имени,
-    # поэтому пробрасываем явно.
+    # `trivialBuild` живёт в `super.emacsPackages.*`, не в `pkgs.*`.
+    # emacsPackages (`compat`, `cond-let`, `llama`, `seq`) тоже не в `pkgs.*`.
+    # `callPackage` не находит их по имени автоматически — пробрасываем явно.
+    trivialBuild = super.emacsPackages.trivialBuild;
     compat = super.emacsPackages.compat;
     cond-let = super.emacsPackages.cond-let;
     llama = super.emacsPackages.llama;
@@ -78,6 +79,7 @@ let
   # `super.emacsPackages.compat`). Передаём его явно через callPackage
   # override — не полагаемся на alphabetic-order в `localRecipes`.
   patchedTransientPatchedCompat = super.callPackage ../emacs-recipes/transient.nix {
+    trivialBuild = super.emacsPackages.trivialBuild;
     compat = patchedCompat;
     cond-let = super.emacsPackages.cond-let;
     llama = super.emacsPackages.llama;

@@ -24,6 +24,8 @@
 | UI         | C-0           | pro-ui-zoom-reset                     | Сбросить масштаб                     |
 | UI         | C-\           | toggle-input-method                   | Переключить Emacs-IM (ru/en)         |
 | UI         | <f5>          | pro/reload-config                     | Перечитать весь конфиг (soft reload) |
+| UI         | <mouse-3>     | ignore                                 | Отключить правый клик (mouse-buffer-menu) |
+| UI         | <down-mouse-3> | ignore                               | Отключить down-event правой кнопки    |
 | History    | C-_           | pro-history-undo                      | Шаг назад (undo)                     |
 | History    | M-_           | pro-history-redo                      | Шаг вперёд (redo)                    |
 | History    | C-z           | pro-history-undo                      | Шаг назад (дубль)                    |
