@@ -158,6 +158,13 @@ llm = patchedLlm;
       # `plz-event-source`, ellama-eval.el требует `plz-media-type`.
       emacsPackages_plz_event_source = super.emacsPackages.plz-event-source or null;
       emacsPackages_plz_media_type = super.emacsPackages.plz-media-type or null;
+      # cond-let и llama — транзитивные deps `transient` (через
+      # `(require 'cond-let)` / `(require 'llama)` в transient.el).
+      # ellama recipe использует простой `mkDerivation` без
+      # `addEmacsNativeLoadPath`, поэтому propagated через transient
+      # не доходят — пробрасываем явно.
+      emacsPackages_cond_let = super.emacsPackages.cond-let;
+      emacsPackages_llama = super.emacsPackages.llama;
     };
   };
 in {

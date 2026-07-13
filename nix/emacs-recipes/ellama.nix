@@ -3,7 +3,10 @@
 , emacsPackages_llm, emacsPackages_plz, emacsPackages_transient
 , emacsPackages_compat, emacsPackages_yaml
 , emacsPackages_plz_event_source ? null
-, emacsPackages_plz_media_type ? null }:
+, emacsPackages_plz_media_type ? null
+, emacsPackages_cond_let ? null
+, emacsPackages_llama ? null
+}:
 
 # Ellama: Emacs client for local (Ollama) and cloud LLMs.
 #
@@ -61,6 +64,14 @@ stdenv.mkDerivation rec {
     # `Cannot open load file: plz-{event-source,media-type}`.
     emacsPackages_plz_event_source
     emacsPackages_plz_media_type
+    # `transient.el` (внутри которого `(require 'cond-let)` и
+    # `(require 'llama)`) делает `ellama-transient.el` byte-compile
+    # падать с `Cannot open load file: cond-let`/`llama`, потому что
+    # transient recipe собирается через trivialBuild и пропагирует deps
+    # через addEmacsNativeLoadPath, но наш recipe — простой mkDerivation
+    # без этого magic. Пробрасываем cond-let/llama явно.
+    emacsPackages_cond_let
+    emacsPackages_llama
   ];
 
   dontConfigure = true;
@@ -89,7 +100,9 @@ stdenv.mkDerivation rec {
       ${emacsPackages_compat}/share/emacs \
       ${emacsPackages_yaml}/share/emacs \
       ${emacsPackages_plz_event_source}/share/emacs \
-      ${emacsPackages_plz_media_type}/share/emacs; do
+      ${emacsPackages_plz_media_type}/share/emacs \
+      ${emacsPackages_cond_let}/share/emacs \
+      ${emacsPackages_llama}/share/emacs; do
       if [ -d "$PKG_ROOT" ]; then
         for SUBDIR in $(find "$PKG_ROOT" -type d); do
           [ -n "$(ls "$SUBDIR"/*.el 2>/dev/null)" ] && LP_ARGS="$LP_ARGS -L $SUBDIR"
