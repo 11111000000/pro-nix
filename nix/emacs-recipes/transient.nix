@@ -60,6 +60,35 @@ trivialBuild rec {
     seq
   ];
 
+  # В v0.13.x исходники лежат в подкаталоге `lisp/`, не в корне.
+  # `trivialBuild` байт-компилирует и ставит `*.el` из cwd. Переходим
+  # в `lisp/` и копируем файлы оттуда.
+  buildPhase = ''
+    runHook preBuild
+
+    if [[ ! ( -z "''${makeFlags-}" && -z "''${makefile:-}" && ! ( -e Makefile || -e makefile || -e GNUmakefile ) ) ]]; then
+      foundMakefile=1
+    fi
+
+    cd lisp
+    emacs -l package -f package-initialize \
+      --eval "(setq byte-compile-debug t)" \
+      --eval "(setq byte-compile-error-on-warn nil)" \
+      -L . --batch -f batch-byte-compile *.el
+
+    runHook postBuild
+  '';
+
+  installPhase = ''
+    runHook preInstall
+
+    LISPDIR=$out/share/emacs/site-lisp
+    install -d $LISPDIR
+    install *.el *.elc $LISPDIR
+
+    runHook postInstall
+  '';
+
   meta = with lib; {
     description = "Transient commands — prefix/suffix UI primitives used by Magit";
     homepage = "https://github.com/magit/transient";
