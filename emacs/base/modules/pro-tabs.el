@@ -58,16 +58,18 @@ If `pro-tabs' package is present, delegate to it; otherwise use `tab-bar-new-tab
   (condition-case err
       (cond
        ((and (fboundp 'pro/register-module-keys))
-        (pro/register-module-keys 'tabs
-                                  '(("C-c t n" . pro-tabs-open-new-tab)
-                                    ("C-c t k" . pro-tabs-close-tab-and-buffer)
-                                    ("C-c t s" . tab-bar-switch-to-tab))))
+         (pro/register-module-keys 'tabs
+                                   '(("C-c b n" . pro-tabs-open-new-tab)
+                                     ("C-c b k" . pro-tabs-close-tab-and-buffer)
+                                     ("C-c b S" . tab-bar-switch-to-tab)
+                                     ("C-c x t" . pro-tabs-open-new-tab))))
        ((and (boundp 'pro/registered-module-keys) (hash-table-p pro/registered-module-keys))
-        (puthash 'tabs
-                 '(("C-c t n" . pro-tabs-open-new-tab)
-                   ("C-c t k" . pro-tabs-close-tab-and-buffer)
-                   ("C-c t s" . tab-bar-switch-to-tab))
-                 pro/registered-module-keys)))
+         (puthash 'tabs
+                  '(("C-c b n" . pro-tabs-open-new-tab)
+                    ("C-c b k" . pro-tabs-close-tab-and-buffer)
+                    ("C-c b S" . tab-bar-switch-to-tab)
+                    ("C-c x t" . pro-tabs-open-new-tab))
+                  pro/registered-module-keys)))
     ;; Avoid referencing `err` in the message to prevent void-variable
     ;; issues in certain early startup contexts. Detailed diagnostics are
     ;; written to /tmp/pro-register-tabs.log above so operators can inspect

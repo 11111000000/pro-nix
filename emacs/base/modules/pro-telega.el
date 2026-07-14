@@ -315,9 +315,9 @@ fullname — склеенные first_name и last_name (может быть п�
   (when (fboundp 'pro/register-module-keys)
     (pro/register-module-keys
      'telega
-     '(("C-c t s" . pro/telega-select-chat-or-contact)
-       ("C-c t c" . pro/telega-select-chat-or-contact)
-       ("C-c t u" . (lambda () (interactive) (pro/telega-select-chat-or-contact '(16))))))))
+     '(("C-c m s" . pro/telega-select-chat-or-contact)
+       ("C-c m c" . pro/telega-select-chat-or-contact)
+       ("C-c m u" . (lambda () (interactive) (pro/telega-select-chat-or-contact '(16))))))))
 
 (provide 'pro-telega)
 

@@ -20,7 +20,8 @@
     pro-ui-completion pro-ui-fonts pro-ui-fringes pro-ui-icons
     pro-ui-improvements pro-buffer-banner pro-ui-modeline pro-ui-theme pro-ui-tty
     pro-dashboard pro-help pro-windows-popups
-    pro-vterm-theme pro-windows pro-nav pro-docker)
+    pro-vterm-theme pro-windows pro-nav pro-docker
+    pro-key-prefixes pro-treemacs)
   "Полный список модулей, загружаемых по умолчанию при старте Emacs.")
 (defvar pro-emacs-base-system-modules-dir nil)
 (defvar pro-emacs-base-user-modules-dir (expand-file-name "~/.config/emacs/modules"))

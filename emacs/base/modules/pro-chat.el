@@ -277,13 +277,13 @@ Tor доступен (см. scripts/check-tor-socks.sh)."
   (when (fboundp 'pro/register-module-keys)
     (pro/register-module-keys
      'chat
-     '(("C-c t o" . pro/chat-open)
-       ("C-c T o" . pro/chat-open)
-       ("C-c t k" . pro/chat-close-idle-chats)
-       ("C-c t e" . pro/chat-reload-emojis)
-       ("C-c t i" . pro/chat-install)
-       ("C-c T s" . pro/chat-tor-status)
-       ("C-c T r" . pro/chat-tor-reroute-now)))))
+     '(("C-c m o" . pro/chat-open)
+       ("C-c m k" . pro/chat-close-idle-chats)
+       ("C-c m e" . pro/chat-reload-emojis)
+       ("C-c m i" . pro/chat-install)
+       ("C-c m s" . pro/chat-tor-status)
+       ("C-c m r" . pro/chat-tor-reroute-now)
+       ("C-c m ?" . pro/messaging-transient)))))
 
 (provide 'pro-chat)
 

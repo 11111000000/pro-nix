@@ -509,6 +509,21 @@ No-op outside EXWM."
                 pro-exwm-urxvt--hidden nil)
           (message "[pro-exwm] urxvt sidebar spawn FAILED (cd=%s)" dir)))))))
 
+;; ── Register module suggestions for keys layer ──────────────────────────
+
+(with-eval-after-load 'pro-keys
+  (when (fboundp 'pro/register-module-keys)
+    (pro/register-module-keys
+     'exwm
+     '(("C-c x r" . exwm-reset)
+       ("C-c x a" . pro/app-launcher)
+       ("C-c x &" . async-shell-command)
+       ("C-c x ?" . pro/exwm-transient)
+       ;; Note: tabs (C-c x t/n/p/N/P/T/1..6/w) are registered by
+       ;; `pro-tabs.el'. They share underlying tab-bar-* commands with
+       ;; the EXWM-local s-* bindings to keep behavior identical.
+       ))))
+
 ;; ── Init hooks ───────────────────────────────────────────────────────────
 ;;
 ;; `window-setup-hook' fires after Emacs has created the initial frame

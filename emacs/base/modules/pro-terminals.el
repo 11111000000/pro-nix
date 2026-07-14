@@ -1,120 +1,189 @@
-;;; pro-terminals.el --- Интеграция терминалов (vterm, eshell) -*- lexical-binding: t; -*-
+;;; pro-terminals.el --- Интеграция терминалов (vterm, eshell, ansi-term, shell-pop) -*- lexical-binding: t; -*-
 ;;
-;; Этот модуль предоставляет небольшие, безопасные вспомогательные функции
-;; для работы с терминалами внутри Emacs. Он не навязывает глобальных
-;; сочетаний клавиш — рекомендации по биндингам регистрируются через API
-;; `pro/register-module-keys' и могут быть экспортированы в виде Org-таблиц.
+;; Контракт:
+;; - Публичные команды: pro/eshell-toggle, pro/vterm-dedicated-toggle,
+;;   pro/vterm-dedicated-close, pro/shell-pop, pro/ansi-term-toggle,
+;;   pro/multi-vterm-next, pro/multi-vterm-prev, pro/vterm-yank,
+;;   pro/vterm-interrupt.
+;; - Все команды безопасны: проверяют доступность модуля через `fboundp' /
+;;   `locate-library'. Если пакет недоступен — сообщение в *Messages*
+;;   без падения.
+;; - Биндинги не навязываются глобально: рекомендации регистрируются
+;;   через `pro/register-module-keys' и попадают в emacs-keys.org
+;;   (глобально — C-c t *, локально — C-c v *).
 ;;
-;; Стиль документации: подробные комментарии и докстринги на русском языке
-;; чтобы код служил одновременно реализацией и учебным материалом.
+;; Last reviewed: 2026-07-13
 
 (require 'subr-x)
 
+(defgroup pro-terminals nil
+  "Helpers for vterm, eshell, ansi-term, shell-pop." :group 'pro-ui)
+
 (defcustom pro-terminals-enable t
-  "Включить вспомогательные функции работы с терминалами (vterm/eshell).
+  "Включить вспомогательные функции работы с терминалами."
+  :type 'boolean :group 'pro-terminals)
 
-Если установить в nil, модуль не будет подключать нигде дополнительных
-хэлперов. Этот флаг не управляет установкой пакетов: убедитесь, что
-vterm доступен в вашей системе (Nix/Home-Manager или ELPA).
-"
-  :type 'boolean :group 'pro-ui)
+(defcustom pro-terminals-shell-pop-height 43
+  "Высота shell-pop окна в процентах от фрейма."
+  :type 'integer :group 'pro-terminals)
 
-;; Основной код модуля выполняется только когда включён флаг и пакет
-;; vterm доступен. Все функции тщательно ограничены по контексту
-;; (проверяют режимы) чтобы избежать побочных эффектов в других буферах.
+;; ── Public commands ──────────────────────────────────────────────────────
+
+(defun pro/eshell-toggle ()
+  "Toggle eshell window. No-op если eshell-toggle недоступен."
+  (interactive)
+  (if (fboundp 'eshell-toggle)
+      (eshell-toggle)
+    (message "[pro-terminals] eshell-toggle недоступен — установите eshell-toggle")))
+
+(defun pro/multi-vterm-project ()
+  "Open multi-vterm in project root. No-op если multi-vterm-project недоступен."
+  (interactive)
+  (if (fboundp 'multi-vterm-project)
+      (multi-vterm-project)
+    (message "[pro-terminals] multi-vterm-project недоступен")))
+
+(defun pro/vterm-dedicated-toggle ()
+  "Toggle dedicated vterm в side window. No-op если multi-vterm-dedicated-toggle недоступен."
+  (interactive)
+  (cond
+   ((fboundp 'multi-vterm-dedicated-toggle)
+    (multi-vterm-dedicated-toggle))
+   ((fboundp 'vterm-toggle)
+    (vterm-toggle))
+   (t (message "[pro-terminals] vterm-dedicated-toggle недоступен"))))
+
+(defun pro/vterm-dedicated-close ()
+  "Закрыть dedicated vterm буфер. Идемпотентно."
+  (interactive)
+  (let ((buf (get-buffer "*vterminal*")))
+    (cond
+     (buf (kill-buffer buf)
+          (message "[pro-terminals] dedicated vterm закрыт"))
+     ((fboundp 'multi-vterm-dedicated-close)
+      (multi-vterm-dedicated-close))
+     (t (message "[pro-terminals] dedicated vterm не открыт")))))
+
+(defun pro/shell-pop ()
+  "Pop-up system shell через shell-pop.el. No-op если недоступен."
+  (interactive)
+  (cond
+   ((fboundp 'shell-pop)
+    (let ((shell-pop-window-height pro-terminals-shell-pop-height))
+      (shell-pop)))
+   ((fboundp 'vterm)
+    (vterm))
+   (t (message "[pro-terminals] shell-pop и vterm недоступны"))))
+
+(defun pro/ansi-term-toggle ()
+  "Toggle ansi-term. Создаёт *ansi-term* buffer если нет, иначе switch-to-buffer."
+  (interactive)
+  (let ((buf (get-buffer "*ansi-term*")))
+    (cond
+     (buf
+      (if (string= (buffer-name (current-buffer)) "*ansi-term*")
+          (kill-buffer buf)
+        (switch-to-buffer buf)))
+     ((fboundp 'ansi-term)
+      (ansi-term "/bin/bash"))
+     (t (message "[pro-terminals] ansi-term недоступен")))))
+
+(defun pro/multi-vterm-next ()
+  "Cycle to next multi-vterm buffer."
+  (interactive)
+  (cond
+   ((fboundp 'multi-vterm-next)
+    (multi-vterm-next))
+   (t
+    (let* ((current (current-buffer))
+           (next (or (cadr (cl-remove-if-not
+                            (lambda (b) (string-match-p "\\*vterminal" (buffer-name b)))
+                            (buffer-list)
+                            :from-end t))
+                     (current-buffer))))
+      (switch-to-buffer next)))))
+
+(defun pro/multi-vterm-prev ()
+  "Cycle to previous multi-vterm buffer."
+  (interactive)
+  (cond
+   ((fboundp 'multi-vterm-prev)
+    (multi-vterm-prev))
+   (t
+    (let* ((current (current-buffer))
+           (prev (or (cadr (cl-remove-if-not
+                            (lambda (b) (string-match-p "\\*vterminal" (buffer-name b)))
+                            (buffer-list)))
+                     (current-buffer))))
+      (switch-to-buffer prev)))))
+
+(defun pro/vterm-yank ()
+  "Yank from kill-ring into vterm with proper handling."
+  (interactive)
+  (when (derived-mode-p 'vterm-mode)
+    (let ((text (current-kill 0)))
+      (when (fboundp 'vterm-send-string)
+        (vterm-send-string text)))))
+
+(defun pro/vterm-interrupt ()
+  "Send SIGINT in vterm (C-c C-c equivalent)."
+  (interactive)
+  (when (and (derived-mode-p 'vterm-mode) (fboundp 'vterm-send-C-c))
+    (vterm-send-C-c)))
+
+;; ── vterm-mode local niceties (history, yank, C-\) ──────────────────────
+
 (when (and pro-terminals-enable (require 'vterm nil t))
-;; Ensure multi-vterm and eshell-toggle are loaded (Nix provides them on load-path)
-(ignore-errors (require 'multi-vterm nil t))
-(ignore-errors (require 'eshell-toggle nil t))
-  ;; Example helper: yank into vterm with proper escaping
-  (defun pro/vterm-yank ()
-    "Yank from kill-ring into vterm with proper handling."
-    (interactive)
-    (when (derived-mode-p 'vterm-mode)
-      (let ((text (current-kill 0)))
-        (vterm-send-string text))))
-
-  (defun pro/vterm-interrupt ()
-    "Send SIGINT in vterm (C-c C-c equivalent)."
-    (interactive)
-    (when (derived-mode-p 'vterm-mode)
-      (vterm-send-C-c)))
-
-  ;; Setup minor vterm niceties
   (add-hook 'vterm-mode-hook
             (lambda ()
               (setq-local scroll-margin 0)
-              ;; enable tab-line in vterm for quick buffer switching
               (when (fboundp 'tab-line-mode) (tab-line-mode 1))
-              ;; C-\ (toggle-input-method) — перехватываем на уровне Emacs,
+              ;; C-\\ (toggle-input-method) — перехватываем на уровне Emacs,
               ;; иначе vterm отправит ESC в терминал и input-method не сработает.
               (define-key vterm-mode-map (kbd "C-\\") #'toggle-input-method)
-              ;; History navigation: M-p / M-n should traverse shell history.
-              ;; These do NOT depend on `vterm-copy-mode' — they send Meta-p/Meta-n
-              ;; to the pty so the underlying shell (bash/zsh readline) handles
-              ;; history navigation. Must be defined outside the copy-mode block.
-               (defun pro/vterm-history-previous ()
-                 "Send Up to the underlying vterm (previous history).
-
-Use the terminal Up key so shells navigate history the same as pressing
-the physical Up arrow." 
-                 (interactive)
-                 (when (derived-mode-p 'vterm-mode)
-                   (if (fboundp 'vterm-send-key)
-                       ;; prefer sending the actual Up key event
-                       (ignore-errors (vterm-send-key "<up>"))
-                     ;; fallback: send ANSI sequence for Up
-                     (vterm-send-string "\e[A"))))
-               (defun pro/vterm-history-next ()
-                 "Send Down to the underlying vterm (next history)."
-                 (interactive)
-                 (when (derived-mode-p 'vterm-mode)
-                   (if (fboundp 'vterm-send-key)
-                       ;; prefer sending the actual Down key event
-                       (ignore-errors (vterm-send-key "<down>"))
-                     ;; fallback: send ANSI sequence for Down
-                     (vterm-send-string "\e[B"))))
+              ;; History navigation: M-p / M-n → underlying shell history
+              (defun pro/vterm-history-previous ()
+                "Send Up to vterm (previous history)."
+                (interactive)
+                (when (derived-mode-p 'vterm-mode)
+                  (if (fboundp 'vterm-send-key)
+                      (ignore-errors (vterm-send-key "<up>"))
+                    (when (fboundp 'vterm-send-string)
+                      (vterm-send-string "\e[A")))))
+              (defun pro/vterm-history-next ()
+                "Send Down to vterm (next history)."
+                (interactive)
+                (when (derived-mode-p 'vterm-mode)
+                  (if (fboundp 'vterm-send-key)
+                      (ignore-errors (vterm-send-key "<down>"))
+                    (when (fboundp 'vterm-send-string)
+                      (vterm-send-string "\e[B")))))
               (define-key vterm-mode-map (kbd "M-p") #'pro/vterm-history-previous)
               (define-key vterm-mode-map (kbd "M-n") #'pro/vterm-history-next)
-              ;; Yank into vterm: C-y should insert last kill-ring entry
-              (when (fboundp 'pro/vterm-yank)
-                (define-key vterm-mode-map (kbd "C-y") #'pro/vterm-yank))
-              ;; Optional consult integration: provide a yank-pop that works in vterm
-              (when (and (fboundp 'consult-yank-pop) (fboundp 'vterm-send-string))
-                (defun pro/vterm-consult-yank-pop ()
-                  "Yank from consult history into vterm. Returns the chosen string for testing."
-                  (interactive)
-                  (when (derived-mode-p 'vterm-mode)
-                    (let ((s (consult-yank-pop)))
-                      (when s (vterm-send-string s))
-                      s))))
-              ;; Copy-mode specific helpers (only when vterm-copy-mode is available).
-              (when (fboundp 'vterm-copy-mode)
-                ;; disable copy mode by default
-                (vterm-copy-mode 0)
-                ;; Escape from copy mode back to prompt
-                (define-key vterm-copy-mode-map (kbd "C-g")
-                  (lambda () (interactive) (when (bound-and-true-p vterm-copy-mode) (vterm-copy-mode -1) (when (and (boundp 'vterm--process-marker) vterm--process-marker) (goto-char vterm--process-marker))))))
-                ;; Move up in line-mode or enter copy-mode then move
-                (define-key vterm-mode-map (kbd "C-p")
-                  (lambda () (interactive)
-                    (unless (bound-and-true-p vterm-copy-mode)
-                      (vterm-copy-mode 1))
-                    (when (bound-and-true-p vterm-copy-mode)
-                      (let ((cmd (or (lookup-key vterm-copy-mode-map (kbd "<up>") )
-                                     (lookup-key vterm-copy-mode-map (kbd "p")))))
-                        (when cmd (call-interactively cmd)))))))
-              ;; Install local keymap for vterm helpers if keys module present
-              (when (and (boundp 'pro/registered-module-keys)
-                         (fboundp 'pro/register-module-keys))
-                ;; register suggested keys for vterm helpers (non-binding)
-                (with-eval-after-load 'pro-keys
-                  (when (fboundp 'pro/register-module-keys)
-                    (pro/register-module-keys 'terminals
-                                             '( ("C-c v y" . pro/vterm-yank)
-                                                ("C-c v i" . pro/vterm-interrupt)
-                                                ("C-c v c" . vterm-copy-mode))))))))
+              ;; Yank into vterm: C-y → insert last kill-ring entry
+              (define-key vterm-mode-map (kbd "C-y") #'pro/vterm-yank))))
+
+;; ── Register module suggestions for keys layer ───────────────────────────
+
+(with-eval-after-load 'pro-keys
+  (when (fboundp 'pro/register-module-keys)
+    (pro/register-module-keys
+     'terminals
+     '(("C-c t e" . pro/eshell-toggle)
+       ("C-c t v" . pro/multi-vterm-project)
+       ("C-c t d" . pro/vterm-dedicated-toggle)
+       ("C-c t D" . pro/vterm-dedicated-close)
+       ("C-c t s" . pro/shell-pop)
+       ("C-c t t" . pro/ansi-term-toggle)
+       ("C-c t n" . pro/multi-vterm-next)
+       ("C-c t p" . pro/multi-vterm-prev)
+       ("C-c t c" . vterm-copy-mode)
+       ("C-c t y" . pro/vterm-yank)
+       ("C-c t i" . pro/vterm-interrupt)
+       ("C-c t ?" . pro/terminal-transient)
+       ("C-c v y" . pro/vterm-yank)
+       ("C-c v i" . pro/vterm-interrupt)
+       ("C-c v c" . vterm-copy-mode)))))
 
 (provide 'pro-terminals)
-
 ;;; pro-terminals.el ends here
