@@ -67,11 +67,48 @@
 
 (defun pro-keys-apply-binding (key command)
   "Привязать KEY к COMMAND, если KEY не пустой. COMMAND — символ или строка.
-Если команда ещё не определена — сохраняем в отложенные привязки." 
+Если команда ещё не определена — сохраняем в отложенные привязки.
+
+Если COMMAND является keymap (sparse/full) — KEY становится prefix.
+Иначе — обычный global-set-key. Если родительский KEY уже определён как
+keymap, а COMMAND не keymap — добавляем COMMAND в этот keymap. Это
+упрощает prefix-based keys (см. `C-c T' sub-prefix)."
   (when (and key command (not (string-empty-p key)))
-    (if (and (symbolp command) (fboundp command))
-        (global-set-key (kbd key) command)
-      (push (list :global key command) pro-keys-pending-bindings))))
+    (let* ((kseq (kbd key))
+           (sym (if (symbolp command) command (intern (format "%s" command))))
+           (is-keymap (and (symbolp command) (fboundp command)
+                           (keymapp (symbol-value command)))))
+      (cond
+       ((and (symbolp command) (fboundp command))
+        (condition-case err
+            (if is-keymap
+                ;; COMMAND is a keymap — install as prefix in global-map.
+                (define-key global-map kseq command)
+              (let* ((parent-prefix
+                      (let ((sp (string-match-p " " key)))
+                        (if sp (substring key 0 sp) nil)))
+                     (child-suffix
+                      (let ((sp (string-match-p " " key)))
+                        (if sp (substring key (1+ sp)) nil))))
+                (if parent-prefix
+                    (let ((existing (lookup-key global-map (kbd parent-prefix))))
+                      (if (keymapp existing)
+                          ;; Parent is a keymap — add child to it.
+                          (define-key existing (kbd child-suffix) command)
+                        ;; Parent isn't a keymap yet — fall back to
+                        ;; global-set-key; subsequent child bindings
+                        ;; will fall back too until parent becomes a
+                        ;; keymap.  To force the parent to be a keymap,
+                        ;; define it as `(define-key global-map (kbd PARENT)
+                        ;; (make-sparse-keymap))' explicitly in your
+                        ;; module (see pro-treemacs.el for an example).
+                        (global-set-key kseq command)))
+                  (global-set-key kseq command))))
+          (error
+           (message "[pro-keys] bind failed for %s -> %s: %S" key sym err)
+           (push (list :global key command) pro-keys-pending-bindings))))
+       (t
+        (push (list :global key command) pro-keys-pending-bindings))))))
 
 (defun pro-keys-apply-exwm-binding (key command)
   "Добавить EXWM-ключ KEY -> COMMAND в отдельный список." 
@@ -181,7 +218,7 @@
                     (unless (boundp 'pro-keys-provenance)
                       (defvar pro-keys-provenance nil "Alist of (KEY . MODULE) provenance."))
                     (push (cons key owner) pro-keys-provenance))))
-            (pro-keys--apply-row (nth 0 binding) (nth 1 binding) (nth 2 binding))))
+            (pro-keys--apply-row (nth 0 binding) (nth 1 binding) (nth 2 binding)))
         (forward-line 1))))))
 
 (defun pro-keys-reload ()
@@ -223,8 +260,21 @@
                  ((memq sym '(pro/chat-open pro/chat-close-idle-chats pro/chat-reload-emojis pro/chat-install)) (ignore-errors (require 'pro-chat nil t)))
                  ((memq sym '(pro/vterm-yank pro/vterm-interrupt pro/vterm-copy-mode)) (ignore-errors (require 'pro-terminals nil t)))
                   ((memq sym '(pro/clipboard-yank-pop pro/clipboard-yank-region)) (ignore-errors (require 'pro-clipboard nil t)))
-                 ;; agent-shell-hud команды (для `C-c i' / `C-c C-h' из emacs-keys.org)
-                 ((memq sym '(agent-shell-hud-info agent-shell-hud-menu agent-shell-hud-refresh)) (ignore-errors (require 'agent-shell-hud nil t))))
+                  ;; agent-shell-hud команды (для `C-c i' / `C-c C-h' из emacs-keys.org)
+                  ((memq sym '(agent-shell-hud-info agent-shell-hud-menu agent-shell-hud-refresh)) (ignore-errors (require 'agent-shell-hud nil t)))
+                 ;; Generic `pro/<name>` helpers — try every plausible
+                 ;; `pro-<module>` that could host the command.  We try a
+                 ;; fixed list (rather than enumerating load-path) so a
+                 ;; missing module fails fast via `ignore-errors'.
+                 ((string-prefix-p "pro/" (symbol-name sym))
+                  (ignore-errors (require 'pro-terminals nil t))
+                  (ignore-errors (require 'pro-windows nil t))
+                  (ignore-errors (require 'pro-treemacs nil t))
+                  (ignore-errors (require 'pro-tabs nil t))
+                  (ignore-errors (require 'pro-chat nil t))
+                  (ignore-errors (require 'pro-telega nil t))
+                  (ignore-errors (require 'pro-key-prefixes nil t))
+                  (ignore-errors (require 'pro-exwm nil t)))))
               ;; If symbol contains a slash (eg. er/expand-region), try requiring
               ;; both parts as packages: before and after the slash.
               (unless (or (fboundp sym) (not (string-match-p "/" (symbol-name sym))))

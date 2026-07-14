@@ -40,6 +40,30 @@ columns during long opencode / nix flake check sessions."
 (setq gc-cons-threshold pro-core-gc-cons-threshold
       gc-cons-percentage pro-core-gc-cons-percentage)
 
+;; Safety net: disable right-click context menus that can deadlock X focus.
+;; Emacs 30 binds `mouse-buffer-menu' to C-<down-mouse-1> globally, and
+;; mode-line / header-line / tab-line have their own per-area bindings.
+;; Any of these drops Emacs into `recursive-edit' and traps the keyboard
+;; if hit accidentally under X11 + Cinnamon. This block runs at every
+;; pro-core load (startup and `pro/reload-config') and is the source of
+;; truth; emacs-keys.org is intentionally NOT used because the unbinding
+;; must be in effect before the Org table is reparsed.
+(global-set-key (kbd "<mouse-3>") #'ignore)
+(global-set-key (kbd "<down-mouse-3>") #'ignore)
+(global-set-key (kbd "C-<down-mouse-1>") #'ignore)
+(dotimes (i (length [mode-line header-line tab-line
+                          vertical-line right-divider bottom-divider]))
+  (let ((area (aref [mode-line header-line tab-line
+                    vertical-line right-divider bottom-divider] i)))
+    (define-key (current-global-map)
+      (vconcat (list area) [mouse-3]) #'ignore)
+    (define-key (current-global-map)
+      (vconcat (list area) [down-mouse-3]) #'ignore)
+    (define-key (current-global-map)
+      (vconcat (list area) (kbd "C-<down-mouse-1>")) #'ignore)))
+(when (fboundp 'context-menu-mode)
+  (context-menu-mode -1))
+
 (provide 'pro-core)
 
 ;;; pro-core.el ends here

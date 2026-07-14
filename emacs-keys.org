@@ -92,13 +92,18 @@
 
 ** Tree (=C-c T=)
 
+=C-c T= — это prefix keymap, см. =pro-treemacs-prefix-map= в
+emacs/base/modules/pro-treemacs.el. Дочерние ключи автоматически
+добавляются в keymap через =pro-keys.el= (если родитель уже keymap).
+
 | Section | Key     | Command                | Note                  |
 |---------+---------+------------------------+-----------------------|
-| Дерево  | C-c T   | pro/treemacs           | treemacs open/toggle  |
+| Дерево  | C-c T   | pro-treemacs-prefix-map| treemacs prefix       |
 | Дерево  | C-c T t | pro/treemacs-toggle    | toggle                |
 | Дерево  | C-c T r | pro/treemacs-refresh   | refresh               |
 | Дерево  | C-c T p | pro/treemacs-project   | project root          |
 | Дерево  | C-c T d | treemacs-delete-window | delete window         |
+| Дерево  | C-c T ? | pro/tree-transient     | transient menu        |
 
 ** Terminals (=C-c t=)
 
@@ -253,8 +258,6 @@
 | UI      | C-0            | pro-ui-zoom-reset      | reset zoom     |
 | UI      | C-\           | toggle-input-method    | input method toggle |
 | UI      | M-/            | eldoc-box-help-at-point| eldoc at point |
-| UI      | <mouse-3>      | ignore                 | disable right click |
-| UI      | <down-mouse-3> | ignore                 | disable right down event |
 
 ** History / Undo / Redo
 

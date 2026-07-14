@@ -220,5 +220,102 @@
                       (window-height . 0.30)
                       (window-parameters . ((no-other-window . t)))))))
 
+;; ── Sub-prefix keymaps ──────────────────────────────────────────────────
+;;
+;; Each top-level prefix (C-c w, C-c t, C-c m, C-c x) is a keymap, not a
+;; command.  When `pro-keys.el' sees `C-c w' in emacs-keys.org with a
+;; keymap as the command, it installs the keymap as a prefix on
+;; `global-map'.  Subsequent child bindings (`C-c w h', `C-c t e', …)
+;; automatically attach to the parent keymap.
+;;
+;; We pre-populate each keymap with the most-used bindings so that
+;; the prefix is functional even before `pro-keys.el' re-binds them
+;; from emacs-keys.org.
+
+(defvar pro-windows-prefix-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "h") #'windmove-left)
+    (define-key map (kbd "j") #'windmove-down)
+    (define-key map (kbd "k") #'windmove-up)
+    (define-key map (kbd "l") #'windmove-right)
+    (define-key map (kbd "H") #'buf-move-left)
+    (define-key map (kbd "J") #'buf-move-down)
+    (define-key map (kbd "K") #'buf-move-up)
+    (define-key map (kbd "L") #'buf-move-right)
+    (define-key map (kbd "u") #'winner-undo)
+    (define-key map (kbd "r") #'winner-redo)
+    (define-key map (kbd "=") #'pro-windows-balance)
+    (define-key map (kbd "d") #'delete-window)
+    (define-key map (kbd "a") #'ace-window)
+    (define-key map (kbd "1") #'delete-other-windows)
+    (define-key map (kbd "2") #'split-window-below)
+    (define-key map (kbd "3") #'split-window-right)
+    (define-key map (kbd "s") #'pro/split-window-sensibly)
+    (define-key map (kbd "?") #'pro/windows-transient)
+    map)
+  "Keymap for `C-c w' prefix (windows nav).")
+
+(defvar pro-terminal-prefix-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "e") #'pro/eshell-toggle)
+    (define-key map (kbd "v") #'multi-vterm-project)
+    (define-key map (kbd "d") #'pro/vterm-dedicated-toggle)
+    (define-key map (kbd "D") #'pro/vterm-dedicated-close)
+    (define-key map (kbd "s") #'pro/shell-pop)
+    (define-key map (kbd "t") #'pro/ansi-term-toggle)
+    (define-key map (kbd "n") #'pro/multi-vterm-next)
+    (define-key map (kbd "p") #'pro/multi-vterm-prev)
+    (define-key map (kbd "c") #'vterm-copy-mode)
+    (define-key map (kbd "y") #'pro/vterm-yank)
+    (define-key map (kbd "i") #'pro/vterm-interrupt)
+    (define-key map (kbd "?") #'pro/terminal-transient)
+    map)
+  "Keymap for `C-c t' prefix (terminals).")
+
+(defvar pro-messaging-prefix-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "o") #'pro/chat-open)
+    (define-key map (kbd "c") #'pro/telega-select-chat-or-contact)
+    (define-key map (kbd "u") (lambda () (interactive) (pro/telega-select-chat-or-contact '(16))))
+    (define-key map (kbd "k") #'pro/chat-close-idle-chats)
+    (define-key map (kbd "e") #'pro/chat-reload-emojis)
+    (define-key map (kbd "i") #'pro/chat-install)
+    (define-key map (kbd "s") #'pro/chat-tor-status)
+    (define-key map (kbd "r") #'pro/chat-tor-reroute-now)
+    (define-key map (kbd "?") #'pro/messaging-transient)
+    map)
+  "Keymap for `C-c m' prefix (messaging/Telegram).")
+
+(defvar pro-exwm-prefix-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "r") #'exwm-reset)
+    (define-key map (kbd "t") #'pro-tabs-open-new-tab)
+    (define-key map (kbd "n") #'tab-bar-switch-to-next-tab)
+    (define-key map (kbd "p") #'tab-bar-switch-to-prev-tab)
+    (define-key map (kbd "N") #'tab-bar-move-tab)
+    (define-key map (kbd "P") #'tab-bar-move-tab-backward)
+    (define-key map (kbd "T") #'tab-bar-undo-close-tab)
+    (define-key map (kbd "1") #'pro-tabs-select-tab-1)
+    (define-key map (kbd "2") #'pro-tabs-select-tab-2)
+    (define-key map (kbd "3") #'pro-tabs-select-tab-3)
+    (define-key map (kbd "4") #'pro-tabs-select-tab-4)
+    (define-key map (kbd "5") #'pro-tabs-select-tab-5)
+    (define-key map (kbd "6") #'pro-tabs-select-tab-6)
+    (define-key map (kbd "w") #'tab-bar-close-tab)
+    (define-key map (kbd "d") #'pro/treemacs)
+    (define-key map (kbd "a") #'pro/app-launcher)
+    (define-key map (kbd "&") #'async-shell-command)
+    (define-key map (kbd "?") #'pro/exwm-transient)
+    map)
+  "Keymap for `C-c x' prefix (EXWM global commands, available everywhere).")
+
+(defvar pro-buffer-bar-prefix-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "n") #'pro-tabs-open-new-tab)
+    (define-key map (kbd "k") #'pro-tabs-close-tab-and-buffer)
+    (define-key map (kbd "S") #'tab-bar-switch-to-tab)
+    map)
+  "Keymap for `C-c b' prefix (buffer/tab-bar).")
+
 (provide 'pro-key-prefixes)
 ;;; pro-key-prefixes.el ends here

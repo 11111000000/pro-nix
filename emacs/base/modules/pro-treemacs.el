@@ -68,18 +68,34 @@ exists, select it; otherwise open one."
         (error (message "[pro-treemacs] project open failed: %S" err)))
     (message "[pro-treemacs] treemacs не загружен")))
 
+;; ── C-c T sub-prefix keymap ─────────────────────────────────────────────
+;; `C-c T' is a prefix key; we install a sparse keymap so children like
+;; `C-c T t', `C-c T r', etc. attach to it instead of conflicting with
+;; the parent binding.  `pro-keys.el' attaches this keymap to
+;; `global-map' as part of parsing the Org-table — see emacs-keys.org.
+
+(defvar pro-treemacs-prefix-map
+  (let ((map (make-sparse-keymap)))
+    ;; Pre-populate children so that even before pro-keys.el re-binds
+    ;; anything, the prefix is functional.
+    (define-key map (kbd "t") #'pro/treemacs-toggle)
+    (define-key map (kbd "r") #'pro/treemacs-refresh)
+    (define-key map (kbd "p") #'pro/treemacs-project)
+    (define-key map (kbd "d") #'treemacs-delete-window)
+    (define-key map (kbd "?") #'pro/tree-transient)
+    map)
+  "Keymap for `C-c T' prefix (treemacs commands).")
+
 ;; ── Register suggestions for keys layer ─────────────────────────────────
 
 (with-eval-after-load 'pro-keys
   (when (fboundp 'pro/register-module-keys)
     (pro/register-module-keys
      'treemacs
-     '(("C-c T" . pro/treemacs)
-       ("C-c T t" . pro/treemacs-toggle)
-       ("C-c T r" . pro/treemacs-refresh)
-       ("C-c T p" . pro/treemacs-project)
-       ("C-c T d" . treemacs-delete-window)
-       ("C-c T ?" . pro/tree-transient)
+     ;; `C-c T' itself points to the prefix keymap.  Children are bound
+     ;; automatically by `pro-keys-apply-binding' when the parent is a
+     ;; keymap.
+     '(("C-c T" . pro-treemacs-prefix-map)
        ("C-c x d" . pro/treemacs)))))
 
 (provide 'pro-treemacs)
