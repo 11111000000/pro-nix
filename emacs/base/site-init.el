@@ -130,37 +130,53 @@ NAME может быть 'core' или 'pro-core' — функция норма�
   (when (file-readable-p packages)
     (load packages nil t)))
 
+(defvar pro-emacs-base-repo-modules-dir
+  (let* ((this-file (or load-file-name buffer-file-name))
+         (site-dir (and this-file (file-name-directory this-file)))
+         ;; site-init.el lives in pro-nix/emacs/base/. Modules are in pro-nix/emacs/base/modules.
+         (repo-root (and site-dir
+                       (locate-dominating-file site-dir "flake.nix")))
+         (cand (and repo-root
+                   (expand-file-name "emacs/base/modules" repo-root))))
+    (and (stringp cand) (file-readable-p cand) cand))
+  "Path to the canonical pro-nix modules directory, derived from
+locating flake.nix above this file.  Used as a hard preference
+over `pro-emacs-base-system-modules-dir' (which can be set to
+\`~/.config/emacs/modules' when init.el is itself loaded from
+a home-manager copy).")
+
 (defun pro-emacs-base--resolve-module (name)
-  (let ((user-file (pro-emacs-base--module-file pro-emacs-base-user-modules-dir name))
-        (system-file (and pro-emacs-base-system-modules-dir
-                          (pro-emacs-base--module-file pro-emacs-base-system-modules-dir name))))
-    (let* ((user-readable (file-readable-p user-file))
-           (user-dir-symlink (and pro-emacs-base-user-modules-dir
-                                  (file-symlink-p pro-emacs-base-user-modules-dir)))
-           (user-file-symlink (and user-readable (file-symlink-p user-file)))
-           (user-attrs (when (and user-readable (null user-file-symlink))
-                         (file-attributes user-file)))
-           (user-owner-ok (or user-dir-symlink
-                              user-file-symlink
-                              (and user-attrs
-                                   (= (nth 2 user-attrs) (user-uid))))))
-      (cond
-       ;; System file always wins when it exists and is not disabled.
-       ;; The user-override path is reserved for users who explicitly
-       ;; want to override a single module; if they want that, they
-       ;; create a file in ~/.config/emacs/modules/ that is owned by
-       ;; their own UID AND we fall back through this ladder in order.
-       ((and pro-emacs-base-system-modules-dir
-             (not (file-exists-p pro-emacs-base-disable-marker))
-             (file-readable-p system-file))
-        system-file)
-       ((and user-readable user-owner-ok) user-file)
-       ((and user-readable (not user-owner-ok))
-        (message "[pro-emacs] user module %s exists but is not owned by current user; no system fallback available" user-file)
-        nil)
-       (t
-        (message "[pro-emacs] module lookup failed: %s user=%s system=%s" name user-file system-file)
-        nil)))))
+  (let* ((user-file (pro-emacs-base--module-file pro-emacs-base-user-modules-dir name))
+         (user-readable (file-readable-p user-file))
+         (user-dir-symlink (and pro-emacs-base-user-modules-dir
+                                (file-symlink-p pro-emacs-base-user-modules-dir)))
+         (user-file-symlink (and user-readable (file-symlink-p user-file)))
+         (user-attrs (when (and user-readable (null user-file-symlink))
+                       (file-attributes user-file)))
+         (user-owner-ok (or user-dir-symlink
+                            user-file-symlink
+                            (and user-attrs
+                                 (= (nth 2 user-attrs) (user-uid)))))
+         ;; Canonical system: prefer the pro-nix repo modules dir
+         ;; (derived from flake.nix) if it exists.  Fall back to
+         ;; pro-emacs-base-system-modules-dir otherwise.
+         (canonical-system (or pro-emacs-base-repo-modules-dir
+                              pro-emacs-base-system-modules-dir))
+         (system-file (and canonical-system
+                            (pro-emacs-base--module-file canonical-system name))))
+    (cond
+     ;; System file always wins when it exists and is not disabled.
+     ((and canonical-system
+           (not (file-exists-p pro-emacs-base-disable-marker))
+           (file-readable-p system-file))
+      system-file)
+     ((and user-readable user-owner-ok) user-file)
+     ((and user-readable (not user-owner-ok))
+      (message "[pro-emacs] user module %s exists but is not owned by current user; no system fallback available" user-file)
+      nil)
+     (t
+      (message "[pro-emacs] module lookup failed: %s user=%s system=%s" name user-file system-file)
+      nil))))
 
 (defun pro-emacs-base-load-lazy-module (module-name)
   "Load MODULE-NAME if it is in `pro-emacs-base-lazy-modules' and not yet loaded."
