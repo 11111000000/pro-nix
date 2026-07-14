@@ -133,33 +133,33 @@ NAME может быть 'core' или 'pro-core' — функция норма�
 (defvar pro-emacs-base-repo-modules-dir
   ;; Resolve the canonical pro-nix modules directory.  We can't rely
   ;; on `load-file-name' (this file may be a home-manager copy), so we
-  ;; walk the filesystem looking for `flake.nix' starting from
-  ;; /etc/static/pro, the NixOS system profile, and the user's HOME.
+  ;; walk the filesystem looking for `flake.nix' from $HOME and /etc.
   (let* ((candidates
           (delq nil
                 (list
-                 ;; 1. NixOS system modules dir (this is where pro-keys.el
-                 ;;    is installed by the pro-nix/etc.nix expression).
-                 "/etc/static/pro"
-                 ;; 2. Walk up from /etc to find flake.nix (in case we're
-                 ;;    on a NixOS system that hasn't symlinked /etc/static).
-                 (locate-dominating-file "/etc" "flake.nix")
-                 ;; 3. Walk up from $HOME.
-                 (locate-dominating-file (or (getenv "HOME") "~") "flake.nix"))))
+                 ;; Walk up from $HOME — this is where the user clones
+                 ;; the pro-nix repo.
+                 (locate-dominating-file (or (getenv "HOME") "~") "flake.nix")
+                 ;; Walk up from /etc.
+                 (locate-dominating-file "/etc" "flake.nix"))))
     (or
-     ;; First hit: /etc/static/pro — modules copied there.
-     (and (file-readable-p "/etc/static/pro")
-          (expand-file-name "modules" "/etc/static/pro"))
-     ;; Otherwise: walk up from /etc/static/pro to flake.nix and use
-     ;; emacs/base/modules.
-     (let* ((root (or (cl-find-if #'identity candidates)
-                      (locate-dominating-file default-directory "flake.nix")))
+     ;; Try each candidate.  The first one that contains
+     ;; emacs/base/modules wins.
+     (let ((root (cl-find-if (lambda (d)
+                              (and d
+                                   (file-readable-p
+                                    (expand-file-name "flake.nix" d))
+                                   (let ((m (expand-file-name "emacs/base/modules" d)))
+                                     (and (file-readable-p m) m))))
+                            candidates)))
+       (and root (expand-file-name "emacs/base/modules" root)))
+     ;; Last resort: walk up from default-directory.
+     (let* ((root (locate-dominating-file default-directory "flake.nix"))
             (cand (and root (expand-file-name "emacs/base/modules" root))))
        (and (stringp cand) (file-readable-p cand) cand))))
   "Path to the canonical pro-nix modules directory, looked up by
-checking /etc/static/pro first (where pro-nix installs modules) and
-then walking up from /etc and $HOME looking for flake.nix.  This
-is used as a hard preference over `pro-emacs-base-system-modules-dir'
+walking up from $HOME and /etc looking for flake.nix.  This is used
+as a hard preference over `pro-emacs-base-system-modules-dir'
 (which can point to ~/.config/emacs/modules when init.el is a
 home-manager copy).")
 
