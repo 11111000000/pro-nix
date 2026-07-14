@@ -99,17 +99,38 @@
     (and (not (string-empty-p value))
          (string-match-p "[[:alnum:]]" value))))
 
+(defvar pro-keys--header-sentinels
+  '("Section" "Key" "Command" "Note" "Section |"
+    "Раздел" "Клавиша" "Команда" "Примечание")
+  "Sentinel-имена первых колонок Org-таблиц, по которым строка-заголовок
+распознаётся и пропускается парсером. Также отбрасываются
+разделители вида `|---------+...'.")
+
+(defun pro-keys--table-header-p (line)
+  "Return non-nil if LINE looks like an Org-table header or separator."
+  (let ((trimmed (string-trim line)))
+    (cond
+     ;; Standard separator: only `|', `-', `+', spaces.
+     ((string-match-p "^[|+\\-[:space:]]+$" trimmed) t)
+     ;; Recognised header words in the first cell.
+     ((let ((first (pro-keys--trim (car (split-string trimmed "|" t "[[:space:]]+")))))
+        (member first pro-keys--header-sentinels))
+      t)
+     (t nil))))
+
 (defun pro-keys--parse-org-table-line (line)
-  "Разобрать строку Org-таблицы с клавишами." 
-  (let ((parts (split-string line "|" t "[[:space:]]+")))
-    (when (>= (length parts) 4)
-      (let ((section (upcase (pro-keys--trim (nth 0 parts))))
-            (key (pro-keys--trim (nth 1 parts)))
-            (command (pro-keys--parse-command (nth 2 parts))))
-        (unless (or (not (pro-keys--meaningful-cell-p section))
-                    (not (pro-keys--meaningful-cell-p key))
-                    (null command))
-          (list section key command))))))
+  "Разобрать строку Org-таблицы с клавишами."
+  ;; Skip Org-table headers and separator rows.
+  (unless (pro-keys--table-header-p line)
+    (let ((parts (split-string line "|" t "[[:space:]]+")))
+      (when (>= (length parts) 4)
+        (let ((section (upcase (pro-keys--trim (nth 0 parts))))
+              (key (pro-keys--trim (nth 1 parts)))
+              (command (pro-keys--parse-command (nth 2 parts))))
+          (unless (or (not (pro-keys--meaningful-cell-p section))
+                      (not (pro-keys--meaningful-cell-p key))
+                      (null command))
+            (list section key command)))))))
 
 (defun pro-keys--table-line-p (line)
   "Проверить, похожа ли строка на строку таблицы клавиш." 

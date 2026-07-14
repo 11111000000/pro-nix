@@ -1,163 +1,367 @@
 #+title: Клавиши PRO
+#+property: header-args :results none
 
-| Секция     | Клавиша       | Команда                               | Примечание                           |
-|------------+---------------+---------------------------------------+--------------------------------------|
-| Поиск      | C-s           | isearch-forward                       | Обычный isearch (вперёд)             |
-| Поиск      | C-r           | pro/revert-buffer                     | Revert буфера без подтверждения      |
-| Поиск      | C-M-s         | isearch-backward                      | isearch назад (без regex)            |
-| Поиск      | M-s s         | consult-line                          | Поиск по буферу (alias)              |
-| Навигация  | C-x b         | pro/consult-buffer                    | Смена буфера (helper)                |
-| Навигация  | C-x C-b       | pro/consult-buffer-other-window       | Смена буфера в другом окне           |
-| Навигация  | M-s M-s       | consult-line-multi                    | Поиск по нескольким буферам          |
-| Навигация  | C-x y         | consult-yank-from-kill-ring           | Вставка из истории kill-ring         |
-| Навигация  | M-g i         | consult-imenu                         | Символы файла                        |
-| Навигация  | M-g g         | consult-goto-line                     | Переход к строке                     |
-| Поиск      | C-c s         | consult-ripgrep                       | Поиск по проекту                     |
-| Поиск      | C-c f         | pro/consult-find                      | Поиск файла (project-aware)          |
-| Поиск      | M-s d         | consult-dash                          | Поиск по документации                |
-| Поиск      | C-c p s       | pro-project-ripgrep                   | Поиск в проекте                      |
-| Поиск      | C-c p f       | pro-project-find-file                 | Файл проекта                         |
-| Поиск      | C-c C-f       | consult-find                          | Поиск файла (consult)                |
-| UI         | C-=           | pro-ui-zoom-in                        | Увеличить шрифт                      |
-| UI         | C-+           | pro-ui-zoom-in                        | Увеличить шрифт (альтернатива)       |
-| UI         | C--           | pro-ui-zoom-out                       | Уменьшить шрифт                      |
-| UI         | C-0           | pro-ui-zoom-reset                     | Сбросить масштаб                     |
-| UI         | C-\           | toggle-input-method                   | Переключить Emacs-IM (ru/en)         |
-| UI         | <f5>          | pro/reload-config                     | Перечитать весь конфиг (soft reload) |
-| UI         | <mouse-3>     | ignore                                 | Отключить правый клик (mouse-buffer-menu) |
-| UI         | <down-mouse-3> | ignore                               | Отключить down-event правой кнопки    |
-| History    | C-_           | pro-history-undo                      | Шаг назад (undo)                     |
-| History    | M-_           | pro-history-redo                      | Шаг вперёд (redo)                    |
-| History    | C-z           | pro-history-undo                      | Шаг назад (дубль)                    |
-| History    | C-M-z         | pro-history-redo                      | Шаг вперёд (дубль)                   |
-| History    | C-c u         | pro-history-time-machine              | Дерево отмен                         |
-| History    | C-c z         | pro-history-time-machine              | Дерево отмен (дубль)                 |
-| History    | C-c C-,       | goto-last-change-reverse              | К предыдущей правке                  |
-| History    | C-c .         | goto-last-change                      | К последней правке                   |
-| History    | C-c ,         | goto-last-change-reverse              | К предыдущей правке                  |
-| History    | <XF86Back>    | winner-undo                           | Откат раскладки окон                 |
-| History    | <XF86Forward> | winner-redo                           | Повтор раскладки окон                |
-| History    | C-c M-h       | pro-history-transient                 | Меню истории (transient)             |
-| UI         | M-/           | eldoc-box-help-at-point               | Подсказка под курсором               |
-| EXWM       | s-r           | exwm-reset                            | Сброс окна EXWM                      |
-| EXWM       | s-w           | tab-bar-close-tab                     | Закрыть вкладку                      |
-| EXWM       | s-t           | pro-tabs-open-new-tab                 | Новая вкладка                        |
-| EXWM       | s-n           | tab-bar-switch-to-next-tab            | Следующая вкладка                    |
-| EXWM       | s-p           | tab-bar-switch-to-prev-tab            | Предыдущая вкладка                   |
-| EXWM       | s-N           | tab-bar-move-tab                      | Переместить вкладку вправо           |
-| EXWM       | s-P           | tab-bar-move-tab-backward             | Переместить вкладку влево            |
-| EXWM       | s-T           | tab-bar-undo-close-tab                | Восстановить вкладку                 |
-| EXWM       | s-1           | pro-tabs-select-tab-1                 | Вкладка 1                            |
-| EXWM       | s-2           | pro-tabs-select-tab-2                 | Вкладка 2                            |
-| EXWM       | s-3           | pro-tabs-select-tab-3                 | Вкладка 3                            |
-| EXWM       | s-4           | pro-tabs-select-tab-4                 | Вкладка 4                            |
-| EXWM       | s-5           | pro-tabs-select-tab-5                 | Вкладка 5                            |
-| EXWM       | s-6           | pro-tabs-select-tab-6                 | Вкладка 6                            |
-| EXWM       | s-x           | pro/app-launcher                      | Запуск .desktop приложения (consult) |
-| EXWM       | s-&           | async-shell-command                   | Запуск команды                       |
-| ORG        | C-c K         | pro-org-open-keys-file                | Открыть файл клавиш                  |
-| Completion | C-c o f       | cape-file                             | Источник файлов для CAPF             |
-| Completion | C-c o d       | cape-dabbrev                          | Слова из буферов                     |
-| Completion | C-c o h       | cape-history                          | История                              |
-| Completion | C-c o k       | cape-keyword                          | Ключевые слова языка                 |
-| Completion | C-c o s       | cape-symbol                           | Символы                              |
-| Completion | C-c o a       | cape-abbrev                           | Аббревиатуры                         |
-| Completion | C-c o .       | completion-at-point                   | Вызвать CAPF                         |
-| Completion | C-c o p       | completion-at-point                   | CAPF (alias из pro)                  |
-| Completion | C-c o t       | complete-tag                          | Дополнить тег                        |
-| Completion | C-c o i       | cape-dict                             | Словарь                              |
-| Completion | C-c o l       | cape-line                             | Строка из буфера                     |
-| Snippet    | C-c y y       | consult-yasnippet                     | Выбор сниппета                       |
-| LSP        | C-c C-.       | consult-eglot-symbols                 | Поиск символов LSP                   |
-| Навигация  | M-g M-g       | avy-goto-char                         | Прыжок к символу                     |
-| Выделение  | M-SPC         | er/expand-region                      | Расширение выделения                 |
-| Проекты    | C-c p p       | projectile-switch-project             | Сменить проект                       |
-| Проекты    | C-c p P       | projectile-find-file                  | Файл в проекте (projectile)          |
-| Проекты    | C-c C-p       | projectile-switch-project             | Сменить проект (alias)               |
-| Проекты    | C-c pa        | projectile-add-known-project          | Добавить проект                      |
-| Дерево     | s-d           | treemacs                              | Открыть дерево                       |
-| Docker     | C-c d c       | pro-docker-containers                 | Список контейнеров                   |
-| Docker     | C-c d i       | pro/docker-images                     | Список образов                       |
-| Docker     | C-c d v       | pro/docker-volumes                    | Список томов                         |
-| Docker     | C-c d n       | pro/docker-networks                   | Список сетей                         |
-| Docker     | C-c d l       | pro/docker-logs                       | Логи контейнера (-f --tail 100)      |
-| Docker     | C-c d e       | pro/docker-shell                      | Shell в контейнере                   |
-| Docker     | C-c d r       | pro/docker-restart                    | Перезапустить контейнер              |
-| Docker     | C-c d p       | pro/docker-prune                      | docker system prune -f               |
-| Окна       | C-x +         | pro-windows-enlarge                   | Увеличить окно (C-u N — шаг)         |
-| Окна       | C-x -         | pro-windows-shrink                    | Уменьшить окно (C-u N — шаг)         |
-| Окна       | C-x =         | pro-windows-balance                   | balance-windows + golden-ratio (разово) |
-| EXWM       | s-h           | windmove-left                         | Переместить фокус влево              |
-| EXWM       | s-j           | windmove-down                         | Переместить фокус вниз               |
-| EXWM       | s-k           | windmove-up                           | Переместить фокус вверх              |
-| EXWM       | s-l           | windmove-right                        | Переместить фокус вправо             |
-| EXWM       | s-H           | buf-move-left                         | Переместить буфер влево              |
-| EXWM       | s-J           | buf-move-down                         | Переместить буфер вниз               |
-| EXWM       | s-K           | buf-move-up                           | Переместить буфер вверх              |
-| EXWM       | s-L           | buf-move-right                        | Переместить буфер вправо             |
-| AI         | C-c a o       | pro-ai-open-entry                     | Вход в AI (under C-c a prefix)        |
-| AI         | C-c A         | pro-agent-open                        | agent-shell                          |
-| AI         | C-c C-h       | agent-shell-hud-menu                  | Пульт агента (в agent-shell-mode)    |
-| AI         | C-c i         | agent-shell-hud-info                  | HUD-инфо (в agent-shell-mode)        |
-| AI         | C-c r         | agent-shell-hud-refresh               | Обновить HUD (в agent-shell-mode)    |
-| Чат        | C-c T o       | pro/chat-open                         | Telegram (under C-c T prefix)        |
-| Чат        | C-c t o       | pro/chat-open                         | Open Telegram (telega)               |
-| Чат        | C-c t K       | pro/chat-close-idle-chats             | Close idle telega chat buffers       |
-| Чат        | C-c t E       | pro/chat-reload-emojis                | Reload telega emoji tables           |
-| Чат        | C-c t i       | pro/chat-install                      | Install telega from MELPA (fallback) |
-| Чат        | C-c T S       | pro/chat-tor-status                   | Telegram: tor proxy status (buffer)  |
-| Чат        | C-c T R       | pro/chat-tor-reroute-now              | Telegram: re-route tor wrapper       |
-| Чат        | C-c t s       | pro/telega-select-chat-or-contact     | Select telega chat/contact (consult) |
-| Чат        | C-c t c       | pro/telega-select-chat-or-contact     | Select telega chat/contact (alias)   |
-| Чат        | C-c t u       | pro/telega-select-chat-or-contact     | Select telega contact (C-u)          |
-| Terminal   | C-c t v       | multi-vterm-project                   | Открыть vterm по проекту             |
-| Terminal   | C-c t e       | eshell-toggle                         | Toggle eshell                        |
-| Tabs       | C-c t n       | pro-tabs-open-new-tab                 | Открыть новую вкладку                |
-| Tabs       | C-c t k       | pro-tabs-close-tab-and-buffer         | Закрыть вкладку и буфер              |
-| Tabs       | C-c t S       | tab-bar-switch-to-tab                 | Переключиться на вкладку             |
-| Tabs       | <C-tab>       | pro-tabs-line-next                    | Следующая tab-line вкладка (в окне)  |
-| Tabs       | <C-S-tab>     | pro-tabs-line-prev                    | Предыдущая tab-line вкладка (в окне) |
-| Package    | C-c P p       | pro-packages-menu                     | Список пакетов                       |
-| Package    | C-c P i       | pro-packages-install                  | Установить пакет из ELPA             |
-| Package    | C-c P v       | pro-packages-install-vc               | Установить пакет из VC               |
-| Package    | C-c P u       | pro-packages-upgrade-all              | Обновить пакеты                      |
-| Package    | C-c P r       | pro-packages-refresh                  | Обновить список архивов              |
-| Package    | C-c P b       | pro-packages-upgrade-built-ins        | Разрешить built-in upgrade           |
-| Package    | C-c P a       | pro-package-bootstrap-install-targets | Установить базовые пакеты            |
-| Git        | C-x g         | pro-git-status                        | Статус репозитория                   |
-| Git        | C-c g         | pro-git-status                        | Magit status                         |
-| Org        | C-c o         | org-agenda                            | Повестка                             |
-| Ключи      | C-c k         | pro-keys-reload                       | Перезагрузить клавиши                |
-| Ключи      | C-c M-k       | pro-keys-reload                       | Перезагрузить клавиши (alias)        |
-| EXWM       | s-`           | multi-vterm-project                   | vterm по проекту                     |
-| EXWM       | s-~           | eshell-toggle                         | eshell toggle                        |
-| EXWM       | C-s-`         | pro/exwm-urxvt-toggle                 | Toggle urxvt в нижнем sidebar        |
-| Suggested  | C-c v y       | pro/vterm-yank                        | suggested from terminals             |
-| Suggested  | C-c v i       | pro/vterm-interrupt                   | suggested from terminals             |
-| Suggested  | C-c v c       | vterm-copy-mode                       | suggested from terminals             |
-| Haskell    | C-c h l       | pro-haskell-load-buffer               | Загрузить буфер в REPL (cabal/ghci)  |
-| Haskell    | C-c h r       | pro-haskell-switch-to-repl            | Переключиться на REPL                |
-| Haskell    | C-c h f       | pro-haskell-format-buffer             | Форматировать (fourmolu)             |
-| Haskell    | C-c h i       | pro-haskell-lint                      | Линтер (hlint)                       |
-| Haskell    | C-c h d       | pro-haskell-browse-haddock            | Документация символа под курсором    |
-| Profiler   | <f8>          | pro/profiler-quick                    | Профиль 15 сек + автоматический отчёт |
-| Profiler   | C-<f8>        | pro/profiler-start                    | Запустить профайлер (CPU)            |
-| Profiler   | S-<f8>        | pro/profiler-stop                     | Остановить профайлер                 |
-| Profiler   | M-<f8>        | pro/profiler-report                   | Открыть отчёт профайлера             |
-| Profiler   | C-S-<f8>      | pro/profiler-reset                    | Сбросить данные профайлера           |
-| AI         | C-c e e       | pro-ai-ellama-open                    | Ellama chat (transient-меню)         |
-| AI         | C-c e s       | pro-ai-ellama-summarize               | Ellama: summarize region/buffer      |
-| AI         | C-c e r       | pro-ai-ellama-code-review             | Ellama: code-review region/buffer    |
-| AI         | C-c e p       | pro-ai-ellama-plan-and-act            | Ellama: plan-and-act agent loop      |
-| AI         | C-c e l       | pro-ai-ellama-list-sessions           | Ellama: list/manage sessions         |
-| AI         | C-c e a       | pro-ai-ellama-load-agents-md          | Ellama: перечитать AGENTS.md         |
-| AI         | C-c e m       | pro-ai-ellama-use-shared-model        | Ellama: подцепить провайдер из gptel |
-| AI         | C-c e b       | pro-ai-ellama-add-buffer-as-context   | Ellama: buffer → /tmp → ephemeral    |
-| AI         | C-c e r       | pro-ai-ellama-add-region-as-context   | Ellama: region → /tmp → ephemeral    |
-| AI         | C-c e h       | pro-ai-ellama-show-sessions           | Ellama: показать список sessions     |
-| AI         | C-c e d       | pro-ai-ellama-delete-session          | Ellama: удалить session              |
-| AI         | C-c a a       | pro-ai-anvil-server-start             | anvil: запустить MCP-сервер          |
-| AI         | C-c a s       | pro-ai-anvil-server-stop              | anvil: остановить сервер             |
-| AI         | C-c a t       | pro-ai-anvil-server-status            | anvil: статус сервера                |
-| AI         | C-c a l       | pro-ai-anvil-list-tools               | anvil: перечислить активные tools    |
-| AI         | C-c a d       | pro-ai-anvil-describe-setup           | anvil: JSON-фрагмент для mcp.json    |
+* Конвенция
+
+- Источник истины: эта таблица. Парсер — `pro-keys.el`.
+- Формат строки: =| Section | Key | Command | Note |=
+- Префиксы уровня 1 (одиночные буквы): =C-c <letter>=.
+- =s-= (Super) оставлен ТОЛЬКО для EXWM-секции — он работает под EXWM,
+  под Gnome/Cinnamon отдаётся DE (Activities/workspace switch).
+- Колонка Note содержит мнемонику (что значит буква после префикса).
+- Все клавиши подобраны так, чтобы оставаться в домашнем ряду и не
+  конфликтовать с DE/WM.
+
+** Префиксы верхнего уровня
+
+- =M-s= search (Emacs-канон)
+- =M-g= goto (Emacs-канон)
+- =C-x= Emacs-core
+- =C-c a= Agent-shell
+- =C-c b= Buffer/Tab
+- =C-c d= Docker
+- =C-c e= Ellama (AI)
+- =C-c h= Haskell
+- =C-c k= Keys reload
+- =C-c m= Messaging
+- =C-c o= CAPF
+- =C-c p= Projectile
+- =C-c P= Packages
+- =C-c t= Terminal
+- =C-c T= Tree
+- =C-c u= History tree
+- =C-c w= Windows nav
+- =C-c x= EXWM global
+- =C-c y= Yasnippet
+- =C-c v= Vterm helpers
+- =C-c ,/= Last-change
+
+* Глобальные биндинги
+
+** Поиск и навигация
+
+| Section | Key     | Command                       | Note              |
+|---------+---------+-------------------------------+-------------------|
+| Поиск   | M-s s   | consult-line                  | search line       |
+| Поиск   | M-s d   | consult-dash                  | docs              |
+| Поиск   | M-s M-s | consult-line-multi            | multi-line        |
+| Навигация | M-g i | consult-imenu                 | imenu             |
+| Навигация | M-g g | consult-goto-line             | goto line         |
+| Навигация | M-g M-g | avy-goto-char               | avy-goto          |
+
+** Буферы и проекты
+
+| Section   | Key     | Command                       | Note                  |
+|-----------+---------+-------------------------------+-----------------------|
+| Навигация | C-x b   | pro/consult-buffer            | buffer switch         |
+| Навигация | C-x C-b | pro/consult-buffer-other-window | buffer switch other |
+| Навигация | C-x y   | consult-yank-from-kill-ring   | yank                  |
+| Git       | C-x g   | pro-git-status                | git (Emacs-канон)     |
+| Проекты   | C-c p p | projectile-switch-project     | projectile project    |
+| Проекты   | C-c p P | projectile-find-file          | projectile file       |
+| Проекты   | C-c C-p | projectile-switch-project     | projectile project alias |
+| Проекты   | C-c p a | projectile-add-known-project  | add                   |
+| Поиск     | C-c p s | pro-project-ripgrep           | search project        |
+| Поиск     | C-c p f | pro-project-find-file         | file project          |
+| Поиск     | C-c C-f | consult-find                  | find                  |
+| Поиск     | C-c f   | pro/consult-find              | find alias            |
+| Поиск     | C-c s   | consult-ripgrep               | search                |
+
+** Окна / frames (=C-x=)
+
+| Section | Key   | Command              | Note                            |
+|---------+-------+----------------------+---------------------------------|
+| Окна    | C-x + | pro-windows-enlarge  | enlarge window (C-u N — шаг)    |
+| Окна    | C-x - | pro-windows-shrink   | shrink window (C-u N — шаг)     |
+| Окна    | C-x = | pro-windows-balance  | balance + golden-ratio one-shot |
+
+** Tab-line (внутри окна)
+
+| Section | Key       | Command              | Note            |
+|---------+-----------+----------------------+-----------------|
+| Tabs    | <C-tab>   | pro-tabs-line-next   | next tab-line   |
+| Tabs    | <C-S-tab> | pro-tabs-line-prev   | prev tab-line   |
+
+** Buffer-bar / Tab-bar (=C-c b=)
+
+| Section | Key    | Command                       | Note                |
+|---------+--------+-------------------------------+---------------------|
+| Tabs    | C-c b n | pro-tabs-open-new-tab         | new tab             |
+| Tabs    | C-c b k | pro-tabs-close-tab-and-buffer | kill tab and buffer |
+| Tabs    | C-c b S | tab-bar-switch-to-tab         | switch to tab       |
+
+** Tree (=C-c T=)
+
+| Section | Key     | Command                | Note                  |
+|---------+---------+------------------------+-----------------------|
+| Дерево  | C-c T   | pro/treemacs           | treemacs open/toggle  |
+| Дерево  | C-c T t | pro/treemacs-toggle    | toggle                |
+| Дерево  | C-c T r | pro/treemacs-refresh   | refresh               |
+| Дерево  | C-c T p | pro/treemacs-project   | project root          |
+| Дерево  | C-c T d | treemacs-delete-window | delete window         |
+
+** Terminals (=C-c t=)
+
+| Section  | Key     | Command                          | Note                       |
+|----------+---------+----------------------------------+----------------------------|
+| Terminal | C-c t e | pro/eshell-toggle                | eshell                     |
+| Terminal | C-c t v | multi-vterm-project              | vterm по проекту           |
+| Terminal | C-c t d | pro/vterm-dedicated-toggle       | dedicated vterm toggle     |
+| Terminal | C-c t D | pro/vterm-dedicated-close        | dedicated vterm close      |
+| Terminal | C-c t s | pro/shell-pop                    | shell pop-up               |
+| Terminal | C-c t t | pro/ansi-term-toggle             | term (ansi-term)           |
+| Terminal | C-c t n | pro/multi-vterm-next             | next vterm                 |
+| Terminal | C-c t p | pro/multi-vterm-prev             | prev vterm                 |
+| Terminal | C-c t c | vterm-copy-mode                  | copy-mode                  |
+| Terminal | C-c t y | pro/vterm-yank                   | yank                       |
+| Terminal | C-c t i | pro/vterm-interrupt              | interrupt (C-c C-c)        |
+| Terminal | C-c t ? | pro/terminal-transient           | transient-helper           |
+
+** Windows nav (=C-c w=)
+
+| Section | Key     | Command                  | Note                          |
+|---------+---------+--------------------------+-------------------------------|
+| Окна    | C-c w h | windmove-left            | left                          |
+| Окна    | C-c w j | windmove-down            | down                          |
+| Окна    | C-c w k | windmove-up              | up                            |
+| Окна    | C-c w l | windmove-right           | right                         |
+| Окна    | C-c w H | buf-move-left            | swap buffer left              |
+| Окна    | C-c w J | buf-move-down            | swap buffer down              |
+| Окна    | C-c w K | buf-move-up              | swap buffer up                |
+| Окна    | C-c w L | buf-move-right           | swap buffer right             |
+| Окна    | C-c w u | winner-undo              | undo window config            |
+| Окна    | C-c w r | winner-redo              | redo window config            |
+| Окна    | C-c w = | pro-windows-balance      | balance (one-shot golden)     |
+| Окна    | C-c w d | delete-window            | delete                        |
+| Окна    | C-c w a | ace-window               | ace-window (number select)    |
+| Окна    | C-c w 1 | delete-other-windows     | one window                    |
+| Окна    | C-c w 2 | split-window-below       | two windows vertical          |
+| Окна    | C-c w 3 | split-window-right       | two windows horizontal        |
+| Окна    | C-c w s | pro/split-window-sensibly| split sensibly                |
+| Окна    | C-c w ? | pro/windows-transient    | transient-helper              |
+
+** Messaging / Telegram (=C-c m=)
+
+| Section | Key     | Command                           | Note                    |
+|---------+---------+-----------------------------------+-------------------------|
+| Чат     | C-c m o | pro/chat-open                     | open                    |
+| Чат     | C-c m c | pro/telega-select-chat-or-contact | chat select             |
+| Чат     | C-c m u | pro/telega-select-chat-or-contact | user/contact (C-u)      |
+| Чат     | C-c m k | pro/chat-close-idle-chats         | kill idle chats         |
+| Чат     | C-c m e | pro/chat-reload-emojis            | emojis reload           |
+| Чат     | C-c m i | pro/chat-install                  | install fallback        |
+| Чат     | C-c m s | pro/chat-tor-status               | tor status (buffer)     |
+| Чат     | C-c m r | pro/chat-tor-reroute-now          | tor reroute             |
+| Чат     | C-c m ? | pro/messaging-transient           | transient-helper        |
+
+** AI / Ellama (=C-c e=)
+
+| Section | Key     | Command                            | Note                       |
+|---------+---------+------------------------------------+----------------------------|
+| AI      | C-c e e | pro-ai-ellama-open                 | open                       |
+| AI      | C-c e s | pro-ai-ellama-summarize            | summarize                  |
+| AI      | C-c e r | pro-ai-ellama-code-review          | code-review                |
+| AI      | C-c e x | pro-ai-ellama-add-region-as-context| eXtract region as context  |
+| AI      | C-c e b | pro-ai-ellama-add-buffer-as-context| buffer as context          |
+| AI      | C-c e p | pro-ai-ellama-plan-and-act         | plan-and-act loop          |
+| AI      | C-c e l | pro-ai-ellama-list-sessions        | list sessions              |
+| AI      | C-c e a | pro-ai-ellama-load-agents-md       | reload AGENTS.md           |
+| AI      | C-c e m | pro-ai-ellama-use-shared-model     | model from gptel           |
+| AI      | C-c e h | pro-ai-ellama-show-sessions        | show sessions              |
+| AI      | C-c e d | pro-ai-ellama-delete-session       | delete session             |
+
+** Agent-shell (=C-c a=)
+
+| Section | Key     | Command                       | Note                |
+|---------+---------+-------------------------------+---------------------|
+| AI      | C-c a a | pro-agent-open                | agent-shell open    |
+| AI      | C-c a o | pro-ai-open-entry             | open entry          |
+| AI      | C-c a s | pro-ai-anvil-server-start     | anvil start         |
+| AI      | C-c a t | pro-ai-anvil-server-stop      | anvil stop          |
+| AI      | C-c a ? | pro-ai-anvil-server-status    | anvil status        |
+| AI      | C-c a l | pro-ai-anvil-list-tools       | anvil tools list    |
+| AI      | C-c a d | pro-ai-anvil-describe-setup   | anvil describe      |
+
+** Agent-shell HUD (внутри agent-shell-mode, локально)
+
+| Section | Key   | Command                  | Note       |
+|---------+-------+--------------------------+------------|
+| AI      | C-c C-h | agent-shell-hud-menu   | hud menu   |
+| AI      | C-c i | agent-shell-hud-info     | hud info   |
+| AI      | C-c r | agent-shell-hud-refresh  | hud refresh|
+
+** Packages (=C-c P=)
+
+| Section  | Key     | Command                          | Note           |
+|----------+---------+----------------------------------+----------------|
+| Package  | C-c P p | pro-packages-menu                | packages list  |
+| Package  | C-c P i | pro-packages-install             | install        |
+| Package  | C-c P v | pro-packages-install-vc          | install from VC|
+| Package  | C-c P u | pro-packages-upgrade-all         | upgrade all    |
+| Package  | C-c P r | pro-packages-refresh             | refresh        |
+| Package  | C-c P b | pro-packages-upgrade-built-ins   | upgrade built-ins|
+| Package  | C-c P a | pro-package-bootstrap-install-targets | bootstrap |
+
+** Docker (=C-c d=)
+
+| Section | Key     | Command                | Note                          |
+|---------+---------+------------------------+-------------------------------|
+| Docker  | C-c d c | pro-docker-containers  | containers                    |
+| Docker  | C-c d i | pro/docker-images      | images                        |
+| Docker  | C-c d v | pro/docker-volumes     | volumes                       |
+| Docker  | C-c d n | pro/docker-networks    | networks                      |
+| Docker  | C-c d l | pro/docker-logs        | logs (-f --tail 100)          |
+| Docker  | C-c d e | pro/docker-shell       | shell in container            |
+| Docker  | C-c d r | pro/docker-restart     | restart                       |
+| Docker  | C-c d p | pro/docker-prune       | docker system prune -f        |
+
+** Haskell (=C-c h=)
+
+| Section | Key     | Command                    | Note                |
+|---------+---------+----------------------------+---------------------|
+| Haskell | C-c h l | pro-haskell-load-buffer    | load buffer to REPL |
+| Haskell | C-c h r | pro-haskell-switch-to-repl | switch to REPL      |
+| Haskell | C-c h f | pro-haskell-format-buffer  | format (fourmolu)   |
+| Haskell | C-c h i | pro-haskell-lint           | lint (hlint)        |
+| Haskell | C-c h d | pro-haskell-browse-haddock | documentation       |
+
+** Completion (=C-c o=) / Yasnippet (=C-c y=) / LSP (=C-c C-.=)
+
+| Section     | Key     | Command                | Note        |
+|-------------+---------+------------------------+-------------|
+| Completion  | C-c o f | cape-file              | CAPF file   |
+| Completion  | C-c o d | cape-dabbrev           | CAPF dabbrev|
+| Completion  | C-c o h | cape-history           | CAPF history|
+| Completion  | C-c o k | cape-keyword           | CAPF keyword|
+| Completion  | C-c o s | cape-symbol            | CAPF symbol |
+| Completion  | C-c o a | cape-abbrev            | CAPF abbrev |
+| Completion  | C-c o t | complete-tag           | complete tag|
+| Completion  | C-c o i | cape-dict              | CAPF dict   |
+| Completion  | C-c o l | cape-line              | CAPF line   |
+| Completion  | C-c o . | completion-at-point    | run CAPF    |
+| Completion  | C-c o p | completion-at-point    | run CAPF alias |
+| Snippet     | C-c y y | consult-yasnippet      | yasnippet   |
+| LSP         | C-c C-. | consult-eglot-symbols  | LSP symbols |
+
+** UI / Zoom / Input method
+
+| Section | Key            | Command                | Note           |
+|---------+----------------+------------------------+----------------|
+| UI      | C-=            | pro-ui-zoom-in         | zoom in        |
+| UI      | C-+            | pro-ui-zoom-in         | zoom in alias  |
+| UI      | C--            | pro-ui-zoom-out        | zoom out       |
+| UI      | C-0            | pro-ui-zoom-reset      | reset zoom     |
+| UI      | C-\           | toggle-input-method    | input method toggle |
+| UI      | M-/            | eldoc-box-help-at-point| eldoc at point |
+| UI      | <mouse-3>      | ignore                 | disable right click |
+| UI      | <down-mouse-3> | ignore                 | disable right down event |
+
+** History / Undo / Redo
+
+| Section | Key       | Command                  | Note              |
+|---------+-----------+--------------------------+-------------------|
+| History | C-_       | pro-history-undo         | undo              |
+| History | M-_       | pro-history-redo         | redo              |
+| History | C-z       | pro-history-undo         | undo duplicate    |
+| History | C-M-z     | pro-history-redo         | redo duplicate    |
+| History | C-c u     | pro-history-time-machine | time machine      |
+| History | C-c z     | pro-history-time-machine | time machine alias|
+| History | C-c C-,   | goto-last-change-reverse | previous change   |
+| History | C-c .     | goto-last-change         | last change       |
+| History | C-c ,     | goto-last-change-reverse | previous change alias|
+| History | C-c M-h   | pro-history-transient    | history transient menu |
+
+** Reload / Config
+
+| Section | Key     | Command                | Note         |
+|---------+---------+------------------------+--------------|
+| UI      | <f5>    | pro/reload-config      | soft reload  |
+| UI      | C-x M-c | pro/reload-config      | soft reload alias|
+
+** Org-mode (=:org= локально)
+
+| Section | Key   | Command                 | Note                  |
+|---------+-------+-------------------------+-----------------------|
+| ORG     | C-c K | pro-org-open-keys-file  | open keys file        |
+| ORG     | C-c k | pro-keys-reload         | reload keys           |
+| ORG     | C-c M-k | pro-keys-reload       | reload keys alias     |
+| ORG     | C-c o | org-agenda              | agenda (org-mode local)|
+
+** Profiler
+
+| Section   | Key       | Command                | Note            |
+|-----------+-----------+------------------------+-----------------|
+| Profiler  | <f8>      | pro/profiler-quick     | quick 15s       |
+| Profiler  | C-<f8>    | pro/profiler-start     | start CPU       |
+| Profiler  | S-<f8>    | pro/profiler-stop      | stop            |
+| Profiler  | M-<f8>    | pro/profiler-report    | report          |
+| Profiler  | C-S-<f8>  | pro/profiler-reset     | reset           |
+
+** EXWM global (=C-c x=) — работает в любом буфере
+
+Зеркалят часть EXWM-фич для использования в обычном emacsclient.
+
+| Section | Key     | Command                          | Note                  |
+|---------+---------+----------------------------------+-----------------------|
+| EXWM    | C-c x r | exwm-reset                       | reset exwm window      |
+| EXWM    | C-c x t | pro-tabs-open-new-tab            | new tab (EXWM-agnostic)|
+| EXWM    | C-c x n | tab-bar-switch-to-next-tab       | next tab               |
+| EXWM    | C-c x p | tab-bar-switch-to-prev-tab       | prev tab               |
+| EXWM    | C-c x N | tab-bar-move-tab                 | move tab right         |
+| EXWM    | C-c x P | tab-bar-move-tab-backward        | move tab left          |
+| EXWM    | C-c x T | tab-bar-undo-close-tab           | restore closed tab     |
+| EXWM    | C-c x 1 | pro-tabs-select-tab-1            | tab 1                  |
+| EXWM    | C-c x 2 | pro-tabs-select-tab-2            | tab 2                  |
+| EXWM    | C-c x 3 | pro-tabs-select-tab-3            | tab 3                  |
+| EXWM    | C-c x 4 | pro-tabs-select-tab-4            | tab 4                  |
+| EXWM    | C-c x 5 | pro-tabs-select-tab-5            | tab 5                  |
+| EXWM    | C-c x 6 | pro-tabs-select-tab-6            | tab 6                  |
+| EXWM    | C-c x w | tab-bar-close-tab                | close tab              |
+| EXWM    | C-c x d | pro/treemacs                     | treemacs (alias of C-c T)|
+| EXWM    | C-c x a | pro/app-launcher                 | app launcher           |
+| EXWM    | C-c x & | async-shell-command              | async shell            |
+| EXWM    | C-c x ? | pro/exwm-transient               | transient-helper       |
+
+** Vterm helpers (=C-c v=) (suggested)
+
+| Section   | Key     | Command              | Note               |
+|-----------+---------+----------------------+--------------------|
+| Suggested | C-c v y | pro/vterm-yank       | suggested terminals|
+| Suggested | C-c v i | pro/vterm-interrupt  | suggested terminals|
+| Suggested | C-c v c | vterm-copy-mode      | suggested terminals|
+
+* EXWM-локальные биндинги (=:exwm=)
+
+Захватываются EXWM до того, как они доходят до X-приложения.
+Работают только в EXWM-сессии. Под Gnome/Cinnamon — свободны для DE.
+
+| Section | Key            | Command                          | Note                |
+|---------+----------------+----------------------------------+---------------------|
+| EXWM    | s-r            | exwm-reset                       | reset window        |
+| EXWM    | s-w            | tab-bar-close-tab                | close tab           |
+| EXWM    | s-t            | pro-tabs-open-new-tab            | new tab             |
+| EXWM    | s-n            | tab-bar-switch-to-next-tab       | next tab            |
+| EXWM    | s-p            | tab-bar-switch-to-prev-tab       | prev tab            |
+| EXWM    | s-N            | tab-bar-move-tab                 | move tab right      |
+| EXWM    | s-P            | tab-bar-move-tab-backward        | move tab left       |
+| EXWM    | s-T            | tab-bar-undo-close-tab           | restore tab         |
+| EXWM    | s-1            | pro-tabs-select-tab-1            | tab 1               |
+| EXWM    | s-2            | pro-tabs-select-tab-2            | tab 2               |
+| EXWM    | s-3            | pro-tabs-select-tab-3            | tab 3               |
+| EXWM    | s-4            | pro-tabs-select-tab-4            | tab 4               |
+| EXWM    | s-5            | pro-tabs-select-tab-5            | tab 5               |
+| EXWM    | s-6            | pro-tabs-select-tab-6            | tab 6               |
+| EXWM    | s-h            | windmove-left                    | focus left          |
+| EXWM    | s-j            | windmove-down                    | focus down          |
+| EXWM    | s-k            | windmove-up                      | focus up            |
+| EXWM    | s-l            | windmove-right                   | focus right         |
+| EXWM    | s-H            | buf-move-left                    | swap left           |
+| EXWM    | s-J            | buf-move-down                    | swap down           |
+| EXWM    | s-K            | buf-move-up                      | swap up             |
+| EXWM    | s-L            | buf-move-right                   | swap right          |
+| EXWM    | s-d            | treemacs                         | treemacs            |
+| EXWM    | s-x            | pro/app-launcher                 | app launcher        |
+| EXWM    | s-&            | async-shell-command              | async shell         |
+| EXWM    | s-`            | multi-vterm-project              | vterm по проекту    |
+| EXWM    | s-~            | eshell-toggle                    | eshell              |
+| EXWM    | C-s-`          | pro/exwm-urxvt-toggle            | urxvt sidebar       |
