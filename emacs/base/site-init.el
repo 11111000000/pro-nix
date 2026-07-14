@@ -131,19 +131,37 @@ NAME может быть 'core' или 'pro-core' — функция норма�
     (load packages nil t)))
 
 (defvar pro-emacs-base-repo-modules-dir
-  (let* ((this-file (or load-file-name buffer-file-name))
-         (site-dir (and this-file (file-name-directory this-file)))
-         ;; site-init.el lives in pro-nix/emacs/base/. Modules are in pro-nix/emacs/base/modules.
-         (repo-root (and site-dir
-                       (locate-dominating-file site-dir "flake.nix")))
-         (cand (and repo-root
-                   (expand-file-name "emacs/base/modules" repo-root))))
-    (and (stringp cand) (file-readable-p cand) cand))
-  "Path to the canonical pro-nix modules directory, derived from
-locating flake.nix above this file.  Used as a hard preference
-over `pro-emacs-base-system-modules-dir' (which can be set to
-\`~/.config/emacs/modules' when init.el is itself loaded from
-a home-manager copy).")
+  ;; Resolve the canonical pro-nix modules directory.  We can't rely
+  ;; on `load-file-name' (this file may be a home-manager copy), so we
+  ;; walk the filesystem looking for `flake.nix' starting from
+  ;; /etc/static/pro, the NixOS system profile, and the user's HOME.
+  (let* ((candidates
+          (delq nil
+                (list
+                 ;; 1. NixOS system modules dir (this is where pro-keys.el
+                 ;;    is installed by the pro-nix/etc.nix expression).
+                 "/etc/static/pro"
+                 ;; 2. Walk up from /etc to find flake.nix (in case we're
+                 ;;    on a NixOS system that hasn't symlinked /etc/static).
+                 (locate-dominating-file "/etc" "flake.nix")
+                 ;; 3. Walk up from $HOME.
+                 (locate-dominating-file (or (getenv "HOME") "~") "flake.nix"))))
+    (or
+     ;; First hit: /etc/static/pro — modules copied there.
+     (and (file-readable-p "/etc/static/pro")
+          (expand-file-name "modules" "/etc/static/pro"))
+     ;; Otherwise: walk up from /etc/static/pro to flake.nix and use
+     ;; emacs/base/modules.
+     (let* ((root (or (cl-find-if #'identity candidates)
+                      (locate-dominating-file default-directory "flake.nix")))
+            (cand (and root (expand-file-name "emacs/base/modules" root))))
+       (and (stringp cand) (file-readable-p cand) cand))))
+  "Path to the canonical pro-nix modules directory, looked up by
+checking /etc/static/pro first (where pro-nix installs modules) and
+then walking up from /etc and $HOME looking for flake.nix.  This
+is used as a hard preference over `pro-emacs-base-system-modules-dir'
+(which can point to ~/.config/emacs/modules when init.el is a
+home-manager copy).")
 
 (defun pro-emacs-base--resolve-module (name)
   (let* ((user-file (pro-emacs-base--module-file pro-emacs-base-user-modules-dir name))
@@ -177,6 +195,30 @@ a home-manager copy).")
      (t
       (message "[pro-emacs] module lookup failed: %s user=%s system=%s" name user-file system-file)
       nil))))
+
+;; After defining the resolver, eagerly re-load the canonical
+;; pro-nix site-init.el if it differs from the one currently being
+;; loaded.  This handles the case where init.el is a home-manager
+;; copy: the loader chain (init → site-init → pro-emacs-base-start)
+;; re-runs site-init from the pro-nix repo, which then sets
+;; `pro-emacs-base-system-modules-dir' to the canonical path.
+(let* ((canonical-site-init
+        (and pro-emacs-base-repo-modules-dir
+             (expand-file-name "site-init.el" pro-emacs-base-repo-modules-dir)))
+       (currently-loading
+        (or load-file-name (and (boundp 'byte-compile-current-file) byte-compile-current-file)))
+       (already-canonical
+        (and canonical-site-init currently-loading
+             (equal (file-truename canonical-site-init)
+                    (file-truename currently-loading)))))
+  (when (and canonical-site-init
+             (file-readable-p canonical-site-init)
+             (not already-canonical))
+    ;; Update the system-modules-dir before re-loading so that the
+    ;; canonical site-init.el's resolve functions see the right path.
+    (when pro-emacs-base-repo-modules-dir
+      (setq pro-emacs-base-system-modules-dir pro-emacs-base-repo-modules-dir))
+    (load canonical-site-init nil t)))
 
 (defun pro-emacs-base-load-lazy-module (module-name)
   "Load MODULE-NAME if it is in `pro-emacs-base-lazy-modules' and not yet loaded."
