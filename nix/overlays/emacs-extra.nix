@@ -74,7 +74,9 @@ let
   # Делаем собственный recipe поверх официального 31.0.0.2
   # (emacs-compat/compat@df03e91, 2026-07-09) — прямой `mkDerivation`
   # + `fetchFromGitHub`, без elpa2nix.
-  patchedCompat = super.callPackage ../emacs-recipes/compat.nix {};
+  patchedCompat = super.callPackage ../emacs-recipes/compat.nix {
+    trivialBuild = super.emacsPackages.trivialBuild;
+  };
   # transient требует на вход именно наш patchedCompat (а не upstream
   # `super.emacsPackages.compat`). Передаём его явно через callPackage
   # override — не полагаемся на alphabetic-order в `localRecipes`.
