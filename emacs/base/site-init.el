@@ -145,16 +145,19 @@ NAME может быть 'core' или 'pro-core' — функция норма�
                               (and user-attrs
                                    (= (nth 2 user-attrs) (user-uid))))))
       (cond
-       ((and user-readable user-owner-ok) user-file)
-       ((and user-readable (not user-owner-ok))
-        (message "[pro-emacs] user module %s exists but is not owned by current user; preferring system module if available" user-file)
-        (when (and pro-emacs-base-system-modules-dir
-                   (not (file-exists-p pro-emacs-base-disable-marker))
-                   (file-readable-p system-file))
-          system-file))
+       ;; System file always wins when it exists and is not disabled.
+       ;; The user-override path is reserved for users who explicitly
+       ;; want to override a single module; if they want that, they
+       ;; create a file in ~/.config/emacs/modules/ that is owned by
+       ;; their own UID AND we fall back through this ladder in order.
        ((and pro-emacs-base-system-modules-dir
              (not (file-exists-p pro-emacs-base-disable-marker))
-             (file-readable-p system-file)) system-file)
+             (file-readable-p system-file))
+        system-file)
+       ((and user-readable user-owner-ok) user-file)
+       ((and user-readable (not user-owner-ok))
+        (message "[pro-emacs] user module %s exists but is not owned by current user; no system fallback available" user-file)
+        nil)
        (t
         (message "[pro-emacs] module lookup failed: %s user=%s system=%s" name user-file system-file)
         nil)))))
