@@ -219,7 +219,7 @@ keymap, а COMMAND не keymap — добавляем COMMAND в этот keymap
                       (defvar pro-keys-provenance nil "Alist of (KEY . MODULE) provenance."))
                     (push (cons key owner) pro-keys-provenance))))
             (pro-keys--apply-row (nth 0 binding) (nth 1 binding) (nth 2 binding)))
-        (forward-line 1))))))
+        (forward-line 1)))))))
 
 (defun pro-keys-reload ()
   "Перезагрузить клавиши из системного и пользовательского слоёв." 
@@ -231,6 +231,82 @@ keymap, а COMMAND не keymap — добавляем COMMAND в этот keymap
   (pro-keys-apply-pending)
   (message "[pro-keys] loaded system and user overrides"))
 
+
+(defun pro-keys--try-require-binding-helpers (sym)
+  "Try to require packages that might provide the command SYM."
+  (cond
+   ((memq sym '(pro-packages pro-packages-install pro-packages-menu pro-packages-refresh pro-packages-upgrade-all pro-packages-upgrade-built-ins)) (ignore-errors (require 'pro-packages nil t)))
+   ((memq sym '(cape-keyword cape-symbol cape-file cape-dabbrev cape-history)) (ignore-errors (require 'cape nil t) (ignore-errors (require 'cape-keyword nil t))))
+   ((memq sym '(projectile-find-file projectile-switch-project)) (ignore-errors (require 'projectile nil t)))
+   ((memq sym '(treemacs)) (ignore-errors (require 'treemacs nil t)))
+   ((memq sym '(consult-imenu)) (ignore-errors (require 'consult-imenu nil t)))
+   ((memq sym '(consult-ripgrep consult-goto-line consult-yasnippet consult-eglot-symbols consult-line-multi consult-yank-from-kill-ring consult-find)) (ignore-errors (require 'consult nil t)))
+   ((memq sym '(consult-dash)) (ignore-errors (require 'consult-dash nil t)))
+   ((memq sym '(eldoc-box-help-at-point)) (ignore-errors (require 'eldoc-box nil t)))
+   ((memq sym '(undo-tree-visualize)) (ignore-errors (require 'undo-tree nil t)))
+   ((memq sym '(cape-dict cape-line)) (ignore-errors (require 'cape nil t)))
+   ((memq sym '(exwm-reset exwm-workspace-switch)) (when (display-graphic-p) (ignore-errors (require 'exwm nil t))))
+   ((memq sym '(buf-move-up buf-move-down buf-move-left buf-move-right)) (ignore-errors (require 'buffer-move nil t)))
+   ((memq sym '(goto-last-change goto-last-change-reverse)) (ignore-errors (require 'goto-chg nil t)))
+   ((memq sym '(pro/chat-open pro/chat-close-idle-chats pro/chat-reload-emojis pro/chat-install)) (ignore-errors (require 'pro-chat nil t)))
+   ((memq sym '(pro/vterm-yank pro/vterm-interrupt pro/vterm-copy-mode)) (ignore-errors (require 'pro-terminals nil t)))
+   ((memq sym '(pro/clipboard-yank-pop pro/clipboard-yank-region)) (ignore-errors (require 'pro-clipboard nil t)))
+   ((memq sym '(agent-shell-hud-info agent-shell-hud-menu agent-shell-hud-refresh)) (ignore-errors (require 'agent-shell-hud nil t)))
+   ((string-prefix-p "pro/" (symbol-name sym))
+    (ignore-errors (require 'pro-terminals nil t))
+    (ignore-errors (require 'pro-windows nil t))
+    (ignore-errors (require 'pro-treemacs nil t))
+    (ignore-errors (require 'pro-tabs nil t))
+    (ignore-errors (require 'pro-chat nil t))
+    (ignore-errors (require 'pro-telega nil t))
+    (ignore-errors (require 'pro-key-prefixes nil t))
+    (ignore-errors (require 'pro-exwm nil t)))))
+
+(defun pro-keys--try-lazy-module-for-symbol (sym)
+  "Try loading a lazy module that might provide the command SYM."
+  (when (and (boundp 'pro-emacs-base-lazy-modules) (symbol-name sym))
+    (let* ((sname (symbol-name sym))
+           (slash-pos (and (string-prefix-p "pro/" sname) (string-match "-" sname 4)))
+           (module-name (and slash-pos
+                         (intern (concat "pro-" (substring sname 4 slash-pos)))))
+           (hyphen-match (cl-find-if
+                          (lambda (m)
+                            (and (memq m pro-emacs-base-lazy-modules)
+                                 (let ((ms (symbol-name m)))
+                                   (and (>= (length sname) (+ (length ms) 1))
+                                        (string-prefix-p (concat ms "-") sname)))))
+                          pro-emacs-base-lazy-modules))
+           (match (or hyphen-match
+                      (and (fboundp 'pro-emacs-base-load-lazy-module)
+                           module-name
+                           (memq module-name pro-emacs-base-lazy-modules)
+                           module-name))))
+      (when (and match (fboundp 'pro-emacs-base-load-lazy-module))
+        (ignore-errors (pro-emacs-base-load-lazy-module match))))))
+
+(defun pro-keys--process-global-binding (key cmd)
+  "Process one pending global binding. Apply if possible, else keep pending."
+  (let ((sym (if (symbolp cmd) cmd (intern (format "%s" cmd)))))
+    (unless (fboundp sym)
+      (pro-keys--try-require-binding-helpers sym))
+    (unless (or (fboundp sym) (not (string-match-p "/" (symbol-name sym))))
+      (let* ((parts (split-string (symbol-name sym) "/"))
+             (first (intern (car parts)))
+             (second (intern (cadr parts))))
+        (ignore-errors (require second nil t))
+        (ignore-errors (require first nil t))))
+    (unless (fboundp sym)
+      (pro-keys--try-lazy-module-for-symbol sym))
+    (if (and (symbolp sym) (fboundp sym))
+        (condition-case err
+            (global-set-key (kbd key) sym)
+          (error
+           (message "[pro-keys] bind failed for %s -> %s: %S" key sym err)
+           nil))
+      nil)))
+
+
+
 (defun pro-keys-apply-pending ()
   "Попытаться применить ранее отложенные привязки." 
   (interactive)
@@ -239,88 +315,9 @@ keymap, а COMMAND не keymap — добавляем COMMAND в этот keymap
       (dolist (entry (nreverse pro-keys-pending-bindings))
         (pcase entry
           (`(:global ,key ,cmd)
-           (let ((sym (if (symbolp cmd) cmd (intern (format "%s" cmd)))))
-             ;; If the command is not defined but there is a package that
-             ;; typically provides it, try to require that package now.
-             (unless (fboundp sym)
-               (cond
-                ((memq sym '(pro-packages pro-packages-install pro-packages-menu pro-packages-refresh pro-packages-upgrade-all pro-packages-upgrade-built-ins)) (ignore-errors (require 'pro-packages nil t)))
-                ((memq sym '(cape-keyword cape-symbol cape-file cape-dabbrev cape-history)) (ignore-errors (require 'cape nil t) (ignore-errors (require 'cape-keyword nil t))))
-                ((memq sym '(projectile-find-file projectile-switch-project)) (ignore-errors (require 'projectile nil t)))
-                ((memq sym '(treemacs)) (ignore-errors (require 'treemacs nil t)))
-                 ((memq sym '(consult-imenu)) (ignore-errors (require 'consult-imenu nil t)))
-                 ((memq sym '(consult-ripgrep consult-goto-line consult-yasnippet consult-eglot-symbols consult-line-multi consult-yank-from-kill-ring consult-find)) (ignore-errors (require 'consult nil t)))
-                ((memq sym '(consult-dash)) (ignore-errors (require 'consult-dash nil t)))
-                ((memq sym '(eldoc-box-help-at-point)) (ignore-errors (require 'eldoc-box nil t)))
-                ((memq sym '(undo-tree-visualize)) (ignore-errors (require 'undo-tree nil t)))
-                ((memq sym '(cape-dict cape-line)) (ignore-errors (require 'cape nil t)))
-                 ((memq sym '(exwm-reset exwm-workspace-switch)) (when (display-graphic-p) (ignore-errors (require 'exwm nil t))))
-                ((memq sym '(buf-move-up buf-move-down buf-move-left buf-move-right)) (ignore-errors (require 'buffer-move nil t)))
-                  ((memq sym '(goto-last-change goto-last-change-reverse)) (ignore-errors (require 'goto-chg nil t)))
-                 ((memq sym '(pro/chat-open pro/chat-close-idle-chats pro/chat-reload-emojis pro/chat-install)) (ignore-errors (require 'pro-chat nil t)))
-                 ((memq sym '(pro/vterm-yank pro/vterm-interrupt pro/vterm-copy-mode)) (ignore-errors (require 'pro-terminals nil t)))
-                  ((memq sym '(pro/clipboard-yank-pop pro/clipboard-yank-region)) (ignore-errors (require 'pro-clipboard nil t)))
-                  ;; agent-shell-hud команды (для `C-c i' / `C-c C-h' из emacs-keys.org)
-                  ((memq sym '(agent-shell-hud-info agent-shell-hud-menu agent-shell-hud-refresh)) (ignore-errors (require 'agent-shell-hud nil t)))
-                 ;; Generic `pro/<name>` helpers — try every plausible
-                 ;; `pro-<module>` that could host the command.  We try a
-                 ;; fixed list (rather than enumerating load-path) so a
-                 ;; missing module fails fast via `ignore-errors'.
-                 ((string-prefix-p "pro/" (symbol-name sym))
-                  (ignore-errors (require 'pro-terminals nil t))
-                  (ignore-errors (require 'pro-windows nil t))
-                  (ignore-errors (require 'pro-treemacs nil t))
-                  (ignore-errors (require 'pro-tabs nil t))
-                  (ignore-errors (require 'pro-chat nil t))
-                  (ignore-errors (require 'pro-telega nil t))
-                  (ignore-errors (require 'pro-key-prefixes nil t))
-                  (ignore-errors (require 'pro-exwm nil t)))))
-              ;; If symbol contains a slash (eg. er/expand-region), try requiring
-              ;; both parts as packages: before and after the slash.
-              (unless (or (fboundp sym) (not (string-match-p "/" (symbol-name sym))))
-                (let* ((parts (split-string (symbol-name sym) "/"))
-                       (first (intern (car parts)))
-                       (second (intern (cadr parts))))
-                  (ignore-errors (require second nil t))
-                  (ignore-errors (require first nil t))))
-              ;; Generic lazy-module fallback. Если команда не определена и
-              ;; существует lazy-модуль, чьё имя (например `pro-ai-ellama')
-              ;; совпадает с префиксом символа до первого `-' после префикса
-              ;; (например `pro-ai-ellama-open'), пробуем его загрузить.
-              ;; Также поддерживаем slash-style: `pro-telega' lazy-модуль
-              ;; может соответствовать команде `pro/telega-select-...'
-              ;; (т.е. `pro-' → `pro/'). Это устраняет «навсегда pending»
-              ;; для ключей pro-ai-ellama-*, pro-haskell-*, pro-ai-anvil-*,
-              ;; pro/telega-*, и т.п.
-              (unless (fboundp sym)
-                (when (and (boundp 'pro-emacs-base-lazy-modules)
-                           (symbol-name sym))
-                  (let* ((sname (symbol-name sym))
-                         (match (cl-find-if
-                                 (lambda (m)
-                                   (let* ((ms (symbol-name m))
-                                          (prefix-hyphen (concat ms "-"))
-                                          ;; `pro-telega' -> `pro/telega-'
-                                          (prefix-slash (concat (substring ms 0 3) "/" (substring ms 4) "-"))
-                                          (mod-in-list (memq m pro-emacs-base-lazy-modules)))
-                                     (and mod-in-list
-                                          (or (string-prefix-p prefix-hyphen sname)
-                                              (string-prefix-p prefix-slash sname)))))
-                                 pro-emacs-base-lazy-modules)))
-                    (when (and match (fboundp 'pro-emacs-base-load-lazy-module))
-                      (ignore-errors (pro-emacs-base-load-lazy-module match))))))
-              (if (and (symbolp sym) (fboundp sym))
-                  ;; При попытке bind-нуть саб-ключ (`C-c a a') под уже
-                  ;; не-prefix родителем (`C-c a' = pro-ai-open-entry)
-                  ;; `global-set-key' бросает `error', который абортнул
-                  ;; весь apply-loop. Ловим, чтобы оставшиеся pending
-                  ;; ключи всё равно обработались.
-                  (condition-case err
-                      (global-set-key (kbd key) sym)
-                    (error
-                     (message "[pro-keys] bind failed for %s -> %s: %S" key sym err)
-                     (push entry remaining)))
-                (push entry remaining)))))
+           (if (pro-keys--process-global-binding key cmd)
+               t
+             (push entry remaining)))
           (`(:exwm ,key ,cmd)
            (let ((sym (if (symbolp cmd) cmd (intern (format "%s" cmd)))))
              (when (display-graphic-p)

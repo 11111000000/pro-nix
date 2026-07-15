@@ -141,7 +141,7 @@ NAME может быть 'core' или 'pro-core' — функция норма�
                  ;; the pro-nix repo.
                  (locate-dominating-file (or (getenv "HOME") "~") "flake.nix")
                  ;; Walk up from /etc.
-                 (locate-dominating-file "/etc" "flake.nix"))))
+                 (locate-dominating-file "/etc" "flake.nix")))))
     (or
      ;; Try each candidate.  The first one that contains
      ;; emacs/base/modules wins.
