@@ -168,6 +168,18 @@ llm = patchedLlm;
       emacsPackages_cond_let = super.emacsPackages.cond-let;
       emacsPackages_llama = super.emacsPackages.llama;
     };
+    # exwm: встроенный ELPA-recipe в nixpkgs 25.11 пинуется на
+    # `exwm-0.34.0.20250919.75516`, чей tar.lz/tar больше недоступен на
+    # elpa.gnu.org (HTTP 404). Используем собственный recipe поверх
+    # актуального `exwm-0.35.0.20260704.2.tar.lz`. Зависимости
+    # (`xelb`, `compat`) — те же, что в nixpkgs (берём из
+    # `super.emacsPackages.*` напрямую, чтобы не зависеть от
+    # alphabetic-order eval attrset).
+    exwm = super.callPackage ../emacs-recipes/exwm.nix {
+      trivialBuild = super.emacsPackages.trivialBuild;
+      xelb = super.emacsPackages.xelb;
+      compat = patchedCompat;
+    };
   };
 in {
   emacsPackages = super.emacsPackages // repoExtras // localRecipes;
