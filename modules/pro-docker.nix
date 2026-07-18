@@ -35,8 +35,8 @@
   # mount/socket-схемами не для всех наших хостов (cf19 не имеет
   # cgroups v2, huawei на классической rootfs). Юзеры из группы
   # `docker` работают с демоном через /var/run/docker.sock.
+  virtualisation.docker.package = pkgs.docker_29;
   virtualisation.docker.enable = true;
-
   # Идемпотентное создание bridge-сети `pro-dev` при каждом старте
   # dockerd. Используем wrapper-скрипт, а не shell-redirect-фоллбэк
   # (`2>/dev/null || true`) внутри ExecStart: в systemd < 258 есть баг
@@ -52,12 +52,12 @@
   systemd.services.docker-network-pro-dev = let
     script = pkgs.writeShellScriptBin "pro-docker-network-create" ''
       set -eu
-      if ${pkgs.docker}/bin/docker network inspect pro-dev >/dev/null 2>&1; then
+      if ${pkgs.docker_29}/bin/docker network inspect pro-dev >/dev/null 2>&1; then
         echo "[pro-docker-network] network pro-dev already exists"
         exit 0
       fi
       echo "[pro-docker-network] creating pro-dev (172.20.0.0/16)..."
-      exec ${pkgs.docker}/bin/docker network create \
+      exec ${pkgs.docker_29}/bin/docker network create \
         --driver=bridge \
         --subnet=172.20.0.0/16 \
         --gateway=172.20.0.1 \
@@ -75,15 +75,12 @@
       # Проверяем реальное наличие сети после create. Если ExecStart
       # завершился с ошибкой (например, нет демона), сообщаем, но
       # не валим загрузку.
-      ExecStartPost = "${pkgs.docker}/bin/docker network inspect pro-dev";
+       ExecStartPost = "${pkgs.docker_29}/bin/docker network inspect pro-dev";
     };
   };
 
-  # Системный уровень: docker CLI / compose / credential-helpers в PATH
-  # для всех юзеров. user-уровень дублируется в modules/pro-users-nixos.nix,
-  # чтобы не зависеть от того, перебил ли хост systemPackages.
   environment.systemPackages = with pkgs; [
-    docker
+    docker_29
     docker-compose
     docker-credential-helpers
   ];

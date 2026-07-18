@@ -19,7 +19,7 @@
       # Опционально: можно включить sandboxed wrapper через programs.opencode-bwrap,
       # но он может тащить плагины. Поэтому оставляем только бинарь.
       # programs.opencode-bwrap.enable = lib.mkDefault false;
-      home.packages = lib.mkAfter ([ pkgs.opencode pkgs.docker pkgs.docker-compose pkgs.docker-credential-helpers ]
+      home.packages = lib.mkAfter ([ pkgs.opencode pkgs.docker_29 pkgs.docker-compose pkgs.docker-credential-helpers ]
         ++ lib.optional (builtins.hasAttr "telega-server" pkgs) pkgs.telega-server);
         pro.emacs = {
           enable = true;
@@ -68,7 +68,7 @@
             # EMACSLOADPATH через emacs/core.nix:allLoadPaths, и в
             # home.packages через availableProvidedNix. Без них
             # (require 'exwm) падает в pro-exwm-start-session.
-            "exwm" "xelb" "exwm-x"
+            "exwm" "xelb"
           ];
 
           extraPackages = let
