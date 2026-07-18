@@ -51,10 +51,11 @@ branch without becoming intrusive."
                  (const :tag "Bottom" :bottom))
   :group 'pro-buffer-banner)
 
-(defcustom pro-buffer-banner-margin 0
+(defcustom pro-buffer-banner-margin 1
   "Pixel margin from the window edge (top or bottom, depending on
-`pro-buffer-banner-position'). 0 means \"one line height\" of the parent
-frame's font — enough to clear the mode-line or first line of text."
+`pro-buffer-banner-position'). 1px — minimum gap, 0 means \"one line
+height\" of the parent frame's font (enough to clear the mode-line
+or first line of text)."
   :type 'integer :group 'pro-buffer-banner)
 
 (defcustom pro-buffer-banner-show-project t
