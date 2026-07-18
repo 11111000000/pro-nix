@@ -64,9 +64,50 @@
   (setq package-archives pro-packages-archives))
 
 (defun pro-packages-initialize ()
-  "Инициализировать `package.el' без обновления архивов."
+  "Инициализировать `package.el' без обновления архивов.
+
+Дополнительно: подключает `package-directory-list' к Nix-store
+elpa-каталогам и явно загружает `<pkg>-autoloads.el' для каждого
+пакета в `package-alist'. Без этого `package-initialize' сканирует
+только дефолтные пути (встроенный `emacs-30.2/.../elpa') и не
+регистрирует autoloads для пакетов, поставленных через `home.packages'
+(eshell-toggle, multi-vterm, и т.д.)."
   (unless pro-packages--initialized
+    ;; Добавляем все `elpa/' директории из `load-path' в
+    ;; `package-directory-list'. Структура Nix-store:
+    ;;   /nix/store/<…>-emacs-<pkg>-<ver>/share/emacs/site-lisp/elpa/<pkg>-<ver>/<pkg>.el
+    ;; `emacs/core.nix' добавляет ВСЕ `<…>/site-lisp/<dir>/' в EMACSLOADPATH.
+    (let ((elpa-dirs
+           (delq nil
+                 (mapcar
+                  (lambda (p)
+                    (let ((parent (file-name-nondirectory
+                                   (directory-file-name p))))
+                      (when (and (string= parent "elpa")
+                                 (file-directory-p p))
+                        p)))
+                  load-path))))
+      (dolist (elpa-dir elpa-dirs)
+        (unless (member elpa-dir package-directory-list)
+          (push elpa-dir package-directory-list))))
     (package-initialize)
+    ;; Nix-store пакеты лежат в виде `<pkg>-<version>/<pkg>-autoloads.el',
+    ;; но `package-initialize' не загружает их автоматически для пакетов,
+    ;; зарегистрированных через package-directory-list (в отличие от
+    ;; встроенного elpa). Загружаем явно для каждого пакета в package-alist.
+    (dolist (entry package-alist)
+      (let* ((pkg-name (symbol-name (car entry)))
+             (desc (cadr entry))
+             (pkg-dir (and (fboundp 'package-desc-dir)
+                           (package-desc-dir desc))))
+        (when (and pkg-dir (stringp pkg-dir)
+                   (file-directory-p pkg-dir))
+          (let ((autoload-file (concat (file-name-as-directory pkg-dir)
+                                      pkg-name "-autoloads.el")))
+            (when (file-regular-p autoload-file)
+              (condition-case nil
+                  (load autoload-file nil t)
+                (error nil)))))))
     (setq pro-packages--initialized t)))
 
 (defun pro-packages--refresh-needed-p ()
