@@ -84,8 +84,8 @@
       (if (string= (buffer-name (current-buffer)) "*ansi-term*")
           (kill-buffer buf)
         (switch-to-buffer buf)))
-     ((fboundp 'ansi-term)
-      (ansi-term "/bin/bash"))
+      ((fboundp 'ansi-term)
+       (ansi-term (executable-find "bash")))
      (t (message "[pro-terminals] ansi-term недоступен")))))
 
 (defun pro/multi-vterm-next ()

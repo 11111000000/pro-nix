@@ -106,6 +106,16 @@ CACHE-KEY is (DIR . HEAD-MTIME); refreshed only when HEAD changes.")
       (setq agent-shell-header-style 'text
             agent-shell-show-welcome-message nil)
 
+      ;; История сессий: agent-shell не хранит её сам — список берётся
+      ;; через ACP `session/list` от запущенного агента. Opencode
+      ;; поддерживает list/load/resume, поэтому стратегия 'latest
+      ;; автоматически подгрузит последнюю сессию при старте нового
+      ;; буфера, без интерактивного picker. Если хотите выбор — поменяйте
+      ;; на 'prompt'.
+      (setq agent-shell-session-strategy 'prompt
+            agent-shell-session-restore-verbosity 'full
+            agent-shell-show-session-id t)
+
       ;; Transcript: держим дефолт — `agent-shell--default-transcript-file-path'.
       ;; При не-nil функции agent-shell:
       ;;   1. сам выбирает имя файла (.agent-shell/transcripts/YYYY-MM-DD-HH-MM-SS.md),

@@ -76,13 +76,13 @@ keymap, а COMMAND не keymap — добавляем COMMAND в этот keymap
   (when (and key command (not (string-empty-p key)))
     (let* ((kseq (kbd key))
            (sym (if (symbolp command) command (intern (format "%s" command))))
-           (is-keymap (and (symbolp command) (fboundp command)
+           (is-keymap (and (symbolp command)
+                           (boundp command)
                            (keymapp (symbol-value command)))))
       (cond
        ((and (symbolp command) (fboundp command))
         (condition-case err
             (if is-keymap
-                ;; COMMAND is a keymap — install as prefix in global-map.
                 (define-key global-map kseq command)
               (let* ((parent-prefix
                       (let ((sp (string-match-p " " key)))
@@ -93,15 +93,7 @@ keymap, а COMMAND не keymap — добавляем COMMAND в этот keymap
                 (if parent-prefix
                     (let ((existing (lookup-key global-map (kbd parent-prefix))))
                       (if (keymapp existing)
-                          ;; Parent is a keymap — add child to it.
                           (define-key existing (kbd child-suffix) command)
-                        ;; Parent isn't a keymap yet — fall back to
-                        ;; global-set-key; subsequent child bindings
-                        ;; will fall back too until parent becomes a
-                        ;; keymap.  To force the parent to be a keymap,
-                        ;; define it as `(define-key global-map (kbd PARENT)
-                        ;; (make-sparse-keymap))' explicitly in your
-                        ;; module (see pro-treemacs.el for an example).
                         (global-set-key kseq command)))
                   (global-set-key kseq command))))
           (error
@@ -214,12 +206,12 @@ keymap, а COMMAND не keymap — добавляем COMMAND в этот keymap
                     (goto-char (1- pos))
                     (when (re-search-backward "^# PRO-MODULE: \(.*\)$" (point-min) t)
                       (setq owner (match-string 1))))
-                  (when owner
-                    (unless (boundp 'pro-keys-provenance)
-                      (defvar pro-keys-provenance nil "Alist of (KEY . MODULE) provenance."))
-                    (push (cons key owner) pro-keys-provenance))))
-            (pro-keys--apply-row (nth 0 binding) (nth 1 binding) (nth 2 binding)))
-        (forward-line 1)))))))
+                   (when owner
+                     (unless (boundp 'pro-keys-provenance)
+                       (defvar pro-keys-provenance nil "Alist of (KEY . MODULE) provenance."))
+                     (push (cons key owner) pro-keys-provenance))))
+              (pro-keys--apply-row (nth 0 binding) (nth 1 binding) (nth 2 binding))))
+        (forward-line 1))))))
 
 (defun pro-keys-reload ()
   "Перезагрузить клавиши из системного и пользовательского слоёв." 

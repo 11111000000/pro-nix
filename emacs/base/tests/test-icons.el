@@ -2,7 +2,7 @@
 
 (require 'ert)
 
-(load-file (expand-file-name "../../modules/pro-ui.el" (file-name-directory (or load-file-name buffer-file-name))))
+(load-file (expand-file-name "../modules/pro-ui.el" (file-name-directory (or load-file-name buffer-file-name))))
 
 (ert-deftest pro-ui-font-check-fira-or-hack ()
   "Ensure at least one recommended patched icon font family is available." 

@@ -34,6 +34,7 @@
 - =C-c x= EXWM global
 - =C-c y= Yasnippet
 - =C-c v= Vterm helpers
+- =C-c g= Git
 - =C-c ,/= Last-change
 
 * Глобальные биндинги
@@ -57,6 +58,7 @@
 | Навигация | C-x C-b | pro/consult-buffer-other-window | buffer switch other |
 | Навигация | C-x y   | consult-yank-from-kill-ring   | yank                  |
 | Git       | C-x g   | pro-git-status                | git (Emacs-канон)     |
+| Git       | C-c g , | pro-git-dispatch              | magit dispatch        |
 | Проекты   | C-c p p | projectile-switch-project     | projectile project    |
 | Проекты   | C-c p P | projectile-find-file          | projectile file       |
 | Проекты   | C-c C-p | projectile-switch-project     | projectile project alias |
@@ -277,9 +279,10 @@ emacs/base/modules/pro-treemacs.el. Дочерние ключи автомати
 ** Reload / Config
 
 | Section | Key     | Command                | Note         |
-|---------+---------+------------------------+--------------|
+|---------+---------+------------------------|--------------|
 | UI      | <f5>    | pro/reload-config      | soft reload  |
 | UI      | C-x M-c | pro/reload-config      | soft reload alias|
+| UI      | C-c k   | pro-keys-reload        | reload keys  |
 
 ** Org-mode (=:org= локально)
 

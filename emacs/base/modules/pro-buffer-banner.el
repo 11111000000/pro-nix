@@ -43,7 +43,7 @@ branch without becoming intrusive."
   "Milliseconds between fade steps."
   :type 'integer :group 'pro-buffer-banner)
 
-(defcustom pro-buffer-banner-position :top
+(defcustom pro-buffer-banner-position :bottom
   "Where to show the banner relative to the selected window.
 `:top'    — at the top of the window.
 `:bottom' — at the bottom of the window."
