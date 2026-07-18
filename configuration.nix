@@ -217,6 +217,18 @@
   # module definitions can set a different value without an option conflict.
   security.sudo.wheelNeedsPassword = lib.mkDefault true;
 
+  # Ограничиваем параллелизм HTTP-загрузок в Nix-демоне. Дефолт (450 соединений)
+  # при сборке больших npm-deps графов (pi-acp и др.) вызывает HTTP/2 framing
+  # errors и TCP RST на cache.nixos.org / registry.npmjs.org — см. AGENTS.md
+  # §6 (июль 2026: flake-сборка huawei упала на linux-s390x fetch, тот же
+  # симптом — Stream error in the HTTP/2 framing layer). Умеренное ограничение
+  # снижает конкуренцию за стримы и убирает флапающие retries. Override через
+  # host-config допустим, если для конкретной машины нужно другое значение.
+  nix.settings.http-connections = lib.mkDefault 25;
+  # connect-timeout уже выставлен в 5s в /etc/nix/nix.conf (см. секцию daemon).
+  # Увеличим retries — флапающие HTTP/2 соединения требуют 2-3 попыток.
+  nix.settings.download-attempts = lib.mkDefault 5;
+
 # ──────────────────────────────────────────────────────────────────────────────
 # Раздел 5: Аппаратная поддержка и базовые сервисы
 #
@@ -295,12 +307,9 @@
     settings.experimental-features = [ "nix-command" "flakes" "cgroups" ];
     settings.connect-timeout = 5;
     settings.fallback = true;
-    # Use cgroups so Nix places build processes into cgroups and systemd
-    # resource controls (CPUQuota/MemoryMax) can be applied per-build.
     settings.use-cgroups = true;
-    # Limit parallel builds to a conservative number to avoid saturating CPU.
-    # Set to 2 for interactive responsiveness on typical desktop machines.
     settings.max-jobs = 2;
+    settings.cores = 2;
 # Substituters — порядок важен: Nix опрашивает все substituters параллельно
     # (binary cache race), но доверяет подписанным binaries только если
     # substituter есть в trusted-substituters И его ключ — в
@@ -309,25 +318,40 @@
     # ключом (mirror.nju.edu.cn подписан cache.nixos.org-1, см.
     # /5pn1p0p3a6yy5l2fbwrpyzhba92gi0fb.narinfo).
     #
-    # Cache.nixos.org — primary (~270 КБ/с на этой ноде, Range поддерживается).
-    # mirror.nju.edu.cn — fallback (медленнее, ~180 КБ/с, но иногда выигрывает
-    # race когда cache.nixos.org тормозит).
+    # Приоритеты бинарных кэшей. Российских публичных зеркал cache.nixos.org
+    # сейчас нет (mirror.yandex.ru отдаёт 404 на /nix-channels/, mccme.ru
+    # недоступен, nixos-redirector.cubieserver.de — TLS открывается но не
+    # отдаёт данные, fastly-фронт cache.nixos.org флапает HTTP/2 stream).
+    # Ближайшие живые академические зеркала (sync с cache.nixos.org, подписаны
+    # тем же ключом cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=):
+    #   1. mirror.sjtu.edu.cn — SJTU,    ~3.6s RTT, стабильный
+    #   2. mirror.nju.edu.cn  — NJU,     ~6s RTT
+    #   3. cache.nixos.org    — fastly CDN, иногда флапает HTTP/2
+    # ?priority=N: меньше = выше приоритет.
     #
-    # nix-mirror.freetls.fastly.net удалён: не подписан известным ключом
-    # (без ключа Nix не доверяет signed binaries → fetcher всегда fallback'ит
-    # на cache.nixos.org, но сам fact опроса fastly тормозит build).
+    # nix-mirror.freetls.fastly.net удалён: не подписан известным ключом.
     settings.substituters = lib.mkForce [
-      "https://cache.nixos.org"
-      "https://mirror.nju.edu.cn/nix-channels/store"
+      "https://mirror.sjtu.edu.cn/nix-channels/store?priority=10"
+      "https://mirror.nju.edu.cn/nix-channels/store?priority=20"
+      "https://cache.nixos.org?priority=30"
     ];
 
     settings.trusted-substituters = lib.mkForce [
-      "https://cache.nixos.org"
+      "https://mirror.sjtu.edu.cn/nix-channels/store"
       "https://mirror.nju.edu.cn/nix-channels/store"
+      "https://cache.nixos.org"
     ];
 
     settings.trusted-public-keys = lib.mkForce [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+    ];
+    settings.extra-substituters = [
+      "https://pi.cachix.org"
+      "https://nix-community.cachix.org"
+    ];
+    settings.extra-trusted-public-keys = [
+      "pi.cachix.org-1:lGeoGJaZ5ZDabuRzkcD5EBTNnDM4HJ1vqeOxlWk1Flk="
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
     ];
     gc = {
       automatic = true;
@@ -337,7 +361,8 @@
     optimise.automatic = true;
   };
 
-  # NOTE: nixpkgs config (eg. allowUnfree) should be provided by flake.nix
+  systemd.services.nix-daemon.serviceConfig.LimitNOFILE = "1048576";
+
   # via the nixpkgs import to avoid creating an externally-configured
   # instance during flake evaluation. See flake.nix:nixpkgsConfig.
 

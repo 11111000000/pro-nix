@@ -6,7 +6,9 @@
     ../../modules/pro-haskell.nix
   ];
 
-  networking.hostName = "huawei";
+  nix.settings.max-jobs = lib.mkForce 1;
+  nix.settings.cores = lib.mkForce 2;
+
 
   hardware.cpu.intel.updateMicrocode = true;
   hardware.firmware = [ pkgs.sof-firmware ];
