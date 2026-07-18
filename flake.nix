@@ -12,8 +12,7 @@
     pi.url = "github:lukasl-dev/pi.nix";
     pi.inputs.nixpkgs.follows = "nixpkgs";
     pi.inputs.systems.follows = "systems";
-    # Hermes agent (fork provided by user). Use SSH URL so private/forked repo works.
-    # nix-hermes removed
+
   };
 
   outputs = inputs@{ self, nixpkgs, home-manager, opencodeBwrap, pi, ... }:
@@ -59,10 +58,6 @@
       # opencode-bwrap sandbox wrapper. The overlay provides a real opencode
       # binary from npm (not a stub) so both direct CLI usage and bwrap work.
       opencodeBwrapModule = opencodeBwrap.homeManagerModules.default;
-      # Global modules to apply to all hosts
-      # If the nix-hermes input provides a NixOS module, enable it globally so
-      # Hermes is available on all hosts (hosts may still opt-out).
-      # Import the upstream pi NixOS module so its options are available.
       globalModules = [ pi.nixosModules.default ./modules/ssh-agent.nix ];
 
       mkHost = extraModules: nixpkgs.lib.nixosSystem {
