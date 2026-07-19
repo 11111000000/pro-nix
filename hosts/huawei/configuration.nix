@@ -6,6 +6,8 @@
     ../../modules/pro-haskell.nix
   ];
 
+  networking.hostName = "huawei";
+
   nix.settings.max-jobs = lib.mkForce 1;
   nix.settings.cores = lib.mkForce 2;
 
