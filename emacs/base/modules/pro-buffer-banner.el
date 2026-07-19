@@ -51,11 +51,13 @@ branch without becoming intrusive."
                  (const :tag "Bottom" :bottom))
   :group 'pro-buffer-banner)
 
-(defcustom pro-buffer-banner-margin 1
+(defcustom pro-buffer-banner-margin 4
   "Pixel margin from the window edge (top or bottom, depending on
-`pro-buffer-banner-position'). 1px — minimum gap, 0 means \"one line
+`pro-buffer-banner-position'). 1px — minimum visible gap, 0 means \"one line
 height\" of the parent frame's font (enough to clear the mode-line
-or first line of text)."
+or first line of text, but visually too far for an unobtrusive banner).
+Default 4px: leaves a clear gap above the mode-line without pushing the
+banner out of the window's visible area."
   :type 'integer :group 'pro-buffer-banner)
 
 (defcustom pro-buffer-banner-show-project t
@@ -84,8 +86,15 @@ still letting single switches through immediately."
   "Frame alpha (0-100) when the banner appears."
   :type 'integer :group 'pro-buffer-banner)
 
-(defcustom pro-buffer-banner-pad-chars 0
-  "Number of blank chars to pad around the text on each side."
+(defcustom pro-buffer-banner-pad-chars 2
+  "Number of blank chars to pad around the text on each side.
+
+Default 2: the banner's child frame is the *exact* size of the rendered
+text + this padding. With 0, the frame ends right at the last character
+and any pixel-level rendering difference (anti-aliasing, X11 cursor
+indicators) bleeds through. With 2, there is a clear visual margin on
+both sides, so the banner's dark background fully covers the area it
+sits on."
   :type 'integer :group 'pro-buffer-banner)
 
 (defcustom pro-buffer-banner-max-text-chars 80
@@ -300,7 +309,9 @@ than `pro-buffer-banner-max-text-chars'."
 ;; ---------------------------------------------------------------------------
 
 (defun pro-buffer-banner--compute-geometry (win text)
-  "Return a plist with :x :y :w-chars :h-chars :font for a banner showing TEXT above WIN."
+  "Return a plist with :x :y :w-chars :h-chars :pixel-w :pixel-h :font.
+The :pixel-w and :pixel-h are exact pixel sizes for the banner frame so
+the underlying child frame has no slack around the rendered text."
   (let* ((parent (selected-frame))
          ;; Position in pixels
          (left 0) (top 0) (right 0) (bottom 0))
@@ -310,40 +321,51 @@ than `pro-buffer-banner-max-text-chars'."
               top    (or (nth 1 edges) 0)
               right  (or (nth 2 edges) left)
               bottom (or (nth 3 edges) top))))
-    ;; Width in characters: pad + text + pad.  No safety margin: the
-    ;; banner font is set explicitly via `pro-buffer-banner--scaled-font'
-    ;; so the frame's char-width matches the rendered text width, and
-    ;; `pro-buffer-banner--populate' uses this exact width for padding.
-    ;; A non-zero safety margin would add trailing/leading spaces to the
-    ;; banner text.
-    (let* ((text-len (length text))
+    ;; Build a scaled font for the banner first; the banner frame's
+    ;; char-width depends on this font, so we need it before sizing.
+    (let* ((font (pro-buffer-banner--scaled-font parent))
+           ;; Measure scaled font in pixels. We don't yet have a live
+           ;; banner frame, but `font-get' on a font-spec gives us the
+           ;; point size; the actual pixel width comes from the
+           ;; font-driver. Approximate via the parent char-width scaled
+           ;; by `pro-buffer-banner-font-scale' — this is good enough
+           ;; because the scaled font has the same family/metrics as
+           ;; the parent's default face.
+           (scaled-char-w (max 1 (round (* pro-buffer-banner-font-scale
+                                           (frame-char-width parent)))))
+           (scaled-char-h (max 1 (round (* pro-buffer-banner-font-scale
+                                           (frame-char-height parent)))))
+           (text-len (length text))
            (pad (max 0 pro-buffer-banner-pad-chars))
            (w-chars (+ text-len pad pad))
            (h-chars 1)
+           ;; Pixel size of the banner frame: exact text + padding.
+           (frame-pixel-w (* w-chars scaled-char-w))
+           (frame-pixel-h (* h-chars scaled-char-h))
            (parent-pixel-w (max 1 (- right left)))
-           (char-w (max 1 (frame-char-width parent)))
-           (frame-pixel-w (* w-chars char-w))
            ;; Center horizontally in the parent window; clamp so we never
            ;; draw past the window edges.
            (x-raw (+ left (max 0 (/ (- parent-pixel-w frame-pixel-w) 2))))
            (x (min x-raw (max left (- right frame-pixel-w))))
            ;; Margin: 0 → "one line height" of the parent's default font.
+           ;; For :bottom we add a full char-height on top of the
+           ;; user-configured margin so the banner clears the mode-line
+           ;; (the mode-line lives in the last char-height of the window,
+           ;; and a floating banner drawn over it would otherwise overlap
+           ;; the cursor/percent indicators rendered on the right).
            (margin (if (> pro-buffer-banner-margin 0)
                        pro-buffer-banner-margin
                      (frame-char-height parent)))
-           ;; Banner pixel height (1 line of the scaled font).
-           (banner-pixel-h (* pro-buffer-banner-font-scale
-                              (frame-char-height parent)))
+           (bottom-clearance (+ margin (frame-char-height parent)))
            ;; Pick y based on `pro-buffer-banner-position'.
            (y-raw (if (eq pro-buffer-banner-position :bottom)
-                      (- bottom banner-pixel-h margin)
+                      (- bottom frame-pixel-h bottom-clearance)
                     (+ top margin)))
-           (y (max top (min y-raw (- bottom banner-pixel-h))))
-           ;; Build a scaled font for the banner so that `width' (in chars)
-           ;; and the rendered text use the same metrics.
-           (font (pro-buffer-banner--scaled-font parent)))
-      (list :x x :y y
+           (y (max top (min y-raw (- bottom frame-pixel-h)))))
+      (list :x (round x) :y (round y)
             :w-chars w-chars :h-chars h-chars
+            :pixel-w frame-pixel-w
+            :pixel-h frame-pixel-h
             :parent parent
             :font font))))
 
@@ -372,15 +394,24 @@ than `pro-buffer-banner-max-text-chars'."
         (y (plist-get geom :y))
         (w (plist-get geom :w-chars))
         (h (plist-get geom :h-chars))
+        (pixel-w (plist-get geom :pixel-w))
+        (pixel-h (plist-get geom :pixel-h))
         (font (plist-get geom :font)))
     `((parent-frame . ,parent)
       (left . ,x)
       (top . ,y)
       ;; Use the scaled font so char width matches the rendered text.
       (font . ,font)
-      ;; width/height are in CHARACTERS of the frame's font.
+      ;; width/height in CHARACTERS of the frame's font, plus an
+      ;; explicit pixel override. The char values are required for
+      ;; `make-frame' to compute initial size, but the `pixel-w' /
+      ;; `pixel-h' are reapplied immediately afterwards so the
+      ;; underlying X11 window matches the rendered text exactly.
       (width . ,w)
       (height . ,h)
+      (min-width . 1)
+      (min-height . 1)
+      (user-size . t)
       (minibuffer . nil)
       ;; WM-level: no decorations, no taskbar entry, bypass WM focus.
       (undecorated . t)
@@ -620,9 +651,16 @@ divided into `pro-buffer-banner-fade-steps' steps."
             (set-frame-parameter frame 'top  (plist-get geom :y))
             (set-frame-parameter frame 'min-width 1)
             (set-frame-parameter frame 'min-height 1)
-            (set-frame-parameter frame 'width  width-chars)
-            (set-frame-parameter frame 'height 1)
-            (condition-case _ (set-frame-size frame width-chars 1) (error nil))
+            ;; Force exact pixel size matching the rendered text. We
+            ;; set `width'/`height' (in chars) ONLY as a hint for the
+            ;; initial frame creation, then immediately override with
+            ;; pixel-precise values. The pixel size keeps the child
+            ;; frame flush with the text, so no light "halo" of empty
+            ;; pixels around the banner.
+            (let ((pixel-w (plist-get geom :pixel-w))
+                  (pixel-h (plist-get geom :pixel-h)))
+              (set-frame-parameter frame 'user-size t)
+              (condition-case _ (set-frame-size frame pixel-w pixel-h :pixels) (error nil)))
             ;; 4. Re-apply decoration stripping on every show: the
             ;; `set-frame-size'/parameter calls above can otherwise let
             ;; the tab/tool/menu bars grow back if the global
