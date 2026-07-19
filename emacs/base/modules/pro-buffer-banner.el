@@ -87,14 +87,23 @@ still letting single switches through immediately."
   :type 'integer :group 'pro-buffer-banner)
 
 (defcustom pro-buffer-banner-pad-chars 2
-  "Number of blank chars to pad around the text on each side.
+  "Number of blank chars to pad on the LEFT of the banner text.
 
-Default 2: the banner's child frame is the *exact* size of the rendered
-text + this padding. With 0, the frame ends right at the last character
-and any pixel-level rendering difference (anti-aliasing, X11 cursor
-indicators) bleeds through. With 2, there is a clear visual margin on
-both sides, so the banner's dark background fully covers the area it
-sits on."
+The banner's child frame is the *exact* size of the rendered text + this
+left padding + `pro-buffer-banner-right-pad-chars' on the right. The
+right side gets a separate, larger pad so the dark background fully
+covers the mode-line indicators on that side (buffer-identification,
+`%p', etc., which would otherwise peek out from behind the banner)."
+  :type 'integer :group 'pro-buffer-banner)
+
+(defcustom pro-buffer-banner-right-pad-chars 10
+  "Number of blank chars to pad on the RIGHT of the banner text.
+
+The mode-line carries variable-width text on the right (buffer name,
+position, mode indicators). With a symmetric pad, the centered banner
+ends mid-mode-line and those indicators bleed through. Pushing the
+right edge further out keeps the banner's dark background flush with
+the right edge of the mode-line content."
   :type 'integer :group 'pro-buffer-banner)
 
 (defcustom pro-buffer-banner-max-text-chars 80
@@ -103,10 +112,11 @@ it is truncated with a trailing \"...\" so the frame stays narrow and
 predictable. Set to 0 to disable truncation."
   :type 'integer :group 'pro-buffer-banner)
 
-(defcustom pro-buffer-banner-font-scale 0.7
+(defcustom pro-buffer-banner-font-scale 0.85
   "Scale factor for the banner font relative to the parent frame.
-0.7 means ~70% the size of the default font (≈ 1/1.5 reduction).
-1.0 means same size as the default."
+0.85 — close to the parent font but slightly smaller, so the banner
+reads at a glance but doesn't compete with the main text. 0.7 used
+to be the default but rendered too thin to read comfortably."
   :type 'number :group 'pro-buffer-banner)
 
 (defcustom pro-buffer-banner-theme-aware t
@@ -336,16 +346,20 @@ the underlying child frame has no slack around the rendered text."
            (scaled-char-h (max 1 (round (* pro-buffer-banner-font-scale
                                            (frame-char-height parent)))))
            (text-len (length text))
-           (pad (max 0 pro-buffer-banner-pad-chars))
-           (w-chars (+ text-len pad pad))
+           (pad-l (max 0 pro-buffer-banner-pad-chars))
+           (pad-r (max 0 pro-buffer-banner-right-pad-chars))
+           (w-chars (+ text-len pad-l pad-r))
            (h-chars 1)
            ;; Pixel size of the banner frame: exact text + padding.
            (frame-pixel-w (* w-chars scaled-char-w))
            (frame-pixel-h (* h-chars scaled-char-h))
            (parent-pixel-w (max 1 (- right left)))
-           ;; Center horizontally in the parent window; clamp so we never
-           ;; draw past the window edges.
-           (x-raw (+ left (max 0 (/ (- parent-pixel-w frame-pixel-w) 2))))
+           ;; Center the TEXT (not the whole frame) horizontally in the
+           ;; parent window. With asymmetric padding, the right side has
+           ;; more slack so the banner covers mode-line indicators on
+           ;; the right while the text stays centered.
+           (text-pixel-w (* text-len scaled-char-w))
+           (x-raw (+ left (max 0 (/ (- parent-pixel-w text-pixel-w) 2))))
            (x (min x-raw (max left (- right frame-pixel-w))))
            ;; Margin: 0 → "one line height" of the parent's default font.
            ;; For :bottom we add a full char-height on top of the
@@ -543,15 +557,21 @@ make the focus move deterministic regardless of WM behaviour."
 ;; Buffer content
 ;; ---------------------------------------------------------------------------
 
-(defun pro-buffer-banner--populate (text width-chars)
-  "Replace current-buffer contents with TEXT padded to WIDTH-CHARS and styled."
+(defun pro-buffer-banner--populate (text width-chars &optional pad-l pad-r)
+  "Replace current-buffer contents with TEXT padded to WIDTH-CHARS and styled.
+PAD-L spaces go on the left, PAD-R on the right. If PAD-L/PAD-R are
+nil, the total padding is split evenly."
   (let ((inhibit-read-only t)
         (inhibit-modification-hooks t)
-        (pad (max 0 (- width-chars (length text)))))
+        (total-pad (max 0 (- width-chars (length text))))
+        (left-pad (or pad-l (/ total-pad 2)))
+        (right-pad (or pad-r (- total-pad (or pad-l (/ total-pad 2))))))
     (erase-buffer)
+    (when (> left-pad 0)
+      (insert (propertize (make-string left-pad ?\s) 'face 'pro-buffer-banner-face)))
     (insert (propertize text 'face 'pro-buffer-banner-face))
-    (when (> pad 0)
-      (insert (propertize (make-string pad ?\s) 'face 'pro-buffer-banner-face)))
+    (when (> right-pad 0)
+      (insert (propertize (make-string right-pad ?\s) 'face 'pro-buffer-banner-face)))
     (setq-local cursor-type nil)
     (setq-local window-size-fixed t)
     (setq-local mode-line-format nil)
@@ -634,11 +654,13 @@ divided into `pro-buffer-banner-fade-steps' steps."
                (width-chars (plist-get geom :w-chars))
                (bufname (pro-buffer-banner--bufname))
                (frame (pro-buffer-banner--ensure-frame params width-chars)))
-          (when frame
-            ;; 1. Update text in-place (no recreation).
-            (let ((b (get-buffer-create bufname)))
-              (with-current-buffer b
-                (pro-buffer-banner--populate text width-chars))
+           (when frame
+             ;; 1. Update text in-place (no recreation).
+             (let ((b (get-buffer-create bufname)))
+               (with-current-buffer b
+                 (pro-buffer-banner--populate text width-chars
+                                             pro-buffer-banner-pad-chars
+                                             pro-buffer-banner-right-pad-chars))
               ;; 2. Attach buffer to the banner window if needed.
               (unless (eq (window-buffer (frame-selected-window frame)) b)
                 (save-selected-window
