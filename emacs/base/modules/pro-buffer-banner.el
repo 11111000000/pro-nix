@@ -96,14 +96,15 @@ covers the mode-line indicators on that side (buffer-identification,
 `%p', etc., which would otherwise peek out from behind the banner)."
   :type 'integer :group 'pro-buffer-banner)
 
-(defcustom pro-buffer-banner-right-pad-chars 10
+(defcustom pro-buffer-banner-right-pad-chars 5
   "Number of blank chars to pad on the RIGHT of the banner text.
 
 The mode-line carries variable-width text on the right (buffer name,
 position, mode indicators). With a symmetric pad, the centered banner
 ends mid-mode-line and those indicators bleed through. Pushing the
 right edge further out keeps the banner's dark background flush with
-the right edge of the mode-line content."
+the right edge of the mode-line content. 5 chars is enough to cover
+the right-side indicators without leaving a wide blank gap."
   :type 'integer :group 'pro-buffer-banner)
 
 (defcustom pro-buffer-banner-max-text-chars 80
