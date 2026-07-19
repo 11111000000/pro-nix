@@ -104,7 +104,8 @@ position, mode indicators). With a symmetric pad, the centered banner
 ends mid-mode-line and those indicators bleed through. Pushing the
 right edge further out keeps the banner's dark background flush with
 the right edge of the mode-line content. 5 chars is enough to cover
-the right-side indicators without leaving a wide blank gap."
+the right-side indicators (`$'/position/mode-name) without leaving
+a wide blank gap."
   :type 'integer :group 'pro-buffer-banner)
 
 (defcustom pro-buffer-banner-max-text-chars 80
@@ -306,7 +307,12 @@ than `pro-buffer-banner-max-text-chars'."
                       (list (pro-buffer-banner--truncate bname max)
                             (and proj (pro-buffer-banner--truncate (format "[%s]" proj) max))
                             (and branch (pro-buffer-banner--truncate (format "(%s)" branch) max))))))
-    (pro-buffer-banner--truncate (string-join parts "  ") max)))
+    ;; `string-join' with "  " would leave a 2-space gap if any middle
+    ;; part is empty, so collapse runs of whitespace to a single space
+    ;; before truncating.
+    (pro-buffer-banner--truncate
+     (replace-regexp-in-string "[ \t]+" " " (string-trim (string-join parts "  ")))
+     max)))
 
 (defun pro-buffer-banner--bufname ()
   "Return the name of the buffer backing the banner, creating it lazily."
@@ -355,12 +361,14 @@ the underlying child frame has no slack around the rendered text."
            (frame-pixel-w (* w-chars scaled-char-w))
            (frame-pixel-h (* h-chars scaled-char-h))
            (parent-pixel-w (max 1 (- right left)))
-           ;; Center the TEXT (not the whole frame) horizontally in the
-           ;; parent window. With asymmetric padding, the right side has
-           ;; more slack so the banner covers mode-line indicators on
-           ;; the right while the text stays centered.
-           (text-pixel-w (* text-len scaled-char-w))
-           (x-raw (+ left (max 0 (/ (- parent-pixel-w text-pixel-w) 2))))
+           ;; Center the banner (text + padding) horizontally in the
+           ;; parent window; clamp so we never draw past the window
+           ;; edges. The dark background covers a centered slice of
+           ;; the mode-line; on the left it covers buffer-id, on the
+           ;; right it covers %p/mode-name (the pad on the right is
+           ;; wider because those indicators tend to be longer than
+           ;; the buffer-id on the left).
+           (x-raw (+ left (max 0 (/ (- parent-pixel-w frame-pixel-w) 2))))
            (x (min x-raw (max left (- right frame-pixel-w))))
            ;; Margin: 0 → "one line height" of the parent's default font.
            ;; For :bottom we add a full char-height on top of the
@@ -560,13 +568,19 @@ make the focus move deterministic regardless of WM behaviour."
 
 (defun pro-buffer-banner--populate (text width-chars &optional pad-l pad-r)
   "Replace current-buffer contents with TEXT padded to WIDTH-CHARS and styled.
-PAD-L spaces go on the left, PAD-R on the right. If PAD-L/PAD-R are
-nil, the total padding is split evenly."
+PAD-L spaces go on the left, PAD-R on the right. If both PAD-L and
+PAD-R are zero, the padding is split evenly to center the text in the
+frame."
   (let ((inhibit-read-only t)
         (inhibit-modification-hooks t)
         (total-pad (max 0 (- width-chars (length text))))
-        (left-pad (or pad-l (/ total-pad 2)))
-        (right-pad (or pad-r (- total-pad (or pad-l (/ total-pad 2))))))
+        (split-p (and (zerop (or pad-l 0)) (zerop (or pad-r 0))))
+        (left-pad (if (and (zerop (or pad-l 0)) (zerop (or pad-r 0)))
+                      (/ total-pad 2)
+                    (or pad-l 0)))
+        (right-pad (if (and (zerop (or pad-l 0)) (zerop (or pad-r 0)))
+                       (- total-pad (/ total-pad 2))
+                     (or pad-r 0))))
     (erase-buffer)
     (when (> left-pad 0)
       (insert (propertize (make-string left-pad ?\s) 'face 'pro-buffer-banner-face)))
