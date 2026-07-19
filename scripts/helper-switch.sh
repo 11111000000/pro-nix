@@ -37,6 +37,11 @@ fi
 
 if [ ! -f "./hosts/$HOST_ARG/configuration.nix" ]; then
   echo "No config: ./hosts/$HOST_ARG/configuration.nix" >&2
+  echo "Available hosts:" >&2
+  for h in ./hosts/*/configuration.nix; do
+    [ -f "$h" ] || continue
+    echo "  just switch $(basename "$(dirname "$h")")" >&2
+  done
   exit 1
 fi
 
