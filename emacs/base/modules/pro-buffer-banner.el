@@ -187,7 +187,7 @@ fg/bg attributes are not specified (e.g. before any theme loads)."
                fallback-bg)))
     (cons fg bg)))
 
-(defun pro-buffer-banner--apply-theme-face ()
+(defun pro-buffer-banner--apply-theme-face (&rest _)
   "Recompute `pro-buffer-banner-face' from the current `default' face.
 
 Banner background = default foreground (text color of the parent frame).
@@ -205,21 +205,21 @@ No-op when `pro-buffer-banner-theme-aware' is nil."
        :background default-fg
        :weight 'bold
        :extend t
-       :height pro-buffer-banner-font-scale))
-    ;; The face symbol is used by `pro-buffer-banner--populate' via
-    ;; `propertize'; updating the face definition refreshes all text
-    ;; in the banner buffer automatically.  Force a redraw so the new
-    ;; colors are visible immediately.  The `boundp' guards make this
-    ;; callable before the Internal state section is loaded (e.g. from
-    ;; the top-level call right after the function is defined).
-    (when (and (boundp 'pro-buffer-banner--bufname)
-               (stringp pro-buffer-banner--bufname)
-               (get-buffer pro-buffer-banner--bufname))
-      (with-current-buffer (get-buffer pro-buffer-banner--bufname)
-        (force-mode-line-update t)))
-    (when (and (boundp 'pro-buffer-banner--frame)
-               (frame-live-p pro-buffer-banner--frame))
-      (force-mode-line-update t))))
+       :height pro-buffer-banner-font-scale)))
+  ;; The face symbol is used by `pro-buffer-banner--populate' via
+  ;; `propertize'; updating the face definition refreshes all text
+  ;; in the banner buffer automatically.  Force a redraw so the new
+  ;; colors are visible immediately.  The `boundp' guards make this
+  ;; callable before the Internal state section is loaded (e.g. from
+  ;; the top-level call right after the function is defined).
+  (when (and (boundp 'pro-buffer-banner--bufname)
+             (stringp pro-buffer-banner--bufname)
+             (get-buffer pro-buffer-banner--bufname))
+    (with-current-buffer (get-buffer pro-buffer-banner--bufname)
+      (force-mode-line-update t)))
+  (when (and (boundp 'pro-buffer-banner--frame)
+             (frame-live-p pro-buffer-banner--frame))
+    (force-mode-line-update t)))
 
 ;; Apply on first load so the banner is theme-aware from the start.
 (pro-buffer-banner--apply-theme-face)
