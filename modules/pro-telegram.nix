@@ -48,15 +48,10 @@ let
   # Wrapper scripts — генерируются в Nix store, доступны как
   # $PATH entries через environment.systemPackages.
 
+  detectScript = ./../scripts/telegram-tor-detect-host.sh;
+
   # Сниппет, вставляемый в начало wrappers. Подтягивает PRO_TELEGRAM_TOR_HOST/PORT
   # из autodetect если они не заданы явно.
-  #
-  # Поведение:
-  #   - Если socksHost задан пользователем явно (отличается от default 127.0.0.1)
-  #     или detectHost=false — autodetect не запускается, используется cfg.socksHost.
-  #   - Иначе (socksHost=127.0.0.1 И detectHost=true):
-  #     PRO_TELEGRAM_TOR_HOST из env > autodetect (gateway → local).
-  autodetectSnippet = if (cfg.socksHost == "127.0.0.1" && cfg.detectHost) then ''
   #
   # Поведение:
   #   - Если socksHost задан пользователем явно (отличается от default 127.0.0.1)
