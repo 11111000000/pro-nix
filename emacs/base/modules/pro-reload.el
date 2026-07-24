@@ -3,8 +3,8 @@
 ;; Кратко: безопасные helper-функции для перезагрузки модулей, фоновых обновлений и управления сессией.
 ;;
 ;; Контракт:
-;; - pro/reload-module, pro/reload-all-modules, pro/update-melpa-in-background, pro/nix-generate-and-refresh-paths,
-;;   pro/session-save-and-restart-emacs — публичные API этого файла.
+;; - pro/reload-module, pro/reload-file, pro/reload-all-modules, pro/update-melpa-in-background,
+;;   pro/nix-generate-and-refresh-paths, pro/session-save-and-restart-emacs — публичные API этого файла.
 ;; - Все функции должны быть idempotent и не ломать текущую сессию при ошибках (используют ignore-errors/condition-case).
 ;; - Побочные эффекты: запуск фоновых процессов, запись файлов сессий, модификация load-path.
 ;;
@@ -59,6 +59,29 @@ MODULE может быть символом или строкой (наприм�
                    pro-emacs-base-system-modules-dir))
          (path (and dir (expand-file-name (format "%s.el" name) dir))))
     (and path (file-readable-p path) path)))
+
+(defun pro--file-custom-variables (file)
+  "Return variables declared by top-level `defcustom' forms in FILE."
+  (with-temp-buffer
+    (insert-file-contents file)
+    (let (variables form)
+      (condition-case nil
+          (while t
+            (setq form (read (current-buffer)))
+            (when (and (consp form)
+                       (eq (car form) 'defcustom)
+                       (symbolp (cadr form)))
+              (push (cadr form) variables)))
+        (end-of-file))
+      variables)))
+
+(defun pro--reset-file-custom-variables (file)
+  "Clear current values of custom variables declared in FILE."
+  (dolist (variable (pro--file-custom-variables file))
+    (makunbound variable)
+    (put variable 'saved-value nil)
+    (put variable 'customized-value nil)
+    (put variable 'force-value nil)))
 
 (defun pro--forget-file-in-load-history (file)
   "Remove all load-history entries whose file is FILE (or its .elc).
@@ -137,7 +160,41 @@ MODULE — символ или строка. Возвращает t при ус�
            (load-file file)
            (message "reloaded module %s" module)
            t)
-        (error (message "error reloading %s: %S" module err) nil)))))
+         (error (message "error reloading %s: %S" module err) nil)))))
+
+(defun pro/reload-file (file)
+  "Reload FILE (.el) — re-run all top-level forms in current Emacs session.
+
+Алгоритм:
+  1. Находятся top-level `defcustom'; их runtime-, saved- и customized-
+     значения очищаются, чтобы новые initializer-формы стали текущими.
+  2. Удаляется устаревший .elc, если исходный .el новее.
+  3. `pro--forget-file-in-load-history' удаляет записи файла и его .elc.
+  4. `load-file' перечитывает .el и выполняет все top-level формы заново.
+
+Если в `load-history' нет записи (файл ни разу не загружался,
+например, скрипт без `provide'), шаги 1–2 безвредно no-op'ятся.
+
+Возвращает t при успехе, nil при ошибке. Используется командами
+`pro/dired-reload-elisp-here', `pro/dired-reload-elisp-dir-recursive'
+и `pro/lisp-reload-buffer'."
+  (interactive "fReload .el file: ")
+  (let ((file (expand-file-name file)))
+    (unless (string-suffix-p ".el" file)
+      (user-error "pro/reload-file: not a .el file: %s" file))
+    (condition-case err
+        (progn
+          (let ((elc (concat (file-name-sans-extension file) ".elc")))
+            (when (and (file-exists-p elc)
+                       (file-newer-than-file-p file elc))
+              (delete-file elc)
+              (message "pro/reload-file: removed stale %s" elc)))
+          (pro--reset-file-custom-variables file)
+          (pro--forget-file-in-load-history file)
+          (load-file file)
+          (message "pro/reload-file: reloaded %s" file)
+          t)
+      (error (message "pro/reload-file: failed for %s: %S" file err) nil))))
 
 (defun pro/reload-all-modules ()
   "Перезагрузить все модули из `pro-emacs-base-default-modules'."
