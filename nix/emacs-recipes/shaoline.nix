@@ -2,7 +2,7 @@
 
 stdenv.mkDerivation rec {
   pname = "shaoline";
-  version = "3.3.7";
+  version = "3.3.8";
   src = ../../submodules/shaoline;
 
   nativeBuildInputs = [ emacs ];
