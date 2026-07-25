@@ -58,7 +58,7 @@
 | Навигация | C-x C-b | pro/consult-buffer-other-window | buffer switch other |
 | Навигация | C-x y   | consult-yank-from-kill-ring   | yank                  |
 | Git       | C-x g   | pro-git-status                | git (Emacs-канон)     |
-| Git       | C-c g , | pro-git-dispatch              | magit dispatch        |
+| Git       | C-c g   | pro-git-status                | magit status          |
 | Проекты   | C-c p p | projectile-switch-project     | projectile project    |
 | Проекты   | C-c p P | projectile-find-file          | projectile file       |
 | Проекты   | C-c C-p | projectile-switch-project     | projectile project alias |

@@ -39,7 +39,7 @@ EMACSLOADPATH, который Nix выставляет автоматическ�
   :type '(choice (const minimal) (const shaoline) (const doom))
   :group 'pro-ui-modeline)
 
-(defcustom pro-ui-shaoline-strategy 'adaptive
+(defcustom pro-ui-shaoline-strategy 'yang
   "Стратегия shaoline-mode.
 - 'yin — обновления только по явному вызову `shaoline-update'. Минимум
   активности, mode-line статичен между ручными апдейтами.

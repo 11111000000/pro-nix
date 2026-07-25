@@ -11,20 +11,82 @@ Set to nil to disable."
 (when pro-dired-enable
   (when (require 'dired nil t)
     
+    (defun pro/dired-reload-elisp-here ()
+      "Byte-compile and reload the .el file at point in dired.
+
+Использует `pro/reload-file' — гарантирует реальное перевыполнение
+top-level-форм (`defvar', `defcustom', `defun', `add-hook', и т.п.)
+в текущей сессии Emacs, без рестарта."
+      (interactive)
+      (let ((file (dired-get-filename)))
+        (unless (string-match-p "\\.el\\'" file)
+          (user-error "Not an .el file: %s" file))
+        (pro/reload-file file)
+        (message "Reloaded %s" file)))
+
+    (defun pro/dired-reload-elisp-dir-recursive ()
+      "Рекурсивно byte-compile и reload всех .el в текущей папке dired.
+
+Обход делается рекурсивно (`directory-files-recursively'), но
+пропускаются каталоги, имя компоненты пути которых начинается с
+`.git' / `.dir-locals' / `.vscode' / `.idea' / `.cache' / `.stack-work'
+— чтобы случайно не дёрнуть чужой код. Каждый .el обрабатывается
+через `pro/reload-file' — top-level формы реально перевыполняются.
+
+Если на каком-то файле load падает — он пропускается, обход
+продолжается. По окончании выводит итог: N ok, M failed."
+      (interactive)
+      (let* ((dir (or (and (fboundp 'dired-current-directory)
+                           (dired-current-directory))
+                      default-directory))
+             (files (directory-files-recursively
+                     dir "\\.el\\'" nil
+                     ;; Не лезть в служебные / сборочные каталоги.
+                     (lambda (name)
+                       (let ((base (file-name-nondirectory name)))
+                         (not (string-match-p
+                               "^[.]\\(git\\|dir-locals\\|vscode\\|idea\\|cache\\|stack-work\\|cabal\\|ghc\\.environment\\)$"
+                               base))))))
+             (ok 0) (fail 0) (failed-names '()))
+        (dolist (f files)
+          (condition-case err
+              (progn (pro/reload-file f) (setq ok (1+ ok)))
+            (error
+             (setq fail (1+ fail))
+             (push (file-name-nondirectory f) failed-names))))
+        (message "pro/dired-reload-elisp-dir: %d ok, %d failed in %s%s"
+                 ok fail dir
+                 (if failed-names
+                     (concat " (failed: "
+                             (mapconcat #'identity (nreverse failed-names) ", ")
+                             ")")
+                   ""))))
+
     ;; basic keybindings and hooks
-    (with-eval-after-load 'dired
-      (let ((map (current-global-map)))
-        ;; Do not impose global keys; configure dired-mode-map instead
-        (when (boundp 'dired-mode-map)
-          (define-key dired-mode-map (kbd "j") #'dired-next-line)
-          (define-key dired-mode-map (kbd "k") #'dired-previous-line)
-          (define-key dired-mode-map (kbd "l") #'dired-find-file)
-          (define-key dired-mode-map (kbd "f") #'dired-find-file)
-          (define-key dired-mode-map (kbd "o") #'dired-find-file)
-          (define-key dired-mode-map (kbd "RET") #'dired-find-file)
-          (define-key dired-mode-map (kbd "h") #'dired-up-directory)
-          (define-key dired-mode-map (kbd "^") #'dired-up-directory)
-          (define-key dired-mode-map (kbd "C-c r") #'pro/dired-reload-elisp-here))))
+    ;;
+    ;; Привязки делаем через `dired-mode-hook' instead of
+    ;; `with-eval-after-load 'dired' — последнее работает только на
+    ;; момент загрузки `pro-dired'. Если позже подключается `dired-x'
+    ;; или `wdired', их define-key может перетереть наши. Через hook
+    ;; привязки ставятся на КАЖДЫЙ dired-буфер и перебить их гораздо
+    ;; сложнее.
+    (defun pro-dired--install-keys ()
+      "Установить pro-dired keybindings в текущем dired-буфере."
+      (when (derived-mode-p 'dired-mode)
+        (define-key dired-mode-map (kbd "j") #'dired-next-line)
+        (define-key dired-mode-map (kbd "k") #'dired-previous-line)
+        (define-key dired-mode-map (kbd "l") #'dired-find-file)
+        (define-key dired-mode-map (kbd "f") #'dired-find-file)
+        (define-key dired-mode-map (kbd "o") #'dired-find-file)
+        (define-key dired-mode-map (kbd "RET") #'dired-find-file)
+        (define-key dired-mode-map (kbd "h") #'dired-up-directory)
+        (define-key dired-mode-map (kbd "^") #'dired-up-directory)
+        (define-key dired-mode-map (kbd "C-c r") #'pro/dired-reload-elisp-here)
+        (define-key dired-mode-map (kbd "C-c C-r") #'pro/dired-reload-elisp-dir-recursive)))
+    (add-hook 'dired-mode-hook #'pro-dired--install-keys)
+    ;; Если dired уже загружен и есть открытые буферы — применить сразу.
+    (when (and (boundp 'dired-mode-map) (fboundp 'dired-mode))
+      (pro-dired--install-keys))
 
     ;; Hooks and settings
     (add-hook 'dired-mode-hook #'dired-hide-details-mode)
