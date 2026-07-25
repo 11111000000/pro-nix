@@ -1,0 +1,29 @@
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--browser-url=http://127.0.0.1:9222"
+      ],
+      "directTools": true,
+      "lifecycle": "keep-alive"
+    },
+    "emcp": {
+      "_comment": "EMCP — MCP-сервер в Emacs. URL должен совпадать с emacs/base/modules/pro-emcp.el:pro-emcp-server-port (default 38913). Профиль по умолчанию `full-control` (inspect + get/set-variable + screenshot + eval + send-keys). `eval`/`send-keys` гейтнуты политикой 'ask' — каждый вызов подтверждается в `*EMCP confirm*`.",
+      "url": "http://127.0.0.1:38913/mcp"
+    },
+    "anvil": {
+      "_comment": "anvil.el — MCP-сервер в Elisp (~40 default tools: file / org / elisp / sqlite / shell). Запускается локально через `M-x pro-ai-anvil-server-start` в Emacs. Profile по умолчанию: `default` (file/org/elisp/sqlite, без memory и orchestrator).",
+      "_status": "experimental — stdio bridge (pro-ai-anvil--stdio-loop) не реализован; пока используйте `emcp` для file/org/eval операций или активируйте anvil в Emacs вручную. Подробнее: local-templates/skills/emacs-anvil/SKILL.md и emacs/base/modules/pro-ai-anvil.el. Получить готовый JSON-фрагмент: M-x pro-ai-anvil-describe-setup.",
+      "command": "emacsclient",
+      "args": [
+        "--eval",
+        "(pro-ai-anvil--stdio-loop)"
+      ],
+      "directTools": true,
+      "lifecycle": "keep-alive"
+    }
+  }
+}

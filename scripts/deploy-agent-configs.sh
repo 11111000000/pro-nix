@@ -14,10 +14,12 @@ set -euo pipefail
 TEMPLATES_DIR="$(cd "$(dirname "$0")/.." && pwd)/local-templates"
 CONFIG_OPENCODE_DIR="$HOME/.config/opencode"
 CONFIG_PI_DIR="$HOME/.pi/agent"
+CONFIG_KIMI_CODE_DIR="$HOME/.kimi-code"
 PROJECT_PI_DIR="$PWD/.pi"
 
 mkdir -p "$CONFIG_OPENCODE_DIR"
 mkdir -p "$CONFIG_PI_DIR"
+mkdir -p "$CONFIG_KIMI_CODE_DIR"
 
 copy_if_missing(){
   local src="$1" dst="$2"
@@ -59,6 +61,10 @@ copy_if_missing "$TEMPLATES_DIR/pi/models.json"   "$CONFIG_PI_DIR/models.json"
 copy_if_missing "$TEMPLATES_DIR/pi/mcp.json"      "$CONFIG_PI_DIR/mcp.json"
 copy_if_missing "$TEMPLATES_DIR/pi/settings.json" "$CONFIG_PI_DIR/settings.json"
 copy_tree_if_missing "$TEMPLATES_DIR/pi/skills"    "$CONFIG_PI_DIR/skills"
+
+# --- Kimi Code CLI (user-global) ---
+echo "[deploy] Deploying Kimi Code CLI config..."
+copy_if_missing "$TEMPLATES_DIR/kimi-code/mcp.json" "$CONFIG_KIMI_CODE_DIR/mcp.json"
 
 # --- Project-local .pi (only if .pi does not yet exist) ---
 echo "[deploy] Deploying project .pi (if missing)..."

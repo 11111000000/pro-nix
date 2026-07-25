@@ -637,7 +637,8 @@ just network-contract
 
 | Что | Где | Как деплоится |
 |-----|-----|---------------|
-| Шаблоны конфигов (source of truth) | `local-templates/{pi,opencode}/` | коммитятся |
+| Шаблоны конфигов (source of truth) | `local-templates/{pi,opencode,kimi-code}/` | коммитятся |
+| Kimi Code CLI MCP | `local-templates/kimi-code/mcp.json` → `~/.kimi-code/mcp.json` | `scripts/deploy-agent-configs.sh` / `nixos-rebuild switch` |
 | Активация на новой машине | `modules/pro-agent-configs.nix` (`home.activation.pro-agent-configs-deploy`) | `nixos-rebuild switch` |
 | Shell-аналог (для не-NixOS и быстрого форса) | `scripts/deploy-agent-configs.sh` | `just deploy-agents` |
 | npm-пакеты (pi-mcp-adapter и др.) | `local-templates/pi/settings.json` → `~/.pi/agent/settings.json` | `scripts/install-pi-packages.sh` |

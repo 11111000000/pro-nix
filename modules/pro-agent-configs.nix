@@ -33,6 +33,10 @@ let
       src = "local-templates/pi/settings.json";
       dst = ".pi/agent/settings.json";
     }
+    {
+      src = "local-templates/kimi-code/mcp.json";
+      dst = ".kimi-code/mcp.json";
+    }
   ];
 
   # Directory trees to deploy (if any file is missing, copy the whole tree).
