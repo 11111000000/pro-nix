@@ -107,14 +107,17 @@ Tor доступен (см. scripts/check-tor-socks.sh)."
     (customize-set-variable 'telega-chat-fill-column pro/chat-fill-column)
     (customize-set-variable 'telega-chat-history-limit pro/chat-history-limit)
     (customize-set-variable 'telega-emoji-font-family pro/chat-emoji-font-family)
-    ;; Tor-conditional telega-server проксирование. Не трогаем если
-    ;; TOR выключен через `pro/chat-use-tor = nil' или бинарь не найден.
-    (when (and pro/chat-use-tor
-               (not telega-use-docker)  ; Не вмешиваемся в docker-путь
-               (locate-file "telega-server-tor-launch" exec-path
-                            exec-suffixes 'file-executable-p)))
-      (customize-set-variable 'telega-server-command
-                             "telega-server-tor-launch")))
+    ;; Tor-conditional telega-server проксирование.
+    ;; Если docker активен — сбрасываем telega-server-command на дефолт,
+    ;; потому что telega-server-tor-launch не существует внутри контейнера.
+    ;; Если docker не активен — перенаправляем на tor-wrapper если доступен.
+    (if telega-use-docker
+        (customize-set-variable 'telega-server-command "telega-server")
+      (when (and pro/chat-use-tor
+                 (locate-file "telega-server-tor-launch" exec-path
+                              exec-suffixes 'file-executable-p))
+        (customize-set-variable 'telega-server-command
+                                "telega-server-tor-launch"))))
 
 (defun pro/chat--install-hooks ()
   "Подключить локальные хуки telega. Вызывать после (require 'telega).
@@ -204,11 +207,15 @@ Tor доступен (см. scripts/check-tor-socks.sh)."
 Полезно когда Tor стал available после загрузки telega.el и `customize-saved-variable'
 не подхватывает path автоматически."
   (interactive)
-  (if (pro/chat--tor-wrapper-p)
-      (progn
-        (customize-set-variable 'telega-server-command "telega-server-tor-launch")
-        (message "[pro-chat] telega-server-command → telega-server-tor-launch"))
-    (message "[pro-chat] wrapper не найден в PATH — check NixOS rebuild")))
+  (cond
+   (telega-use-docker
+    (customize-set-variable 'telega-server-command "telega-server")
+    (message "[pro-chat] docker активен — telega-server-command → telega-server"))
+   ((pro/chat--tor-wrapper-p)
+    (customize-set-variable 'telega-server-command "telega-server-tor-launch")
+    (message "[pro-chat] telega-server-command → telega-server-tor-launch"))
+   (t
+    (message "[pro-chat] wrapper не найден в PATH — check NixOS rebuild"))))
 
 ;; -------------------------------------------------------------------
 ;; Публичные команды
