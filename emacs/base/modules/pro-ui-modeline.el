@@ -68,6 +68,19 @@ EMACSLOADPATH, который Nix выставляет автоматическ�
 симптом «запускается но не показывается»."
   (setq shaoline-mode-strategy pro-ui-shaoline-strategy))
 
+(defun pro-ui--shaoline-yield-minibuffer (orig &rest _args)
+  "Belt-and-braces: do not let shaoline write to the echo area while
+a minibuffer is active. Upstream shaoline already bails in the
+`yang' reassert and timer paths, but `shaoline--display-cached'
+(echoed out by `focus-in-hook' and `window-selection-change-functions'
+on a 0.1 s timer) historically did not re-check minibuffer state.
+The submodule patch (667bc16 + 1) closes that, but we keep this
+advice so pro does not regress if someone toggles the upstream
+patch or re-introduces a leaky path."
+  (if (or (active-minibuffer-window) (> (minibuffer-depth) 0))
+      nil
+    (apply orig _args)))
+
 (defun pro-ui--enable-shaoline-if-available ()
   "Включает shaoline, если выбран стиль 'shaoline' и пакет доступен.
 Функция безопасна к вызову в ранней инициализации — использует require с
@@ -75,7 +88,12 @@ nil t и with-eval-after-load для отложенной настройки."
   (when (and (eq pro-ui-modeline-style 'shaoline) (require 'shaoline nil t))
     (with-eval-after-load 'shaoline
       (pro-ui--apply-shaoline-strategy)
-      (when (fboundp 'shaoline-mode) (shaoline-mode 1)))))
+      (when (fboundp 'shaoline-mode) (shaoline-mode 1))
+      ;; Page through shaoline's display functions so the empty
+      ;; quarter-frame mini-window never gets painted (see AGENTS.md).
+      (advice-add 'shaoline--display :around #'pro-ui--shaoline-yield-minibuffer)
+      (advice-add 'shaoline--display-cached :around #'pro-ui--shaoline-yield-minibuffer)
+      (advice-add 'shaoline--reassert-yang-visibility :around #'pro-ui--shaoline-yield-minibuffer))))
 
 (defun pro-ui--enable-doom-if-available ()
   "Включает doom-modeline, если выбран стиль 'doom' и пакет доступен.
