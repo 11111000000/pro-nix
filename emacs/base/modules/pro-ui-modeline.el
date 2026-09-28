@@ -11,6 +11,8 @@
 ;; Last reviewed: 2026-05-03
 ;;
 
+(require 'pro-compat)
+
 (defgroup pro-ui-modeline nil
   "Настройки модельного слоя для pro UI.")
 
@@ -39,15 +41,18 @@ EMACSLOADPATH, который Nix выставляет автоматическ�
   :type '(choice (const minimal) (const shaoline) (const doom))
   :group 'pro-ui-modeline)
 
-(defcustom pro-ui-shaoline-strategy 'adaptive
+(defcustom pro-ui-shaoline-strategy 'yang
   "Стратегия shaoline-mode.
 - 'yin — обновления только по явному вызову `shaoline-update'. Минимум
   активности, mode-line статичен между ручными апдейтами.
 - 'yang — полная активность: post-command-hook, advice, таймеры,
-  echo-area-reassert. Максимально отзывчиво, но склонно «мигать»
-  echo-area при любом (message ...).
+  echo-area-reassert. Максимально отзывчиво. Shaoline уступает echo-area
+  при активном минибуфере; на выходе из него восстанавливается
+  через `minibuffer-exit-hook' (см. `pro-ui--shaoline-restore-after-minibuffer').
 - 'adaptive — компромисс: debounce + rate-limit + context-monitoring
-  внутри shaoline (см. shaoline-strategy.el). Без внешних таймеров."
+  внутри shaoline (см. shaoline-strategy.el). Без внешних таймеров,
+  но без 'always-visible' — после выхода из минибуфера shaoline не
+  возвращается, пока что-то не изменилось."
   :type '(choice (const yin) (const adaptive) (const yang))
   :group 'pro-ui-modeline)
 
@@ -68,18 +73,18 @@ EMACSLOADPATH, который Nix выставляет автоматическ�
 симптом «запускается но не показывается»."
   (setq shaoline-mode-strategy pro-ui-shaoline-strategy))
 
-(defun pro-ui--shaoline-yield-minibuffer (orig &rest _args)
-  "Belt-and-braces: do not let shaoline write to the echo area while
-a minibuffer is active. Upstream shaoline already bails in the
-`yang' reassert and timer paths, but `shaoline--display-cached'
-(echoed out by `focus-in-hook' and `window-selection-change-functions'
-on a 0.1 s timer) historically did not re-check minibuffer state.
-The submodule patch (667bc16 + 1) closes that, but we keep this
-advice so pro does not regress if someone toggles the upstream
-patch or re-introduces a leaky path."
-  (if (or (active-minibuffer-window) (> (minibuffer-depth) 0))
-      nil
-    (apply orig _args)))
+(defun pro-ui--shaoline-restore-after-minibuffer ()
+  "Re-paint Shaoline's echo-area line as soon as a minibuffer session ends.
+
+Upstream Shaoline (yang strategy) deliberately yields the echo area
+to the active minibuffer via `shaoline--should-yield-for-minibuffer-p'.
+When the minibuffer closes, `shaoline--reassert-yang-visibility' only
+fires when the composed state actually changes; if nothing changes
+between the M-x prompt and the post-minibuffer moment (the common
+case), Shaoline stays blank. Force one re-assert here."
+  (when (and (bound-and-true-p shaoline-mode)
+             (fboundp 'shaoline-update))
+    (shaoline-update t)))
 
 (defun pro-ui--enable-shaoline-if-available ()
   "Включает shaoline, если выбран стиль 'shaoline' и пакет доступен.
@@ -89,11 +94,11 @@ nil t и with-eval-after-load для отложенной настройки."
     (with-eval-after-load 'shaoline
       (pro-ui--apply-shaoline-strategy)
       (when (fboundp 'shaoline-mode) (shaoline-mode 1))
-      ;; Page through shaoline's display functions so the empty
-      ;; quarter-frame mini-window never gets painted (see AGENTS.md).
-      (advice-add 'shaoline--display :around #'pro-ui--shaoline-yield-minibuffer)
-      (advice-add 'shaoline--display-cached :around #'pro-ui--shaoline-yield-minibuffer)
-      (advice-add 'shaoline--reassert-yang-visibility :around #'pro-ui--shaoline-yield-minibuffer))))
+      ;; Make sure Shaoline reappears the moment a minibuffer session ends.
+      ;; minibuffer-exit-hook runs *after* the minibuffer window is gone, so
+      ;; `shaoline--reassert-yang-visibility' will not yield to it.
+      (pro-compat--add-hook-once 'minibuffer-exit-hook
+                                 #'pro-ui--shaoline-restore-after-minibuffer))))
 
 (defun pro-ui--enable-doom-if-available ()
   "Включает doom-modeline, если выбран стиль 'doom' и пакет доступен.
