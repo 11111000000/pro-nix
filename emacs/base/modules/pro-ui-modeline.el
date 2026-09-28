@@ -41,18 +41,24 @@ EMACSLOADPATH, который Nix выставляет автоматическ�
   :type '(choice (const minimal) (const shaoline) (const doom))
   :group 'pro-ui-modeline)
 
-(defcustom pro-ui-shaoline-strategy 'yang
+(defcustom pro-ui-shaoline-strategy 'adaptive
   "Стратегия shaoline-mode.
 - 'yin — обновления только по явному вызову `shaoline-update'. Минимум
   активности, mode-line статичен между ручными апдейтами.
+- 'adaptive — дефолт. Debounce + rate-limit + context-monitoring внутри
+  shaoline (см. shaoline-strategy.el). Без внешних таймеров и без
+  `hide-mode-lines': сохраняет обычные Emacs mode-line в буферах и
+  оставляет minibuffer-window видимым при M-x / completing-read.
+  Shaoline рисуется в echo area при изменениях, не мигает на каждом
+  `(message ...)'.
 - 'yang — полная активность: post-command-hook, advice, таймеры,
-  echo-area-reassert. Максимально отзывчиво. Shaoline уступает echo-area
-  при активном минибуфере; на выходе из него восстанавливается
-  через `minibuffer-exit-hook' (см. `pro-ui--shaoline-restore-after-minibuffer').
-- 'adaptive — компромисс: debounce + rate-limit + context-monitoring
-  внутри shaoline (см. shaoline-strategy.el). Без внешних таймеров,
-  но без 'always-visible' — после выхода из минибуфера shaoline не
-  возвращается, пока что-то не изменилось."
+  echo-area-reassert. Максимально отзывчиво. В этой конфигурации
+  yang + `hide-mode-lines' скрывает minibuffer-window при M-x до
+  первого keypress (вычислено эмпирически: minibuffer-buffer содержит
+  prompt и vertico overlay, но `(window-visible-p minibuffer-window)
+  = nil`). `pro-ui--shaoline-restore-after-minibuffer' на
+  `minibuffer-exit-hook' всё равно не возвращает minibuffer-window
+  в этом состоянии. Используйте yang только если готовы к этому."
   :type '(choice (const yin) (const adaptive) (const yang))
   :group 'pro-ui-modeline)
 
