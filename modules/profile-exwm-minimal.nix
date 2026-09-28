@@ -73,16 +73,17 @@ in {
     # модулях-профилях.
     services.xserver = {
       enable = mkDefault true;
-      windowManager.exwm.enable = mkDefault true;
-      # nixpkgs модуль (nixos/modules/services/x11/window-managers/exwm.nix)
-      # при `windowManager.exwm.enable = true` добавляет свою запись в
-      # `windowManager.session` с name = "exwm" и Exec вида
-      # `${emacs}/bin/emacs -l ${loadScript}` (без ~/.xprofile, без
-      # systemd-run, без ssh-agent). Эта запись попадает в
-      # /etc/X11/sessions/ и LightDM/Sway показывает её в меню рядом с
-      # нашей `pro-exwm-xsession`. В NixOS 25.11 опции `useDefaultSessionFile`
-      # нет — вычищаем её через `mkForce`. `[]` означает "убрать
-      # nixpkgs-сессию, оставить только pro-exwm-xsession из sessionPackages".
+      # nixpkgs-модуль `windowManager.exwm` (см.
+      # nixos/modules/services/x11/window-managers/exwm.nix) при `enable = true`
+      # добавляет в `environment.systemPackages` derivation `emacs-with-packages`,
+      # который собирает upstream `pkgs.emacs.pkgs.exwm = 0.34.0.20250919.75516.tar`
+      # — тарболл с elpa.gnu.org удалён retention-политикой GNU ELPA, и
+      # `nixos-rebuild switch` падает с HTTP 404 (см. AGENTS.md §6e).
+      # Наша реальная сессия идёт через `pro-exwm-xsession` ниже, которая
+      # регистрируется в greeter без `windowManager.exwm.enable`. Поэтому
+      # оставляем nixpkgs-exwm выключенным, а регистрацию xsession делаем
+      # нашим пакетом в `services.displayManager.sessionPackages`.
+      windowManager.exwm.enable = mkDefault false;
       windowManager.session = lib.mkForce [];
       desktopManager.cinnamon.enable = mkDefault false;
     };

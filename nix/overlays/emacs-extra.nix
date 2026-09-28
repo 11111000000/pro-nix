@@ -181,8 +181,34 @@ llm = patchedLlm;
       compat = patchedCompat;
     };
   };
+in
+let
+  # В nixpkgs 25.11 `pkgs.emacsPackages` (в all-packages.nix:10886) — это
+  # `dontRecurseIntoAttrs emacs.pkgs`, а `emacs.pkgs` = `passthru.pkgs` =
+  # `emacsPackagesFor finalAttrs.finalPackage` (см.
+  # pkgs/applications/editors/emacs/make-emacs.nix:498).
+  #
+  # В NixOS-модуле `nixos/modules/services/x11/window-managers/exwm.nix`
+  # при `windowManager.exwm.enable = true` строится
+  # `cfg.package.pkgs.withPackages (ep: [ ep.exwm … ])`. Это `pkgs.emacs.pkgs` —
+  # атрибут самой emacs-derivation'а (см. `passthru.pkgs` выше).
+  #
+  # `self.emacs.pkgs = super.emacs.pkgs // patched` в overlay ниже
+  # подменяет `pkgs.emacs.pkgs` для путей, которые читают attrset
+  # напрямую (не через `passthru`). Реальную проблему upstream
+  # `0.34.0.20250919.75516.tar` (HTTP 404 на elpa.gnu.org, см.
+  # AGENTS.md §6e) мы лечим отдельно в `modules/profile-exwm-minimal.nix`,
+  # принудительно отключая nixpkgs-модуль
+  # `services.xserver.windowManager.exwm.enable` — наша EXWM-сессия
+  # идёт через `pro-exwm-xsession` и в этом пакете не нуждается.
+  patchedEmacsPkgsAttrs = {
+    inherit (localRecipes) exwm transient llm compat;
+  };
 in {
   emacsPackages = super.emacsPackages // repoExtras // localRecipes;
+  emacs = super.emacs // {
+    pkgs = super.emacs.pkgs // patchedEmacsPkgsAttrs;
+  };
   # telega-server: a CLI binary used by telega.el as a TDLib JSON bridge.
   # Exposed as a regular package (not under emacsPackages) so that
   # `home.packages` can include it. The elisp side references it via PATH.
